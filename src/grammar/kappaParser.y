@@ -1,6 +1,7 @@
 %{
 #include <iostream>
 #include <string>
+#include <cstring>
 
 using namespace std;
 extern "C"
@@ -33,7 +34,7 @@ main()
 %token <pos> KAPPA_WLD KAPPA_SEMI SIGNATURE INFINITY TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
 %token <pos> EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
 %token <integer> INT 
-%token <str> ID LABEL KAPPA_MRK NAME
+%token <str> ID LABEL KAPPA_MRK NAME 
 %token <real> FLOAT 
 %token <str> STRING
 %token <pos> STOP SNAPSHOT
@@ -56,6 +57,8 @@ main()
 	char str[100];
 	int pos;
 }
+
+%type <str> agent_expression
 
 %%
 statements:
@@ -84,7 +87,7 @@ instruction:
 | USE comp_list
  	{}
 | SIGNATURE agent_expression  
-	{cout << "hola" << endl;}
+	{cout << "hola agente" << $2 << endl;}
 | TOKEN ID
 	{}
 | SIGNATURE error
@@ -456,9 +459,9 @@ non_empty_mixture:
 
 agent_expression:
  ID OP_PAR interface_expression CL_PAR 
-	{}
+	{strcpy($$ ,$1);}
 | ID error 
-	{}
+	{strcpy($$ ,$1);}
 ;
 
 interface_expression:

@@ -114,7 +114,7 @@ real		([0-9]+|[0-9]+.[0-9]*|[0-9]*.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 \r			return NEWLINE;
 "#"[\n]^\n	return 1;	
 "'".*"'"	return LABEL;
-{id}		return ID;
+{id}		strcpy(yylval.str,yytext); return ID;
 "["			return OP_BRA;
 "]"			return CL_BRA;
 "@*"		return FIX;

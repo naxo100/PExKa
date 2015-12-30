@@ -3,6 +3,10 @@
 //#include <iostream>
 #include "kappaParser.hh"
 
+#define YY_USER_ACTION yylloc.filename = filename; 							\
+    yylloc.first_line = yylloc.last_line = yylineno; 						\
+    yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
+    yycolumn += yyleng;
 
 %}
 digit		[0-9]

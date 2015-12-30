@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include "ast/AstStructs.h"
 
 using namespace std;
 extern "C"
@@ -17,7 +18,7 @@ extern "C"
 
 void yyerror(const char *str)
 {
-        cerr << "error: " << str << endl;
+        cerr << "error: " << str << "\t line" << yylloc.first_line << endl;
 }
   
 main()
@@ -26,6 +27,40 @@ main()
 } 
 
 %}
+
+%code requires {
+
+char *filename; /* current filename here for the lexer */
+
+typedef struct YYLTYPE {
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+  char *filename;
+} YYLTYPE;
+# define YYLTYPE_IS_DECLARED 1 /* alert the parser that we have our own definition */
+
+# define YYLLOC_DEFAULT(Current, Rhs, N)                               \
+    do                                                                 \
+      if (N)                                                           \
+        {                                                              \
+          (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;       \
+          (Current).first_column = YYRHSLOC (Rhs, 1).first_column;     \
+          (Current).last_line    = YYRHSLOC (Rhs, N).last_line;        \
+          (Current).last_column  = YYRHSLOC (Rhs, N).last_column;      \
+          (Current).filename     = YYRHSLOC (Rhs, 1).filename;         \
+        }                                                              \
+      else                                                             \
+        { /* empty RHS */                                              \
+          (Current).first_line   = (Current).last_line   =             \
+            YYRHSLOC (Rhs, 0).last_line;                               \
+          (Current).first_column = (Current).last_column =             \
+            YYRHSLOC (Rhs, 0).last_column;                             \
+          (Current).filename  = NULL;                        /* new */ \
+        }                                                              \
+    while (0)
+}
 
 
 %token END NEWLINE SEMICOLON
@@ -56,9 +91,11 @@ main()
 	float real;
 	char str[100];
 	int pos;
+	Expression* exp;
 }
 
 %type <str> agent_expression
+%type <exp> alg_expr constant
 
 %%
 statements:
@@ -346,10 +383,10 @@ arrow:
 ;
 
 constant:
-| INFINITY
-	{}
+ INFINITY
+	{$$ = new Constant(Cons.INFINITY);}
 | FLOAT
-	{}
+	{$$ = new Num();}
 | INT 
 	{}
 | EMAX
@@ -361,7 +398,7 @@ constant:
 ;
 
 variable:
-| PIPE ID PIPE 
+ PIPE ID PIPE 
 	{}
 | LABEL 
 	{}
@@ -378,16 +415,16 @@ variable:
 ;
 
 alg_expr:
-| OP_PAR alg_expr CL_PAR 
-	{}
+ OP_PAR alg_expr CL_PAR 
+	{$$ = $2}
 | constant 
-	{}
+	{$$ = $1}
 | variable
 	{}
 | ID
-	{}
+	{$$ = new Id();}
 | alg_expr MULT alg_expr
-	{}
+	{$$ = new BinaryOperation($1,$3,BinaryOperation.Operator.MULT,$3);}
 | alg_expr PLUS alg_expr
 	{}
 | alg_expr DIV alg_expr

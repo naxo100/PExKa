@@ -12,12 +12,12 @@
 
 class AstRule : public Statement {
 protected:
-	list<Agent> lhs;
-	list<Agent> rhs;
-	Arrow arrow;
-	Num	rate;
+	list<ast::Agent> lhs;
+	list<ast::Agent> rhs;
+	ast::Arrow arrow;
+	ast::Num	rate;
 
-	Id label;
+	ast::Id label;
 
 
 public:

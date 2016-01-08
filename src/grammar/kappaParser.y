@@ -1,83 +1,65 @@
-%{
-#include <iostream>
-#include <string>
-#include <cstring>
-#include "ast/AstStructs.h"
-
-using namespace std;
-extern "C"
+%skeleton "lalr1.cc" /* -*- C++ -*- */
+%require "3.0"
+%defines
+%define parse.assert
+%define parser_class_name { KappaParser }
+%define api.value.type variant
+%define api.token.constructor
+%define parse.error verbose
+%lex-param { ast::KappaAst &driver }
+%parse-param { ast::KappaAst &driver }
+%locations
+%initial-action
 {
-        int yyparse(void);
-        int yylex(void);  
-        int yywrap()
-        {
-                return 1;
-        }
+	// Initialize the initial location.
+	//@$.begin.filename = @$.end.filename = &driver.file;
+};
+
+%code requires{
+	#include <iostream>
+	#include <string>
+	#include "ast/AstStructs.h"
+	
+	using namespace std;
+	
+	namespace yy {
+		class KappaLexer;
+	}
+	namespace ast{
+		class KappaAst;
+	}
 
 }
 
-void yyerror(const char *str)
-{
-        cerr << "error: " << str << "\t line" << yylloc.first_line << endl;
-}
-  
-main()
-{
-        yyparse();
-} 
+%code top {
+    #include "KappaLexer.h"
+    #include "KappaParser.hpp"
+    #include "location.hh"
+    
+	#define yylex(x) x.get_next_token()
 
-%}
-
-%code requires {
-
-char *filename; /* current filename here for the lexer */
-
-typedef struct YYLTYPE {
-  int first_line;
-  int first_column;
-  int last_line;
-  int last_column;
-  char *filename;
-} YYLTYPE;
-# define YYLTYPE_IS_DECLARED 1 /* alert the parser that we have our own definition */
-
-# define YYLLOC_DEFAULT(Current, Rhs, N)                               \
-    do                                                                 \
-      if (N)                                                           \
-        {                                                              \
-          (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;       \
-          (Current).first_column = YYRHSLOC (Rhs, 1).first_column;     \
-          (Current).last_line    = YYRHSLOC (Rhs, N).last_line;        \
-          (Current).last_column  = YYRHSLOC (Rhs, N).last_column;      \
-          (Current).filename     = YYRHSLOC (Rhs, 1).filename;         \
-        }                                                              \
-      else                                                             \
-        { /* empty RHS */                                              \
-          (Current).first_line   = (Current).last_line   =             \
-            YYRHSLOC (Rhs, 0).last_line;                               \
-          (Current).first_column = (Current).last_column =             \
-            YYRHSLOC (Rhs, 0).last_column;                             \
-          (Current).filename  = NULL;                        /* new */ \
-        }                                                              \
-    while (0)
+	using namespace yy;
 }
 
+%code {
+    #include "ast/KappaAst.h"
+}
 
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
-%token <pos> LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
-%token <pos> KAPPA_WLD KAPPA_SEMI SIGNATURE INFINITY TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
-%token <pos> EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
-%token <integer> INT 
-%token <str> ID LABEL KAPPA_MRK NAME 
-%token <real> FLOAT 
-%token <str> STRING
-%token <pos> STOP SNAPSHOT
+%token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
+%token KAPPA_WLD KAPPA_SEMI SIGNATURE INFINITY TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
+%token EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
+%token <int> INT 
+%token <std::string> ID LABEL KAPPA_MRK NAME 
+%token <float> FLOAT 
+%token <std::string> STRING
+%token STOP SNAPSHOT
 
-%token <pos> COMPARTMENT C_LINK TRANSPORT USE
+%token COMPARTMENT C_LINK TRANSPORT USE
 
 %left MINUS PLUS MIN MAX
-%left MULT DIV 10 
+%left MULT DIV
 %left MODULO
 %right POW 
 %nonassoc LOG SQRT EXPONENT SINUS COSINUS ABS TAN
@@ -85,17 +67,13 @@ typedef struct YYLTYPE {
 %left OR
 %left AND
 
-%union 
-{
-	int integer;
-	float real;
-	char str[100];
-	int pos;
-	Expression* exp;
-}
 
-%type <str> agent_expression
-%type <exp> alg_expr constant
+/*%type <ast::Agent> agent_expression*/
+/*%type <ast::Expression> alg_expr constant
+*/
+%type <ast::Expression> constant
+
+%start statements
 
 %%
 statements:
@@ -104,10 +82,10 @@ statements:
 ;
 
 statement:
- rule_expression
+| rule_expression
 	{}
 | instruction
-	{} 
+	{cout << "this is instruction" << endl;} 
 | error 
 	{}
 ;
@@ -124,7 +102,7 @@ instruction:
 | USE comp_list
  	{}
 | SIGNATURE agent_expression  
-	{cout << "hola agente" << $2 << endl;}
+	{}
 | TOKEN ID
 	{}
 | SIGNATURE error
@@ -282,8 +260,8 @@ boolean:
 ;
 
 variable_declaration:
-| LABEL non_empty_mixture {}
-| LABEL alg_expr {}
+ LABEL non_empty_mixture {}
+| LABEL alg_expr {cout << "this is var expr" << endl;}
 | LABEL error 
 	{}
 ;
@@ -384,9 +362,9 @@ arrow:
 
 constant:
  INFINITY
-	{$$ = new Constant(Cons.INFINITY);}
+	{}
 | FLOAT
-	{$$ = new Num();}
+	{cout << $1 << "\t loc=" << @$ << endl;}
 | INT 
 	{}
 | EMAX
@@ -416,15 +394,15 @@ variable:
 
 alg_expr:
  OP_PAR alg_expr CL_PAR 
-	{$$ = $2}
+	{}
 | constant 
-	{$$ = $1}
+	{}
 | variable
 	{}
 | ID
-	{$$ = new Id();}
+	{}
 | alg_expr MULT alg_expr
-	{$$ = new BinaryOperation($1,$3,BinaryOperation.Operator.MULT,$3);}
+	{}
 | alg_expr PLUS alg_expr
 	{}
 | alg_expr DIV alg_expr
@@ -496,9 +474,9 @@ non_empty_mixture:
 
 agent_expression:
  ID OP_PAR interface_expression CL_PAR 
-	{strcpy($$ ,$1);}
+	{}
 | ID error 
-	{strcpy($$ ,$1);}
+	{}
 ;
 
 interface_expression:
@@ -545,3 +523,12 @@ link_state:
 ;
 
 %%
+
+void yy::KappaParser::error(const location &loc , const std::string &message) {
+        
+        // Location should be initialized inside scanner action, but is not in this example.
+        // Let's grab location directly from driver class.
+	// cout << "Error: " << message << endl << "Location: " << loc << endl;
+	
+        cout << "Error: " << message << endl << "Error location: " << loc << endl;
+}

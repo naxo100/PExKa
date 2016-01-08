@@ -10,17 +10,28 @@
 
 #include <string>
 #include <list>
+#include "../location.hh"
 using namespace std;
 
+namespace ast {
 class Token {
 	int character;
 	short line;
+	string file;
 public:
-	Token(int c,short l):character(c),line(l){};
+	Token(int c,short l,const string &s)
+		:character(c),line(l),file(s){};
+	Token(const yy::location& l)
+		:character(l.begin.column),line(l.begin.line),file(*l.begin.filename){};
+	Token(){};
 };
 
 class Expression : public Token{
 
+public:
+	Expression(const yy::location& l)
+		:Token(l){};
+	Expression(){};
 };
 
 
@@ -32,16 +43,16 @@ public:
 
 class Var : Expression {
 	string id;
-	Expression* exp;
+	const Expression* exp;
 public:
-	Var(char* label,Expression* e,Token t):Token(t),id(label),exp(e){};
+	Var(char* label,const Expression* e,const yy::location& l):Expression(l),id(label),exp(e){};
 };
 
 class Num : public Expression {
 	bool isInteger;
 	union num {int n;float f;} val;
 public:
-	Num (int* n,float* f,Token t):Token(t){
+	Num (int n,float f,Token t){
 		if(n)
 			val.n = n;
 		else
@@ -79,7 +90,7 @@ class BinaryOperation: public Expression {
 	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN} op;
 public:
 	BinaryOperation(Expression* e1,Expression* e2,Operator o,Token t)
-		:Token(t),exp1(e1),exp2(e2),op(o){};
+		:exp1(e1),exp2(e2),op(o){};
 };
 
 class UnaryOperation: public Expression{
@@ -87,7 +98,7 @@ class UnaryOperation: public Expression{
 	enum Func {LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS} func;
 public:
 	UnaryOperation(Expression* e,Func f,Token t)
-		:Token(t),exp(e),func(f){};
+		:exp(e),func(f){};
 
 };
 
@@ -97,6 +108,6 @@ public:
 	Constant(Cons c): cons(c){};
 };
 
-
+}
 
 #endif /* GRAMMAR_AST_ASTSTRUCTS_H_ */

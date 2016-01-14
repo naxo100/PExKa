@@ -8,12 +8,14 @@
 #ifndef GRAMMAR_AST_KAPPAAST_H_
 #define GRAMMAR_AST_KAPPAAST_H_
 
-#include "../KappaParser.hpp"
+
 #include <string>
 #include <list>
+#include "../KappaLexer.h"
+#include "../KappaParser.hpp"
 
-/*#undef YY_DECL
-#define YY_DECL \
+
+/*#define YY_DECL \
   yy::KappaParser::symbol_type yylex (ast::KappaAst& driver)
 // ... and declare it for the parser's sake.
 YY_DECL;*/
@@ -22,6 +24,7 @@ namespace ast {
 class KappaAst {
 	list<std::string> files;
 	yy::KappaParser parser;
+	yy::KappaLexer lexer;
 
 public:
 	KappaAst(char* fls[],int flsc);
@@ -29,6 +32,7 @@ public:
 	virtual ~KappaAst();
 
 	int parse();
+	yy::KappaParser::symbol_type getNextToken();
 };
 
 } /* namespace ast */

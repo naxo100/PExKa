@@ -6,13 +6,13 @@
 %define api.value.type variant
 %define api.token.constructor
 %define parse.error verbose
-%lex-param { ast::KappaAst &driver }
-%parse-param { ast::KappaAst &driver }
+%param { ast::KappaAst &driver }
 %locations
 %initial-action
 {
 	// Initialize the initial location.
-	//@$.begin.filename = @$.end.filename = &driver.file;
+	@$.initialize(new std::string("file"),1,1);
+	cout << "inicializado" << endl;
 };
 
 %code requires{
@@ -36,7 +36,7 @@
     #include "KappaParser.hpp"
     #include "location.hh"
     
-	#define yylex(x) x.get_next_token()
+	#define yylex(x) x.getNextToken()
 
 	using namespace yy;
 }
@@ -69,9 +69,7 @@
 
 
 /*%type <ast::Agent> agent_expression*/
-/*%type <ast::Expression> alg_expr constant
-*/
-%type <ast::Expression> constant
+%type <ast::Expression> alg_expr constant
 
 %start statements
 
@@ -85,7 +83,7 @@ statement:
 | rule_expression
 	{}
 | instruction
-	{cout << "this is instruction" << endl;} 
+	{} 
 | error 
 	{}
 ;
@@ -260,8 +258,10 @@ boolean:
 ;
 
 variable_declaration:
- LABEL non_empty_mixture {}
-| LABEL alg_expr {cout << "this is var expr" << endl;}
+ LABEL non_empty_mixture 
+ 	{}
+| LABEL alg_expr 
+	{}
 | LABEL error 
 	{}
 ;
@@ -364,7 +364,7 @@ constant:
  INFINITY
 	{}
 | FLOAT
-	{cout << $1 << "\t loc=" << @$ << endl;}
+	{$$ = ast::Num($1,$1,@1);}
 | INT 
 	{}
 | EMAX
@@ -396,7 +396,7 @@ alg_expr:
  OP_PAR alg_expr CL_PAR 
 	{}
 | constant 
-	{}
+	{$$ = $1;}
 | variable
 	{}
 | ID
@@ -404,7 +404,7 @@ alg_expr:
 | alg_expr MULT alg_expr
 	{}
 | alg_expr PLUS alg_expr
-	{}
+	{$$ = ast::BinaryOperation(&$1,&$3,ast::BinaryOperation::SUM,@2);}
 | alg_expr DIV alg_expr
 	{}
 | alg_expr MINUS alg_expr

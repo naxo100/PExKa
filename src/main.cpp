@@ -5,8 +5,10 @@
  *      Author: naxo
  */
 
-#include "grammar/KappaParser.hpp"
 #include "grammar/KappaLexer.h"
+#include "grammar/KappaParser.hpp"
+#include "grammar/ast/KappaAst.h"
+
 
 //using namespace std;
 int main(int argc, char* argv[]){

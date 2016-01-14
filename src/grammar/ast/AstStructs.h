@@ -15,14 +15,12 @@ using namespace std;
 
 namespace ast {
 class Token {
-	int character;
-	short line;
-	string file;
+	yy::location loc;
 public:
-	Token(int c,short l,const string &s)
-		:character(c),line(l),file(s){};
+	/*Token(int c,short l,const string &s)
+		:col(c),line(l),file(s){};*/
 	Token(const yy::location& l)
-		:character(l.begin.column),line(l.begin.line),file(*l.begin.filename){};
+		:loc(l)	{cout << "location: " << l << endl;}
 	Token(){};
 };
 
@@ -52,12 +50,12 @@ class Num : public Expression {
 	bool isInteger;
 	union num {int n;float f;} val;
 public:
-	Num (int n,float f,Token t){
-		if(n)
+	Num (int n,float f,const yy::location &loc): Expression(loc){
+		if(n == f)
 			val.n = n;
 		else
 			val.f = f;
-		isInteger = n ? true :false;
+		isInteger = n == f ? true : false;
 	};
 };
 
@@ -86,11 +84,13 @@ class Agent {
 };
 
 class BinaryOperation: public Expression {
-	Expression *exp1,*exp2;
-	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN} op;
 public:
-	BinaryOperation(Expression* e1,Expression* e2,Operator o,Token t)
-		:exp1(e1),exp2(e2),op(o){};
+	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN};
+	BinaryOperation(Expression* e1,Expression* e2,Operator o,yy::location &l)
+		:Expression(l),exp1(e1),exp2(e2),op(o){};
+protected:
+	Expression *exp1,*exp2;
+	Operator op;
 };
 
 class UnaryOperation: public Expression{

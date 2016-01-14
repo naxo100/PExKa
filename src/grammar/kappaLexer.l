@@ -5,7 +5,7 @@
 	#include "ast/KappaAst.h"
 	#include "location.hh"
 	
-	#define yyterminate() KappaParser::make_END(location());  
+	#define yyterminate() KappaParser::make_END(loc);  
 	
 	using namespace yy;
 	
@@ -13,9 +13,13 @@
 	# define YY_USER_ACTION  loc.columns (yyleng);
 	// The location of the current token.
 	static yy::location loc;
+	
+		
+	# undef yywrap
+	# define yywrap() 1
 %}
 
-
+%option nounput batch debug noinput
 %option nodefault
 %option noyywrap
 %option c++
@@ -38,163 +42,143 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 
 [\t ]+		{loc.step();}
 \-?{digit}+	{
-				return KappaParser::make_INT(atoi(yytext),location()); 
+				return KappaParser::make_INT(atoi(yytext),loc); 
 			}
 \-?{real}	{
-				return KappaParser::make_FLOAT(atof(yytext),location());
+				return KappaParser::make_FLOAT(atof(yytext),loc);
 			}
 "%"{id}":"	{
 				if(!strcmp(yytext,"%agent:"))
-					return KappaParser::make_SIGNATURE(location());
+					return KappaParser::make_SIGNATURE(loc);
 				else if(!strcmp(yytext,"%init:"))
-					return KappaParser::make_INIT(location());
+					return KappaParser::make_INIT(loc);
 				else if(!strcmp(yytext,"%var:"))
-					return KappaParser::make_LET(location());
+					return KappaParser::make_LET(loc);
 				else if(!strcmp(yytext,"%plot:"))
-					return KappaParser::make_PLOT(location());
+					return KappaParser::make_PLOT(loc);
 				else if(!strcmp(yytext,"%mod:"))
-					return KappaParser::make_PERT(location());
+					return KappaParser::make_PERT(loc);
 				else if(!strcmp(yytext,"%obs:"))
-					return KappaParser::make_OBS(location());
+					return KappaParser::make_OBS(loc);
 				else if(!strcmp(yytext,"%def:"))
-					return KappaParser::make_CONFIG(location());
+					return KappaParser::make_CONFIG(loc);
 				else if(!strcmp(yytext,"%token:"))
-					return KappaParser::make_TOKEN(location());
+					return KappaParser::make_TOKEN(loc);
 				else if(!strcmp(yytext,"%compartment:"))
-					return KappaParser::make_COMPARTMENT(location());
+					return KappaParser::make_COMPARTMENT(loc);
 				else if(!strcmp(yytext,"%link:"))
-					return KappaParser::make_C_LINK(location());
+					return KappaParser::make_C_LINK(loc);
 				else if(!strcmp(yytext,"%transport:"))
-					return KappaParser::make_TRANSPORT(location());
+					return KappaParser::make_TRANSPORT(loc);
 				else if(!strcmp(yytext,"%use:"))
-					return KappaParser::make_USE(location());
+					return KappaParser::make_USE(loc);
 				else{
-					cout << "Error at\n" << location() << ": " << yytext << endl;
+					cout << "Error at\n" << loc << ": " << yytext << endl;
 					cout << "No such instruction in expanded Kappa" << endl;
-					return KappaParser::make_NEWLINE(location());
+					return KappaParser::make_NEWLINE(loc);
 				}
 			}
-"do"		return KappaParser::make_DO(location());
-"set"		return KappaParser::make_SET(location());
-"repeat"	return KappaParser::make_REPEAT(location());
-"until"		return KappaParser::make_UNTIL(location());
-"&&"		return KappaParser::make_AND(location());
-"||"		return KappaParser::make_OR(location());
-"<->"		return KappaParser::make_KAPPA_LRAR(location());
-"->"		return KappaParser::make_KAPPA_RAR(location());
-"<-"		return KappaParser::make_LAR(location());
-":="		return KappaParser::make_ASSIGN(location());
-"<>"		return KappaParser::make_DIFF(location());
+"do"		return KappaParser::make_DO(loc);
+"set"		return KappaParser::make_SET(loc);
+"repeat"	return KappaParser::make_REPEAT(loc);
+"until"		return KappaParser::make_UNTIL(loc);
+"&&"		return KappaParser::make_AND(loc);
+"||"		return KappaParser::make_OR(loc);
+"<->"		return KappaParser::make_KAPPA_LRAR(loc);
+"->"		return KappaParser::make_KAPPA_RAR(loc);
+"<-"		return KappaParser::make_LAR(loc);
+":="		return KappaParser::make_ASSIGN(loc);
+"<>"		return KappaParser::make_DIFF(loc);
 \${letter}+	{
 				if(!strcmp(yytext,"$DEL"))
-					return KappaParser::make_DELETE(location());
+					return KappaParser::make_DELETE(loc);
 				else if(!strcmp(yytext,"$ADD"))
-					return KappaParser::make_INTRO(location());
+					return KappaParser::make_INTRO(loc);
 				else if(!strcmp(yytext,"$SNAPSHOT"))
-					return KappaParser::make_SNAPSHOT(location());
+					return KappaParser::make_SNAPSHOT(loc);
 				else if(!strcmp(yytext,"$STOP"))
-					return KappaParser::make_STOP(location());
+					return KappaParser::make_STOP(loc);
 				else if(!strcmp(yytext,"$FLUX"))
-					return KappaParser::make_FLUX(location());
+					return KappaParser::make_FLUX(loc);
 				else if(!strcmp(yytext,"$TRACK"))
-					return KappaParser::make_TRACK(location());
+					return KappaParser::make_TRACK(loc);
 				else if(!strcmp(yytext,"$UPDATE"))
-					return KappaParser::make_ASSIGN2(location());
+					return KappaParser::make_ASSIGN2(loc);
 				else if(!strcmp(yytext,"$PRINT"))
-					return KappaParser::make_PRINT(location());
+					return KappaParser::make_PRINT(loc);
 				else if(!strcmp(yytext,"$PRINTF"))
-					return KappaParser::make_PRINTF(location());
+					return KappaParser::make_PRINTF(loc);
 				else{					
-					cout << "Error at\n" << location() << ": " << yytext << endl;
+					cout << "Error at\n" << loc << ": " << yytext << endl;
 					cout << "No such perturbation in expanded Kappa" << endl;
-					return KappaParser::make_NEWLINE(location());
+					return KappaParser::make_NEWLINE(loc);
 				}
 			}
-"[A]"		return KappaParser::make_ACTIVITY(location());
-"[E]"		return KappaParser::make_EVENT(location());
-"[E+]"		return KappaParser::make_PROD_EVENT(location());
-"[E-]"		return KappaParser::make_NULL_EVENT(location());
-"[T]"		return KappaParser::make_TIME(location());
-"[Tsim]"	return KappaParser::make_CPUTIME(location());
-"[log]"		return KappaParser::make_LOG(location());
-"[sin]"		return KappaParser::make_SINUS(location());
-"[cos]"		return KappaParser::make_COSINUS(location());
-"[tan]"		return KappaParser::make_TAN(location());
-"[exp]"		return KappaParser::make_EXPONENT(location());
-"[abs]"		return KappaParser::make_ABS(location());
-"[mod]"		return KappaParser::make_MODULO(location());
-"[sqrt]"	return KappaParser::make_SQRT(location());
-"[inf]"		return KappaParser::make_INFINITY(location());
-"[true]"	return KappaParser::make_TRUE(location());
-"[false]"	return KappaParser::make_FALSE(location());
-"[pi]"		return KappaParser::make_FLOAT(3.14159,location());
-"[max]"		return KappaParser::make_MAX(location());
-"[min]"		return KappaParser::make_MIN(location());
-"[EMax]"	return KappaParser::make_EMAX(location());
-"[TMax]"	return KappaParser::make_TMAX(location());
-"[atan]"	return KappaParser::make_ATAN(location());
-"[coin]"	return KappaParser::make_COIN(location());
-"[randN]"	return KappaParser::make_RAND_N(location());
-"[rand1]"	return KappaParser::make_RAND_1(location());
-":"			return KappaParser::make_TYPE(location());
-";"			return KappaParser::make_SEMICOLON(location());
-\".*\"		return KappaParser::make_STRING(yytext,location());
-\n			return KappaParser::make_NEWLINE(location());
-\r			return KappaParser::make_NEWLINE(location());
-"#"[\n]^*\n	return KappaParser::make_NEWLINE(location());	
-"'".*"'"	cout << "making label" << endl;return KappaParser::make_LABEL(yytext,location());
+"[A]"		return KappaParser::make_ACTIVITY(loc);
+"[E]"		return KappaParser::make_EVENT(loc);
+"[E+]"		return KappaParser::make_PROD_EVENT(loc);
+"[E-]"		return KappaParser::make_NULL_EVENT(loc);
+"[T]"		return KappaParser::make_TIME(loc);
+"[Tsim]"	return KappaParser::make_CPUTIME(loc);
+"[log]"		return KappaParser::make_LOG(loc);
+"[sin]"		return KappaParser::make_SINUS(loc);
+"[cos]"		return KappaParser::make_COSINUS(loc);
+"[tan]"		return KappaParser::make_TAN(loc);
+"[exp]"		return KappaParser::make_EXPONENT(loc);
+"[abs]"		return KappaParser::make_ABS(loc);
+"[mod]"		return KappaParser::make_MODULO(loc);
+"[sqrt]"	return KappaParser::make_SQRT(loc);
+"[inf]"		return KappaParser::make_INFINITY(loc);
+"[true]"	return KappaParser::make_TRUE(loc);
+"[false]"	return KappaParser::make_FALSE(loc);
+"[pi]"		return KappaParser::make_FLOAT(3.14159,loc);
+"[max]"		return KappaParser::make_MAX(loc);
+"[min]"		return KappaParser::make_MIN(loc);
+"[EMax]"	return KappaParser::make_EMAX(loc);
+"[TMax]"	return KappaParser::make_TMAX(loc);
+"[atan]"	return KappaParser::make_ATAN(loc);
+"[coin]"	return KappaParser::make_COIN(loc);
+"[randN]"	return KappaParser::make_RAND_N(loc);
+"[rand1]"	return KappaParser::make_RAND_1(loc);
+":"			return KappaParser::make_TYPE(loc);
+";"			return KappaParser::make_SEMICOLON(loc);
+\".*\"		return KappaParser::make_STRING(yytext,loc);
+[\n]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
+[\r]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
+"#"[\n]^*	loc.step();//return KappaParser::make_NEWLINE(loc);	
+"'".*"'"	return KappaParser::make_LABEL(yytext,loc);
 {id}		{
-				return KappaParser::make_ID(yytext,location());
+				return KappaParser::make_ID(yytext,loc);
 			}
-"["			return KappaParser::make_OP_BRA(location());
-"]"			return KappaParser::make_CL_BRA(location());
-"@*"		return KappaParser::make_FIX(location());
-"$"			return KappaParser::make_ATD(location());
-"<move-free>"	return KappaParser::make_FREE(location());
-"<move-join>"	return KappaParser::make_JOIN(location());
-"@"				return KappaParser::make_AT(location());
-","				return KappaParser::make_COMMA(location());
-"("				return KappaParser::make_OP_PAR(location());
-")"				return KappaParser::make_CL_PAR(location());
-"{"				return KappaParser::make_OP_CUR(location());
-"}"				return KappaParser::make_CL_CUR(location());
-"|"				return KappaParser::make_PIPE(location());
-"."				return KappaParser::make_DOT(location());
-"+"				return KappaParser::make_PLUS(location());
-"*"				return KappaParser::make_MULT(location());
-"-"				return KappaParser::make_MINUS(location());
-"^"				return KappaParser::make_POW(location());
-"/"				return KappaParser::make_DIV(location());
-"<"				return KappaParser::make_SMALLER(location());
-">"				return KappaParser::make_GREATER(location());
-"="				return KappaParser::make_EQUAL(location());
-"!"				return KappaParser::make_KAPPA_LNK(location());
-"~"[0-9a-zA-Z]+	return KappaParser::make_KAPPA_MRK(&yytext[1],location());
-"?"				return KappaParser::make_KAPPA_WLD(location());
-"_"				return KappaParser::make_KAPPA_SEMI(location());
+"["			return KappaParser::make_OP_BRA(loc);
+"]"			return KappaParser::make_CL_BRA(loc);
+"@*"		return KappaParser::make_FIX(loc);
+"$"			return KappaParser::make_ATD(loc);
+"<move-free>"	return KappaParser::make_FREE(loc);
+"<move-join>"	return KappaParser::make_JOIN(loc);
+"@"				return KappaParser::make_AT(loc);
+","				return KappaParser::make_COMMA(loc);
+"("				return KappaParser::make_OP_PAR(loc);
+")"				return KappaParser::make_CL_PAR(loc);
+"{"				return KappaParser::make_OP_CUR(loc);
+"}"				return KappaParser::make_CL_CUR(loc);
+"|"				return KappaParser::make_PIPE(loc);
+"."				return KappaParser::make_DOT(loc);
+"+"				return KappaParser::make_PLUS(loc);
+"*"				return KappaParser::make_MULT(loc);
+"-"				return KappaParser::make_MINUS(loc);
+"^"				return KappaParser::make_POW(loc);
+"/"				return KappaParser::make_DIV(loc);
+"<"				return KappaParser::make_SMALLER(loc);
+">"				return KappaParser::make_GREATER(loc);
+"="				return KappaParser::make_EQUAL(loc);
+"!"				return KappaParser::make_KAPPA_LNK(loc);
+"~"[0-9a-zA-Z]+	return KappaParser::make_KAPPA_MRK(&yytext[1],loc);
+"?"				return KappaParser::make_KAPPA_WLD(loc);
+"_"				return KappaParser::make_KAPPA_SEMI(loc);
 
 <<EOF>> { return yyterminate(); }
 
 %%
-
-int ast::KappaAst::parse(){
-	int r;
-	if(files.empty()){
-		yyin = stdin;
-		r = parser.parse();
-	}
-	else{
-		for(std::string f : files){
-			if (!(yyin = fopen (f.c_str (), "r"))){
-		      //error ("cannot open " + file + ": " + strerror(errno));
-		      exit (EXIT_FAILURE);
-		    }
-		    r = parser.parse();
-		    fclose(yyin);
-		}
-	}
-	return r;
-}
-
 		    
 		    

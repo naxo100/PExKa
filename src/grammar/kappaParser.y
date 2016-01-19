@@ -69,7 +69,8 @@
 
 
 /*%type <ast::Agent> agent_expression*/
-%type <ast::Expression> alg_expr constant
+%type <ast::Declaration> variable_declaration
+%type <ast::Expression> alg_expr constant variable
 
 %start statements
 
@@ -110,7 +111,7 @@ instruction:
 | INIT error
 	{}
 | LET variable_declaration 
-	{}
+	{driver.addDeclaration($2);}
 | OBS variable_declaration
 	{}
 | PLOT alg_expr 
@@ -261,7 +262,7 @@ variable_declaration:
  LABEL non_empty_mixture 
  	{}
 | LABEL alg_expr 
-	{}
+	{$$ = ast::Declaration(ast::Id($1,@1),$2,@$);}
 | LABEL error 
 	{}
 ;
@@ -362,61 +363,61 @@ arrow:
 
 constant:
  INFINITY
-	{}
+	{$$ = ast::Const(ast::Const::INF,@1);}
 | FLOAT
-	{$$ = ast::Num($1,$1,@1);}
+	{$$ = ast::Const($1,@1);}
 | INT 
-	{}
+	{$$ = ast::Const($1,@1);}
 | EMAX
-	{}
+	{$$ = ast::Const(ast::Const::EMAX,@1);}
 | TMAX
-	{}
-| CPUTIME
-	{}
+	{$$ = ast::Const(ast::Const::TMAX,@1);}
 ;
 
 variable:
  PIPE ID PIPE 
-	{}
+	{ast::Var($2,ast::Var::TOKEN,@$);}
 | LABEL 
-	{}
+	{ast::Var($1,ast::Var::VAR,@$);}
 | TIME
-	{}
+	{$$ = ast::Var(ast::Var::TIME,@$);}
 | EVENT
-	{}
+	{$$ = ast::Var(ast::Var::EVENT,@$);}
 | NULL_EVENT
-	{}
+	{$$ = ast::Var(ast::Var::NULL_EVENT,@$);}
 | PROD_EVENT
-	{}
+	{$$ = ast::Var(ast::Var::PROD_EVENT,@$);}
 | ACTIVITY
-	{}
+	{$$ = ast::Var(ast::Var::ACTIVITY,@$);}
+| CPUTIME
+	{$$ = ast::Const(ast::Var::CPUTIME,@1);}
 ;
 
 alg_expr:
  OP_PAR alg_expr CL_PAR 
-	{}
+	{$$ = $2;}
 | constant 
 	{$$ = $1;}
 | variable
-	{}
+	{$$ = $1;}
 | ID
 	{}
 | alg_expr MULT alg_expr
-	{}
+	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MULT,@2);}
 | alg_expr PLUS alg_expr
-	{$$ = ast::BinaryOperation(&$1,&$3,ast::BinaryOperation::SUM,@2);}
+	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::SUM,@2);}
 | alg_expr DIV alg_expr
-	{}
+	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::DIV,@2);}
 | alg_expr MINUS alg_expr
-	{}
+	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MINUS,@2);}
 | alg_expr POW alg_expr
-	{}
+	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::POW,@2);}
 | alg_expr MODULO alg_expr
-	{}	
+	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MODULO,@2);}	
 | MAX alg_expr alg_expr
-	{}
+	{$$ = ast::BinaryOperation($2,$3,ast::BinaryOperation::MAX,@2);}
 | MIN alg_expr alg_expr
-	{}
+	{$$ = ast::BinaryOperation($2,$3,ast::BinaryOperation::MIN,@2);}
 | EXPONENT alg_expr 
 	{}
 | SINUS alg_expr 

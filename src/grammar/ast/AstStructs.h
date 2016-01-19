@@ -14,52 +14,58 @@
 using namespace std;
 
 namespace ast {
-class Token {
+class Node {
 	yy::location loc;
 public:
 	/*Token(int c,short l,const string &s)
 		:col(c),line(l),file(s){};*/
-	Token(const yy::location& l)
+	Node(const yy::location& l)
 		:loc(l)	{cout << "location: " << l << endl;}
-	Token(){};
+	Node(){};
 };
 
-class Expression : public Token{
+class Expression : public Node{
 
 public:
 	Expression(const yy::location& l)
-		:Token(l){};
+		:Node(l){};
 	Expression(){};
 };
 
 
-class Id : public Token {
+class Id : public Node {
 	string id;
 public:
-	Id(char* label,Token t): Token(t),id(label){};
+	Id(const string &s,Node t): Node(t),id(s){};
 };
 
-class Var : Expression {
+class Var : public Expression {
+public:
+	enum VarType {VAR,TOKEN,TIME,EVENT,NULL_EVENT,PROD_EVENT,CPUTIME,ACTIVITY};
+	Var(const string &label,const VarType &t,const yy::location& l):
+		Expression(l),id(label),type(t){};
+	Var(const VarType &t,const yy::location& l):
+		Expression(l),type(t){};
+protected:
 	string id;
-	const Expression* exp;
-public:
-	Var(char* label,const Expression* e,const yy::location& l):Expression(l),id(label),exp(e){};
+	VarType type;
 };
 
-class Num : public Expression {
-	bool isInteger;
-	union num {int n;float f;} val;
+class Const : public Expression {
 public:
-	Num (int n,float f,const yy::location &loc): Expression(loc){
-		if(n == f)
-			val.n = n;
-		else
-			val.f = f;
-		isInteger = n == f ? true : false;
-	};
+	enum ConstType {INTEGER,FLOAT,INF,INF_NEG,TMAX,EMAX};
+	Const (const float f,const yy::location &loc):
+		Expression(loc),f(f),type(FLOAT){}
+	Const (const int i,const yy::location &loc):
+		Expression(loc),n(i),type(INTEGER){}
+	Const (const ConstType t,const yy::location &loc):
+		Expression(loc),type(t){}
+protected:
+	ConstType type;
+	union {int n;float f;};
 };
 
-class Arrow : public Token {
+class Arrow : public Node {
 	enum ARR {LEFT,RIGHT,BI} dir;
 };
 
@@ -67,7 +73,7 @@ class Bool : public Expression {
 	bool val;
 };
 
-class Link : public Token {
+class Link : public Node {
 	int value;
 	enum LNK {VALUE,FREE,ANY,SOME,TYPE} lnk;
 };
@@ -86,26 +92,73 @@ class Agent {
 class BinaryOperation: public Expression {
 public:
 	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN};
-	BinaryOperation(Expression* e1,Expression* e2,Operator o,yy::location &l)
+	BinaryOperation(Expression &e1,Expression &e2,Operator o,yy::location &l)
 		:Expression(l),exp1(e1),exp2(e2),op(o){};
 protected:
-	Expression *exp1,*exp2;
+	Expression exp1,exp2;
 	Operator op;
 };
 
 class UnaryOperation: public Expression{
-	Expression *exp;
+	const Expression exp;
 	enum Func {LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS} func;
 public:
-	UnaryOperation(Expression* e,Func f,Token t)
-		:exp(e),func(f){};
+	UnaryOperation(Expression &e,const Func f,const yy::location &t)
+		:Expression(t),exp(e),func(f){};
 
 };
 
-class Constant: public Expression {
-	enum Cons {TIME,EVENT,NULL_EVENT,PROD_EVENT,TMAX,EMAX,CPUTIME,INFINITY} cons;
+class Effect : Node{
+	Node mod;
+	enum Mod {ASSIGN,TRACK,FLUX,INTRO,DELETE,TOKEN,SNAPSHOT,STOP,PRINT,PRINTF};
+	Id str1,str2;
+	Expression exp;
+	bool b;
+	list<Agent> mixture;
+
+};
+
+class Perturbation: public Node {
+protected:
+	Node repeat;
+	Expression test;
+	Node do_tok;
+	list<Effect> mods;
 public:
-	Constant(Cons c): cons(c){};
+	Perturbation();
+	virtual ~Perturbation();
+};
+
+class Declaration: public Node{
+	Id label;
+	Expression exp;
+public:
+	Declaration(const Id &lab,const Expression e,const yy::location &loc):
+		Node(loc),exp(e),label(lab){}
+	Declaration():label(Id("",yy::location())){}
+};
+
+class CompExpression: public Node {
+
+};
+
+class Compartment : public Node {
+
+};
+
+class Rule : public Node {
+protected:
+	list<Agent> lhs;
+	list<Agent> rhs;
+	Arrow arrow;
+	Expression	rate;
+
+	Id label;
+
+
+public:
+	Rule();
+	virtual ~Rule();
 };
 
 }

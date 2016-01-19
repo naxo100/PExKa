@@ -26,6 +26,9 @@ class KappaAst {
 	yy::KappaParser parser;
 	yy::KappaLexer lexer;
 
+	list<Perturbation> perts;
+	list<Declaration> decls;
+
 public:
 	KappaAst(char* fls[],int flsc);
 	KappaAst();
@@ -33,6 +36,11 @@ public:
 
 	int parse();
 	yy::KappaParser::symbol_type getNextToken();
+
+	void addDeclaration(Declaration d){
+		decls.push_back(d);
+		std::cout << "declaration pushed." << endl;
+	}
 };
 
 } /* namespace ast */

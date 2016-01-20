@@ -1,0 +1,5941 @@
+Terminals unused in grammar
+
+   END
+   NAME
+
+
+Rules useless in parser due to conflicts
+
+    7 instruction: %empty
+
+   45 value_list: STRING
+
+   49 comp_list: comp_expr
+
+  100 string_or_pr_expr: %empty
+
+  122 rule_expression: %empty
+  124                | rule_label lhs_rhs arrow lhs_rhs
+
+
+State 1 conflicts: 1 shift/reduce, 1 reduce/reduce
+State 8 conflicts: 1 shift/reduce, 1 reduce/reduce
+State 19 conflicts: 2 shift/reduce, 33 reduce/reduce
+State 21 conflicts: 1 reduce/reduce
+State 82 conflicts: 1 reduce/reduce
+State 87 conflicts: 1 shift/reduce
+State 99 conflicts: 6 shift/reduce
+State 100 conflicts: 6 shift/reduce
+State 101 conflicts: 6 shift/reduce
+State 110 conflicts: 2 reduce/reduce
+State 111 conflicts: 3 reduce/reduce
+State 124 conflicts: 1 shift/reduce
+State 127 conflicts: 1 reduce/reduce
+State 130 conflicts: 1 reduce/reduce
+State 132 conflicts: 1 shift/reduce, 1 reduce/reduce
+State 139 conflicts: 1 reduce/reduce
+State 145 conflicts: 2 shift/reduce, 31 reduce/reduce
+State 146 conflicts: 28 shift/reduce
+State 148 conflicts: 2 shift/reduce
+State 151 conflicts: 2 reduce/reduce
+State 160 conflicts: 1 reduce/reduce
+State 161 conflicts: 4 reduce/reduce
+State 162 conflicts: 4 reduce/reduce
+State 167 conflicts: 1 shift/reduce
+State 202 conflicts: 1 reduce/reduce
+State 232 conflicts: 3 reduce/reduce
+State 237 conflicts: 1 reduce/reduce
+State 306 conflicts: 28 shift/reduce
+
+
+Grammar
+
+    0 $accept: statements $end
+
+    1 statements: %empty
+    2           | statements statement NEWLINE
+
+    3 statement: %empty
+    4          | rule_expression
+    5          | instruction
+    6          | error
+
+    7 instruction: %empty
+    8            | COMPARTMENT comp_expr alg_expr
+    9            | C_LINK LABEL comp_expr arrow comp_expr ATD constant
+   10            | TRANSPORT join LABEL mixture AT alg_expr
+   11            | USE comp_list
+   12            | SIGNATURE agent_expression
+   13            | TOKEN ID
+   14            | SIGNATURE error
+   15            | INIT init_declaration
+   16            | INIT error
+   17            | LET variable_declaration
+   18            | OBS variable_declaration
+   19            | PLOT alg_expr
+   20            | PLOT error
+   21            | PERT perturbation_declaration
+   22            | PERT REPEAT perturbation_declaration UNTIL bool_expr
+   23            | CONFIG STRING value_list
+   24            | PERT bool_expr DO effect_list UNTIL bool_expr
+
+   25 init_declaration: %empty
+   26                 | multiple non_empty_mixture
+   27                 | ID LAR multiple
+   28                 | ID OP_CUR init_declaration CL_CUR
+
+   29 join: %empty
+   30     | JOIN
+   31     | FREE
+
+   32 comp_expr: LABEL dimension where_expr
+
+   33 dimension: %empty
+   34          | OP_BRA index_expr CL_BRA dimension
+
+   35 index_expr: INT
+   36           | ID
+   37           | OP_PAR index_expr CL_PAR
+   38           | index_expr MULT index_expr
+   39           | index_expr PLUS index_expr
+   40           | index_expr DIV index_expr
+   41           | index_expr MINUS index_expr
+   42           | index_expr POW index_expr
+   43           | index_expr MODULO index_expr
+
+   44 value_list: %empty
+   45           | STRING
+   46           | STRING value_list
+
+   47 comp_list: %empty
+   48          | "$ALL"
+   49          | comp_expr
+   50          | comp_expr comp_list
+   51          | comp_expr COMMA comp_list
+
+   52 where_expr: %empty
+   53           | OP_CUR bool_expr CL_CUR
+
+   54 perturbation_declaration: %empty
+   55                         | OP_PAR perturbation_declaration CL_PAR
+   56                         | bool_expr DO effect_list
+   57                         | bool_expr SET effect_list
+
+   58 effect_list: %empty
+   59            | OP_PAR effect_list CL_PAR
+   60            | effect
+   61            | effect SEMICOLON effect_list
+
+   62 effect: %empty
+   63       | LABEL ASSIGN alg_expr
+   64       | ASSIGN2 LABEL alg_expr
+   65       | TRACK LABEL boolean
+   66       | FLUX opt_string boolean
+   67       | INTRO multiple_mixture
+   68       | INTRO error
+   69       | DELETE multiple_mixture
+   70       | DELETE error
+   71       | ID LAR alg_expr
+   72       | SNAPSHOT opt_string
+   73       | STOP opt_string
+   74       | PRINT SMALLER print_expr GREATER
+   75       | PRINTF string_or_pr_expr SMALLER print_expr GREATER
+
+   76 print_expr: %empty
+   77           | STRING
+   78           | alg_expr
+   79           | STRING DOT print_expr
+   80           | alg_expr DOT print_expr
+
+   81 boolean: %empty
+   82        | TRUE
+   83        | FALSE
+
+   84 variable_declaration: LABEL non_empty_mixture
+   85                     | LABEL alg_expr
+   86                     | LABEL error
+
+   87 bool_expr: %empty
+   88          | OP_PAR bool_expr CL_PAR
+   89          | bool_expr AND bool_expr
+   90          | bool_expr OR bool_expr
+   91          | alg_expr GREATER alg_expr
+   92          | alg_expr SMALLER alg_expr
+   93          | alg_expr EQUAL alg_expr
+   94          | alg_expr DIFF alg_expr
+   95          | TRUE
+   96          | FALSE
+
+   97 opt_string: %empty
+   98           | STRING
+   99           | SMALLER print_expr GREATER
+
+  100 string_or_pr_expr: %empty
+  101                  | STRING
+  102                  | SMALLER print_expr GREATER
+
+  103 multiple: %empty
+  104         | INT
+  105         | FLOAT
+  106         | LABEL
+
+  107 rule_label: %empty
+  108           | LABEL
+
+  109 lhs_rhs: mixture token_expr
+
+  110 token_expr: %empty
+  111           | PIPE sum_token
+  112           | PIPE error
+
+  113 sum_token: %empty
+  114          | OP_PAR sum_token CL_PAR
+  115          | alg_expr TYPE ID
+  116          | alg_expr TYPE ID PLUS sum_token
+
+  117 mixture: %empty
+  118        | non_empty_mixture
+
+  119 rate_sep: %empty
+  120         | AT
+  121         | FIX
+
+  122 rule_expression: %empty
+  123                | rule_label lhs_rhs arrow lhs_rhs rate_sep rate
+  124                | rule_label lhs_rhs arrow lhs_rhs
+
+  125 arrow: %empty
+  126      | KAPPA_RAR
+  127      | KAPPA_LRAR
+
+  128 constant: INFINITY
+  129         | FLOAT
+  130         | INT
+  131         | EMAX
+  132         | TMAX
+
+  133 variable: PIPE ID PIPE
+  134         | LABEL
+  135         | TIME
+  136         | EVENT
+  137         | NULL_EVENT
+  138         | PROD_EVENT
+  139         | ACTIVITY
+  140         | CPUTIME
+
+  141 alg_expr: OP_PAR alg_expr CL_PAR
+  142         | constant
+  143         | variable
+  144         | ID
+  145         | alg_expr MULT alg_expr
+  146         | alg_expr PLUS alg_expr
+  147         | alg_expr DIV alg_expr
+  148         | alg_expr MINUS alg_expr
+  149         | alg_expr POW alg_expr
+  150         | alg_expr MODULO alg_expr
+  151         | MAX alg_expr alg_expr
+  152         | MIN alg_expr alg_expr
+  153         | EXPONENT alg_expr
+  154         | SINUS alg_expr
+  155         | COSINUS alg_expr
+  156         | TAN alg_expr
+  157         | ABS alg_expr
+  158         | SQRT alg_expr
+  159         | LOG alg_expr
+  160         | ATAN alg_expr
+  161         | COIN alg_expr
+  162         | RAND_N alg_expr
+  163         | RAND_1
+
+  164 rate: %empty
+  165     | alg_expr OP_PAR alg_with_radius CL_PAR
+  166     | alg_expr
+  167     | alg_expr COMMA alg_expr
+
+  168 alg_with_radius: %empty
+  169                | alg_expr
+  170                | alg_expr TYPE alg_expr
+
+  171 multiple_mixture: %empty
+  172                 | alg_expr non_empty_mixture
+  173                 | non_empty_mixture
+
+  174 non_empty_mixture: %empty
+  175                  | OP_PAR non_empty_mixture CL_PAR
+  176                  | agent_expression COMMA non_empty_mixture
+  177                  | agent_expression
+
+  178 agent_expression: ID OP_PAR interface_expression CL_PAR
+  179                 | ID error
+
+  180 interface_expression: %empty
+  181                     | ne_interface_expression
+
+  182 ne_interface_expression: %empty
+  183                        | port_expression COMMA ne_interface_expression
+  184                        | port_expression
+
+  185 port_expression: %empty
+  186                | ID internal_state link_state
+
+  187 internal_state: %empty
+  188               | KAPPA_MRK internal_state
+  189               | error
+
+  190 link_state: %empty
+  191           | KAPPA_LNK INT
+  192           | KAPPA_LNK KAPPA_SEMI
+  193           | KAPPA_LNK ID DOT ID
+  194           | KAPPA_WLD
+  195           | KAPPA_LNK error
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256) 6 14 16 20 68 70 86 112 179 189 195
+END (258)
+NEWLINE (259) 2
+SEMICOLON (260) 61
+AT (261) 10 120
+ATD (262) 9
+FIX (263) 121
+OP_PAR (264) 37 55 59 88 114 141 165 175 178
+CL_PAR (265) 37 55 59 88 114 141 165 175 178
+OP_BRA (266) 34
+CL_BRA (267) 34
+COMMA (268) 51 167 176 183
+DOT (269) 79 80 193
+TYPE (270) 115 116 170
+LAR (271) 27 71
+OP_CUR (272) 28 53
+CL_CUR (273) 28 53
+JOIN (274) 30
+FREE (275) 31
+LOG (276) 159
+PLUS (277) 39 116 146
+MULT (278) 38 145
+MINUS (279) 41 148
+AND (280) 89
+OR (281) 90
+GREATER (282) 74 75 91 99 102
+SMALLER (283) 74 75 92 99 102
+EQUAL (284) 93
+PERT (285) 21 22 24
+INTRO (286) 67 68
+DELETE (287) 69 70
+DO (288) 24 56
+SET (289) 57
+UNTIL (290) 22 24
+TRUE (291) 82 95
+FALSE (292) 83 96
+OBS (293) 18
+KAPPA_RAR (294) 126
+TRACK (295) 65
+CPUTIME (296) 140
+CONFIG (297) 23
+REPEAT (298) 22
+DIFF (299) 94
+KAPPA_WLD (300) 194
+KAPPA_SEMI (301) 192
+SIGNATURE (302) 12 14
+INFINITY (303) 128
+TIME (304) 135
+EVENT (305) 136
+ACTIVITY (306) 139
+NULL_EVENT (307) 137
+PROD_EVENT (308) 138
+INIT (309) 15 16
+LET (310) 17
+DIV (311) 40 147
+PLOT (312) 19 20
+SINUS (313) 154
+COSINUS (314) 155
+TAN (315) 156
+ATAN (316) 160
+COIN (317) 161
+RAND_N (318) 162
+SQRT (319) 158
+EXPONENT (320) 153
+POW (321) 42 149
+ABS (322) 157
+MODULO (323) 43 150
+EMAX (324) 131
+TMAX (325) 132
+RAND_1 (326) 163
+FLUX (327) 66
+ASSIGN (328) 63
+ASSIGN2 (329) 64
+TOKEN (330) 13
+KAPPA_LNK (331) 191 192 193 195
+PIPE (332) 111 112 133
+KAPPA_LRAR (333) 127
+PRINT (334) 74
+PRINTF (335) 75
+MAX (336) 151
+MIN (337) 152
+INT (338) 35 104 130 191
+ID (339) 13 27 28 36 71 115 116 133 144 178 179 186 193
+LABEL (340) 9 10 32 63 64 65 84 85 86 106 108 134
+KAPPA_MRK (341) 188
+NAME (342)
+FLOAT (343) 105 129
+STRING (344) 23 45 46 77 79 98 101
+STOP (345) 73
+SNAPSHOT (346) 72
+COMPARTMENT (347) 8
+C_LINK (348) 9
+TRANSPORT (349) 10
+USE (350) 11
+"$ALL" (351) 48
+
+
+Nonterminals, with rules where they appear
+
+$accept (97)
+    on left: 0
+statements (98)
+    on left: 1 2, on right: 0 2
+statement (99)
+    on left: 3 4 5 6, on right: 2
+instruction (100)
+    on left: 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24, on right:
+    5
+init_declaration (101)
+    on left: 25 26 27 28, on right: 15 28
+join (102)
+    on left: 29 30 31, on right: 10
+comp_expr (103)
+    on left: 32, on right: 8 9 49 50 51
+dimension (104)
+    on left: 33 34, on right: 32 34
+index_expr (105)
+    on left: 35 36 37 38 39 40 41 42 43, on right: 34 37 38 39 40 41
+    42 43
+value_list (106)
+    on left: 44 45 46, on right: 23 46
+comp_list (107)
+    on left: 47 48 49 50 51, on right: 11 50 51
+where_expr (108)
+    on left: 52 53, on right: 32
+perturbation_declaration (109)
+    on left: 54 55 56 57, on right: 21 22 55
+effect_list (110)
+    on left: 58 59 60 61, on right: 24 56 57 59 61
+effect (111)
+    on left: 62 63 64 65 66 67 68 69 70 71 72 73 74 75, on right: 60
+    61
+print_expr (112)
+    on left: 76 77 78 79 80, on right: 74 75 79 80 99 102
+boolean (113)
+    on left: 81 82 83, on right: 65 66
+variable_declaration (114)
+    on left: 84 85 86, on right: 17 18
+bool_expr (115)
+    on left: 87 88 89 90 91 92 93 94 95 96, on right: 22 24 53 56 57
+    88 89 90
+opt_string (116)
+    on left: 97 98 99, on right: 66 72 73
+string_or_pr_expr (117)
+    on left: 100 101 102, on right: 75
+multiple (118)
+    on left: 103 104 105 106, on right: 26 27
+rule_label (119)
+    on left: 107 108, on right: 123 124
+lhs_rhs (120)
+    on left: 109, on right: 123 124
+token_expr (121)
+    on left: 110 111 112, on right: 109
+sum_token (122)
+    on left: 113 114 115 116, on right: 111 114 116
+mixture (123)
+    on left: 117 118, on right: 10 109
+rate_sep (124)
+    on left: 119 120 121, on right: 123
+rule_expression (125)
+    on left: 122 123 124, on right: 4
+arrow (126)
+    on left: 125 126 127, on right: 9 123 124
+constant (127)
+    on left: 128 129 130 131 132, on right: 9 142
+variable (128)
+    on left: 133 134 135 136 137 138 139 140, on right: 143
+alg_expr (129)
+    on left: 141 142 143 144 145 146 147 148 149 150 151 152 153 154
+    155 156 157 158 159 160 161 162 163, on right: 8 10 19 63 64 71
+    78 80 85 91 92 93 94 115 116 141 145 146 147 148 149 150 151 152
+    153 154 155 156 157 158 159 160 161 162 165 166 167 169 170 172
+rate (130)
+    on left: 164 165 166 167, on right: 123
+alg_with_radius (131)
+    on left: 168 169 170, on right: 165
+multiple_mixture (132)
+    on left: 171 172 173, on right: 67 69
+non_empty_mixture (133)
+    on left: 174 175 176 177, on right: 26 84 118 172 173 175 176
+agent_expression (134)
+    on left: 178 179, on right: 12 176 177
+interface_expression (135)
+    on left: 180 181, on right: 178
+ne_interface_expression (136)
+    on left: 182 183 184, on right: 181 183
+port_expression (137)
+    on left: 185 186, on right: 183 184
+internal_state (138)
+    on left: 187 188 189, on right: 186 188
+link_state (139)
+    on left: 190 191 192 193 194 195, on right: 186
+
+
+State 0
+
+    0 $accept: . statements $end
+
+    $default  reduce using rule 1 (statements)
+
+    statements  go to state 1
+
+
+State 1
+
+    0 $accept: statements . $end
+    2 statements: statements . statement NEWLINE
+
+    $end         shift, and go to state 2
+    error        shift, and go to state 3
+    PERT         shift, and go to state 4
+    OBS          shift, and go to state 5
+    CONFIG       shift, and go to state 6
+    SIGNATURE    shift, and go to state 7
+    INIT         shift, and go to state 8
+    LET          shift, and go to state 9
+    PLOT         shift, and go to state 10
+    TOKEN        shift, and go to state 11
+    LABEL        shift, and go to state 12
+    COMPARTMENT  shift, and go to state 13
+    C_LINK       shift, and go to state 14
+    TRANSPORT    shift, and go to state 15
+    USE          shift, and go to state 16
+
+    NEWLINE     reduce using rule 3 (statement)
+    NEWLINE     [reduce using rule 7 (instruction)]
+    NEWLINE     [reduce using rule 107 (rule_label)]
+    NEWLINE     [reduce using rule 122 (rule_expression)]
+    AT          reduce using rule 107 (rule_label)
+    FIX         reduce using rule 107 (rule_label)
+    OP_PAR      reduce using rule 107 (rule_label)
+    LOG         reduce using rule 107 (rule_label)
+    KAPPA_RAR   reduce using rule 107 (rule_label)
+    CPUTIME     reduce using rule 107 (rule_label)
+    INFINITY    reduce using rule 107 (rule_label)
+    TIME        reduce using rule 107 (rule_label)
+    EVENT       reduce using rule 107 (rule_label)
+    ACTIVITY    reduce using rule 107 (rule_label)
+    NULL_EVENT  reduce using rule 107 (rule_label)
+    PROD_EVENT  reduce using rule 107 (rule_label)
+    SINUS       reduce using rule 107 (rule_label)
+    COSINUS     reduce using rule 107 (rule_label)
+    TAN         reduce using rule 107 (rule_label)
+    ATAN        reduce using rule 107 (rule_label)
+    COIN        reduce using rule 107 (rule_label)
+    RAND_N      reduce using rule 107 (rule_label)
+    SQRT        reduce using rule 107 (rule_label)
+    EXPONENT    reduce using rule 107 (rule_label)
+    ABS         reduce using rule 107 (rule_label)
+    EMAX        reduce using rule 107 (rule_label)
+    TMAX        reduce using rule 107 (rule_label)
+    RAND_1      reduce using rule 107 (rule_label)
+    PIPE        reduce using rule 107 (rule_label)
+    KAPPA_LRAR  reduce using rule 107 (rule_label)
+    MAX         reduce using rule 107 (rule_label)
+    MIN         reduce using rule 107 (rule_label)
+    INT         reduce using rule 107 (rule_label)
+    ID          reduce using rule 107 (rule_label)
+    LABEL       [reduce using rule 107 (rule_label)]
+    FLOAT       reduce using rule 107 (rule_label)
+
+    statement        go to state 17
+    instruction      go to state 18
+    rule_label       go to state 19
+    rule_expression  go to state 20
+
+
+State 2
+
+    0 $accept: statements $end .
+
+    $default  accept
+
+
+State 3
+
+    6 statement: error .
+
+    $default  reduce using rule 6 (statement)
+
+
+State 4
+
+   21 instruction: PERT . perturbation_declaration
+   22            | PERT . REPEAT perturbation_declaration UNTIL bool_expr
+   24            | PERT . bool_expr DO effect_list UNTIL bool_expr
+
+    OP_PAR      shift, and go to state 21
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    REPEAT      shift, and go to state 26
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    NEWLINE   reduce using rule 54 (perturbation_declaration)
+    $default  reduce using rule 87 (bool_expr)
+
+    perturbation_declaration  go to state 52
+    bool_expr                 go to state 53
+    constant                  go to state 54
+    variable                  go to state 55
+    alg_expr                  go to state 56
+
+
+State 5
+
+   18 instruction: OBS . variable_declaration
+
+    LABEL  shift, and go to state 57
+
+    variable_declaration  go to state 58
+
+
+State 6
+
+   23 instruction: CONFIG . STRING value_list
+
+    STRING  shift, and go to state 59
+
+
+State 7
+
+   12 instruction: SIGNATURE . agent_expression
+   14            | SIGNATURE . error
+
+    error  shift, and go to state 60
+    ID     shift, and go to state 61
+
+    agent_expression  go to state 62
+
+
+State 8
+
+   15 instruction: INIT . init_declaration
+   16            | INIT . error
+
+    error  shift, and go to state 63
+    INT    shift, and go to state 64
+    ID     shift, and go to state 65
+    LABEL  shift, and go to state 66
+    FLOAT  shift, and go to state 67
+
+    NEWLINE  reduce using rule 25 (init_declaration)
+    NEWLINE  [reduce using rule 103 (multiple)]
+    OP_PAR   reduce using rule 103 (multiple)
+    ID       [reduce using rule 103 (multiple)]
+
+    init_declaration  go to state 68
+    multiple          go to state 69
+
+
+State 9
+
+   17 instruction: LET . variable_declaration
+
+    LABEL  shift, and go to state 57
+
+    variable_declaration  go to state 70
+
+
+State 10
+
+   19 instruction: PLOT . alg_expr
+   20            | PLOT . error
+
+    error       shift, and go to state 71
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 73
+
+
+State 11
+
+   13 instruction: TOKEN . ID
+
+    ID  shift, and go to state 74
+
+
+State 12
+
+  108 rule_label: LABEL .
+
+    $default  reduce using rule 108 (rule_label)
+
+
+State 13
+
+    8 instruction: COMPARTMENT . comp_expr alg_expr
+
+    LABEL  shift, and go to state 75
+
+    comp_expr  go to state 76
+
+
+State 14
+
+    9 instruction: C_LINK . LABEL comp_expr arrow comp_expr ATD constant
+
+    LABEL  shift, and go to state 77
+
+
+State 15
+
+   10 instruction: TRANSPORT . join LABEL mixture AT alg_expr
+
+    JOIN  shift, and go to state 78
+    FREE  shift, and go to state 79
+
+    $default  reduce using rule 29 (join)
+
+    join  go to state 80
+
+
+State 16
+
+   11 instruction: USE . comp_list
+
+    LABEL   shift, and go to state 75
+    "$ALL"  shift, and go to state 81
+
+    $default  reduce using rule 47 (comp_list)
+
+    comp_expr  go to state 82
+    comp_list  go to state 83
+
+
+State 17
+
+    2 statements: statements statement . NEWLINE
+
+    NEWLINE  shift, and go to state 84
+
+
+State 18
+
+    5 statement: instruction .
+
+    $default  reduce using rule 5 (statement)
+
+
+State 19
+
+  123 rule_expression: rule_label . lhs_rhs arrow lhs_rhs rate_sep rate
+  124                | rule_label . lhs_rhs arrow lhs_rhs
+
+    OP_PAR  shift, and go to state 85
+    ID      shift, and go to state 61
+
+    NEWLINE     reduce using rule 117 (mixture)
+    NEWLINE     [reduce using rule 174 (non_empty_mixture)]
+    AT          reduce using rule 117 (mixture)
+    AT          [reduce using rule 174 (non_empty_mixture)]
+    FIX         reduce using rule 117 (mixture)
+    FIX         [reduce using rule 174 (non_empty_mixture)]
+    OP_PAR      [reduce using rule 117 (mixture)]
+    OP_PAR      [reduce using rule 174 (non_empty_mixture)]
+    LOG         reduce using rule 117 (mixture)
+    LOG         [reduce using rule 174 (non_empty_mixture)]
+    KAPPA_RAR   reduce using rule 117 (mixture)
+    KAPPA_RAR   [reduce using rule 174 (non_empty_mixture)]
+    CPUTIME     reduce using rule 117 (mixture)
+    CPUTIME     [reduce using rule 174 (non_empty_mixture)]
+    INFINITY    reduce using rule 117 (mixture)
+    INFINITY    [reduce using rule 174 (non_empty_mixture)]
+    TIME        reduce using rule 117 (mixture)
+    TIME        [reduce using rule 174 (non_empty_mixture)]
+    EVENT       reduce using rule 117 (mixture)
+    EVENT       [reduce using rule 174 (non_empty_mixture)]
+    ACTIVITY    reduce using rule 117 (mixture)
+    ACTIVITY    [reduce using rule 174 (non_empty_mixture)]
+    NULL_EVENT  reduce using rule 117 (mixture)
+    NULL_EVENT  [reduce using rule 174 (non_empty_mixture)]
+    PROD_EVENT  reduce using rule 117 (mixture)
+    PROD_EVENT  [reduce using rule 174 (non_empty_mixture)]
+    SINUS       reduce using rule 117 (mixture)
+    SINUS       [reduce using rule 174 (non_empty_mixture)]
+    COSINUS     reduce using rule 117 (mixture)
+    COSINUS     [reduce using rule 174 (non_empty_mixture)]
+    TAN         reduce using rule 117 (mixture)
+    TAN         [reduce using rule 174 (non_empty_mixture)]
+    ATAN        reduce using rule 117 (mixture)
+    ATAN        [reduce using rule 174 (non_empty_mixture)]
+    COIN        reduce using rule 117 (mixture)
+    COIN        [reduce using rule 174 (non_empty_mixture)]
+    RAND_N      reduce using rule 117 (mixture)
+    RAND_N      [reduce using rule 174 (non_empty_mixture)]
+    SQRT        reduce using rule 117 (mixture)
+    SQRT        [reduce using rule 174 (non_empty_mixture)]
+    EXPONENT    reduce using rule 117 (mixture)
+    EXPONENT    [reduce using rule 174 (non_empty_mixture)]
+    ABS         reduce using rule 117 (mixture)
+    ABS         [reduce using rule 174 (non_empty_mixture)]
+    EMAX        reduce using rule 117 (mixture)
+    EMAX        [reduce using rule 174 (non_empty_mixture)]
+    TMAX        reduce using rule 117 (mixture)
+    TMAX        [reduce using rule 174 (non_empty_mixture)]
+    RAND_1      reduce using rule 117 (mixture)
+    RAND_1      [reduce using rule 174 (non_empty_mixture)]
+    PIPE        reduce using rule 117 (mixture)
+    PIPE        [reduce using rule 174 (non_empty_mixture)]
+    KAPPA_LRAR  reduce using rule 117 (mixture)
+    KAPPA_LRAR  [reduce using rule 174 (non_empty_mixture)]
+    MAX         reduce using rule 117 (mixture)
+    MAX         [reduce using rule 174 (non_empty_mixture)]
+    MIN         reduce using rule 117 (mixture)
+    MIN         [reduce using rule 174 (non_empty_mixture)]
+    INT         reduce using rule 117 (mixture)
+    INT         [reduce using rule 174 (non_empty_mixture)]
+    ID          [reduce using rule 117 (mixture)]
+    ID          [reduce using rule 174 (non_empty_mixture)]
+    LABEL       reduce using rule 117 (mixture)
+    LABEL       [reduce using rule 174 (non_empty_mixture)]
+    FLOAT       reduce using rule 117 (mixture)
+    FLOAT       [reduce using rule 174 (non_empty_mixture)]
+    $default    reduce using rule 117 (mixture)
+
+    lhs_rhs            go to state 86
+    mixture            go to state 87
+    non_empty_mixture  go to state 88
+    agent_expression   go to state 89
+
+
+State 20
+
+    4 statement: rule_expression .
+
+    $default  reduce using rule 4 (statement)
+
+
+State 21
+
+   55 perturbation_declaration: OP_PAR . perturbation_declaration CL_PAR
+   88 bool_expr: OP_PAR . bool_expr CL_PAR
+  141 alg_expr: OP_PAR . alg_expr CL_PAR
+
+    OP_PAR      shift, and go to state 21
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    CL_PAR    reduce using rule 54 (perturbation_declaration)
+    CL_PAR    [reduce using rule 87 (bool_expr)]
+    $default  reduce using rule 87 (bool_expr)
+
+    perturbation_declaration  go to state 90
+    bool_expr                 go to state 91
+    constant                  go to state 54
+    variable                  go to state 55
+    alg_expr                  go to state 92
+
+
+State 22
+
+  159 alg_expr: LOG . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 93
+
+
+State 23
+
+   95 bool_expr: TRUE .
+
+    $default  reduce using rule 95 (bool_expr)
+
+
+State 24
+
+   96 bool_expr: FALSE .
+
+    $default  reduce using rule 96 (bool_expr)
+
+
+State 25
+
+  140 variable: CPUTIME .
+
+    $default  reduce using rule 140 (variable)
+
+
+State 26
+
+   22 instruction: PERT REPEAT . perturbation_declaration UNTIL bool_expr
+
+    OP_PAR      shift, and go to state 21
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    UNTIL     reduce using rule 54 (perturbation_declaration)
+    $default  reduce using rule 87 (bool_expr)
+
+    perturbation_declaration  go to state 94
+    bool_expr                 go to state 95
+    constant                  go to state 54
+    variable                  go to state 55
+    alg_expr                  go to state 56
+
+
+State 27
+
+  128 constant: INFINITY .
+
+    $default  reduce using rule 128 (constant)
+
+
+State 28
+
+  135 variable: TIME .
+
+    $default  reduce using rule 135 (variable)
+
+
+State 29
+
+  136 variable: EVENT .
+
+    $default  reduce using rule 136 (variable)
+
+
+State 30
+
+  139 variable: ACTIVITY .
+
+    $default  reduce using rule 139 (variable)
+
+
+State 31
+
+  137 variable: NULL_EVENT .
+
+    $default  reduce using rule 137 (variable)
+
+
+State 32
+
+  138 variable: PROD_EVENT .
+
+    $default  reduce using rule 138 (variable)
+
+
+State 33
+
+  154 alg_expr: SINUS . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 96
+
+
+State 34
+
+  155 alg_expr: COSINUS . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 97
+
+
+State 35
+
+  156 alg_expr: TAN . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 98
+
+
+State 36
+
+  160 alg_expr: ATAN . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 99
+
+
+State 37
+
+  161 alg_expr: COIN . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 100
+
+
+State 38
+
+  162 alg_expr: RAND_N . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 101
+
+
+State 39
+
+  158 alg_expr: SQRT . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 102
+
+
+State 40
+
+  153 alg_expr: EXPONENT . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 103
+
+
+State 41
+
+  157 alg_expr: ABS . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 104
+
+
+State 42
+
+  131 constant: EMAX .
+
+    $default  reduce using rule 131 (constant)
+
+
+State 43
+
+  132 constant: TMAX .
+
+    $default  reduce using rule 132 (constant)
+
+
+State 44
+
+  163 alg_expr: RAND_1 .
+
+    $default  reduce using rule 163 (alg_expr)
+
+
+State 45
+
+  133 variable: PIPE . ID PIPE
+
+    ID  shift, and go to state 105
+
+
+State 46
+
+  151 alg_expr: MAX . alg_expr alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 106
+
+
+State 47
+
+  152 alg_expr: MIN . alg_expr alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 107
+
+
+State 48
+
+  130 constant: INT .
+
+    $default  reduce using rule 130 (constant)
+
+
+State 49
+
+  144 alg_expr: ID .
+
+    $default  reduce using rule 144 (alg_expr)
+
+
+State 50
+
+  134 variable: LABEL .
+
+    $default  reduce using rule 134 (variable)
+
+
+State 51
+
+  129 constant: FLOAT .
+
+    $default  reduce using rule 129 (constant)
+
+
+State 52
+
+   21 instruction: PERT perturbation_declaration .
+
+    $default  reduce using rule 21 (instruction)
+
+
+State 53
+
+   24 instruction: PERT bool_expr . DO effect_list UNTIL bool_expr
+   56 perturbation_declaration: bool_expr . DO effect_list
+   57                         | bool_expr . SET effect_list
+   89 bool_expr: bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+
+    AND  shift, and go to state 108
+    OR   shift, and go to state 109
+    DO   shift, and go to state 110
+    SET  shift, and go to state 111
+
+
+State 54
+
+  142 alg_expr: constant .
+
+    $default  reduce using rule 142 (alg_expr)
+
+
+State 55
+
+  143 alg_expr: variable .
+
+    $default  reduce using rule 143 (alg_expr)
+
+
+State 56
+
+   91 bool_expr: alg_expr . GREATER alg_expr
+   92          | alg_expr . SMALLER alg_expr
+   93          | alg_expr . EQUAL alg_expr
+   94          | alg_expr . DIFF alg_expr
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS     shift, and go to state 112
+    MULT     shift, and go to state 113
+    MINUS    shift, and go to state 114
+    GREATER  shift, and go to state 115
+    SMALLER  shift, and go to state 116
+    EQUAL    shift, and go to state 117
+    DIFF     shift, and go to state 118
+    DIV      shift, and go to state 119
+    POW      shift, and go to state 120
+    MODULO   shift, and go to state 121
+
+
+State 57
+
+   84 variable_declaration: LABEL . non_empty_mixture
+   85                     | LABEL . alg_expr
+   86                     | LABEL . error
+
+    error       shift, and go to state 122
+    OP_PAR      shift, and go to state 123
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 124
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    NEWLINE  reduce using rule 174 (non_empty_mixture)
+
+    constant           go to state 54
+    variable           go to state 55
+    alg_expr           go to state 125
+    non_empty_mixture  go to state 126
+    agent_expression   go to state 89
+
+
+State 58
+
+   18 instruction: OBS variable_declaration .
+
+    $default  reduce using rule 18 (instruction)
+
+
+State 59
+
+   23 instruction: CONFIG STRING . value_list
+
+    STRING  shift, and go to state 127
+
+    $default  reduce using rule 44 (value_list)
+
+    value_list  go to state 128
+
+
+State 60
+
+   14 instruction: SIGNATURE error .
+
+    $default  reduce using rule 14 (instruction)
+
+
+State 61
+
+  178 agent_expression: ID . OP_PAR interface_expression CL_PAR
+  179                 | ID . error
+
+    error   shift, and go to state 129
+    OP_PAR  shift, and go to state 130
+
+
+State 62
+
+   12 instruction: SIGNATURE agent_expression .
+
+    $default  reduce using rule 12 (instruction)
+
+
+State 63
+
+   16 instruction: INIT error .
+
+    $default  reduce using rule 16 (instruction)
+
+
+State 64
+
+  104 multiple: INT .
+
+    $default  reduce using rule 104 (multiple)
+
+
+State 65
+
+   27 init_declaration: ID . LAR multiple
+   28                 | ID . OP_CUR init_declaration CL_CUR
+
+    LAR     shift, and go to state 131
+    OP_CUR  shift, and go to state 132
+
+
+State 66
+
+  106 multiple: LABEL .
+
+    $default  reduce using rule 106 (multiple)
+
+
+State 67
+
+  105 multiple: FLOAT .
+
+    $default  reduce using rule 105 (multiple)
+
+
+State 68
+
+   15 instruction: INIT init_declaration .
+
+    $default  reduce using rule 15 (instruction)
+
+
+State 69
+
+   26 init_declaration: multiple . non_empty_mixture
+
+    OP_PAR  shift, and go to state 85
+    ID      shift, and go to state 61
+
+    $default  reduce using rule 174 (non_empty_mixture)
+
+    non_empty_mixture  go to state 133
+    agent_expression   go to state 89
+
+
+State 70
+
+   17 instruction: LET variable_declaration .
+
+    $default  reduce using rule 17 (instruction)
+
+
+State 71
+
+   20 instruction: PLOT error .
+
+    $default  reduce using rule 20 (instruction)
+
+
+State 72
+
+  141 alg_expr: OP_PAR . alg_expr CL_PAR
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 134
+
+
+State 73
+
+   19 instruction: PLOT alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 19 (instruction)
+
+
+State 74
+
+   13 instruction: TOKEN ID .
+
+    $default  reduce using rule 13 (instruction)
+
+
+State 75
+
+   32 comp_expr: LABEL . dimension where_expr
+
+    OP_BRA  shift, and go to state 135
+
+    $default  reduce using rule 33 (dimension)
+
+    dimension  go to state 136
+
+
+State 76
+
+    8 instruction: COMPARTMENT comp_expr . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 137
+
+
+State 77
+
+    9 instruction: C_LINK LABEL . comp_expr arrow comp_expr ATD constant
+
+    LABEL  shift, and go to state 75
+
+    comp_expr  go to state 138
+
+
+State 78
+
+   30 join: JOIN .
+
+    $default  reduce using rule 30 (join)
+
+
+State 79
+
+   31 join: FREE .
+
+    $default  reduce using rule 31 (join)
+
+
+State 80
+
+   10 instruction: TRANSPORT join . LABEL mixture AT alg_expr
+
+    LABEL  shift, and go to state 139
+
+
+State 81
+
+   48 comp_list: "$ALL" .
+
+    $default  reduce using rule 48 (comp_list)
+
+
+State 82
+
+   49 comp_list: comp_expr .
+   50          | comp_expr . comp_list
+   51          | comp_expr . COMMA comp_list
+
+    COMMA   shift, and go to state 140
+    LABEL   shift, and go to state 75
+    "$ALL"  shift, and go to state 81
+
+    NEWLINE   reduce using rule 47 (comp_list)
+    NEWLINE   [reduce using rule 49 (comp_list)]
+    $default  reduce using rule 47 (comp_list)
+
+    comp_expr  go to state 82
+    comp_list  go to state 141
+
+
+State 83
+
+   11 instruction: USE comp_list .
+
+    $default  reduce using rule 11 (instruction)
+
+
+State 84
+
+    2 statements: statements statement NEWLINE .
+
+    $default  reduce using rule 2 (statements)
+
+
+State 85
+
+  175 non_empty_mixture: OP_PAR . non_empty_mixture CL_PAR
+
+    OP_PAR  shift, and go to state 85
+    ID      shift, and go to state 61
+
+    $default  reduce using rule 174 (non_empty_mixture)
+
+    non_empty_mixture  go to state 142
+    agent_expression   go to state 89
+
+
+State 86
+
+  123 rule_expression: rule_label lhs_rhs . arrow lhs_rhs rate_sep rate
+  124                | rule_label lhs_rhs . arrow lhs_rhs
+
+    KAPPA_RAR   shift, and go to state 143
+    KAPPA_LRAR  shift, and go to state 144
+
+    $default  reduce using rule 125 (arrow)
+
+    arrow  go to state 145
+
+
+State 87
+
+  109 lhs_rhs: mixture . token_expr
+
+    PIPE  shift, and go to state 146
+
+    PIPE      [reduce using rule 110 (token_expr)]
+    $default  reduce using rule 110 (token_expr)
+
+    token_expr  go to state 147
+
+
+State 88
+
+  118 mixture: non_empty_mixture .
+
+    $default  reduce using rule 118 (mixture)
+
+
+State 89
+
+  176 non_empty_mixture: agent_expression . COMMA non_empty_mixture
+  177                  | agent_expression .
+
+    COMMA  shift, and go to state 148
+
+    $default  reduce using rule 177 (non_empty_mixture)
+
+
+State 90
+
+   55 perturbation_declaration: OP_PAR perturbation_declaration . CL_PAR
+
+    CL_PAR  shift, and go to state 149
+
+
+State 91
+
+   56 perturbation_declaration: bool_expr . DO effect_list
+   57                         | bool_expr . SET effect_list
+   88 bool_expr: OP_PAR bool_expr . CL_PAR
+   89          | bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+
+    CL_PAR  shift, and go to state 150
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    DO      shift, and go to state 151
+    SET     shift, and go to state 111
+
+
+State 92
+
+   91 bool_expr: alg_expr . GREATER alg_expr
+   92          | alg_expr . SMALLER alg_expr
+   93          | alg_expr . EQUAL alg_expr
+   94          | alg_expr . DIFF alg_expr
+  141 alg_expr: OP_PAR alg_expr . CL_PAR
+  145         | alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    CL_PAR   shift, and go to state 152
+    PLUS     shift, and go to state 112
+    MULT     shift, and go to state 113
+    MINUS    shift, and go to state 114
+    GREATER  shift, and go to state 115
+    SMALLER  shift, and go to state 116
+    EQUAL    shift, and go to state 117
+    DIFF     shift, and go to state 118
+    DIV      shift, and go to state 119
+    POW      shift, and go to state 120
+    MODULO   shift, and go to state 121
+
+
+State 93
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  159         | LOG alg_expr .
+
+    $default  reduce using rule 159 (alg_expr)
+
+
+State 94
+
+   22 instruction: PERT REPEAT perturbation_declaration . UNTIL bool_expr
+
+    UNTIL  shift, and go to state 153
+
+
+State 95
+
+   56 perturbation_declaration: bool_expr . DO effect_list
+   57                         | bool_expr . SET effect_list
+   89 bool_expr: bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+
+    AND  shift, and go to state 108
+    OR   shift, and go to state 109
+    DO   shift, and go to state 151
+    SET  shift, and go to state 111
+
+
+State 96
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  154         | SINUS alg_expr .
+
+    $default  reduce using rule 154 (alg_expr)
+
+
+State 97
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  155         | COSINUS alg_expr .
+
+    $default  reduce using rule 155 (alg_expr)
+
+
+State 98
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  156         | TAN alg_expr .
+
+    $default  reduce using rule 156 (alg_expr)
+
+
+State 99
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  160         | ATAN alg_expr .
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    PLUS      [reduce using rule 160 (alg_expr)]
+    MULT      [reduce using rule 160 (alg_expr)]
+    MINUS     [reduce using rule 160 (alg_expr)]
+    DIV       [reduce using rule 160 (alg_expr)]
+    POW       [reduce using rule 160 (alg_expr)]
+    MODULO    [reduce using rule 160 (alg_expr)]
+    $default  reduce using rule 160 (alg_expr)
+
+
+State 100
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  161         | COIN alg_expr .
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    PLUS      [reduce using rule 161 (alg_expr)]
+    MULT      [reduce using rule 161 (alg_expr)]
+    MINUS     [reduce using rule 161 (alg_expr)]
+    DIV       [reduce using rule 161 (alg_expr)]
+    POW       [reduce using rule 161 (alg_expr)]
+    MODULO    [reduce using rule 161 (alg_expr)]
+    $default  reduce using rule 161 (alg_expr)
+
+
+State 101
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  162         | RAND_N alg_expr .
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    PLUS      [reduce using rule 162 (alg_expr)]
+    MULT      [reduce using rule 162 (alg_expr)]
+    MINUS     [reduce using rule 162 (alg_expr)]
+    DIV       [reduce using rule 162 (alg_expr)]
+    POW       [reduce using rule 162 (alg_expr)]
+    MODULO    [reduce using rule 162 (alg_expr)]
+    $default  reduce using rule 162 (alg_expr)
+
+
+State 102
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  158         | SQRT alg_expr .
+
+    $default  reduce using rule 158 (alg_expr)
+
+
+State 103
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  153         | EXPONENT alg_expr .
+
+    $default  reduce using rule 153 (alg_expr)
+
+
+State 104
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  157         | ABS alg_expr .
+
+    $default  reduce using rule 157 (alg_expr)
+
+
+State 105
+
+  133 variable: PIPE ID . PIPE
+
+    PIPE  shift, and go to state 154
+
+
+State 106
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  151         | MAX alg_expr . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    PLUS        shift, and go to state 112
+    MULT        shift, and go to state 113
+    MINUS       shift, and go to state 114
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    DIV         shift, and go to state 119
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    POW         shift, and go to state 120
+    ABS         shift, and go to state 41
+    MODULO      shift, and go to state 121
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 155
+
+
+State 107
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  152         | MIN alg_expr . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    PLUS        shift, and go to state 112
+    MULT        shift, and go to state 113
+    MINUS       shift, and go to state 114
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    DIV         shift, and go to state 119
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    POW         shift, and go to state 120
+    ABS         shift, and go to state 41
+    MODULO      shift, and go to state 121
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 156
+
+
+State 108
+
+   89 bool_expr: bool_expr AND . bool_expr
+
+    OP_PAR      shift, and go to state 157
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 87 (bool_expr)
+
+    bool_expr  go to state 158
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 56
+
+
+State 109
+
+   90 bool_expr: bool_expr OR . bool_expr
+
+    OP_PAR      shift, and go to state 157
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 87 (bool_expr)
+
+    bool_expr  go to state 159
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 56
+
+
+State 110
+
+   24 instruction: PERT bool_expr DO . effect_list UNTIL bool_expr
+   56 perturbation_declaration: bool_expr DO . effect_list
+
+    OP_PAR    shift, and go to state 160
+    INTRO     shift, and go to state 161
+    DELETE    shift, and go to state 162
+    TRACK     shift, and go to state 163
+    FLUX      shift, and go to state 164
+    ASSIGN2   shift, and go to state 165
+    PRINT     shift, and go to state 166
+    PRINTF    shift, and go to state 167
+    ID        shift, and go to state 168
+    LABEL     shift, and go to state 169
+    STOP      shift, and go to state 170
+    SNAPSHOT  shift, and go to state 171
+
+    NEWLINE    reduce using rule 58 (effect_list)
+    NEWLINE    [reduce using rule 62 (effect)]
+    SEMICOLON  reduce using rule 62 (effect)
+    UNTIL      reduce using rule 58 (effect_list)
+    UNTIL      [reduce using rule 62 (effect)]
+    $default   reduce using rule 58 (effect_list)
+
+    effect_list  go to state 172
+    effect       go to state 173
+
+
+State 111
+
+   57 perturbation_declaration: bool_expr SET . effect_list
+
+    OP_PAR    shift, and go to state 160
+    INTRO     shift, and go to state 161
+    DELETE    shift, and go to state 162
+    TRACK     shift, and go to state 163
+    FLUX      shift, and go to state 164
+    ASSIGN2   shift, and go to state 165
+    PRINT     shift, and go to state 166
+    PRINTF    shift, and go to state 167
+    ID        shift, and go to state 168
+    LABEL     shift, and go to state 169
+    STOP      shift, and go to state 170
+    SNAPSHOT  shift, and go to state 171
+
+    NEWLINE    reduce using rule 58 (effect_list)
+    NEWLINE    [reduce using rule 62 (effect)]
+    SEMICOLON  reduce using rule 62 (effect)
+    CL_PAR     reduce using rule 58 (effect_list)
+    CL_PAR     [reduce using rule 62 (effect)]
+    UNTIL      reduce using rule 58 (effect_list)
+    UNTIL      [reduce using rule 62 (effect)]
+    $default   reduce using rule 58 (effect_list)
+
+    effect_list  go to state 174
+    effect       go to state 173
+
+
+State 112
+
+  146 alg_expr: alg_expr PLUS . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 175
+
+
+State 113
+
+  145 alg_expr: alg_expr MULT . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 176
+
+
+State 114
+
+  148 alg_expr: alg_expr MINUS . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 177
+
+
+State 115
+
+   91 bool_expr: alg_expr GREATER . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 178
+
+
+State 116
+
+   92 bool_expr: alg_expr SMALLER . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 179
+
+
+State 117
+
+   93 bool_expr: alg_expr EQUAL . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 180
+
+
+State 118
+
+   94 bool_expr: alg_expr DIFF . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 181
+
+
+State 119
+
+  147 alg_expr: alg_expr DIV . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 182
+
+
+State 120
+
+  149 alg_expr: alg_expr POW . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 183
+
+
+State 121
+
+  150 alg_expr: alg_expr MODULO . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 184
+
+
+State 122
+
+   86 variable_declaration: LABEL error .
+
+    $default  reduce using rule 86 (variable_declaration)
+
+
+State 123
+
+  141 alg_expr: OP_PAR . alg_expr CL_PAR
+  175 non_empty_mixture: OP_PAR . non_empty_mixture CL_PAR
+
+    OP_PAR      shift, and go to state 123
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 124
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 174 (non_empty_mixture)
+
+    constant           go to state 54
+    variable           go to state 55
+    alg_expr           go to state 134
+    non_empty_mixture  go to state 142
+    agent_expression   go to state 89
+
+
+State 124
+
+  144 alg_expr: ID .
+  178 agent_expression: ID . OP_PAR interface_expression CL_PAR
+  179                 | ID . error
+
+    error   shift, and go to state 129
+    OP_PAR  shift, and go to state 130
+
+    NEWLINE    reduce using rule 144 (alg_expr)
+    SEMICOLON  reduce using rule 144 (alg_expr)
+    OP_PAR     [reduce using rule 144 (alg_expr)]
+    CL_PAR     reduce using rule 144 (alg_expr)
+    PLUS       reduce using rule 144 (alg_expr)
+    MULT       reduce using rule 144 (alg_expr)
+    MINUS      reduce using rule 144 (alg_expr)
+    UNTIL      reduce using rule 144 (alg_expr)
+    DIV        reduce using rule 144 (alg_expr)
+    POW        reduce using rule 144 (alg_expr)
+    MODULO     reduce using rule 144 (alg_expr)
+    ID         reduce using rule 144 (alg_expr)
+
+
+State 125
+
+   85 variable_declaration: LABEL alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 85 (variable_declaration)
+
+
+State 126
+
+   84 variable_declaration: LABEL non_empty_mixture .
+
+    $default  reduce using rule 84 (variable_declaration)
+
+
+State 127
+
+   45 value_list: STRING .
+   46           | STRING . value_list
+
+    STRING  shift, and go to state 127
+
+    NEWLINE   reduce using rule 44 (value_list)
+    NEWLINE   [reduce using rule 45 (value_list)]
+    $default  reduce using rule 44 (value_list)
+
+    value_list  go to state 185
+
+
+State 128
+
+   23 instruction: CONFIG STRING value_list .
+
+    $default  reduce using rule 23 (instruction)
+
+
+State 129
+
+  179 agent_expression: ID error .
+
+    $default  reduce using rule 179 (agent_expression)
+
+
+State 130
+
+  178 agent_expression: ID OP_PAR . interface_expression CL_PAR
+
+    ID  shift, and go to state 186
+
+    CL_PAR    reduce using rule 180 (interface_expression)
+    CL_PAR    [reduce using rule 182 (ne_interface_expression)]
+    CL_PAR    [reduce using rule 185 (port_expression)]
+    COMMA     reduce using rule 185 (port_expression)
+    $default  reduce using rule 180 (interface_expression)
+
+    interface_expression     go to state 187
+    ne_interface_expression  go to state 188
+    port_expression          go to state 189
+
+
+State 131
+
+   27 init_declaration: ID LAR . multiple
+
+    INT    shift, and go to state 64
+    LABEL  shift, and go to state 66
+    FLOAT  shift, and go to state 67
+
+    $default  reduce using rule 103 (multiple)
+
+    multiple  go to state 190
+
+
+State 132
+
+   28 init_declaration: ID OP_CUR . init_declaration CL_CUR
+
+    INT    shift, and go to state 64
+    ID     shift, and go to state 65
+    LABEL  shift, and go to state 66
+    FLOAT  shift, and go to state 67
+
+    OP_PAR    reduce using rule 103 (multiple)
+    CL_CUR    reduce using rule 25 (init_declaration)
+    CL_CUR    [reduce using rule 103 (multiple)]
+    ID        [reduce using rule 103 (multiple)]
+    $default  reduce using rule 25 (init_declaration)
+
+    init_declaration  go to state 191
+    multiple          go to state 69
+
+
+State 133
+
+   26 init_declaration: multiple non_empty_mixture .
+
+    $default  reduce using rule 26 (init_declaration)
+
+
+State 134
+
+  141 alg_expr: OP_PAR alg_expr . CL_PAR
+  145         | alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    CL_PAR  shift, and go to state 152
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+
+State 135
+
+   34 dimension: OP_BRA . index_expr CL_BRA dimension
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 195
+
+
+State 136
+
+   32 comp_expr: LABEL dimension . where_expr
+
+    OP_CUR  shift, and go to state 196
+
+    $default  reduce using rule 52 (where_expr)
+
+    where_expr  go to state 197
+
+
+State 137
+
+    8 instruction: COMPARTMENT comp_expr alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 8 (instruction)
+
+
+State 138
+
+    9 instruction: C_LINK LABEL comp_expr . arrow comp_expr ATD constant
+
+    KAPPA_RAR   shift, and go to state 143
+    KAPPA_LRAR  shift, and go to state 144
+
+    $default  reduce using rule 125 (arrow)
+
+    arrow  go to state 198
+
+
+State 139
+
+   10 instruction: TRANSPORT join LABEL . mixture AT alg_expr
+
+    OP_PAR  shift, and go to state 85
+    ID      shift, and go to state 61
+
+    AT        reduce using rule 117 (mixture)
+    AT        [reduce using rule 174 (non_empty_mixture)]
+    $default  reduce using rule 117 (mixture)
+
+    mixture            go to state 199
+    non_empty_mixture  go to state 88
+    agent_expression   go to state 89
+
+
+State 140
+
+   51 comp_list: comp_expr COMMA . comp_list
+
+    LABEL   shift, and go to state 75
+    "$ALL"  shift, and go to state 81
+
+    $default  reduce using rule 47 (comp_list)
+
+    comp_expr  go to state 82
+    comp_list  go to state 200
+
+
+State 141
+
+   50 comp_list: comp_expr comp_list .
+
+    $default  reduce using rule 50 (comp_list)
+
+
+State 142
+
+  175 non_empty_mixture: OP_PAR non_empty_mixture . CL_PAR
+
+    CL_PAR  shift, and go to state 201
+
+
+State 143
+
+  126 arrow: KAPPA_RAR .
+
+    $default  reduce using rule 126 (arrow)
+
+
+State 144
+
+  127 arrow: KAPPA_LRAR .
+
+    $default  reduce using rule 127 (arrow)
+
+
+State 145
+
+  123 rule_expression: rule_label lhs_rhs arrow . lhs_rhs rate_sep rate
+  124                | rule_label lhs_rhs arrow . lhs_rhs
+
+    OP_PAR  shift, and go to state 85
+    ID      shift, and go to state 61
+
+    NEWLINE     reduce using rule 117 (mixture)
+    NEWLINE     [reduce using rule 174 (non_empty_mixture)]
+    AT          reduce using rule 117 (mixture)
+    AT          [reduce using rule 174 (non_empty_mixture)]
+    FIX         reduce using rule 117 (mixture)
+    FIX         [reduce using rule 174 (non_empty_mixture)]
+    OP_PAR      [reduce using rule 117 (mixture)]
+    OP_PAR      [reduce using rule 174 (non_empty_mixture)]
+    LOG         reduce using rule 117 (mixture)
+    LOG         [reduce using rule 174 (non_empty_mixture)]
+    CPUTIME     reduce using rule 117 (mixture)
+    CPUTIME     [reduce using rule 174 (non_empty_mixture)]
+    INFINITY    reduce using rule 117 (mixture)
+    INFINITY    [reduce using rule 174 (non_empty_mixture)]
+    TIME        reduce using rule 117 (mixture)
+    TIME        [reduce using rule 174 (non_empty_mixture)]
+    EVENT       reduce using rule 117 (mixture)
+    EVENT       [reduce using rule 174 (non_empty_mixture)]
+    ACTIVITY    reduce using rule 117 (mixture)
+    ACTIVITY    [reduce using rule 174 (non_empty_mixture)]
+    NULL_EVENT  reduce using rule 117 (mixture)
+    NULL_EVENT  [reduce using rule 174 (non_empty_mixture)]
+    PROD_EVENT  reduce using rule 117 (mixture)
+    PROD_EVENT  [reduce using rule 174 (non_empty_mixture)]
+    SINUS       reduce using rule 117 (mixture)
+    SINUS       [reduce using rule 174 (non_empty_mixture)]
+    COSINUS     reduce using rule 117 (mixture)
+    COSINUS     [reduce using rule 174 (non_empty_mixture)]
+    TAN         reduce using rule 117 (mixture)
+    TAN         [reduce using rule 174 (non_empty_mixture)]
+    ATAN        reduce using rule 117 (mixture)
+    ATAN        [reduce using rule 174 (non_empty_mixture)]
+    COIN        reduce using rule 117 (mixture)
+    COIN        [reduce using rule 174 (non_empty_mixture)]
+    RAND_N      reduce using rule 117 (mixture)
+    RAND_N      [reduce using rule 174 (non_empty_mixture)]
+    SQRT        reduce using rule 117 (mixture)
+    SQRT        [reduce using rule 174 (non_empty_mixture)]
+    EXPONENT    reduce using rule 117 (mixture)
+    EXPONENT    [reduce using rule 174 (non_empty_mixture)]
+    ABS         reduce using rule 117 (mixture)
+    ABS         [reduce using rule 174 (non_empty_mixture)]
+    EMAX        reduce using rule 117 (mixture)
+    EMAX        [reduce using rule 174 (non_empty_mixture)]
+    TMAX        reduce using rule 117 (mixture)
+    TMAX        [reduce using rule 174 (non_empty_mixture)]
+    RAND_1      reduce using rule 117 (mixture)
+    RAND_1      [reduce using rule 174 (non_empty_mixture)]
+    PIPE        reduce using rule 117 (mixture)
+    PIPE        [reduce using rule 174 (non_empty_mixture)]
+    MAX         reduce using rule 117 (mixture)
+    MAX         [reduce using rule 174 (non_empty_mixture)]
+    MIN         reduce using rule 117 (mixture)
+    MIN         [reduce using rule 174 (non_empty_mixture)]
+    INT         reduce using rule 117 (mixture)
+    INT         [reduce using rule 174 (non_empty_mixture)]
+    ID          [reduce using rule 117 (mixture)]
+    ID          [reduce using rule 174 (non_empty_mixture)]
+    LABEL       reduce using rule 117 (mixture)
+    LABEL       [reduce using rule 174 (non_empty_mixture)]
+    FLOAT       reduce using rule 117 (mixture)
+    FLOAT       [reduce using rule 174 (non_empty_mixture)]
+    $default    reduce using rule 117 (mixture)
+
+    lhs_rhs            go to state 202
+    mixture            go to state 87
+    non_empty_mixture  go to state 88
+    agent_expression   go to state 89
+
+
+State 146
+
+  111 token_expr: PIPE . sum_token
+  112           | PIPE . error
+
+    error       shift, and go to state 203
+    OP_PAR      shift, and go to state 204
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    NEWLINE     reduce using rule 113 (sum_token)
+    AT          reduce using rule 113 (sum_token)
+    FIX         reduce using rule 113 (sum_token)
+    OP_PAR      [reduce using rule 113 (sum_token)]
+    LOG         [reduce using rule 113 (sum_token)]
+    KAPPA_RAR   reduce using rule 113 (sum_token)
+    CPUTIME     [reduce using rule 113 (sum_token)]
+    INFINITY    [reduce using rule 113 (sum_token)]
+    TIME        [reduce using rule 113 (sum_token)]
+    EVENT       [reduce using rule 113 (sum_token)]
+    ACTIVITY    [reduce using rule 113 (sum_token)]
+    NULL_EVENT  [reduce using rule 113 (sum_token)]
+    PROD_EVENT  [reduce using rule 113 (sum_token)]
+    SINUS       [reduce using rule 113 (sum_token)]
+    COSINUS     [reduce using rule 113 (sum_token)]
+    TAN         [reduce using rule 113 (sum_token)]
+    ATAN        [reduce using rule 113 (sum_token)]
+    COIN        [reduce using rule 113 (sum_token)]
+    RAND_N      [reduce using rule 113 (sum_token)]
+    SQRT        [reduce using rule 113 (sum_token)]
+    EXPONENT    [reduce using rule 113 (sum_token)]
+    ABS         [reduce using rule 113 (sum_token)]
+    EMAX        [reduce using rule 113 (sum_token)]
+    TMAX        [reduce using rule 113 (sum_token)]
+    RAND_1      [reduce using rule 113 (sum_token)]
+    PIPE        [reduce using rule 113 (sum_token)]
+    KAPPA_LRAR  reduce using rule 113 (sum_token)
+    MAX         [reduce using rule 113 (sum_token)]
+    MIN         [reduce using rule 113 (sum_token)]
+    INT         [reduce using rule 113 (sum_token)]
+    ID          [reduce using rule 113 (sum_token)]
+    LABEL       [reduce using rule 113 (sum_token)]
+    FLOAT       [reduce using rule 113 (sum_token)]
+
+    sum_token  go to state 205
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 206
+
+
+State 147
+
+  109 lhs_rhs: mixture token_expr .
+
+    $default  reduce using rule 109 (lhs_rhs)
+
+
+State 148
+
+  176 non_empty_mixture: agent_expression COMMA . non_empty_mixture
+
+    OP_PAR  shift, and go to state 85
+    ID      shift, and go to state 61
+
+    OP_PAR    [reduce using rule 174 (non_empty_mixture)]
+    ID        [reduce using rule 174 (non_empty_mixture)]
+    $default  reduce using rule 174 (non_empty_mixture)
+
+    non_empty_mixture  go to state 207
+    agent_expression   go to state 89
+
+
+State 149
+
+   55 perturbation_declaration: OP_PAR perturbation_declaration CL_PAR .
+
+    $default  reduce using rule 55 (perturbation_declaration)
+
+
+State 150
+
+   88 bool_expr: OP_PAR bool_expr CL_PAR .
+
+    $default  reduce using rule 88 (bool_expr)
+
+
+State 151
+
+   56 perturbation_declaration: bool_expr DO . effect_list
+
+    OP_PAR    shift, and go to state 160
+    INTRO     shift, and go to state 161
+    DELETE    shift, and go to state 162
+    TRACK     shift, and go to state 163
+    FLUX      shift, and go to state 164
+    ASSIGN2   shift, and go to state 165
+    PRINT     shift, and go to state 166
+    PRINTF    shift, and go to state 167
+    ID        shift, and go to state 168
+    LABEL     shift, and go to state 169
+    STOP      shift, and go to state 170
+    SNAPSHOT  shift, and go to state 171
+
+    SEMICOLON  reduce using rule 62 (effect)
+    CL_PAR     reduce using rule 58 (effect_list)
+    CL_PAR     [reduce using rule 62 (effect)]
+    UNTIL      reduce using rule 58 (effect_list)
+    UNTIL      [reduce using rule 62 (effect)]
+    $default   reduce using rule 58 (effect_list)
+
+    effect_list  go to state 208
+    effect       go to state 173
+
+
+State 152
+
+  141 alg_expr: OP_PAR alg_expr CL_PAR .
+
+    $default  reduce using rule 141 (alg_expr)
+
+
+State 153
+
+   22 instruction: PERT REPEAT perturbation_declaration UNTIL . bool_expr
+
+    OP_PAR      shift, and go to state 157
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 87 (bool_expr)
+
+    bool_expr  go to state 209
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 56
+
+
+State 154
+
+  133 variable: PIPE ID PIPE .
+
+    $default  reduce using rule 133 (variable)
+
+
+State 155
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  151         | MAX alg_expr alg_expr .
+
+    MULT    shift, and go to state 113
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 151 (alg_expr)
+
+
+State 156
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  152         | MIN alg_expr alg_expr .
+
+    MULT    shift, and go to state 113
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 152 (alg_expr)
+
+
+State 157
+
+   88 bool_expr: OP_PAR . bool_expr CL_PAR
+  141 alg_expr: OP_PAR . alg_expr CL_PAR
+
+    OP_PAR      shift, and go to state 157
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 87 (bool_expr)
+
+    bool_expr  go to state 210
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 92
+
+
+State 158
+
+   89 bool_expr: bool_expr . AND bool_expr
+   89          | bool_expr AND bool_expr .
+   90          | bool_expr . OR bool_expr
+
+    $default  reduce using rule 89 (bool_expr)
+
+
+State 159
+
+   89 bool_expr: bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+   90          | bool_expr OR bool_expr .
+
+    AND  shift, and go to state 108
+
+    $default  reduce using rule 90 (bool_expr)
+
+
+State 160
+
+   59 effect_list: OP_PAR . effect_list CL_PAR
+
+    OP_PAR    shift, and go to state 160
+    INTRO     shift, and go to state 161
+    DELETE    shift, and go to state 162
+    TRACK     shift, and go to state 163
+    FLUX      shift, and go to state 164
+    ASSIGN2   shift, and go to state 165
+    PRINT     shift, and go to state 166
+    PRINTF    shift, and go to state 167
+    ID        shift, and go to state 168
+    LABEL     shift, and go to state 169
+    STOP      shift, and go to state 170
+    SNAPSHOT  shift, and go to state 171
+
+    SEMICOLON  reduce using rule 62 (effect)
+    CL_PAR     reduce using rule 58 (effect_list)
+    CL_PAR     [reduce using rule 62 (effect)]
+    $default   reduce using rule 58 (effect_list)
+
+    effect_list  go to state 211
+    effect       go to state 173
+
+
+State 161
+
+   67 effect: INTRO . multiple_mixture
+   68       | INTRO . error
+
+    error       shift, and go to state 212
+    OP_PAR      shift, and go to state 123
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 124
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    NEWLINE    reduce using rule 171 (multiple_mixture)
+    NEWLINE    [reduce using rule 174 (non_empty_mixture)]
+    SEMICOLON  reduce using rule 171 (multiple_mixture)
+    SEMICOLON  [reduce using rule 174 (non_empty_mixture)]
+    CL_PAR     reduce using rule 171 (multiple_mixture)
+    CL_PAR     [reduce using rule 174 (non_empty_mixture)]
+    UNTIL      reduce using rule 171 (multiple_mixture)
+    UNTIL      [reduce using rule 174 (non_empty_mixture)]
+
+    constant           go to state 54
+    variable           go to state 55
+    alg_expr           go to state 213
+    multiple_mixture   go to state 214
+    non_empty_mixture  go to state 215
+    agent_expression   go to state 89
+
+
+State 162
+
+   69 effect: DELETE . multiple_mixture
+   70       | DELETE . error
+
+    error       shift, and go to state 216
+    OP_PAR      shift, and go to state 123
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 124
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    NEWLINE    reduce using rule 171 (multiple_mixture)
+    NEWLINE    [reduce using rule 174 (non_empty_mixture)]
+    SEMICOLON  reduce using rule 171 (multiple_mixture)
+    SEMICOLON  [reduce using rule 174 (non_empty_mixture)]
+    CL_PAR     reduce using rule 171 (multiple_mixture)
+    CL_PAR     [reduce using rule 174 (non_empty_mixture)]
+    UNTIL      reduce using rule 171 (multiple_mixture)
+    UNTIL      [reduce using rule 174 (non_empty_mixture)]
+
+    constant           go to state 54
+    variable           go to state 55
+    alg_expr           go to state 213
+    multiple_mixture   go to state 217
+    non_empty_mixture  go to state 215
+    agent_expression   go to state 89
+
+
+State 163
+
+   65 effect: TRACK . LABEL boolean
+
+    LABEL  shift, and go to state 218
+
+
+State 164
+
+   66 effect: FLUX . opt_string boolean
+
+    SMALLER  shift, and go to state 219
+    STRING   shift, and go to state 220
+
+    $default  reduce using rule 97 (opt_string)
+
+    opt_string  go to state 221
+
+
+State 165
+
+   64 effect: ASSIGN2 . LABEL alg_expr
+
+    LABEL  shift, and go to state 222
+
+
+State 166
+
+   74 effect: PRINT . SMALLER print_expr GREATER
+
+    SMALLER  shift, and go to state 223
+
+
+State 167
+
+   75 effect: PRINTF . string_or_pr_expr SMALLER print_expr GREATER
+
+    SMALLER  shift, and go to state 224
+    STRING   shift, and go to state 225
+
+    SMALLER  [reduce using rule 100 (string_or_pr_expr)]
+
+    string_or_pr_expr  go to state 226
+
+
+State 168
+
+   71 effect: ID . LAR alg_expr
+
+    LAR  shift, and go to state 227
+
+
+State 169
+
+   63 effect: LABEL . ASSIGN alg_expr
+
+    ASSIGN  shift, and go to state 228
+
+
+State 170
+
+   73 effect: STOP . opt_string
+
+    SMALLER  shift, and go to state 219
+    STRING   shift, and go to state 220
+
+    $default  reduce using rule 97 (opt_string)
+
+    opt_string  go to state 229
+
+
+State 171
+
+   72 effect: SNAPSHOT . opt_string
+
+    SMALLER  shift, and go to state 219
+    STRING   shift, and go to state 220
+
+    $default  reduce using rule 97 (opt_string)
+
+    opt_string  go to state 230
+
+
+State 172
+
+   24 instruction: PERT bool_expr DO effect_list . UNTIL bool_expr
+   56 perturbation_declaration: bool_expr DO effect_list .
+
+    UNTIL  shift, and go to state 231
+
+    $default  reduce using rule 56 (perturbation_declaration)
+
+
+State 173
+
+   60 effect_list: effect .
+   61            | effect . SEMICOLON effect_list
+
+    SEMICOLON  shift, and go to state 232
+
+    $default  reduce using rule 60 (effect_list)
+
+
+State 174
+
+   57 perturbation_declaration: bool_expr SET effect_list .
+
+    $default  reduce using rule 57 (perturbation_declaration)
+
+
+State 175
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  146         | alg_expr PLUS alg_expr .
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    MULT    shift, and go to state 113
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 146 (alg_expr)
+
+
+State 176
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  145         | alg_expr MULT alg_expr .
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 145 (alg_expr)
+
+
+State 177
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  148         | alg_expr MINUS alg_expr .
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    MULT    shift, and go to state 113
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 148 (alg_expr)
+
+
+State 178
+
+   91 bool_expr: alg_expr GREATER alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 91 (bool_expr)
+
+
+State 179
+
+   92 bool_expr: alg_expr SMALLER alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 92 (bool_expr)
+
+
+State 180
+
+   93 bool_expr: alg_expr EQUAL alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 93 (bool_expr)
+
+
+State 181
+
+   94 bool_expr: alg_expr DIFF alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 94 (bool_expr)
+
+
+State 182
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  147         | alg_expr DIV alg_expr .
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 147 (alg_expr)
+
+
+State 183
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  149         | alg_expr POW alg_expr .
+  150         | alg_expr . MODULO alg_expr
+
+    POW  shift, and go to state 120
+
+    $default  reduce using rule 149 (alg_expr)
+
+
+State 184
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  150         | alg_expr MODULO alg_expr .
+
+    POW  shift, and go to state 120
+
+    $default  reduce using rule 150 (alg_expr)
+
+
+State 185
+
+   46 value_list: STRING value_list .
+
+    $default  reduce using rule 46 (value_list)
+
+
+State 186
+
+  186 port_expression: ID . internal_state link_state
+
+    error      shift, and go to state 233
+    KAPPA_MRK  shift, and go to state 234
+
+    CL_PAR     reduce using rule 187 (internal_state)
+    COMMA      reduce using rule 187 (internal_state)
+    KAPPA_WLD  reduce using rule 187 (internal_state)
+    KAPPA_LNK  reduce using rule 187 (internal_state)
+
+    internal_state  go to state 235
+
+
+State 187
+
+  178 agent_expression: ID OP_PAR interface_expression . CL_PAR
+
+    CL_PAR  shift, and go to state 236
+
+
+State 188
+
+  181 interface_expression: ne_interface_expression .
+
+    $default  reduce using rule 181 (interface_expression)
+
+
+State 189
+
+  183 ne_interface_expression: port_expression . COMMA ne_interface_expression
+  184                        | port_expression .
+
+    COMMA  shift, and go to state 237
+
+    $default  reduce using rule 184 (ne_interface_expression)
+
+
+State 190
+
+   27 init_declaration: ID LAR multiple .
+
+    $default  reduce using rule 27 (init_declaration)
+
+
+State 191
+
+   28 init_declaration: ID OP_CUR init_declaration . CL_CUR
+
+    CL_CUR  shift, and go to state 238
+
+
+State 192
+
+   37 index_expr: OP_PAR . index_expr CL_PAR
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 239
+
+
+State 193
+
+   35 index_expr: INT .
+
+    $default  reduce using rule 35 (index_expr)
+
+
+State 194
+
+   36 index_expr: ID .
+
+    $default  reduce using rule 36 (index_expr)
+
+
+State 195
+
+   34 dimension: OP_BRA index_expr . CL_BRA dimension
+   38 index_expr: index_expr . MULT index_expr
+   39           | index_expr . PLUS index_expr
+   40           | index_expr . DIV index_expr
+   41           | index_expr . MINUS index_expr
+   42           | index_expr . POW index_expr
+   43           | index_expr . MODULO index_expr
+
+    CL_BRA  shift, and go to state 240
+    PLUS    shift, and go to state 241
+    MULT    shift, and go to state 242
+    MINUS   shift, and go to state 243
+    DIV     shift, and go to state 244
+    POW     shift, and go to state 245
+    MODULO  shift, and go to state 246
+
+
+State 196
+
+   53 where_expr: OP_CUR . bool_expr CL_CUR
+
+    OP_PAR      shift, and go to state 157
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 87 (bool_expr)
+
+    bool_expr  go to state 247
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 56
+
+
+State 197
+
+   32 comp_expr: LABEL dimension where_expr .
+
+    $default  reduce using rule 32 (comp_expr)
+
+
+State 198
+
+    9 instruction: C_LINK LABEL comp_expr arrow . comp_expr ATD constant
+
+    LABEL  shift, and go to state 75
+
+    comp_expr  go to state 248
+
+
+State 199
+
+   10 instruction: TRANSPORT join LABEL mixture . AT alg_expr
+
+    AT  shift, and go to state 249
+
+
+State 200
+
+   51 comp_list: comp_expr COMMA comp_list .
+
+    $default  reduce using rule 51 (comp_list)
+
+
+State 201
+
+  175 non_empty_mixture: OP_PAR non_empty_mixture CL_PAR .
+
+    $default  reduce using rule 175 (non_empty_mixture)
+
+
+State 202
+
+  123 rule_expression: rule_label lhs_rhs arrow lhs_rhs . rate_sep rate
+  124                | rule_label lhs_rhs arrow lhs_rhs .
+
+    AT   shift, and go to state 250
+    FIX  shift, and go to state 251
+
+    NEWLINE   reduce using rule 119 (rate_sep)
+    NEWLINE   [reduce using rule 124 (rule_expression)]
+    $default  reduce using rule 119 (rate_sep)
+
+    rate_sep  go to state 252
+
+
+State 203
+
+  112 token_expr: PIPE error .
+
+    $default  reduce using rule 112 (token_expr)
+
+
+State 204
+
+  114 sum_token: OP_PAR . sum_token CL_PAR
+  141 alg_expr: OP_PAR . alg_expr CL_PAR
+
+    OP_PAR      shift, and go to state 204
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 113 (sum_token)
+
+    sum_token  go to state 253
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 254
+
+
+State 205
+
+  111 token_expr: PIPE sum_token .
+
+    $default  reduce using rule 111 (token_expr)
+
+
+State 206
+
+  115 sum_token: alg_expr . TYPE ID
+  116          | alg_expr . TYPE ID PLUS sum_token
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    TYPE    shift, and go to state 255
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+
+State 207
+
+  176 non_empty_mixture: agent_expression COMMA non_empty_mixture .
+
+    $default  reduce using rule 176 (non_empty_mixture)
+
+
+State 208
+
+   56 perturbation_declaration: bool_expr DO effect_list .
+
+    $default  reduce using rule 56 (perturbation_declaration)
+
+
+State 209
+
+   22 instruction: PERT REPEAT perturbation_declaration UNTIL bool_expr .
+   89 bool_expr: bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+
+    AND  shift, and go to state 108
+    OR   shift, and go to state 109
+
+    $default  reduce using rule 22 (instruction)
+
+
+State 210
+
+   88 bool_expr: OP_PAR bool_expr . CL_PAR
+   89          | bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+
+    CL_PAR  shift, and go to state 150
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+
+
+State 211
+
+   59 effect_list: OP_PAR effect_list . CL_PAR
+
+    CL_PAR  shift, and go to state 256
+
+
+State 212
+
+   68 effect: INTRO error .
+
+    $default  reduce using rule 68 (effect)
+
+
+State 213
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  172 multiple_mixture: alg_expr . non_empty_mixture
+
+    OP_PAR  shift, and go to state 85
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+    ID      shift, and go to state 61
+
+    $default  reduce using rule 174 (non_empty_mixture)
+
+    non_empty_mixture  go to state 257
+    agent_expression   go to state 89
+
+
+State 214
+
+   67 effect: INTRO multiple_mixture .
+
+    $default  reduce using rule 67 (effect)
+
+
+State 215
+
+  173 multiple_mixture: non_empty_mixture .
+
+    $default  reduce using rule 173 (multiple_mixture)
+
+
+State 216
+
+   70 effect: DELETE error .
+
+    $default  reduce using rule 70 (effect)
+
+
+State 217
+
+   69 effect: DELETE multiple_mixture .
+
+    $default  reduce using rule 69 (effect)
+
+
+State 218
+
+   65 effect: TRACK LABEL . boolean
+
+    TRUE   shift, and go to state 258
+    FALSE  shift, and go to state 259
+
+    $default  reduce using rule 81 (boolean)
+
+    boolean  go to state 260
+
+
+State 219
+
+   99 opt_string: SMALLER . print_expr GREATER
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+    STRING      shift, and go to state 261
+
+    $default  reduce using rule 76 (print_expr)
+
+    print_expr  go to state 262
+    constant    go to state 54
+    variable    go to state 55
+    alg_expr    go to state 263
+
+
+State 220
+
+   98 opt_string: STRING .
+
+    $default  reduce using rule 98 (opt_string)
+
+
+State 221
+
+   66 effect: FLUX opt_string . boolean
+
+    TRUE   shift, and go to state 258
+    FALSE  shift, and go to state 259
+
+    $default  reduce using rule 81 (boolean)
+
+    boolean  go to state 264
+
+
+State 222
+
+   64 effect: ASSIGN2 LABEL . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 265
+
+
+State 223
+
+   74 effect: PRINT SMALLER . print_expr GREATER
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+    STRING      shift, and go to state 261
+
+    $default  reduce using rule 76 (print_expr)
+
+    print_expr  go to state 266
+    constant    go to state 54
+    variable    go to state 55
+    alg_expr    go to state 263
+
+
+State 224
+
+  102 string_or_pr_expr: SMALLER . print_expr GREATER
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+    STRING      shift, and go to state 261
+
+    $default  reduce using rule 76 (print_expr)
+
+    print_expr  go to state 267
+    constant    go to state 54
+    variable    go to state 55
+    alg_expr    go to state 263
+
+
+State 225
+
+  101 string_or_pr_expr: STRING .
+
+    $default  reduce using rule 101 (string_or_pr_expr)
+
+
+State 226
+
+   75 effect: PRINTF string_or_pr_expr . SMALLER print_expr GREATER
+
+    SMALLER  shift, and go to state 268
+
+
+State 227
+
+   71 effect: ID LAR . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 269
+
+
+State 228
+
+   63 effect: LABEL ASSIGN . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 270
+
+
+State 229
+
+   73 effect: STOP opt_string .
+
+    $default  reduce using rule 73 (effect)
+
+
+State 230
+
+   72 effect: SNAPSHOT opt_string .
+
+    $default  reduce using rule 72 (effect)
+
+
+State 231
+
+   24 instruction: PERT bool_expr DO effect_list UNTIL . bool_expr
+
+    OP_PAR      shift, and go to state 157
+    LOG         shift, and go to state 22
+    TRUE        shift, and go to state 23
+    FALSE       shift, and go to state 24
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 87 (bool_expr)
+
+    bool_expr  go to state 271
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 56
+
+
+State 232
+
+   61 effect_list: effect SEMICOLON . effect_list
+
+    OP_PAR    shift, and go to state 160
+    INTRO     shift, and go to state 161
+    DELETE    shift, and go to state 162
+    TRACK     shift, and go to state 163
+    FLUX      shift, and go to state 164
+    ASSIGN2   shift, and go to state 165
+    PRINT     shift, and go to state 166
+    PRINTF    shift, and go to state 167
+    ID        shift, and go to state 168
+    LABEL     shift, and go to state 169
+    STOP      shift, and go to state 170
+    SNAPSHOT  shift, and go to state 171
+
+    NEWLINE    reduce using rule 58 (effect_list)
+    NEWLINE    [reduce using rule 62 (effect)]
+    SEMICOLON  reduce using rule 62 (effect)
+    CL_PAR     reduce using rule 58 (effect_list)
+    CL_PAR     [reduce using rule 62 (effect)]
+    UNTIL      reduce using rule 58 (effect_list)
+    UNTIL      [reduce using rule 62 (effect)]
+    $default   reduce using rule 58 (effect_list)
+
+    effect_list  go to state 272
+    effect       go to state 173
+
+
+State 233
+
+  189 internal_state: error .
+
+    $default  reduce using rule 189 (internal_state)
+
+
+State 234
+
+  188 internal_state: KAPPA_MRK . internal_state
+
+    error      shift, and go to state 233
+    KAPPA_MRK  shift, and go to state 234
+
+    CL_PAR     reduce using rule 187 (internal_state)
+    COMMA      reduce using rule 187 (internal_state)
+    KAPPA_WLD  reduce using rule 187 (internal_state)
+    KAPPA_LNK  reduce using rule 187 (internal_state)
+
+    internal_state  go to state 273
+
+
+State 235
+
+  186 port_expression: ID internal_state . link_state
+
+    KAPPA_WLD  shift, and go to state 274
+    KAPPA_LNK  shift, and go to state 275
+
+    $default  reduce using rule 190 (link_state)
+
+    link_state  go to state 276
+
+
+State 236
+
+  178 agent_expression: ID OP_PAR interface_expression CL_PAR .
+
+    $default  reduce using rule 178 (agent_expression)
+
+
+State 237
+
+  183 ne_interface_expression: port_expression COMMA . ne_interface_expression
+
+    ID  shift, and go to state 186
+
+    CL_PAR    reduce using rule 182 (ne_interface_expression)
+    CL_PAR    [reduce using rule 185 (port_expression)]
+    COMMA     reduce using rule 185 (port_expression)
+    $default  reduce using rule 182 (ne_interface_expression)
+
+    ne_interface_expression  go to state 277
+    port_expression          go to state 189
+
+
+State 238
+
+   28 init_declaration: ID OP_CUR init_declaration CL_CUR .
+
+    $default  reduce using rule 28 (init_declaration)
+
+
+State 239
+
+   37 index_expr: OP_PAR index_expr . CL_PAR
+   38           | index_expr . MULT index_expr
+   39           | index_expr . PLUS index_expr
+   40           | index_expr . DIV index_expr
+   41           | index_expr . MINUS index_expr
+   42           | index_expr . POW index_expr
+   43           | index_expr . MODULO index_expr
+
+    CL_PAR  shift, and go to state 278
+    PLUS    shift, and go to state 241
+    MULT    shift, and go to state 242
+    MINUS   shift, and go to state 243
+    DIV     shift, and go to state 244
+    POW     shift, and go to state 245
+    MODULO  shift, and go to state 246
+
+
+State 240
+
+   34 dimension: OP_BRA index_expr CL_BRA . dimension
+
+    OP_BRA  shift, and go to state 135
+
+    $default  reduce using rule 33 (dimension)
+
+    dimension  go to state 279
+
+
+State 241
+
+   39 index_expr: index_expr PLUS . index_expr
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 280
+
+
+State 242
+
+   38 index_expr: index_expr MULT . index_expr
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 281
+
+
+State 243
+
+   41 index_expr: index_expr MINUS . index_expr
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 282
+
+
+State 244
+
+   40 index_expr: index_expr DIV . index_expr
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 283
+
+
+State 245
+
+   42 index_expr: index_expr POW . index_expr
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 284
+
+
+State 246
+
+   43 index_expr: index_expr MODULO . index_expr
+
+    OP_PAR  shift, and go to state 192
+    INT     shift, and go to state 193
+    ID      shift, and go to state 194
+
+    index_expr  go to state 285
+
+
+State 247
+
+   53 where_expr: OP_CUR bool_expr . CL_CUR
+   89 bool_expr: bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+
+    CL_CUR  shift, and go to state 286
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+
+
+State 248
+
+    9 instruction: C_LINK LABEL comp_expr arrow comp_expr . ATD constant
+
+    ATD  shift, and go to state 287
+
+
+State 249
+
+   10 instruction: TRANSPORT join LABEL mixture AT . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 288
+
+
+State 250
+
+  120 rate_sep: AT .
+
+    $default  reduce using rule 120 (rate_sep)
+
+
+State 251
+
+  121 rate_sep: FIX .
+
+    $default  reduce using rule 121 (rate_sep)
+
+
+State 252
+
+  123 rule_expression: rule_label lhs_rhs arrow lhs_rhs rate_sep . rate
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 164 (rate)
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 289
+    rate      go to state 290
+
+
+State 253
+
+  114 sum_token: OP_PAR sum_token . CL_PAR
+
+    CL_PAR  shift, and go to state 291
+
+
+State 254
+
+  115 sum_token: alg_expr . TYPE ID
+  116          | alg_expr . TYPE ID PLUS sum_token
+  141 alg_expr: OP_PAR alg_expr . CL_PAR
+  145         | alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    CL_PAR  shift, and go to state 152
+    TYPE    shift, and go to state 255
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+
+State 255
+
+  115 sum_token: alg_expr TYPE . ID
+  116          | alg_expr TYPE . ID PLUS sum_token
+
+    ID  shift, and go to state 292
+
+
+State 256
+
+   59 effect_list: OP_PAR effect_list CL_PAR .
+
+    $default  reduce using rule 59 (effect_list)
+
+
+State 257
+
+  172 multiple_mixture: alg_expr non_empty_mixture .
+
+    $default  reduce using rule 172 (multiple_mixture)
+
+
+State 258
+
+   82 boolean: TRUE .
+
+    $default  reduce using rule 82 (boolean)
+
+
+State 259
+
+   83 boolean: FALSE .
+
+    $default  reduce using rule 83 (boolean)
+
+
+State 260
+
+   65 effect: TRACK LABEL boolean .
+
+    $default  reduce using rule 65 (effect)
+
+
+State 261
+
+   77 print_expr: STRING .
+   79           | STRING . DOT print_expr
+
+    DOT  shift, and go to state 293
+
+    $default  reduce using rule 77 (print_expr)
+
+
+State 262
+
+   99 opt_string: SMALLER print_expr . GREATER
+
+    GREATER  shift, and go to state 294
+
+
+State 263
+
+   78 print_expr: alg_expr .
+   80           | alg_expr . DOT print_expr
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    DOT     shift, and go to state 295
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 78 (print_expr)
+
+
+State 264
+
+   66 effect: FLUX opt_string boolean .
+
+    $default  reduce using rule 66 (effect)
+
+
+State 265
+
+   64 effect: ASSIGN2 LABEL alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 64 (effect)
+
+
+State 266
+
+   74 effect: PRINT SMALLER print_expr . GREATER
+
+    GREATER  shift, and go to state 296
+
+
+State 267
+
+  102 string_or_pr_expr: SMALLER print_expr . GREATER
+
+    GREATER  shift, and go to state 297
+
+
+State 268
+
+   75 effect: PRINTF string_or_pr_expr SMALLER . print_expr GREATER
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+    STRING      shift, and go to state 261
+
+    $default  reduce using rule 76 (print_expr)
+
+    print_expr  go to state 298
+    constant    go to state 54
+    variable    go to state 55
+    alg_expr    go to state 263
+
+
+State 269
+
+   71 effect: ID LAR alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 71 (effect)
+
+
+State 270
+
+   63 effect: LABEL ASSIGN alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 63 (effect)
+
+
+State 271
+
+   24 instruction: PERT bool_expr DO effect_list UNTIL bool_expr .
+   89 bool_expr: bool_expr . AND bool_expr
+   90          | bool_expr . OR bool_expr
+
+    AND  shift, and go to state 108
+    OR   shift, and go to state 109
+
+    $default  reduce using rule 24 (instruction)
+
+
+State 272
+
+   61 effect_list: effect SEMICOLON effect_list .
+
+    $default  reduce using rule 61 (effect_list)
+
+
+State 273
+
+  188 internal_state: KAPPA_MRK internal_state .
+
+    $default  reduce using rule 188 (internal_state)
+
+
+State 274
+
+  194 link_state: KAPPA_WLD .
+
+    $default  reduce using rule 194 (link_state)
+
+
+State 275
+
+  191 link_state: KAPPA_LNK . INT
+  192           | KAPPA_LNK . KAPPA_SEMI
+  193           | KAPPA_LNK . ID DOT ID
+  195           | KAPPA_LNK . error
+
+    error       shift, and go to state 299
+    KAPPA_SEMI  shift, and go to state 300
+    INT         shift, and go to state 301
+    ID          shift, and go to state 302
+
+
+State 276
+
+  186 port_expression: ID internal_state link_state .
+
+    $default  reduce using rule 186 (port_expression)
+
+
+State 277
+
+  183 ne_interface_expression: port_expression COMMA ne_interface_expression .
+
+    $default  reduce using rule 183 (ne_interface_expression)
+
+
+State 278
+
+   37 index_expr: OP_PAR index_expr CL_PAR .
+
+    $default  reduce using rule 37 (index_expr)
+
+
+State 279
+
+   34 dimension: OP_BRA index_expr CL_BRA dimension .
+
+    $default  reduce using rule 34 (dimension)
+
+
+State 280
+
+   38 index_expr: index_expr . MULT index_expr
+   39           | index_expr . PLUS index_expr
+   39           | index_expr PLUS index_expr .
+   40           | index_expr . DIV index_expr
+   41           | index_expr . MINUS index_expr
+   42           | index_expr . POW index_expr
+   43           | index_expr . MODULO index_expr
+
+    MULT    shift, and go to state 242
+    DIV     shift, and go to state 244
+    POW     shift, and go to state 245
+    MODULO  shift, and go to state 246
+
+    $default  reduce using rule 39 (index_expr)
+
+
+State 281
+
+   38 index_expr: index_expr . MULT index_expr
+   38           | index_expr MULT index_expr .
+   39           | index_expr . PLUS index_expr
+   40           | index_expr . DIV index_expr
+   41           | index_expr . MINUS index_expr
+   42           | index_expr . POW index_expr
+   43           | index_expr . MODULO index_expr
+
+    POW     shift, and go to state 245
+    MODULO  shift, and go to state 246
+
+    $default  reduce using rule 38 (index_expr)
+
+
+State 282
+
+   38 index_expr: index_expr . MULT index_expr
+   39           | index_expr . PLUS index_expr
+   40           | index_expr . DIV index_expr
+   41           | index_expr . MINUS index_expr
+   41           | index_expr MINUS index_expr .
+   42           | index_expr . POW index_expr
+   43           | index_expr . MODULO index_expr
+
+    MULT    shift, and go to state 242
+    DIV     shift, and go to state 244
+    POW     shift, and go to state 245
+    MODULO  shift, and go to state 246
+
+    $default  reduce using rule 41 (index_expr)
+
+
+State 283
+
+   38 index_expr: index_expr . MULT index_expr
+   39           | index_expr . PLUS index_expr
+   40           | index_expr . DIV index_expr
+   40           | index_expr DIV index_expr .
+   41           | index_expr . MINUS index_expr
+   42           | index_expr . POW index_expr
+   43           | index_expr . MODULO index_expr
+
+    POW     shift, and go to state 245
+    MODULO  shift, and go to state 246
+
+    $default  reduce using rule 40 (index_expr)
+
+
+State 284
+
+   38 index_expr: index_expr . MULT index_expr
+   39           | index_expr . PLUS index_expr
+   40           | index_expr . DIV index_expr
+   41           | index_expr . MINUS index_expr
+   42           | index_expr . POW index_expr
+   42           | index_expr POW index_expr .
+   43           | index_expr . MODULO index_expr
+
+    POW  shift, and go to state 245
+
+    $default  reduce using rule 42 (index_expr)
+
+
+State 285
+
+   38 index_expr: index_expr . MULT index_expr
+   39           | index_expr . PLUS index_expr
+   40           | index_expr . DIV index_expr
+   41           | index_expr . MINUS index_expr
+   42           | index_expr . POW index_expr
+   43           | index_expr . MODULO index_expr
+   43           | index_expr MODULO index_expr .
+
+    POW  shift, and go to state 245
+
+    $default  reduce using rule 43 (index_expr)
+
+
+State 286
+
+   53 where_expr: OP_CUR bool_expr CL_CUR .
+
+    $default  reduce using rule 53 (where_expr)
+
+
+State 287
+
+    9 instruction: C_LINK LABEL comp_expr arrow comp_expr ATD . constant
+
+    INFINITY  shift, and go to state 27
+    EMAX      shift, and go to state 42
+    TMAX      shift, and go to state 43
+    INT       shift, and go to state 48
+    FLOAT     shift, and go to state 51
+
+    constant  go to state 303
+
+
+State 288
+
+   10 instruction: TRANSPORT join LABEL mixture AT alg_expr .
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 10 (instruction)
+
+
+State 289
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  165 rate: alg_expr . OP_PAR alg_with_radius CL_PAR
+  166     | alg_expr .
+  167     | alg_expr . COMMA alg_expr
+
+    OP_PAR  shift, and go to state 304
+    COMMA   shift, and go to state 305
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 166 (rate)
+
+
+State 290
+
+  123 rule_expression: rule_label lhs_rhs arrow lhs_rhs rate_sep rate .
+
+    $default  reduce using rule 123 (rule_expression)
+
+
+State 291
+
+  114 sum_token: OP_PAR sum_token CL_PAR .
+
+    $default  reduce using rule 114 (sum_token)
+
+
+State 292
+
+  115 sum_token: alg_expr TYPE ID .
+  116          | alg_expr TYPE ID . PLUS sum_token
+
+    PLUS  shift, and go to state 306
+
+    $default  reduce using rule 115 (sum_token)
+
+
+State 293
+
+   79 print_expr: STRING DOT . print_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+    STRING      shift, and go to state 261
+
+    $default  reduce using rule 76 (print_expr)
+
+    print_expr  go to state 307
+    constant    go to state 54
+    variable    go to state 55
+    alg_expr    go to state 263
+
+
+State 294
+
+   99 opt_string: SMALLER print_expr GREATER .
+
+    $default  reduce using rule 99 (opt_string)
+
+
+State 295
+
+   80 print_expr: alg_expr DOT . print_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+    STRING      shift, and go to state 261
+
+    $default  reduce using rule 76 (print_expr)
+
+    print_expr  go to state 308
+    constant    go to state 54
+    variable    go to state 55
+    alg_expr    go to state 263
+
+
+State 296
+
+   74 effect: PRINT SMALLER print_expr GREATER .
+
+    $default  reduce using rule 74 (effect)
+
+
+State 297
+
+  102 string_or_pr_expr: SMALLER print_expr GREATER .
+
+    $default  reduce using rule 102 (string_or_pr_expr)
+
+
+State 298
+
+   75 effect: PRINTF string_or_pr_expr SMALLER print_expr . GREATER
+
+    GREATER  shift, and go to state 309
+
+
+State 299
+
+  195 link_state: KAPPA_LNK error .
+
+    $default  reduce using rule 195 (link_state)
+
+
+State 300
+
+  192 link_state: KAPPA_LNK KAPPA_SEMI .
+
+    $default  reduce using rule 192 (link_state)
+
+
+State 301
+
+  191 link_state: KAPPA_LNK INT .
+
+    $default  reduce using rule 191 (link_state)
+
+
+State 302
+
+  193 link_state: KAPPA_LNK ID . DOT ID
+
+    DOT  shift, and go to state 310
+
+
+State 303
+
+    9 instruction: C_LINK LABEL comp_expr arrow comp_expr ATD constant .
+
+    $default  reduce using rule 9 (instruction)
+
+
+State 304
+
+  165 rate: alg_expr OP_PAR . alg_with_radius CL_PAR
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    $default  reduce using rule 168 (alg_with_radius)
+
+    constant         go to state 54
+    variable         go to state 55
+    alg_expr         go to state 311
+    alg_with_radius  go to state 312
+
+
+State 305
+
+  167 rate: alg_expr COMMA . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 313
+
+
+State 306
+
+  116 sum_token: alg_expr TYPE ID PLUS . sum_token
+
+    OP_PAR      shift, and go to state 204
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    OP_PAR      [reduce using rule 113 (sum_token)]
+    LOG         [reduce using rule 113 (sum_token)]
+    CPUTIME     [reduce using rule 113 (sum_token)]
+    INFINITY    [reduce using rule 113 (sum_token)]
+    TIME        [reduce using rule 113 (sum_token)]
+    EVENT       [reduce using rule 113 (sum_token)]
+    ACTIVITY    [reduce using rule 113 (sum_token)]
+    NULL_EVENT  [reduce using rule 113 (sum_token)]
+    PROD_EVENT  [reduce using rule 113 (sum_token)]
+    SINUS       [reduce using rule 113 (sum_token)]
+    COSINUS     [reduce using rule 113 (sum_token)]
+    TAN         [reduce using rule 113 (sum_token)]
+    ATAN        [reduce using rule 113 (sum_token)]
+    COIN        [reduce using rule 113 (sum_token)]
+    RAND_N      [reduce using rule 113 (sum_token)]
+    SQRT        [reduce using rule 113 (sum_token)]
+    EXPONENT    [reduce using rule 113 (sum_token)]
+    ABS         [reduce using rule 113 (sum_token)]
+    EMAX        [reduce using rule 113 (sum_token)]
+    TMAX        [reduce using rule 113 (sum_token)]
+    RAND_1      [reduce using rule 113 (sum_token)]
+    PIPE        [reduce using rule 113 (sum_token)]
+    MAX         [reduce using rule 113 (sum_token)]
+    MIN         [reduce using rule 113 (sum_token)]
+    INT         [reduce using rule 113 (sum_token)]
+    ID          [reduce using rule 113 (sum_token)]
+    LABEL       [reduce using rule 113 (sum_token)]
+    FLOAT       [reduce using rule 113 (sum_token)]
+    $default    reduce using rule 113 (sum_token)
+
+    sum_token  go to state 314
+    constant   go to state 54
+    variable   go to state 55
+    alg_expr   go to state 206
+
+
+State 307
+
+   79 print_expr: STRING DOT print_expr .
+
+    $default  reduce using rule 79 (print_expr)
+
+
+State 308
+
+   80 print_expr: alg_expr DOT print_expr .
+
+    $default  reduce using rule 80 (print_expr)
+
+
+State 309
+
+   75 effect: PRINTF string_or_pr_expr SMALLER print_expr GREATER .
+
+    $default  reduce using rule 75 (effect)
+
+
+State 310
+
+  193 link_state: KAPPA_LNK ID DOT . ID
+
+    ID  shift, and go to state 315
+
+
+State 311
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  169 alg_with_radius: alg_expr .
+  170                | alg_expr . TYPE alg_expr
+
+    TYPE    shift, and go to state 316
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 169 (alg_with_radius)
+
+
+State 312
+
+  165 rate: alg_expr OP_PAR alg_with_radius . CL_PAR
+
+    CL_PAR  shift, and go to state 317
+
+
+State 313
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  167 rate: alg_expr COMMA alg_expr .
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 167 (rate)
+
+
+State 314
+
+  116 sum_token: alg_expr TYPE ID PLUS sum_token .
+
+    $default  reduce using rule 116 (sum_token)
+
+
+State 315
+
+  193 link_state: KAPPA_LNK ID DOT ID .
+
+    $default  reduce using rule 193 (link_state)
+
+
+State 316
+
+  170 alg_with_radius: alg_expr TYPE . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 318
+
+
+State 317
+
+  165 rate: alg_expr OP_PAR alg_with_radius CL_PAR .
+
+    $default  reduce using rule 165 (rate)
+
+
+State 318
+
+  145 alg_expr: alg_expr . MULT alg_expr
+  146         | alg_expr . PLUS alg_expr
+  147         | alg_expr . DIV alg_expr
+  148         | alg_expr . MINUS alg_expr
+  149         | alg_expr . POW alg_expr
+  150         | alg_expr . MODULO alg_expr
+  170 alg_with_radius: alg_expr TYPE alg_expr .
+
+    PLUS    shift, and go to state 112
+    MULT    shift, and go to state 113
+    MINUS   shift, and go to state 114
+    DIV     shift, and go to state 119
+    POW     shift, and go to state 120
+    MODULO  shift, and go to state 121
+
+    $default  reduce using rule 170 (alg_with_radius)

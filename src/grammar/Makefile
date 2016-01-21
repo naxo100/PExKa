@@ -3,7 +3,7 @@ all:
 	bison --verbose --debug -d -o KappaParser.cpp kappaParser.y 
 #	cc -c lex.yy.c -o lex.yy.o
 #-std=c++0x 
-	g++ -g ../main.cpp KappaLexer.cpp KappaParser.cpp ast/KappaAst.cpp  -o parser
+	g++ -g ../main.cpp KappaLexer.cpp KappaParser.cpp ast/KappaAst.cpp -lboost_program_options -o parser
 	
 clean:
 	rm -rf KappaLexer.cpp

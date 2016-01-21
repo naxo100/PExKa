@@ -11,6 +11,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 #include "../KappaLexer.h"
 #include "../KappaParser.hpp"
 
@@ -22,7 +23,7 @@ YY_DECL;*/
 namespace ast {
 
 class KappaAst {
-	list<std::string> files;
+	vector<std::string> files;
 	yy::KappaParser parser;
 	yy::KappaLexer lexer;
 
@@ -30,17 +31,14 @@ class KappaAst {
 	list<Declaration> decls;
 
 public:
-	KappaAst(char* fls[],int flsc);
+	KappaAst(const vector<string> &files);
 	KappaAst();
 	virtual ~KappaAst();
 
 	int parse();
 	yy::KappaParser::symbol_type getNextToken();
 
-	void addDeclaration(Declaration d){
-		decls.push_back(d);
-		std::cout << "declaration pushed." << endl;
-	}
+	void addDeclaration(Declaration d);
 };
 
 } /* namespace ast */

@@ -10,16 +10,13 @@
 namespace ast {
 
 using namespace std;
-KappaAst::KappaAst(): parser(*this), lexer (*this){}
+KappaAst::KappaAst():
+		parser(*this), lexer (*this){}
 
-KappaAst::KappaAst(char* fls[],int flsc): parser(*this), lexer(*this) {
-	for(int i = 0; i < flsc; i++)
-		files.push_back(fls[i]);
-}
+KappaAst::KappaAst(const vector<string> &fls):
+		parser(*this), lexer(*this), files(fls) {}
 
-KappaAst::~KappaAst() {
-	// TODO Auto-generated destructor stub
-}
+KappaAst::~KappaAst() {}
 
 int KappaAst::parse(){
 	int r;
@@ -28,19 +25,23 @@ int KappaAst::parse(){
 		r = parser.parse();
 	}
 	else{
-		for(list<string>::iterator it = files.begin();it != files.end() ; it++){
-			ifstream *f = new ifstream(it->c_str());
-			if (!f->failbit ) {
-				lexer.switch_streams( f, NULL);
-		      //error ("cannot open " + file + ": " + strerror(errno));
+		for(vector<string>::iterator it = files.begin();it != files.end() ; it++){
+			ifstream f(it->c_str());
+			if (f.fail()) {
+		      cerr << "Cannot open file " << it->c_str() << endl;
 		      exit (EXIT_FAILURE);
 		    }
+			lexer.switch_streams( &f, NULL);
 		    r = parser.parse();
-		    delete f;
 		   // fclose(yyin);
 		}
 	}
 	return r;
+}
+
+void KappaAst::addDeclaration(Declaration d){
+	decls.push_back(d);
+	std::cout << "declaration pushed." << endl;
 }
 
 yy::KappaParser::symbol_type KappaAst::getNextToken(){

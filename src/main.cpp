@@ -24,28 +24,28 @@ using namespace std;
 int main(int argc, char* argv[]){
 	const string version("0.1");
 	const string v_msg("PExKa "+version);
-	const string usage_msg("Simple usage is \n\t$ [mpirun* -np procs] PExKa ([-i] kappa_file)+ [-e events] -t time [-p points] -sync-t tau");
+	const string usage_msg("Simple usage is \n$ [mpirun* -np procs] PExKa ([-i] kappa_file)+ [-e events] -t time [-p points] -sync-t tau");
 
 	//Allowed options
-	options_description desc(v_msg + "\n" + usage_msg + "\nAllowed options");
+	options_description desc(v_msg + "\n" + usage_msg + "\n\nAllowed options");
 	desc.add_options()
-		("I,i",value<vector <string> >(),"Kappa files to read model (for backward compatibility with KaSim/PISKa)")
-		(",e",value<int>(),"Stop simulation at 'arg' events (negative for unbounded)")
-		(",t",value<float>(),"Stop simulation at time 'arg' (arbitrary time unit)")
-		(",p",value<int>(),"Number of points in plot files")
-		(",o",value<string>(),"Prefix for file name of data outputs (set to 'arg'+'comp_name[index].out')")
-		(",d",value<string>(),"Specifies directory where output files should be stored")
-		(",load-sim",value<string>(),"Load kappa model from 'arg' instead of kappa files")
-		(",make-sim",value<string>(),"Save the kappa model 'arg' from kappa files")
+		("input-file,i",value<vector <string> >(),"Kappa files to read model (for backward compatibility with KaSim/PISKa)")
+		("events,e",value<int>(),"Stop simulation at 'arg' events (negative for unbounded)")
+		("time,t",value<float>(),"Stop simulation at time 'arg' (arbitrary time unit)")
+		("points,p",value<int>(),"Number of points in plot files")
+		("out,o",value<string>(),"Prefix for file name of data outputs (set to 'arg'+'comp_name[index].out')")
+		("dir,d",value<string>(),"Specifies directory where output files should be stored")
+		("load-sim,l",value<string>(),"Load kappa model from 'arg' instead of kappa files")
+		("make-sim,m",value<string>(),"Save the kappa model 'arg' from kappa files")
 		("implicit-signature","Parser will guess agent signatures automatically")
-		(",seed",value<int>(),"Seed for random number generation (default is chosen from time())")
-		(",sync-t",value<float>(),"Synchronize compartments every 'arg' simulation-time units")
+		("seed,s",value<int>(),"Seed for random number generation (default is chosen from time())")
+		("sync-t",value<float>(),"Synchronize compartments every 'arg' simulation-time units")
 	    ("version,v", "print version string")
 	    ("help,h", "produce help message")
 	;
 
 	positional_options_description pos;
-	pos.add("I",-1);
+	pos.add("input-file",-1);
 	variables_map vm;
 	store(command_line_parser(argc,argv).options(desc).positional(pos).run(), vm);
 	notify(vm);
@@ -55,8 +55,15 @@ int main(int argc, char* argv[]){
 	    return 1;
 	}
 
-	ast::KappaAst ast_model(vm["I"].as<vector<string> >());
-	ast_model.parse();
+	ast::KappaAst *ast_model;
+	if (vm.count("input-file"))
+		ast_model = new ast::KappaAst(vm["input-file"].as<vector<string> >());
+	else
+		ast_model = new ast::KappaAst();
+
+	ast_model->parse();
+
+	delete ast_model;
 	return 0;
 }
 

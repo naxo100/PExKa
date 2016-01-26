@@ -6,13 +6,13 @@
 %define api.value.type variant
 %define api.token.constructor
 %define parse.error verbose
-%param { ast::KappaAst &driver }
+%param { grammar::KappaDriver &driver }
 %locations
 %initial-action
 {
 	// Initialize the initial location.
-	@$.initialize(new std::string("file"),1,1);
-	cout << "inicializado" << endl;
+	//@$.initialize(driver.getCurrentFileName(),1,1);
+	//yydebug_ = 1;
 };
 
 %code requires{
@@ -25,8 +25,8 @@
 	namespace yy {
 		class KappaLexer;
 	}
-	namespace ast{
-		class KappaAst;
+	namespace grammar{
+		class KappaDriver;
 	}
 
 }
@@ -42,7 +42,7 @@
 }
 
 %code {
-    #include "ast/KappaAst.h"
+    #include "KappaDriver.h"
 }
 
 %token END NEWLINE SEMICOLON
@@ -76,9 +76,14 @@
 
 %%
 statements:
-| statements statement NEWLINE
+| statements statement newline
 	{}
 ;
+
+newline:
+NEWLINE {}
+| END {return 0;}
+
 
 statement:
 | rule_expression

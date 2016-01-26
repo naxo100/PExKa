@@ -9,12 +9,12 @@
 
 #include "grammar/KappaLexer.h"
 #include "grammar/KappaParser.hpp"
-#include "grammar/ast/KappaAst.h"
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <vector>
+#include "grammar/KappaDriver.h"
 
 
 using namespace boost::program_options;
@@ -55,11 +55,11 @@ int main(int argc, char* argv[]){
 	    return 1;
 	}
 
-	ast::KappaAst *ast_model;
+	grammar::KappaDriver *ast_model;
 	if (vm.count("input-file"))
-		ast_model = new ast::KappaAst(vm["input-file"].as<vector<string> >());
+		ast_model = new grammar::KappaDriver(vm["input-file"].as<vector<string> >());
 	else
-		ast_model = new ast::KappaAst();
+		ast_model = new grammar::KappaDriver();
 
 	ast_model->parse();
 

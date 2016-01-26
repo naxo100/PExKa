@@ -37,6 +37,7 @@ class Id : public Node {
 	string id;
 public:
 	Id(const string &s,Node t): Node(t),id(s){};
+	Id(): Node(),id(){};
 };
 
 class Var : public Expression {
@@ -74,8 +75,16 @@ class Bool : public Expression {
 };
 
 class Link : public Node {
+public:
+	enum LinkType {VALUE,FREE,ANY,SOME,TYPE};
+	Link(LinkType t,const yy::location &loc): Node(loc), type(t)  {};
+//	Link(LinkType t,int val, const yy::location &loc):type(t), value(val)i,Node(loc) {};
+//	Link(LinkType t,Id &id1,Id &id2,const yy::location &loc): type(t), id1(id1), id2(id2), Node(loc) {};
+protected:
+	LinkType type;
 	int value;
-	enum LNK {VALUE,FREE,ANY,SOME,TYPE} lnk;
+	Id id1;
+	Id id2;
 };
 
 class Site {
@@ -100,12 +109,13 @@ protected:
 };
 
 class UnaryOperation: public Expression{
-	const Expression exp;
-	enum Func {LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS} func;
 public:
+	enum Func {EXPONENT,LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS,ATAN,COIN,RAND_N};
 	UnaryOperation(Expression &e,const Func f,const yy::location &t)
 		:Expression(t),exp(e),func(f){};
-
+protected:	
+	const Expression exp;
+	Func func;
 };
 
 class Effect : Node{

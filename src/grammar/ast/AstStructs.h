@@ -36,7 +36,9 @@ public:
 class Id : public Node {
 	string id;
 public:
+	Id(const string &s): Node(),id(s){};
 	Id(const string &s,Node t): Node(t),id(s){};
+//	Id(const string &s,yy::locattion& l): Node(l),id(s){};
 	Id(): Node(),id(){};
 };
 
@@ -80,7 +82,8 @@ public:
 	Link() {};
 	Link(LinkType t,const yy::location &loc): Node(loc), type(t)  {};
 	Link(LinkType t,int val, const yy::location &loc): Node(loc),type(t), value(val) {};
-//	Link(LinkType t,Id &id1,Id &id2,const yy::location &loc): type(t), id1(id1), id2(id2), Node(loc) {};
+	Link(LinkType t,const Id &id1,const Id &id2,const yy::location &loc): type(t), id1(id1), id2(id2), Node(loc) {};
+	//Link(LinkType t,std::string &id1,std::string &id2,const yy::location &loc): type(t), id1(id1), id2(id2), Node(loc) {};
 protected:
 	LinkType type;
 	int value;

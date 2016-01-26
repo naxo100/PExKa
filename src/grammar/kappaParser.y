@@ -72,6 +72,7 @@
 %type <ast::Declaration> variable_declaration
 %type <ast::Expression> alg_expr constant variable
 %type <ast::Link> link_state
+%type <ast::Arrow> arrow
 %start statements
 
 %%
@@ -356,9 +357,9 @@ rule_expression:
 
 arrow:
 | KAPPA_RAR 
-	{}
+	{$$=ast::Arrow(ast::Arrow::RIGHT,@1);}
 | KAPPA_LRAR
-	{}
+	{$$=ast::Arrow(ast::Arrow::BI,@1);}
 ;
 
 constant:

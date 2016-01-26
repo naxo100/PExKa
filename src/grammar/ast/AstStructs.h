@@ -69,7 +69,13 @@ protected:
 };
 
 class Arrow : public Node {
-	enum ARR {LEFT,RIGHT,BI} dir;
+public:
+	enum ArrType {LEFT,RIGHT,BI};
+	Arrow(){};
+	Arrow(ArrType t): Node(),type(t) {};
+	Arrow(ArrType t,const yy::location &loc): Node(loc), type(t) {};
+protected:
+	ArrType type;
 };
 
 class Bool : public Expression {

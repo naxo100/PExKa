@@ -77,8 +77,9 @@ class Bool : public Expression {
 class Link : public Node {
 public:
 	enum LinkType {VALUE,FREE,ANY,SOME,TYPE};
+	Link() {};
 	Link(LinkType t,const yy::location &loc): Node(loc), type(t)  {};
-//	Link(LinkType t,int val, const yy::location &loc):type(t), value(val)i,Node(loc) {};
+	Link(LinkType t,int val, const yy::location &loc): Node(loc),type(t), value(val) {};
 //	Link(LinkType t,Id &id1,Id &id2,const yy::location &loc): type(t), id1(id1), id2(id2), Node(loc) {};
 protected:
 	LinkType type;

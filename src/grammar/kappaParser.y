@@ -510,9 +510,10 @@ internal_state:
 
 link_state:
 /*empty*/ 
-	{$$ = ast::Link(ast::Link::FREE,@$);}
+/*{$$ = ast::Link(ast::Link::FREE,@1);}*/
 | KAPPA_LNK INT 
-	{}
+{}
+/*{$$ = ast::Link(ast::Link::VALUE,$2);}*/
 | KAPPA_LNK KAPPA_SEMI 
 	{}
 | KAPPA_LNK ID DOT ID

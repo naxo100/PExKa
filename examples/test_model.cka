@@ -1,0 +1,7 @@
+
+%var: 'a' 3.5*2
+%var: 'age' 27
+
+%agent: S(i~1~2)
+
+%compartment: 'cell'[2] 1.0

@@ -20,7 +20,7 @@ public:
 	/*Token(int c,short l,const string &s)
 		:col(c),line(l),file(s){};*/
 	Node(const yy::location& l)
-		:loc(l)	{cout << "location: " << l << endl;}
+		:loc(l)	{cout << "construct Node at " << l << endl;}
 	Node(){};
 };
 

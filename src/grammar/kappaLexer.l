@@ -2,18 +2,17 @@
 	#include <iostream>
 	#include "KappaLexer.h"
 	#include "KappaParser.hpp"
-	#include "ast/KappaAst.h"
+	#include "KappaDriver.h"
 	#include "location.hh"
 	
-	#define yyterminate() KappaParser::make_END(loc);  
+	#define loc (*(driver.getLocation()))
+	#define yyterminate() KappaParser::make_END(loc) 
 	
 	using namespace yy;
 	
 	// Code run each time a pattern is matched.
 	# define YY_USER_ACTION  loc.columns (yyleng);
 	// The location of the current token.
-	static yy::location loc;
-	
 		
 	# undef yywrap
 	# define yywrap() 1

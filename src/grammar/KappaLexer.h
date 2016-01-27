@@ -24,21 +24,21 @@
 
 #include "KappaParser.hpp" // this is needed for symbol_type
 
-namespace ast{
-class KappaAst;
+namespace grammar {
+class KappaDriver;
 }
 
 namespace yy {
 
 class KappaLexer : public yyFlexLexer {
 public:
-	KappaLexer(ast::KappaAst &driver_arg):driver(driver_arg) {};
+	KappaLexer(grammar::KappaDriver &driver_arg):driver(driver_arg) {};
 	//KappaLexer() {};
 	virtual ~KappaLexer() {}
 	virtual yy::KappaParser::symbol_type get_next_token();
 
 private:
-	ast::KappaAst &driver;
+	grammar::KappaDriver &driver;
 };
 
 }

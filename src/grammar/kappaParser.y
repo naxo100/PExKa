@@ -71,7 +71,7 @@
 /*%type <ast::Agent> agent_expression*/
 %type <ast::Declaration> variable_declaration
 %type <ast::Expression> alg_expr constant variable
-
+%type <ast::Link> link_state
 %start statements
 
 %%
@@ -306,9 +306,9 @@ string_or_pr_expr:
 
 
 multiple:
-| INT {}
-| FLOAT {}
-| LABEL {}
+| INT {  }
+| FLOAT { }
+| LABEL { }
 ;
 
 rule_label: 
@@ -424,26 +424,26 @@ alg_expr:
 | MIN alg_expr alg_expr
 	{$$ = ast::BinaryOperation($2,$3,ast::BinaryOperation::MIN,@2);}
 | EXPONENT alg_expr 
-	{}
-| SINUS alg_expr 
-	{}
-| COSINUS alg_expr 
-	{}
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::EXPONENT,@2);}
+| SINUS alg_expr
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::SINUS,@2);}
+| COSINUS alg_expr
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::COSINUS,@2);}
 | TAN alg_expr 
-	{}
-| ABS alg_expr 
-	{}
-| SQRT alg_expr 
-	{}
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::TAN,@2);}
+| ABS alg_expr
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::ABS,@2);}
+| SQRT alg_expr
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::SQRT,@2);}
 | LOG alg_expr
-	{}
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::LOG,@2);}
 /*(***)*/
-| ATAN alg_expr 
-	{}
+| ATAN alg_expr
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::ATAN,@2);}
 | COIN alg_expr
-	{}
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::COIN,@2);}
 | RAND_N alg_expr
-	{}
+	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::RAND_N,@2);}
 | RAND_1
 	{}
 ;
@@ -515,15 +515,15 @@ internal_state:
 
 link_state:
 /*empty*/ 
-	{}
+	{$$ = ast::Link(ast::Link::FREE,@$);}
 | KAPPA_LNK INT 
-	{}
+	{$$ = ast::Link(ast::Link::VALUE,$2,@2);}
 | KAPPA_LNK KAPPA_SEMI 
-	{}
+	{$$ = ast::Link(ast::Link::SOME,@2);}
 | KAPPA_LNK ID DOT ID
-	{}
+	{$$ = ast::Link(ast::Link::TYPE,ast::Id($2,@2),ast::Id($4,@4),@1);}
 | KAPPA_WLD 
-	{}
+	{$$ = ast::Link(ast::Link::ANY,@1);}
 | KAPPA_LNK error 
 	{}
 ;

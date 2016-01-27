@@ -116,7 +116,7 @@ instruction:
 | INIT error
 	{}
 | LET variable_declaration 
-	{driver.addDeclaration($2);}
+	{driver.getAst().add($2);}
 | OBS variable_declaration
 	{}
 | PLOT alg_expr 

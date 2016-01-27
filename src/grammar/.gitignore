@@ -1,5 +1,9 @@
-/kappaParser.cc
-/kappaParser.hh
-/lex.yy.c
-/kappaParser.output
+/KappaParser.cpp
+/KappaParser.hpp
+/KappaParser.cpp
+/KappaLexer.cpp
+/KappaParser.output
+/location.hh
+/position.hh
+/stack.hh
 /parser

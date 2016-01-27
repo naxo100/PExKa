@@ -79,6 +79,9 @@ protected:
 };
 
 class Bool : public Expression {
+public:
+	Bool(bool val): val(val) {};
+protected:
 	bool val;
 };
 
@@ -108,11 +111,20 @@ class Agent {
 	list<Site> sites;
 };
 
+class BoolOperation: public Expression {
+public:
+	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};	
+	BoolOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){};
+protected:
+	Expression exp1,exp2;
+	Operator op;
+};
+
 class BinaryOperation: public Expression {
 public:
 	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN};
 	BinaryOperation(Expression &e1,Expression &e2,Operator o,yy::location &l)
-		:Expression(l),exp1(e1),exp2(e2),op(o){};
+		: Expression(l),exp1(e1),exp2(e2),op(o){};
 protected:
 	Expression exp1,exp2;
 	Operator op;

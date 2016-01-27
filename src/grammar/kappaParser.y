@@ -70,9 +70,9 @@
 
 /*%type <ast::Agent> agent_expression*/
 %type <ast::Declaration> variable_declaration
-%type <ast::Expression> alg_expr constant variable
-%type <ast::Link> link_state
-%type <ast::Arrow> arrow
+%type <ast::Expression> alg_expr constant variable bool_expr 
+%type <ast::Node> link_state arrow
+%type <bool> rate_sep boolean
 %start statements
 
 %%
@@ -255,8 +255,8 @@ print_expr:
 ;
 
 boolean:
-| TRUE {}
-| FALSE {}
+| TRUE {$$=true;}
+| FALSE {$$=false;}
 ;
 
 variable_declaration:
@@ -272,17 +272,17 @@ bool_expr:
 | OP_PAR bool_expr CL_PAR 
 	{}
 | bool_expr AND bool_expr 
-	{}
+	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::AND,@2);}
 | bool_expr OR bool_expr 
-	{}
+	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::OR,@2);}
 | alg_expr GREATER alg_expr 
-	{}
+	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::GREATER,@2);}
 | alg_expr SMALLER alg_expr 
-	{}
+	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::SMALLER,@2);}
 | alg_expr EQUAL alg_expr 
-	{}
+	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::EQUAL,@2);}
 | alg_expr DIFF alg_expr  
-	{}
+	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::DIFF,@2);}
 | TRUE
 	{}
 | FALSE
@@ -337,12 +337,12 @@ mixture:
 /*empty*/ 
 	{}
 | non_empty_mixture 
-	{}
+/*	{$$=$1;}*/
 ;
 
 rate_sep:
-| AT {}
-| FIX {}
+| AT {$$=false;}
+| FIX {$$=true;}
 
 /*(**  **)*/
 

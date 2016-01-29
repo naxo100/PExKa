@@ -81,6 +81,7 @@ protected:
 class Bool : public Expression {
 public:
 	Bool(bool val): val(val) {};
+	Bool(bool val,const yy::location &l): Expression(l), val(val) {};
 protected:
 	bool val;
 };
@@ -111,6 +112,15 @@ class Agent {
 	list<Site> sites;
 };
 
+//class IndexOperation: public Expression {
+//public:
+//	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO};
+//	IndexOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){};
+//protected:
+//	Expression exp1,exp2;
+//	Operator op;
+//};
+
 class BoolOperation: public Expression {
 public:
 	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};	
@@ -126,7 +136,7 @@ public:
 	BinaryOperation(Expression &e1,Expression &e2,Operator o,yy::location &l)
 		: Expression(l),exp1(e1),exp2(e2),op(o){};
 protected:
-	Expression exp1,exp2;
+	Expression ,exp2;
 	Operator op;
 };
 
@@ -171,7 +181,14 @@ public:
 };
 
 class CompExpression: public Node {
-
+public:
+	Expression &dim;
+	CompOperation(const std::string &label, yy::location &l) : label(label),dim(),where(){};
+	CompOperation(const std::string &label, Expression &dim, yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){};
+protected:
+	std::string label;
+	Expression dim;
+	Expression where;
 };
 
 class Compartment : public Node {

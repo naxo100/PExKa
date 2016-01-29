@@ -70,9 +70,14 @@
 
 /*%type <ast::Agent> agent_expression*/
 %type <ast::Declaration> variable_declaration
-%type <ast::Expression> alg_expr constant variable bool_expr 
-%type <ast::Node> link_state arrow
+%type <ast::Expression> alg_expr bool_expr  constant variable multiple 
+%type <ast::Node> link_state arrow  
 %type <bool> rate_sep boolean
+%type <std::list<std::string>> value_list
+%type <ast::CompExpression> comp_expr
+%type <std::list<ast::CompExpression>> comp_list
+%type <ast::Expression*> where_expr
+/*%type <std::list> value_list*/
 %start statements
 
 %%
@@ -151,62 +156,71 @@ join:
 	{}
 
 comp_expr:
-LABEL dimension where_expr
-	{}
+| LABEL 
+	{$$=ast::CompExpression($1)}
+| LABEL dimension
+	{$$=ast::CompExpression($1,$2);}
+| LABEL dimension where_expr
+	{$$=ast::CompExpression($1,$2,$3);}
 ;
 
 dimension: 
 /*empty*/
 	{}
-| OP_BRA index_expr CL_BRA dimension
+/*| OP_BRA index_expr CL_BRA dimension*/
+| OP_BRA alg_expr CL_BRA dimension
 	{}
 ;
 
-index_expr:
+/*index_expr:
 INT
 	{}
-| ID /*iter var*/
+| ID 
 	{}
 | OP_PAR index_expr CL_PAR 
-	{}
+	{$$=$2;}
 | index_expr MULT index_expr
-	{}
+	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::MULT,@2);}
 | index_expr PLUS index_expr
-	{}
+	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::SUM,@2);}
 | index_expr DIV index_expr
-	{}
+	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::DIV,@2);}
 | index_expr MINUS index_expr
-	{}
+	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::MINUS,@2);}
 | index_expr POW index_expr
-	{}
+	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::POW,@2);}
 | index_expr MODULO index_expr
-	{}	
-;
+	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::MODULO,@2);}
+;*/
 
 value_list: 
 | STRING 
-	{}
+	{$$=std::list<std::string>(1,$1); }
 | STRING value_list 
-	{}
+	{$2.push_front($1);$$=$2; }
 ;
 
 comp_list:
-	{}
+	{$$=std::list<ast::CompExpression>(); }
 | "$ALL"
-  	{}
+	{$$=std::list<ast::CompExpression>(); }
 | comp_expr
-	{}
+	{$$=std::list<ast::CompExpression>(1,$1); }
 | comp_expr comp_list
-	{}
+	{ 
+		$2.push_front($1);
+ 		$$=$2; 
+	}
 | comp_expr COMMA comp_list
-	{}
+	{	
+		$3.push_front($1);
+		$$=$3; 
+	}
 ;
 
 where_expr: 
-/* empty */
-	{}
-| OP_CUR bool_expr CL_CUR
-	{}
+ OP_CUR bool_expr CL_CUR
+	{$$=&$2;}
 ;
 
 
@@ -275,7 +289,7 @@ variable_declaration:
 
 bool_expr:
 | OP_PAR bool_expr CL_PAR 
-	{}
+	{$$=$2;}
 | bool_expr AND bool_expr 
 	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::AND,@2);}
 | bool_expr OR bool_expr 
@@ -289,9 +303,9 @@ bool_expr:
 | alg_expr DIFF alg_expr  
 	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::DIFF,@2);}
 | TRUE
-	{}
+	{$$ = ast::Bool(true,@1);}
 | FALSE
-	{}
+	{$$ = ast::Bool(false,@1);}
 ;
 
 opt_string:
@@ -307,10 +321,21 @@ string_or_pr_expr:
 
 
 multiple:
-| INT {  }
-| FLOAT { }
-| LABEL { }
+| INT   {$$ = ast::Const($1,@1);}
+| FLOAT	{$$ = ast::Const($1,@1);}
+| LABEL {$$= ast::Var($1,ast::Var::VAR,@1); }
 ;
+
+constant:
+ INFINITY
+	{$$ = ast::Const(ast::Const::INF,@1);}
+| FLOAT
+	{$$ = ast::Const($1,@1);}
+| INT 
+	{$$ = ast::Const($1,@1);}
+| EMAX
+	{$$ = ast::Const(ast::Const::EMAX,@1);}
+| TMAX
 
 rule_label: 
 /*empty */

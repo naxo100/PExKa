@@ -71,11 +71,12 @@
 /*%type <ast::Agent> agent_expression*/
 %type <ast::Declaration> variable_declaration
 %type <ast::Expression> alg_expr bool_expr  constant variable multiple 
-%type <ast::Node> link_state arrow  
-%type <bool> rate_sep boolean
+%type <ast::Node> CompExpression link_state arrow  
+%type <bool> rate_sep boolean join
 %type <std::list<std::string>> value_list
 %type <ast::CompExpression> comp_expr
 %type <std::list<ast::CompExpression>> comp_list
+%type <std::list<ast::Expression>> dimension
 %type <ast::Expression*> where_expr
 /*%type <std::list> value_list*/
 %start statements
@@ -149,27 +150,32 @@ init_declaration:
 /*SPATIAL*/
 join:
 /*empty*/
-	{}
+	{$$=true;}
 | JOIN
-	{}
+	{$$=true;}
 | FREE
-	{}
+	{$$=false;}
 
 comp_expr:
-| LABEL 
-	{$$=ast::CompExpression($1)}
-| LABEL dimension
-	{$$=ast::CompExpression($1,$2);}
 | LABEL dimension where_expr
-	{$$=ast::CompExpression($1,$2,$3);}
+	{$$=ast::CompExpression($1,$2,$3,@1);}
 ;
 
 dimension: 
 /*empty*/
-	{}
-/*| OP_BRA index_expr CL_BRA dimension*/
+	{$$=std::list<ast::Expression>(); }
 | OP_BRA alg_expr CL_BRA dimension
-	{}
+	{
+		$4.push_front($2);
+ 		$$=$4;
+	}
+;
+
+where_expr:
+ /*empty*/
+	{$$=NULL;}
+| OP_CUR bool_expr CL_CUR
+	{$$=&$2;}
 ;
 
 /*index_expr:
@@ -218,10 +224,6 @@ comp_list:
 	}
 ;
 
-where_expr: 
- OP_CUR bool_expr CL_CUR
-	{$$=&$2;}
-;
 
 
 perturbation_declaration:

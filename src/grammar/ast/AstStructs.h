@@ -11,6 +11,9 @@
 #include <string>
 #include <list>
 #include "../location.hh"
+
+#define DEBUG
+
 using namespace std;
 
 namespace ast {
@@ -124,7 +127,7 @@ class Agent {
 class BoolOperation: public Expression {
 public:
 	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};	
-	BoolOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){};
+	BoolOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){cout<<"Bool Operation"<<endl;};
 protected:
 	Expression exp1,exp2;
 	Operator op;
@@ -136,7 +139,8 @@ public:
 	BinaryOperation(Expression &e1,Expression &e2,Operator o,yy::location &l)
 		: Expression(l),exp1(e1),exp2(e2),op(o){};
 protected:
-	Expression ,exp2;
+	Expression exp1;
+	Expression exp2;
 	Operator op;
 };
 
@@ -182,13 +186,12 @@ public:
 
 class CompExpression: public Node {
 public:
-	Expression &dim;
-	CompOperation(const std::string &label, yy::location &l) : label(label),dim(),where(){};
-	CompOperation(const std::string &label, Expression &dim, yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){};
+	CompExpression() {};
+	CompExpression(const std::string &la,const std::list<Expression> &d,Expression* w,const yy::location &l): Node(l),label(la), dim(d), where(w) {cout<<"CompExpression"<<endl;};
 protected:
-	std::string label;
-	Expression dim;
-	Expression where;
+	std::string            label;
+	std::list<Expression>    dim;
+	Expression*            where;
 };
 
 class Compartment : public Node {

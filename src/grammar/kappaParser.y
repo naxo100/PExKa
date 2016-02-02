@@ -71,7 +71,7 @@
 /*%type <ast::Agent> agent_expression*/
 %type <ast::Declaration> variable_declaration
 %type <ast::Expression> alg_expr bool_expr  constant variable multiple 
-%type <ast::Node> CompExpression link_state arrow  
+%type <ast::Node> link_state arrow  
 %type <bool> rate_sep boolean join
 %type <std::list<std::string>> value_list
 %type <ast::CompExpression> comp_expr
@@ -106,7 +106,7 @@ instruction:
 /* */
 | COMPARTMENT comp_expr alg_expr
  	{}
-| C_LINK LABEL comp_expr arrow comp_expr ATD constant
+| C_LINK LABEL comp_expr arrow ATD constant
  	{}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
@@ -157,23 +157,37 @@ join:
 	{$$=false;}
 
 comp_expr:
-| LABEL dimension where_expr
-	{$$=ast::CompExpression($1,$2,$3,@1);}
+|  LABEL dimension
+	{ cout<<"comp_expr: "<<endl;
+	$$=ast::CompExpression($1,$2,NULL,@1);}
+/*
+|  LABEL where_expr
+	{ cout<<"comp_expr: "<<endl;
+	$$=ast::CompExpression($1,std::list<ast::Expression>(),$2,@1);}*/
+/*|  LABEL dimension where_expr
+	{ cout<<"comp_expr: "<<endl;
+	$$=ast::CompExpression($1,$2,$3,@1);}*/
 ;
 
 dimension: 
 /*empty*/
-	{$$=std::list<ast::Expression>(); }
+/*	{cout<<"dimension empty"<<endl;*/
+/*	$$=std::list<ast::Expression>(); }*/
 | OP_BRA alg_expr CL_BRA dimension
 	{
+		cout<<"dimension [alg_expr]"<<endl;
 		$4.push_front($2);
  		$$=$4;
+	}
+| OP_BRA alg_expr CL_BRA
+	{
+		$$=std::list<ast::Expression>(1,$2);
 	}
 ;
 
 where_expr:
  /*empty*/
-	{$$=NULL;}
+ 	{$$=NULL;}
 | OP_CUR bool_expr CL_CUR
 	{$$=&$2;}
 ;

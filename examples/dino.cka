@@ -1,2 +1,1 @@
-%compartment: 'LALA' [2] {[true]} 3.0
-
+%link: 'L' 'C1' [1][2] -> 'C2' [2][2] $ 2.0

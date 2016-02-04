@@ -145,7 +145,7 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 [\n]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 [\r]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 "#"[\n]^*	loc.step();//return KappaParser::make_NEWLINE(loc);	
-"'".*"'"	return KappaParser::make_LABEL(yytext,loc);
+"'"[^']*"'"	return KappaParser::make_LABEL(yytext,loc);
 {id}		{
 				return KappaParser::make_ID(yytext,loc);
 			}

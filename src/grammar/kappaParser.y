@@ -106,7 +106,7 @@ instruction:
 /* */
 | COMPARTMENT comp_expr alg_expr
  	{}
-| C_LINK LABEL comp_expr arrow ATD constant
+| C_LINK LABEL comp_expr arrow comp_expr ATD constant
  	{}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
@@ -130,7 +130,8 @@ instruction:
 	{}
 | PLOT error 
 	{}
-| PERT perturbation_declaration {}
+| PERT perturbation_declaration 
+	{}
 | PERT REPEAT perturbation_declaration UNTIL bool_expr 
 	{}
 | CONFIG STRING value_list 
@@ -157,31 +158,17 @@ join:
 	{$$=false;}
 
 comp_expr:
-|  LABEL dimension
-	{ cout<<"comp_expr: "<<endl;
-	$$=ast::CompExpression($1,$2,NULL,@1);}
-/*
-|  LABEL where_expr
-	{ cout<<"comp_expr: "<<endl;
-	$$=ast::CompExpression($1,std::list<ast::Expression>(),$2,@1);}*/
-/*|  LABEL dimension where_expr
-	{ cout<<"comp_expr: "<<endl;
-	$$=ast::CompExpression($1,$2,$3,@1);}*/
+  LABEL dimension where_expr
+	{$$=ast::CompExpression($1,std::list<ast::Expression>(),NULL,@1);}
 ;
 
 dimension: 
 /*empty*/
-/*	{cout<<"dimension empty"<<endl;*/
-/*	$$=std::list<ast::Expression>(); }*/
+	{$$=std::list<ast::Expression>();}
 | OP_BRA alg_expr CL_BRA dimension
 	{
-		cout<<"dimension [alg_expr]"<<endl;
 		$4.push_front($2);
  		$$=$4;
-	}
-| OP_BRA alg_expr CL_BRA
-	{
-		$$=std::list<ast::Expression>(1,$2);
 	}
 ;
 
@@ -402,7 +389,7 @@ rule_expression:
 
 
 arrow:
-| KAPPA_RAR 
+ KAPPA_RAR 
 	{$$=ast::Arrow(ast::Arrow::RIGHT,@1);}
 | KAPPA_LRAR
 	{$$=ast::Arrow(ast::Arrow::BI,@1);}

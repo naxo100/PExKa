@@ -187,7 +187,7 @@ public:
 class CompExpression: public Node {
 public:
 	CompExpression() {};
-	CompExpression(const std::string &la,const std::list<Expression> &d,Expression* w,const yy::location &l): Node(l),label(la), dim(d), where(w) {cout<<"CompExpression"<<endl;};
+	CompExpression(const std::string &la,const std::list<Expression> &d,Expression* w,const yy::location &l): Node(l),label(la), dim(d), where(w) {};
 protected:
 	std::string            label;
 	std::list<Expression>    dim;

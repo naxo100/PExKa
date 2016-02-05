@@ -71,10 +71,14 @@
 /*%type <ast::Agent> agent_expression*/
 %type <ast::Declaration> variable_declaration
 %type <ast::Expression> alg_expr bool_expr  constant variable multiple 
-%type <ast::Node> link_state arrow  
+%type <ast::Arrow> arrow 
 %type <bool> rate_sep boolean join
-%type <std::list<std::string>> value_list
+%type <std::list<std::string>> value_list internal_state
+%type <ast::Link> link_state
 %type <ast::CompExpression> comp_expr
+%type <ast::Site> port_expression
+%type <std::list<ast::Site>> interface_expression
+%type <ast::Agent> agent_expression
 %type <std::list<ast::CompExpression>> comp_list
 %type <std::list<ast::Expression>> dimension
 %type <ast::Expression*> where_expr
@@ -204,7 +208,10 @@ value_list:
 | STRING 
 	{$$=std::list<std::string>(1,$1); }
 | STRING value_list 
-	{$2.push_front($1);$$=$2; }
+	{
+		$2.push_front($1);
+		$$=$2;
+	 }
 ;
 
 comp_list:
@@ -506,40 +513,54 @@ non_empty_mixture:
 | agent_expression 
 	{}
 ;
-
+/*Make a list for interface_expression*/
 agent_expression:
  ID OP_PAR interface_expression CL_PAR 
-	{}
+	{$$=ast::Agent($1,$3,@1);}
 | ID error 
-	{}
+	{yy::KappaParser::error(@1,std::string("Malformed agent ")+$1);}
 ;
 
-interface_expression:
-/*empty*/ 
+interface_expression: 
+	/*empty*/
+	{$$=std::list<ast::Site>();}
+| port_expression
+	{$$=std::list<ast::Site>(1,$1);}
+| port_expression COMMA interface_expression
+{
+	$3.push_front($1);
+	$$=$3;
+};
+
+/*interface_expression: 
 	{}
 | ne_interface_expression 
 	{}
-;
+;*/
 
-ne_interface_expression:
+/*ne_interface_expression:
 | port_expression COMMA ne_interface_expression 
 	{}
 | port_expression  
 	{}
-;
+;*/
 
 
 port_expression:
 | ID internal_state link_state 
-	{}
+	{$$=ast::Site($1,$2,$3,@1);}
 ;
 
 internal_state:
-/*empty*/ {}
+/*empty*/ 
+	{$$=std::list<std::string>(); }
 | KAPPA_MRK internal_state 
-	{}
+	{
+		$2.push_front($1);
+		$$=$2;
+	 }
 | error 
-	{}
+	{yy::KappaParser::error(@1,"Invalid internal state");}
 ;
 
 link_state:
@@ -554,7 +575,7 @@ link_state:
 | KAPPA_WLD 
 	{$$ = ast::Link(ast::Link::ANY,@1);}
 | KAPPA_LNK error 
-	{}
+	{yy::KappaParser::error(@1,"Invalid link state");}
 ;
 
 %%

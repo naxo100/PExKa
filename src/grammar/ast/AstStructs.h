@@ -104,15 +104,39 @@ protected:
 	Id id2;
 };
 
-class Site {
+//class PortExpression : public Node {
+//public:
+//	enum PortType {EMPTY,NONEMPTY};
+//	PortExpression() {};
+//	PortExpression(const std::string &id,const std::list<string> &is,const Link &l,const yy::location &loc): Node(loc),id(id), internal_state(is), link(l) {};
+//protected:
+//	std::string id;
+//	std::list<string> internal_state;
+//	Link link;
+//};
+
+class Site: Node {
+public:
+	Site() {};
+	Site(const std::string &id,const std::list<string> &s,const Link &l,const yy::location &loc): Node(loc), id(id), states(s), link(l) {};
+protected:
 	Id id;
-	list<Id> values;
+	std::list<string> states;
 	Link link;
 };
+//class Site {
+//	Id id;
+//	list<Id> values;
+//	Link link;
+//};
 
-class Agent {
+class Agent: Node {
+public:
+	Agent() {};
+	Agent(const std::string &id,const std::list<Site> s,const yy::location &loc): Node(loc), id(id),sites(s) {};
+protected:
 	Id id;
-	list<Site> sites;
+	std::list<Site> sites;
 };
 
 //class IndexOperation: public Expression {
@@ -197,6 +221,7 @@ protected:
 class Compartment : public Node {
 
 };
+
 
 class Rule : public Node {
 protected:

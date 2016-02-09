@@ -299,52 +299,68 @@ namespace yy {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
+      // agent_expression
+      char dummy1[sizeof(ast::Agent)];
+
+      // arrow
+      char dummy2[sizeof(ast::Arrow)];
+
       // comp_expr
-      char dummy1[sizeof(ast::CompExpression)];
+      char dummy3[sizeof(ast::CompExpression)];
 
       // variable_declaration
-      char dummy2[sizeof(ast::Declaration)];
+      char dummy4[sizeof(ast::Declaration)];
 
       // bool_expr
       // multiple
       // constant
       // variable
       // alg_expr
-      char dummy3[sizeof(ast::Expression)];
+      char dummy5[sizeof(ast::Expression)];
 
       // where_expr
-      char dummy4[sizeof(ast::Expression*)];
+      char dummy6[sizeof(ast::Expression*)];
 
-      // arrow
       // link_state
-      char dummy5[sizeof(ast::Node)];
+      char dummy7[sizeof(ast::Link)];
+
+      // port_expression
+      char dummy8[sizeof(ast::Site)];
 
       // join
       // boolean
       // rate_sep
-      char dummy6[sizeof(bool)];
+      char dummy9[sizeof(bool)];
 
       // FLOAT
-      char dummy7[sizeof(float)];
+      char dummy10[sizeof(float)];
 
       // INT
-      char dummy8[sizeof(int)];
+      char dummy11[sizeof(int)];
+
+      // mixture
+      // non_empty_mixture
+      char dummy12[sizeof(std::list<ast::Agent>)];
 
       // comp_list
-      char dummy9[sizeof(std::list<ast::CompExpression>)];
+      char dummy13[sizeof(std::list<ast::CompExpression>)];
 
       // dimension
-      char dummy10[sizeof(std::list<ast::Expression>)];
+      char dummy14[sizeof(std::list<ast::Expression>)];
+
+      // interface_expression
+      char dummy15[sizeof(std::list<ast::Site>)];
 
       // value_list
-      char dummy11[sizeof(std::list<std::string>)];
+      // internal_state
+      char dummy16[sizeof(std::list<std::string>)];
 
       // ID
       // LABEL
       // KAPPA_MRK
       // NAME
       // STRING
-      char dummy12[sizeof(std::string)];
+      char dummy17[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -494,6 +510,10 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
 
+  basic_symbol (typename Base::kind_type t, const ast::Agent v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ast::Arrow v, const location_type& l);
+
   basic_symbol (typename Base::kind_type t, const ast::CompExpression v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const ast::Declaration v, const location_type& l);
@@ -502,7 +522,9 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const ast::Expression* v, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const ast::Node v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const ast::Link v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ast::Site v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const bool v, const location_type& l);
 
@@ -510,9 +532,13 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const int v, const location_type& l);
 
+  basic_symbol (typename Base::kind_type t, const std::list<ast::Agent> v, const location_type& l);
+
   basic_symbol (typename Base::kind_type t, const std::list<ast::CompExpression> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::list<ast::Expression> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::list<ast::Site> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::list<std::string> v, const location_type& l);
 
@@ -1148,8 +1174,8 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 1149,     ///< Last index in yytable_.
-      yynnts_ = 43,  ///< Number of nonterminal symbols.
+      yylast_ = 1148,     ///< Last index in yytable_.
+      yynnts_ = 42,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
       yyfinal_ = 2, ///< Termination state number.
       yyterror_ = 1,
@@ -1241,6 +1267,14 @@ namespace yy {
   {
       switch (other.type_get ())
     {
+      case 134: // agent_expression
+        value.copy< ast::Agent > (other.value);
+        break;
+
+      case 127: // arrow
+        value.copy< ast::Arrow > (other.value);
+        break;
+
       case 104: // comp_expr
         value.copy< ast::CompExpression > (other.value);
         break;
@@ -1261,9 +1295,12 @@ namespace yy {
         value.copy< ast::Expression* > (other.value);
         break;
 
-      case 127: // arrow
-      case 139: // link_state
-        value.copy< ast::Node > (other.value);
+      case 138: // link_state
+        value.copy< ast::Link > (other.value);
+        break;
+
+      case 136: // port_expression
+        value.copy< ast::Site > (other.value);
         break;
 
       case 103: // join
@@ -1280,6 +1317,11 @@ namespace yy {
         value.copy< int > (other.value);
         break;
 
+      case 124: // mixture
+      case 133: // non_empty_mixture
+        value.copy< std::list<ast::Agent> > (other.value);
+        break;
+
       case 108: // comp_list
         value.copy< std::list<ast::CompExpression> > (other.value);
         break;
@@ -1288,7 +1330,12 @@ namespace yy {
         value.copy< std::list<ast::Expression> > (other.value);
         break;
 
+      case 135: // interface_expression
+        value.copy< std::list<ast::Site> > (other.value);
+        break;
+
       case 107: // value_list
+      case 137: // internal_state
         value.copy< std::list<std::string> > (other.value);
         break;
 
@@ -1317,6 +1364,14 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
+      case 134: // agent_expression
+        value.copy< ast::Agent > (v);
+        break;
+
+      case 127: // arrow
+        value.copy< ast::Arrow > (v);
+        break;
+
       case 104: // comp_expr
         value.copy< ast::CompExpression > (v);
         break;
@@ -1337,9 +1392,12 @@ namespace yy {
         value.copy< ast::Expression* > (v);
         break;
 
-      case 127: // arrow
-      case 139: // link_state
-        value.copy< ast::Node > (v);
+      case 138: // link_state
+        value.copy< ast::Link > (v);
+        break;
+
+      case 136: // port_expression
+        value.copy< ast::Site > (v);
         break;
 
       case 103: // join
@@ -1356,6 +1414,11 @@ namespace yy {
         value.copy< int > (v);
         break;
 
+      case 124: // mixture
+      case 133: // non_empty_mixture
+        value.copy< std::list<ast::Agent> > (v);
+        break;
+
       case 108: // comp_list
         value.copy< std::list<ast::CompExpression> > (v);
         break;
@@ -1364,7 +1427,12 @@ namespace yy {
         value.copy< std::list<ast::Expression> > (v);
         break;
 
+      case 135: // interface_expression
+        value.copy< std::list<ast::Site> > (v);
+        break;
+
       case 107: // value_list
+      case 137: // internal_state
         value.copy< std::list<std::string> > (v);
         break;
 
@@ -1388,6 +1456,20 @@ namespace yy {
    KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Agent v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Arrow v, const location_type& l)
+    : Base (t)
+    , value (v)
     , location (l)
   {}
 
@@ -1420,7 +1502,14 @@ namespace yy {
   {}
 
   template <typename Base>
-   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Node v, const location_type& l)
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Link v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Site v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1448,6 +1537,13 @@ namespace yy {
   {}
 
   template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::list<ast::Agent> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
    KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::list<ast::CompExpression> v, const location_type& l)
     : Base (t)
     , value (v)
@@ -1456,6 +1552,13 @@ namespace yy {
 
   template <typename Base>
    KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::list<ast::Expression> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::list<ast::Site> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1491,6 +1594,14 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
+      case 134: // agent_expression
+        value.template destroy< ast::Agent > ();
+        break;
+
+      case 127: // arrow
+        value.template destroy< ast::Arrow > ();
+        break;
+
       case 104: // comp_expr
         value.template destroy< ast::CompExpression > ();
         break;
@@ -1511,9 +1622,12 @@ namespace yy {
         value.template destroy< ast::Expression* > ();
         break;
 
-      case 127: // arrow
-      case 139: // link_state
-        value.template destroy< ast::Node > ();
+      case 138: // link_state
+        value.template destroy< ast::Link > ();
+        break;
+
+      case 136: // port_expression
+        value.template destroy< ast::Site > ();
         break;
 
       case 103: // join
@@ -1530,6 +1644,11 @@ namespace yy {
         value.template destroy< int > ();
         break;
 
+      case 124: // mixture
+      case 133: // non_empty_mixture
+        value.template destroy< std::list<ast::Agent> > ();
+        break;
+
       case 108: // comp_list
         value.template destroy< std::list<ast::CompExpression> > ();
         break;
@@ -1538,7 +1657,12 @@ namespace yy {
         value.template destroy< std::list<ast::Expression> > ();
         break;
 
+      case 135: // interface_expression
+        value.template destroy< std::list<ast::Site> > ();
+        break;
+
       case 107: // value_list
+      case 137: // internal_state
         value.template destroy< std::list<std::string> > ();
         break;
 
@@ -1564,6 +1688,14 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
+      case 134: // agent_expression
+        value.move< ast::Agent > (s.value);
+        break;
+
+      case 127: // arrow
+        value.move< ast::Arrow > (s.value);
+        break;
+
       case 104: // comp_expr
         value.move< ast::CompExpression > (s.value);
         break;
@@ -1584,9 +1716,12 @@ namespace yy {
         value.move< ast::Expression* > (s.value);
         break;
 
-      case 127: // arrow
-      case 139: // link_state
-        value.move< ast::Node > (s.value);
+      case 138: // link_state
+        value.move< ast::Link > (s.value);
+        break;
+
+      case 136: // port_expression
+        value.move< ast::Site > (s.value);
         break;
 
       case 103: // join
@@ -1603,6 +1738,11 @@ namespace yy {
         value.move< int > (s.value);
         break;
 
+      case 124: // mixture
+      case 133: // non_empty_mixture
+        value.move< std::list<ast::Agent> > (s.value);
+        break;
+
       case 108: // comp_list
         value.move< std::list<ast::CompExpression> > (s.value);
         break;
@@ -1611,7 +1751,12 @@ namespace yy {
         value.move< std::list<ast::Expression> > (s.value);
         break;
 
+      case 135: // interface_expression
+        value.move< std::list<ast::Site> > (s.value);
+        break;
+
       case 107: // value_list
+      case 137: // internal_state
         value.move< std::list<std::string> > (s.value);
         break;
 
@@ -2246,7 +2391,7 @@ namespace yy {
 
 
 } // yy
-#line 2250 "KappaParser.hpp" // lalr1.cc:372
+#line 2395 "KappaParser.hpp" // lalr1.cc:372
 
 
 

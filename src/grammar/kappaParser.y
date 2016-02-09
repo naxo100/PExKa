@@ -79,6 +79,8 @@
 %type <ast::Site> port_expression
 %type <std::list<ast::Site>> interface_expression
 %type <ast::Agent> agent_expression
+%type <std::list<ast::Agent>> non_empty_mixture
+%type <std::list<ast::Agent>> mixture
 %type <std::list<ast::CompExpression>> comp_list
 %type <std::list<ast::Expression>> dimension
 %type <ast::Expression*> where_expr
@@ -147,8 +149,10 @@ instruction:
 init_declaration:
 | multiple non_empty_mixture 
 	{}
-| ID LAR multiple {}
-| ID OP_CUR init_declaration CL_CUR {}
+| ID LAR multiple
+	{}
+| ID OP_CUR init_declaration CL_CUR 
+	{}
 ;
 
 
@@ -375,9 +379,9 @@ sum_token:
 
 mixture:
 /*empty*/ 
-	{}
+	{$$=std::list<ast::Agent>();}
 | non_empty_mixture 
-/*	{$$=$1;}*/
+	{$$=$1;}
 ;
 
 rate_sep:
@@ -507,11 +511,14 @@ multiple_mixture:
 
 non_empty_mixture:
 | OP_PAR non_empty_mixture CL_PAR
-	{}
+	{$$=$2;}
 | agent_expression COMMA non_empty_mixture  
-	{}
+	{
+		$3.push_front($1);
+		$$=$3;
+	}
 | agent_expression 
-	{}
+	{$$=std::list<ast::Agent>(1,$1);}
 ;
 /*Make a list for interface_expression*/
 agent_expression:

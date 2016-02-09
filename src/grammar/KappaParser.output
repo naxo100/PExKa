@@ -52,10 +52,10 @@ State 162 conflicts: 1 reduce/reduce
 State 163 conflicts: 5 reduce/reduce
 State 164 conflicts: 5 reduce/reduce
 State 169 conflicts: 1 shift/reduce
-State 201 conflicts: 2 reduce/reduce
-State 231 conflicts: 4 reduce/reduce
-State 236 conflicts: 1 reduce/reduce
-State 291 conflicts: 28 shift/reduce
+State 200 conflicts: 2 reduce/reduce
+State 230 conflicts: 4 reduce/reduce
+State 235 conflicts: 1 reduce/reduce
+State 290 conflicts: 28 shift/reduce
 
 
 Grammar
@@ -277,31 +277,28 @@ Grammar
   176                 | ID error
 
   177 interface_expression: %empty
-  178                     | ne_interface_expression
+  178                     | port_expression
+  179                     | port_expression COMMA interface_expression
 
-  179 ne_interface_expression: %empty
-  180                        | port_expression COMMA ne_interface_expression
-  181                        | port_expression
+  180 port_expression: %empty
+  181                | ID internal_state link_state
 
-  182 port_expression: %empty
-  183                | ID internal_state link_state
+  182 internal_state: %empty
+  183               | KAPPA_MRK internal_state
+  184               | error
 
-  184 internal_state: %empty
-  185               | KAPPA_MRK internal_state
-  186               | error
-
-  187 link_state: %empty
-  188           | KAPPA_LNK INT
-  189           | KAPPA_LNK KAPPA_SEMI
-  190           | KAPPA_LNK ID DOT ID
-  191           | KAPPA_WLD
-  192           | KAPPA_LNK error
+  185 link_state: %empty
+  186           | KAPPA_LNK INT
+  187           | KAPPA_LNK KAPPA_SEMI
+  188           | KAPPA_LNK ID DOT ID
+  189           | KAPPA_WLD
+  190           | KAPPA_LNK error
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-error (256) 8 16 18 22 61 63 79 110 176 186 192
+error (256) 8 16 18 22 61 63 79 110 176 184 190
 END (258) 4
 NEWLINE (259) 3
 SEMICOLON (260) 54
@@ -312,8 +309,8 @@ OP_PAR (264) 48 52 81 112 138 162 172 175
 CL_PAR (265) 48 52 81 112 138 162 172 175
 OP_BRA (266) 36
 CL_BRA (267) 36
-COMMA (268) 46 164 173 180
-DOT (269) 72 73 190
+COMMA (268) 46 164 173 179
+DOT (269) 72 73 188
 TYPE (270) 113 114 167
 LAR (271) 29 64
 OP_CUR (272) 30 38
@@ -344,8 +341,8 @@ CPUTIME (296) 137
 CONFIG (297) 25
 REPEAT (298) 24
 DIFF (299) 87
-KAPPA_WLD (300) 191
-KAPPA_SEMI (301) 189
+KAPPA_WLD (300) 189
+KAPPA_SEMI (301) 187
 SIGNATURE (302) 14 16
 INFINITY (303) 100 125
 TIME (304) 132
@@ -375,17 +372,17 @@ FLUX (327) 59
 ASSIGN (328) 56
 ASSIGN2 (329) 57
 TOKEN (330) 15
-KAPPA_LNK (331) 188 189 190 192
+KAPPA_LNK (331) 186 187 188 190
 PIPE (332) 109 110 130
 KAPPA_LRAR (333) 124
 PRINT (334) 67
 PRINTF (335) 68
 MAX (336) 148
 MIN (337) 149
-INT (338) 97 102 127 188
-ID (339) 15 29 30 64 113 114 130 141 175 176 183 190
+INT (338) 97 102 127 186
+ID (339) 15 29 30 64 113 114 130 141 175 176 181 188
 LABEL (340) 11 12 34 56 57 58 77 78 79 99 106 131
-KAPPA_MRK (341) 185
+KAPPA_MRK (341) 183
 NAME (342)
 FLOAT (343) 98 101 126
 STRING (344) 25 40 41 70 72 91 94
@@ -485,15 +482,13 @@ non_empty_mixture (133)
 agent_expression (134)
     on left: 175 176, on right: 14 173 174
 interface_expression (135)
-    on left: 177 178, on right: 175
-ne_interface_expression (136)
-    on left: 179 180 181, on right: 178 180
-port_expression (137)
-    on left: 182 183, on right: 180 181
-internal_state (138)
-    on left: 184 185 186, on right: 183 185
-link_state (139)
-    on left: 187 188 189 190 191 192, on right: 183
+    on left: 177 178 179, on right: 175 179
+port_expression (136)
+    on left: 180 181, on right: 178 179
+internal_state (137)
+    on left: 182 183 184, on right: 181 183
+link_state (138)
+    on left: 185 186 187 188 189 190, on right: 181
 
 
 State 0
@@ -3481,14 +3476,12 @@ State 132
     ID  shift, and go to state 188
 
     CL_PAR    reduce using rule 177 (interface_expression)
-    CL_PAR    [reduce using rule 179 (ne_interface_expression)]
-    CL_PAR    [reduce using rule 182 (port_expression)]
-    COMMA     reduce using rule 182 (port_expression)
+    CL_PAR    [reduce using rule 180 (port_expression)]
+    COMMA     reduce using rule 180 (port_expression)
     $default  reduce using rule 177 (interface_expression)
 
-    interface_expression     go to state 189
-    ne_interface_expression  go to state 190
-    port_expression          go to state 191
+    interface_expression  go to state 189
+    port_expression       go to state 190
 
 
 State 133
@@ -3501,7 +3494,7 @@ State 133
 
     $default  reduce using rule 96 (multiple)
 
-    multiple  go to state 192
+    multiple  go to state 191
 
 
 State 134
@@ -3519,7 +3512,7 @@ State 134
     ID        [reduce using rule 96 (multiple)]
     $default  reduce using rule 27 (init_declaration)
 
-    init_declaration  go to state 193
+    init_declaration  go to state 192
     multiple          go to state 69
 
 
@@ -3584,18 +3577,18 @@ State 137
 
     constant  go to state 54
     variable  go to state 55
-    alg_expr  go to state 194
+    alg_expr  go to state 193
 
 
 State 138
 
    34 comp_expr: LABEL dimension . where_expr
 
-    OP_CUR  shift, and go to state 195
+    OP_CUR  shift, and go to state 194
 
     $default  reduce using rule 37 (where_expr)
 
-    where_expr  go to state 196
+    where_expr  go to state 195
 
 
 State 139
@@ -3625,7 +3618,7 @@ State 140
     KAPPA_RAR   shift, and go to state 145
     KAPPA_LRAR  shift, and go to state 146
 
-    arrow  go to state 197
+    arrow  go to state 196
 
 
 State 141
@@ -3639,7 +3632,7 @@ State 141
     AT        [reduce using rule 171 (non_empty_mixture)]
     $default  reduce using rule 115 (mixture)
 
-    mixture            go to state 198
+    mixture            go to state 197
     non_empty_mixture  go to state 90
     agent_expression   go to state 91
 
@@ -3654,7 +3647,7 @@ State 142
     $default  reduce using rule 42 (comp_list)
 
     comp_expr  go to state 82
-    comp_list  go to state 199
+    comp_list  go to state 198
 
 
 State 143
@@ -3668,7 +3661,7 @@ State 144
 
   172 non_empty_mixture: OP_PAR non_empty_mixture . CL_PAR
 
-    CL_PAR  shift, and go to state 200
+    CL_PAR  shift, and go to state 199
 
 
 State 145
@@ -3759,7 +3752,7 @@ State 147
     FLOAT       [reduce using rule 171 (non_empty_mixture)]
     $default    reduce using rule 115 (mixture)
 
-    lhs_rhs            go to state 201
+    lhs_rhs            go to state 200
     mixture            go to state 89
     non_empty_mixture  go to state 90
     agent_expression   go to state 91
@@ -3770,8 +3763,8 @@ State 148
   109 token_expr: PIPE . sum_token
   110           | PIPE . error
 
-    error       shift, and go to state 202
-    OP_PAR      shift, and go to state 203
+    error       shift, and go to state 201
+    OP_PAR      shift, and go to state 202
     LOG         shift, and go to state 22
     CPUTIME     shift, and go to state 25
     INFINITY    shift, and go to state 27
@@ -3836,9 +3829,9 @@ State 148
     FLOAT       [reduce using rule 111 (sum_token)]
 
     constant   go to state 54
-    sum_token  go to state 204
+    sum_token  go to state 203
     variable   go to state 55
-    alg_expr   go to state 205
+    alg_expr   go to state 204
 
 
 State 149
@@ -3859,7 +3852,7 @@ State 150
     ID        [reduce using rule 171 (non_empty_mixture)]
     $default  reduce using rule 171 (non_empty_mixture)
 
-    non_empty_mixture  go to state 206
+    non_empty_mixture  go to state 205
     agent_expression   go to state 91
 
 
@@ -3901,7 +3894,7 @@ State 153
     UNTIL      [reduce using rule 55 (effect)]
     $default   reduce using rule 51 (effect_list)
 
-    effect_list  go to state 207
+    effect_list  go to state 206
     effect       go to state 175
 
 
@@ -3949,7 +3942,7 @@ State 155
 
     $default  reduce using rule 80 (bool_expr)
 
-    bool_expr  go to state 208
+    bool_expr  go to state 207
     constant   go to state 54
     variable   go to state 55
     alg_expr   go to state 56
@@ -4036,7 +4029,7 @@ State 159
 
     $default  reduce using rule 80 (bool_expr)
 
-    bool_expr  go to state 209
+    bool_expr  go to state 208
     constant   go to state 54
     variable   go to state 55
     alg_expr   go to state 94
@@ -4084,7 +4077,7 @@ State 162
     CL_PAR     [reduce using rule 55 (effect)]
     $default   reduce using rule 51 (effect_list)
 
-    effect_list  go to state 210
+    effect_list  go to state 209
     effect       go to state 175
 
 
@@ -4093,7 +4086,7 @@ State 163
    60 effect: INTRO . multiple_mixture
    61       | INTRO . error
 
-    error       shift, and go to state 211
+    error       shift, and go to state 210
     OP_PAR      shift, and go to state 125
     LOG         shift, and go to state 22
     CPUTIME     shift, and go to state 25
@@ -4136,9 +4129,9 @@ State 163
 
     constant           go to state 54
     variable           go to state 55
-    alg_expr           go to state 212
-    multiple_mixture   go to state 213
-    non_empty_mixture  go to state 214
+    alg_expr           go to state 211
+    multiple_mixture   go to state 212
+    non_empty_mixture  go to state 213
     agent_expression   go to state 91
 
 
@@ -4147,7 +4140,7 @@ State 164
    62 effect: DELETE . multiple_mixture
    63       | DELETE . error
 
-    error       shift, and go to state 215
+    error       shift, and go to state 214
     OP_PAR      shift, and go to state 125
     LOG         shift, and go to state 22
     CPUTIME     shift, and go to state 25
@@ -4190,9 +4183,9 @@ State 164
 
     constant           go to state 54
     variable           go to state 55
-    alg_expr           go to state 212
-    multiple_mixture   go to state 216
-    non_empty_mixture  go to state 214
+    alg_expr           go to state 211
+    multiple_mixture   go to state 215
+    non_empty_mixture  go to state 213
     agent_expression   go to state 91
 
 
@@ -4200,83 +4193,83 @@ State 165
 
    58 effect: TRACK . LABEL boolean
 
-    LABEL  shift, and go to state 217
+    LABEL  shift, and go to state 216
 
 
 State 166
 
    59 effect: FLUX . opt_string boolean
 
-    SMALLER  shift, and go to state 218
-    STRING   shift, and go to state 219
+    SMALLER  shift, and go to state 217
+    STRING   shift, and go to state 218
 
     $default  reduce using rule 90 (opt_string)
 
-    opt_string  go to state 220
+    opt_string  go to state 219
 
 
 State 167
 
    57 effect: ASSIGN2 . LABEL alg_expr
 
-    LABEL  shift, and go to state 221
+    LABEL  shift, and go to state 220
 
 
 State 168
 
    67 effect: PRINT . SMALLER print_expr GREATER
 
-    SMALLER  shift, and go to state 222
+    SMALLER  shift, and go to state 221
 
 
 State 169
 
    68 effect: PRINTF . string_or_pr_expr SMALLER print_expr GREATER
 
-    SMALLER  shift, and go to state 223
-    STRING   shift, and go to state 224
+    SMALLER  shift, and go to state 222
+    STRING   shift, and go to state 223
 
     SMALLER  [reduce using rule 93 (string_or_pr_expr)]
 
-    string_or_pr_expr  go to state 225
+    string_or_pr_expr  go to state 224
 
 
 State 170
 
    64 effect: ID . LAR alg_expr
 
-    LAR  shift, and go to state 226
+    LAR  shift, and go to state 225
 
 
 State 171
 
    56 effect: LABEL . ASSIGN alg_expr
 
-    ASSIGN  shift, and go to state 227
+    ASSIGN  shift, and go to state 226
 
 
 State 172
 
    66 effect: STOP . opt_string
 
-    SMALLER  shift, and go to state 218
-    STRING   shift, and go to state 219
+    SMALLER  shift, and go to state 217
+    STRING   shift, and go to state 218
 
     $default  reduce using rule 90 (opt_string)
 
-    opt_string  go to state 228
+    opt_string  go to state 227
 
 
 State 173
 
    65 effect: SNAPSHOT . opt_string
 
-    SMALLER  shift, and go to state 218
-    STRING   shift, and go to state 219
+    SMALLER  shift, and go to state 217
+    STRING   shift, and go to state 218
 
     $default  reduce using rule 90 (opt_string)
 
-    opt_string  go to state 229
+    opt_string  go to state 228
 
 
 State 174
@@ -4284,7 +4277,7 @@ State 174
    26 instruction: PERT bool_expr DO effect_list . UNTIL bool_expr
    49 perturbation_declaration: bool_expr DO effect_list .
 
-    UNTIL  shift, and go to state 230
+    UNTIL  shift, and go to state 229
 
     $default  reduce using rule 49 (perturbation_declaration)
 
@@ -4294,7 +4287,7 @@ State 175
    53 effect_list: effect .
    54            | effect . SEMICOLON effect_list
 
-    SEMICOLON  shift, and go to state 231
+    SEMICOLON  shift, and go to state 230
 
     $default  reduce using rule 53 (effect_list)
 
@@ -4493,58 +4486,51 @@ State 187
 
 State 188
 
-  183 port_expression: ID . internal_state link_state
+  181 port_expression: ID . internal_state link_state
 
-    error      shift, and go to state 232
-    KAPPA_MRK  shift, and go to state 233
+    error      shift, and go to state 231
+    KAPPA_MRK  shift, and go to state 232
 
-    CL_PAR     reduce using rule 184 (internal_state)
-    COMMA      reduce using rule 184 (internal_state)
-    KAPPA_WLD  reduce using rule 184 (internal_state)
-    KAPPA_LNK  reduce using rule 184 (internal_state)
+    CL_PAR     reduce using rule 182 (internal_state)
+    COMMA      reduce using rule 182 (internal_state)
+    KAPPA_WLD  reduce using rule 182 (internal_state)
+    KAPPA_LNK  reduce using rule 182 (internal_state)
 
-    internal_state  go to state 234
+    internal_state  go to state 233
 
 
 State 189
 
   175 agent_expression: ID OP_PAR interface_expression . CL_PAR
 
-    CL_PAR  shift, and go to state 235
+    CL_PAR  shift, and go to state 234
 
 
 State 190
 
-  178 interface_expression: ne_interface_expression .
+  178 interface_expression: port_expression .
+  179                     | port_expression . COMMA interface_expression
+
+    COMMA  shift, and go to state 235
 
     $default  reduce using rule 178 (interface_expression)
 
 
 State 191
 
-  180 ne_interface_expression: port_expression . COMMA ne_interface_expression
-  181                        | port_expression .
-
-    COMMA  shift, and go to state 236
-
-    $default  reduce using rule 181 (ne_interface_expression)
-
-
-State 192
-
    29 init_declaration: ID LAR multiple .
 
     $default  reduce using rule 29 (init_declaration)
 
 
-State 193
+State 192
 
    30 init_declaration: ID OP_CUR init_declaration . CL_CUR
 
-    CL_CUR  shift, and go to state 237
+    CL_CUR  shift, and go to state 236
 
 
-State 194
+State 193
 
    36 dimension: OP_BRA alg_expr . CL_BRA dimension
   142 alg_expr: alg_expr . MULT alg_expr
@@ -4554,7 +4540,7 @@ State 194
   146         | alg_expr . POW alg_expr
   147         | alg_expr . MODULO alg_expr
 
-    CL_BRA  shift, and go to state 238
+    CL_BRA  shift, and go to state 237
     PLUS    shift, and go to state 114
     MULT    shift, and go to state 115
     MINUS   shift, and go to state 116
@@ -4563,7 +4549,7 @@ State 194
     MODULO  shift, and go to state 123
 
 
-State 195
+State 194
 
    38 where_expr: OP_CUR . bool_expr CL_CUR
 
@@ -4600,56 +4586,56 @@ State 195
 
     $default  reduce using rule 80 (bool_expr)
 
-    bool_expr  go to state 239
+    bool_expr  go to state 238
     constant   go to state 54
     variable   go to state 55
     alg_expr   go to state 56
 
 
-State 196
+State 195
 
    34 comp_expr: LABEL dimension where_expr .
 
     $default  reduce using rule 34 (comp_expr)
 
 
-State 197
+State 196
 
    11 instruction: C_LINK LABEL comp_expr arrow . comp_expr ATD constant
 
     LABEL  shift, and go to state 75
 
-    comp_expr  go to state 240
+    comp_expr  go to state 239
 
 
-State 198
+State 197
 
    12 instruction: TRANSPORT join LABEL mixture . AT alg_expr
 
-    AT  shift, and go to state 241
+    AT  shift, and go to state 240
 
 
-State 199
+State 198
 
    46 comp_list: comp_expr COMMA comp_list .
 
     $default  reduce using rule 46 (comp_list)
 
 
-State 200
+State 199
 
   172 non_empty_mixture: OP_PAR non_empty_mixture CL_PAR .
 
     $default  reduce using rule 172 (non_empty_mixture)
 
 
-State 201
+State 200
 
   121 rule_expression: rule_label lhs_rhs arrow lhs_rhs . rate_sep rate
   122                | rule_label lhs_rhs arrow lhs_rhs .
 
-    AT   shift, and go to state 242
-    FIX  shift, and go to state 243
+    AT   shift, and go to state 241
+    FIX  shift, and go to state 242
 
     END       reduce using rule 117 (rate_sep)
     END       [reduce using rule 122 (rule_expression)]
@@ -4657,22 +4643,22 @@ State 201
     NEWLINE   [reduce using rule 122 (rule_expression)]
     $default  reduce using rule 117 (rate_sep)
 
-    rate_sep  go to state 244
+    rate_sep  go to state 243
 
 
-State 202
+State 201
 
   110 token_expr: PIPE error .
 
     $default  reduce using rule 110 (token_expr)
 
 
-State 203
+State 202
 
   112 sum_token: OP_PAR . sum_token CL_PAR
   138 alg_expr: OP_PAR . alg_expr CL_PAR
 
-    OP_PAR      shift, and go to state 203
+    OP_PAR      shift, and go to state 202
     LOG         shift, and go to state 22
     CPUTIME     shift, and go to state 25
     INFINITY    shift, and go to state 27
@@ -4704,19 +4690,19 @@ State 203
     $default  reduce using rule 111 (sum_token)
 
     constant   go to state 54
-    sum_token  go to state 245
+    sum_token  go to state 244
     variable   go to state 55
-    alg_expr   go to state 246
+    alg_expr   go to state 245
 
 
-State 204
+State 203
 
   109 token_expr: PIPE sum_token .
 
     $default  reduce using rule 109 (token_expr)
 
 
-State 205
+State 204
 
   113 sum_token: alg_expr . TYPE ID
   114          | alg_expr . TYPE ID PLUS sum_token
@@ -4727,7 +4713,7 @@ State 205
   146         | alg_expr . POW alg_expr
   147         | alg_expr . MODULO alg_expr
 
-    TYPE    shift, and go to state 247
+    TYPE    shift, and go to state 246
     PLUS    shift, and go to state 114
     MULT    shift, and go to state 115
     MINUS   shift, and go to state 116
@@ -4736,21 +4722,21 @@ State 205
     MODULO  shift, and go to state 123
 
 
-State 206
+State 205
 
   173 non_empty_mixture: agent_expression COMMA non_empty_mixture .
 
     $default  reduce using rule 173 (non_empty_mixture)
 
 
-State 207
+State 206
 
    49 perturbation_declaration: bool_expr DO effect_list .
 
     $default  reduce using rule 49 (perturbation_declaration)
 
 
-State 208
+State 207
 
    24 instruction: PERT REPEAT perturbation_declaration UNTIL bool_expr .
    82 bool_expr: bool_expr . AND bool_expr
@@ -4762,7 +4748,7 @@ State 208
     $default  reduce using rule 24 (instruction)
 
 
-State 209
+State 208
 
    81 bool_expr: OP_PAR bool_expr . CL_PAR
    82          | bool_expr . AND bool_expr
@@ -4773,21 +4759,21 @@ State 209
     OR      shift, and go to state 111
 
 
-State 210
+State 209
 
    52 effect_list: OP_PAR effect_list . CL_PAR
 
-    CL_PAR  shift, and go to state 248
+    CL_PAR  shift, and go to state 247
 
 
-State 211
+State 210
 
    61 effect: INTRO error .
 
     $default  reduce using rule 61 (effect)
 
 
-State 212
+State 211
 
   142 alg_expr: alg_expr . MULT alg_expr
   143         | alg_expr . PLUS alg_expr
@@ -4808,51 +4794,51 @@ State 212
 
     $default  reduce using rule 171 (non_empty_mixture)
 
-    non_empty_mixture  go to state 249
+    non_empty_mixture  go to state 248
     agent_expression   go to state 91
 
 
-State 213
+State 212
 
    60 effect: INTRO multiple_mixture .
 
     $default  reduce using rule 60 (effect)
 
 
-State 214
+State 213
 
   170 multiple_mixture: non_empty_mixture .
 
     $default  reduce using rule 170 (multiple_mixture)
 
 
-State 215
+State 214
 
    63 effect: DELETE error .
 
     $default  reduce using rule 63 (effect)
 
 
-State 216
+State 215
 
    62 effect: DELETE multiple_mixture .
 
     $default  reduce using rule 62 (effect)
 
 
-State 217
+State 216
 
    58 effect: TRACK LABEL . boolean
 
-    TRUE   shift, and go to state 250
-    FALSE  shift, and go to state 251
+    TRUE   shift, and go to state 249
+    FALSE  shift, and go to state 250
 
     $default  reduce using rule 74 (boolean)
 
-    boolean  go to state 252
+    boolean  go to state 251
 
 
-State 218
+State 217
 
    92 opt_string: SMALLER . print_expr GREATER
 
@@ -4884,36 +4870,36 @@ State 218
     ID          shift, and go to state 49
     LABEL       shift, and go to state 50
     FLOAT       shift, and go to state 51
-    STRING      shift, and go to state 253
+    STRING      shift, and go to state 252
 
     $default  reduce using rule 69 (print_expr)
 
-    print_expr  go to state 254
+    print_expr  go to state 253
     constant    go to state 54
     variable    go to state 55
-    alg_expr    go to state 255
+    alg_expr    go to state 254
 
 
-State 219
+State 218
 
    91 opt_string: STRING .
 
     $default  reduce using rule 91 (opt_string)
 
 
-State 220
+State 219
 
    59 effect: FLUX opt_string . boolean
 
-    TRUE   shift, and go to state 250
-    FALSE  shift, and go to state 251
+    TRUE   shift, and go to state 249
+    FALSE  shift, and go to state 250
 
     $default  reduce using rule 74 (boolean)
 
-    boolean  go to state 256
+    boolean  go to state 255
 
 
-State 221
+State 220
 
    57 effect: ASSIGN2 LABEL . alg_expr
 
@@ -4948,10 +4934,10 @@ State 221
 
     constant  go to state 54
     variable  go to state 55
-    alg_expr  go to state 257
+    alg_expr  go to state 256
 
 
-State 222
+State 221
 
    67 effect: PRINT SMALLER . print_expr GREATER
 
@@ -4983,17 +4969,17 @@ State 222
     ID          shift, and go to state 49
     LABEL       shift, and go to state 50
     FLOAT       shift, and go to state 51
-    STRING      shift, and go to state 253
+    STRING      shift, and go to state 252
 
     $default  reduce using rule 69 (print_expr)
 
-    print_expr  go to state 258
+    print_expr  go to state 257
     constant    go to state 54
     variable    go to state 55
-    alg_expr    go to state 255
+    alg_expr    go to state 254
 
 
-State 223
+State 222
 
    95 string_or_pr_expr: SMALLER . print_expr GREATER
 
@@ -5025,33 +5011,71 @@ State 223
     ID          shift, and go to state 49
     LABEL       shift, and go to state 50
     FLOAT       shift, and go to state 51
-    STRING      shift, and go to state 253
+    STRING      shift, and go to state 252
 
     $default  reduce using rule 69 (print_expr)
 
-    print_expr  go to state 259
+    print_expr  go to state 258
     constant    go to state 54
     variable    go to state 55
-    alg_expr    go to state 255
+    alg_expr    go to state 254
 
 
-State 224
+State 223
 
    94 string_or_pr_expr: STRING .
 
     $default  reduce using rule 94 (string_or_pr_expr)
 
 
-State 225
+State 224
 
    68 effect: PRINTF string_or_pr_expr . SMALLER print_expr GREATER
 
-    SMALLER  shift, and go to state 260
+    SMALLER  shift, and go to state 259
+
+
+State 225
+
+   64 effect: ID LAR . alg_expr
+
+    OP_PAR      shift, and go to state 72
+    LOG         shift, and go to state 22
+    CPUTIME     shift, and go to state 25
+    INFINITY    shift, and go to state 27
+    TIME        shift, and go to state 28
+    EVENT       shift, and go to state 29
+    ACTIVITY    shift, and go to state 30
+    NULL_EVENT  shift, and go to state 31
+    PROD_EVENT  shift, and go to state 32
+    SINUS       shift, and go to state 33
+    COSINUS     shift, and go to state 34
+    TAN         shift, and go to state 35
+    ATAN        shift, and go to state 36
+    COIN        shift, and go to state 37
+    RAND_N      shift, and go to state 38
+    SQRT        shift, and go to state 39
+    EXPONENT    shift, and go to state 40
+    ABS         shift, and go to state 41
+    EMAX        shift, and go to state 42
+    TMAX        shift, and go to state 43
+    RAND_1      shift, and go to state 44
+    PIPE        shift, and go to state 45
+    MAX         shift, and go to state 46
+    MIN         shift, and go to state 47
+    INT         shift, and go to state 48
+    ID          shift, and go to state 49
+    LABEL       shift, and go to state 50
+    FLOAT       shift, and go to state 51
+
+    constant  go to state 54
+    variable  go to state 55
+    alg_expr  go to state 260
 
 
 State 226
 
-   64 effect: ID LAR . alg_expr
+   56 effect: LABEL ASSIGN . alg_expr
 
     OP_PAR      shift, and go to state 72
     LOG         shift, and go to state 22
@@ -5089,57 +5113,19 @@ State 226
 
 State 227
 
-   56 effect: LABEL ASSIGN . alg_expr
-
-    OP_PAR      shift, and go to state 72
-    LOG         shift, and go to state 22
-    CPUTIME     shift, and go to state 25
-    INFINITY    shift, and go to state 27
-    TIME        shift, and go to state 28
-    EVENT       shift, and go to state 29
-    ACTIVITY    shift, and go to state 30
-    NULL_EVENT  shift, and go to state 31
-    PROD_EVENT  shift, and go to state 32
-    SINUS       shift, and go to state 33
-    COSINUS     shift, and go to state 34
-    TAN         shift, and go to state 35
-    ATAN        shift, and go to state 36
-    COIN        shift, and go to state 37
-    RAND_N      shift, and go to state 38
-    SQRT        shift, and go to state 39
-    EXPONENT    shift, and go to state 40
-    ABS         shift, and go to state 41
-    EMAX        shift, and go to state 42
-    TMAX        shift, and go to state 43
-    RAND_1      shift, and go to state 44
-    PIPE        shift, and go to state 45
-    MAX         shift, and go to state 46
-    MIN         shift, and go to state 47
-    INT         shift, and go to state 48
-    ID          shift, and go to state 49
-    LABEL       shift, and go to state 50
-    FLOAT       shift, and go to state 51
-
-    constant  go to state 54
-    variable  go to state 55
-    alg_expr  go to state 262
-
-
-State 228
-
    66 effect: STOP opt_string .
 
     $default  reduce using rule 66 (effect)
 
 
-State 229
+State 228
 
    65 effect: SNAPSHOT opt_string .
 
     $default  reduce using rule 65 (effect)
 
 
-State 230
+State 229
 
    26 instruction: PERT bool_expr DO effect_list UNTIL . bool_expr
 
@@ -5176,13 +5162,13 @@ State 230
 
     $default  reduce using rule 80 (bool_expr)
 
-    bool_expr  go to state 263
+    bool_expr  go to state 262
     constant   go to state 54
     variable   go to state 55
     alg_expr   go to state 56
 
 
-State 231
+State 230
 
    54 effect_list: effect SEMICOLON . effect_list
 
@@ -5210,74 +5196,74 @@ State 231
     UNTIL      [reduce using rule 55 (effect)]
     $default   reduce using rule 51 (effect_list)
 
-    effect_list  go to state 264
+    effect_list  go to state 263
     effect       go to state 175
+
+
+State 231
+
+  184 internal_state: error .
+
+    $default  reduce using rule 184 (internal_state)
 
 
 State 232
 
-  186 internal_state: error .
+  183 internal_state: KAPPA_MRK . internal_state
 
-    $default  reduce using rule 186 (internal_state)
+    error      shift, and go to state 231
+    KAPPA_MRK  shift, and go to state 232
+
+    CL_PAR     reduce using rule 182 (internal_state)
+    COMMA      reduce using rule 182 (internal_state)
+    KAPPA_WLD  reduce using rule 182 (internal_state)
+    KAPPA_LNK  reduce using rule 182 (internal_state)
+
+    internal_state  go to state 264
 
 
 State 233
 
-  185 internal_state: KAPPA_MRK . internal_state
+  181 port_expression: ID internal_state . link_state
 
-    error      shift, and go to state 232
-    KAPPA_MRK  shift, and go to state 233
+    KAPPA_WLD  shift, and go to state 265
+    KAPPA_LNK  shift, and go to state 266
 
-    CL_PAR     reduce using rule 184 (internal_state)
-    COMMA      reduce using rule 184 (internal_state)
-    KAPPA_WLD  reduce using rule 184 (internal_state)
-    KAPPA_LNK  reduce using rule 184 (internal_state)
+    $default  reduce using rule 185 (link_state)
 
-    internal_state  go to state 265
+    link_state  go to state 267
 
 
 State 234
-
-  183 port_expression: ID internal_state . link_state
-
-    KAPPA_WLD  shift, and go to state 266
-    KAPPA_LNK  shift, and go to state 267
-
-    $default  reduce using rule 187 (link_state)
-
-    link_state  go to state 268
-
-
-State 235
 
   175 agent_expression: ID OP_PAR interface_expression CL_PAR .
 
     $default  reduce using rule 175 (agent_expression)
 
 
-State 236
+State 235
 
-  180 ne_interface_expression: port_expression COMMA . ne_interface_expression
+  179 interface_expression: port_expression COMMA . interface_expression
 
     ID  shift, and go to state 188
 
-    CL_PAR    reduce using rule 179 (ne_interface_expression)
-    CL_PAR    [reduce using rule 182 (port_expression)]
-    COMMA     reduce using rule 182 (port_expression)
-    $default  reduce using rule 179 (ne_interface_expression)
+    CL_PAR    reduce using rule 177 (interface_expression)
+    CL_PAR    [reduce using rule 180 (port_expression)]
+    COMMA     reduce using rule 180 (port_expression)
+    $default  reduce using rule 177 (interface_expression)
 
-    ne_interface_expression  go to state 269
-    port_expression          go to state 191
+    interface_expression  go to state 268
+    port_expression       go to state 190
 
 
-State 237
+State 236
 
    30 init_declaration: ID OP_CUR init_declaration CL_CUR .
 
     $default  reduce using rule 30 (init_declaration)
 
 
-State 238
+State 237
 
    36 dimension: OP_BRA alg_expr CL_BRA . dimension
 
@@ -5285,28 +5271,28 @@ State 238
 
     $default  reduce using rule 35 (dimension)
 
-    dimension  go to state 270
+    dimension  go to state 269
 
 
-State 239
+State 238
 
    38 where_expr: OP_CUR bool_expr . CL_CUR
    82 bool_expr: bool_expr . AND bool_expr
    83          | bool_expr . OR bool_expr
 
-    CL_CUR  shift, and go to state 271
+    CL_CUR  shift, and go to state 270
     AND     shift, and go to state 110
     OR      shift, and go to state 111
 
 
-State 240
+State 239
 
    11 instruction: C_LINK LABEL comp_expr arrow comp_expr . ATD constant
 
-    ATD  shift, and go to state 272
+    ATD  shift, and go to state 271
 
 
-State 241
+State 240
 
    12 instruction: TRANSPORT join LABEL mixture AT . alg_expr
 
@@ -5341,24 +5327,24 @@ State 241
 
     constant  go to state 54
     variable  go to state 55
-    alg_expr  go to state 273
+    alg_expr  go to state 272
 
 
-State 242
+State 241
 
   118 rate_sep: AT .
 
     $default  reduce using rule 118 (rate_sep)
 
 
-State 243
+State 242
 
   119 rate_sep: FIX .
 
     $default  reduce using rule 119 (rate_sep)
 
 
-State 244
+State 243
 
   121 rule_expression: rule_label lhs_rhs arrow lhs_rhs rate_sep . rate
 
@@ -5395,18 +5381,18 @@ State 244
 
     constant  go to state 54
     variable  go to state 55
-    alg_expr  go to state 274
-    rate      go to state 275
+    alg_expr  go to state 273
+    rate      go to state 274
 
 
-State 245
+State 244
 
   112 sum_token: OP_PAR sum_token . CL_PAR
 
-    CL_PAR  shift, and go to state 276
+    CL_PAR  shift, and go to state 275
 
 
-State 246
+State 245
 
   113 sum_token: alg_expr . TYPE ID
   114          | alg_expr . TYPE ID PLUS sum_token
@@ -5419,7 +5405,7 @@ State 246
   147         | alg_expr . MODULO alg_expr
 
     CL_PAR  shift, and go to state 154
-    TYPE    shift, and go to state 247
+    TYPE    shift, and go to state 246
     PLUS    shift, and go to state 114
     MULT    shift, and go to state 115
     MINUS   shift, and go to state 116
@@ -5428,67 +5414,67 @@ State 246
     MODULO  shift, and go to state 123
 
 
-State 247
+State 246
 
   113 sum_token: alg_expr TYPE . ID
   114          | alg_expr TYPE . ID PLUS sum_token
 
-    ID  shift, and go to state 277
+    ID  shift, and go to state 276
 
 
-State 248
+State 247
 
    52 effect_list: OP_PAR effect_list CL_PAR .
 
     $default  reduce using rule 52 (effect_list)
 
 
-State 249
+State 248
 
   169 multiple_mixture: alg_expr non_empty_mixture .
 
     $default  reduce using rule 169 (multiple_mixture)
 
 
-State 250
+State 249
 
    75 boolean: TRUE .
 
     $default  reduce using rule 75 (boolean)
 
 
-State 251
+State 250
 
    76 boolean: FALSE .
 
     $default  reduce using rule 76 (boolean)
 
 
-State 252
+State 251
 
    58 effect: TRACK LABEL boolean .
 
     $default  reduce using rule 58 (effect)
 
 
-State 253
+State 252
 
    70 print_expr: STRING .
    72           | STRING . DOT print_expr
 
-    DOT  shift, and go to state 278
+    DOT  shift, and go to state 277
 
     $default  reduce using rule 70 (print_expr)
 
 
-State 254
+State 253
 
    92 opt_string: SMALLER print_expr . GREATER
 
-    GREATER  shift, and go to state 279
+    GREATER  shift, and go to state 278
 
 
-State 255
+State 254
 
    71 print_expr: alg_expr .
    73           | alg_expr . DOT print_expr
@@ -5499,7 +5485,7 @@ State 255
   146         | alg_expr . POW alg_expr
   147         | alg_expr . MODULO alg_expr
 
-    DOT     shift, and go to state 280
+    DOT     shift, and go to state 279
     PLUS    shift, and go to state 114
     MULT    shift, and go to state 115
     MINUS   shift, and go to state 116
@@ -5510,14 +5496,14 @@ State 255
     $default  reduce using rule 71 (print_expr)
 
 
-State 256
+State 255
 
    59 effect: FLUX opt_string boolean .
 
     $default  reduce using rule 59 (effect)
 
 
-State 257
+State 256
 
    57 effect: ASSIGN2 LABEL alg_expr .
   142 alg_expr: alg_expr . MULT alg_expr
@@ -5537,21 +5523,21 @@ State 257
     $default  reduce using rule 57 (effect)
 
 
-State 258
+State 257
 
    67 effect: PRINT SMALLER print_expr . GREATER
+
+    GREATER  shift, and go to state 280
+
+
+State 258
+
+   95 string_or_pr_expr: SMALLER print_expr . GREATER
 
     GREATER  shift, and go to state 281
 
 
 State 259
-
-   95 string_or_pr_expr: SMALLER print_expr . GREATER
-
-    GREATER  shift, and go to state 282
-
-
-State 260
 
    68 effect: PRINTF string_or_pr_expr SMALLER . print_expr GREATER
 
@@ -5583,17 +5569,17 @@ State 260
     ID          shift, and go to state 49
     LABEL       shift, and go to state 50
     FLOAT       shift, and go to state 51
-    STRING      shift, and go to state 253
+    STRING      shift, and go to state 252
 
     $default  reduce using rule 69 (print_expr)
 
-    print_expr  go to state 283
+    print_expr  go to state 282
     constant    go to state 54
     variable    go to state 55
-    alg_expr    go to state 255
+    alg_expr    go to state 254
 
 
-State 261
+State 260
 
    64 effect: ID LAR alg_expr .
   142 alg_expr: alg_expr . MULT alg_expr
@@ -5613,7 +5599,7 @@ State 261
     $default  reduce using rule 64 (effect)
 
 
-State 262
+State 261
 
    56 effect: LABEL ASSIGN alg_expr .
   142 alg_expr: alg_expr . MULT alg_expr
@@ -5633,7 +5619,7 @@ State 262
     $default  reduce using rule 56 (effect)
 
 
-State 263
+State 262
 
    26 instruction: PERT bool_expr DO effect_list UNTIL bool_expr .
    82 bool_expr: bool_expr . AND bool_expr
@@ -5645,69 +5631,69 @@ State 263
     $default  reduce using rule 26 (instruction)
 
 
-State 264
+State 263
 
    54 effect_list: effect SEMICOLON effect_list .
 
     $default  reduce using rule 54 (effect_list)
 
 
+State 264
+
+  183 internal_state: KAPPA_MRK internal_state .
+
+    $default  reduce using rule 183 (internal_state)
+
+
 State 265
 
-  185 internal_state: KAPPA_MRK internal_state .
+  189 link_state: KAPPA_WLD .
 
-    $default  reduce using rule 185 (internal_state)
+    $default  reduce using rule 189 (link_state)
 
 
 State 266
 
-  191 link_state: KAPPA_WLD .
+  186 link_state: KAPPA_LNK . INT
+  187           | KAPPA_LNK . KAPPA_SEMI
+  188           | KAPPA_LNK . ID DOT ID
+  190           | KAPPA_LNK . error
 
-    $default  reduce using rule 191 (link_state)
+    error       shift, and go to state 283
+    KAPPA_SEMI  shift, and go to state 284
+    INT         shift, and go to state 285
+    ID          shift, and go to state 286
 
 
 State 267
 
-  188 link_state: KAPPA_LNK . INT
-  189           | KAPPA_LNK . KAPPA_SEMI
-  190           | KAPPA_LNK . ID DOT ID
-  192           | KAPPA_LNK . error
+  181 port_expression: ID internal_state link_state .
 
-    error       shift, and go to state 284
-    KAPPA_SEMI  shift, and go to state 285
-    INT         shift, and go to state 286
-    ID          shift, and go to state 287
+    $default  reduce using rule 181 (port_expression)
 
 
 State 268
 
-  183 port_expression: ID internal_state link_state .
+  179 interface_expression: port_expression COMMA interface_expression .
 
-    $default  reduce using rule 183 (port_expression)
+    $default  reduce using rule 179 (interface_expression)
 
 
 State 269
-
-  180 ne_interface_expression: port_expression COMMA ne_interface_expression .
-
-    $default  reduce using rule 180 (ne_interface_expression)
-
-
-State 270
 
    36 dimension: OP_BRA alg_expr CL_BRA dimension .
 
     $default  reduce using rule 36 (dimension)
 
 
-State 271
+State 270
 
    38 where_expr: OP_CUR bool_expr CL_CUR .
 
     $default  reduce using rule 38 (where_expr)
 
 
-State 272
+State 271
 
    11 instruction: C_LINK LABEL comp_expr arrow comp_expr ATD . constant
 
@@ -5717,10 +5703,10 @@ State 272
     INT       shift, and go to state 48
     FLOAT     shift, and go to state 51
 
-    constant  go to state 288
+    constant  go to state 287
 
 
-State 273
+State 272
 
    12 instruction: TRANSPORT join LABEL mixture AT alg_expr .
   142 alg_expr: alg_expr . MULT alg_expr
@@ -5740,7 +5726,7 @@ State 273
     $default  reduce using rule 12 (instruction)
 
 
-State 274
+State 273
 
   142 alg_expr: alg_expr . MULT alg_expr
   143         | alg_expr . PLUS alg_expr
@@ -5752,8 +5738,8 @@ State 274
   163     | alg_expr .
   164     | alg_expr . COMMA alg_expr
 
-    OP_PAR  shift, and go to state 289
-    COMMA   shift, and go to state 290
+    OP_PAR  shift, and go to state 288
+    COMMA   shift, and go to state 289
     PLUS    shift, and go to state 114
     MULT    shift, and go to state 115
     MINUS   shift, and go to state 116
@@ -5764,31 +5750,31 @@ State 274
     $default  reduce using rule 163 (rate)
 
 
-State 275
+State 274
 
   121 rule_expression: rule_label lhs_rhs arrow lhs_rhs rate_sep rate .
 
     $default  reduce using rule 121 (rule_expression)
 
 
-State 276
+State 275
 
   112 sum_token: OP_PAR sum_token CL_PAR .
 
     $default  reduce using rule 112 (sum_token)
 
 
-State 277
+State 276
 
   113 sum_token: alg_expr TYPE ID .
   114          | alg_expr TYPE ID . PLUS sum_token
 
-    PLUS  shift, and go to state 291
+    PLUS  shift, and go to state 290
 
     $default  reduce using rule 113 (sum_token)
 
 
-State 278
+State 277
 
    72 print_expr: STRING DOT . print_expr
 
@@ -5820,24 +5806,24 @@ State 278
     ID          shift, and go to state 49
     LABEL       shift, and go to state 50
     FLOAT       shift, and go to state 51
-    STRING      shift, and go to state 253
+    STRING      shift, and go to state 252
 
     $default  reduce using rule 69 (print_expr)
 
-    print_expr  go to state 292
+    print_expr  go to state 291
     constant    go to state 54
     variable    go to state 55
-    alg_expr    go to state 255
+    alg_expr    go to state 254
 
 
-State 279
+State 278
 
    92 opt_string: SMALLER print_expr GREATER .
 
     $default  reduce using rule 92 (opt_string)
 
 
-State 280
+State 279
 
    73 print_expr: alg_expr DOT . print_expr
 
@@ -5869,73 +5855,73 @@ State 280
     ID          shift, and go to state 49
     LABEL       shift, and go to state 50
     FLOAT       shift, and go to state 51
-    STRING      shift, and go to state 253
+    STRING      shift, and go to state 252
 
     $default  reduce using rule 69 (print_expr)
 
-    print_expr  go to state 293
+    print_expr  go to state 292
     constant    go to state 54
     variable    go to state 55
-    alg_expr    go to state 255
+    alg_expr    go to state 254
 
 
-State 281
+State 280
 
    67 effect: PRINT SMALLER print_expr GREATER .
 
     $default  reduce using rule 67 (effect)
 
 
-State 282
+State 281
 
    95 string_or_pr_expr: SMALLER print_expr GREATER .
 
     $default  reduce using rule 95 (string_or_pr_expr)
 
 
-State 283
+State 282
 
    68 effect: PRINTF string_or_pr_expr SMALLER print_expr . GREATER
 
-    GREATER  shift, and go to state 294
+    GREATER  shift, and go to state 293
+
+
+State 283
+
+  190 link_state: KAPPA_LNK error .
+
+    $default  reduce using rule 190 (link_state)
 
 
 State 284
 
-  192 link_state: KAPPA_LNK error .
+  187 link_state: KAPPA_LNK KAPPA_SEMI .
 
-    $default  reduce using rule 192 (link_state)
+    $default  reduce using rule 187 (link_state)
 
 
 State 285
 
-  189 link_state: KAPPA_LNK KAPPA_SEMI .
+  186 link_state: KAPPA_LNK INT .
 
-    $default  reduce using rule 189 (link_state)
+    $default  reduce using rule 186 (link_state)
 
 
 State 286
 
-  188 link_state: KAPPA_LNK INT .
+  188 link_state: KAPPA_LNK ID . DOT ID
 
-    $default  reduce using rule 188 (link_state)
+    DOT  shift, and go to state 294
 
 
 State 287
-
-  190 link_state: KAPPA_LNK ID . DOT ID
-
-    DOT  shift, and go to state 295
-
-
-State 288
 
    11 instruction: C_LINK LABEL comp_expr arrow comp_expr ATD constant .
 
     $default  reduce using rule 11 (instruction)
 
 
-State 289
+State 288
 
   162 rate: alg_expr OP_PAR . alg_with_radius CL_PAR
 
@@ -5972,11 +5958,11 @@ State 289
 
     constant         go to state 54
     variable         go to state 55
-    alg_expr         go to state 296
-    alg_with_radius  go to state 297
+    alg_expr         go to state 295
+    alg_with_radius  go to state 296
 
 
-State 290
+State 289
 
   164 rate: alg_expr COMMA . alg_expr
 
@@ -6011,14 +5997,14 @@ State 290
 
     constant  go to state 54
     variable  go to state 55
-    alg_expr  go to state 298
+    alg_expr  go to state 297
 
 
-State 291
+State 290
 
   114 sum_token: alg_expr TYPE ID PLUS . sum_token
 
-    OP_PAR      shift, and go to state 203
+    OP_PAR      shift, and go to state 202
     LOG         shift, and go to state 22
     CPUTIME     shift, and go to state 25
     INFINITY    shift, and go to state 27
@@ -6078,40 +6064,40 @@ State 291
     $default    reduce using rule 111 (sum_token)
 
     constant   go to state 54
-    sum_token  go to state 299
+    sum_token  go to state 298
     variable   go to state 55
-    alg_expr   go to state 205
+    alg_expr   go to state 204
 
 
-State 292
+State 291
 
    72 print_expr: STRING DOT print_expr .
 
     $default  reduce using rule 72 (print_expr)
 
 
-State 293
+State 292
 
    73 print_expr: alg_expr DOT print_expr .
 
     $default  reduce using rule 73 (print_expr)
 
 
-State 294
+State 293
 
    68 effect: PRINTF string_or_pr_expr SMALLER print_expr GREATER .
 
     $default  reduce using rule 68 (effect)
 
 
+State 294
+
+  188 link_state: KAPPA_LNK ID DOT . ID
+
+    ID  shift, and go to state 299
+
+
 State 295
-
-  190 link_state: KAPPA_LNK ID DOT . ID
-
-    ID  shift, and go to state 300
-
-
-State 296
 
   142 alg_expr: alg_expr . MULT alg_expr
   143         | alg_expr . PLUS alg_expr
@@ -6122,7 +6108,7 @@ State 296
   166 alg_with_radius: alg_expr .
   167                | alg_expr . TYPE alg_expr
 
-    TYPE    shift, and go to state 301
+    TYPE    shift, and go to state 300
     PLUS    shift, and go to state 114
     MULT    shift, and go to state 115
     MINUS   shift, and go to state 116
@@ -6133,14 +6119,14 @@ State 296
     $default  reduce using rule 166 (alg_with_radius)
 
 
-State 297
+State 296
 
   162 rate: alg_expr OP_PAR alg_with_radius . CL_PAR
 
-    CL_PAR  shift, and go to state 302
+    CL_PAR  shift, and go to state 301
 
 
-State 298
+State 297
 
   142 alg_expr: alg_expr . MULT alg_expr
   143         | alg_expr . PLUS alg_expr
@@ -6160,21 +6146,21 @@ State 298
     $default  reduce using rule 164 (rate)
 
 
-State 299
+State 298
 
   114 sum_token: alg_expr TYPE ID PLUS sum_token .
 
     $default  reduce using rule 114 (sum_token)
 
 
+State 299
+
+  188 link_state: KAPPA_LNK ID DOT ID .
+
+    $default  reduce using rule 188 (link_state)
+
+
 State 300
-
-  190 link_state: KAPPA_LNK ID DOT ID .
-
-    $default  reduce using rule 190 (link_state)
-
-
-State 301
 
   167 alg_with_radius: alg_expr TYPE . alg_expr
 
@@ -6209,17 +6195,17 @@ State 301
 
     constant  go to state 54
     variable  go to state 55
-    alg_expr  go to state 303
+    alg_expr  go to state 302
 
 
-State 302
+State 301
 
   162 rate: alg_expr OP_PAR alg_with_radius CL_PAR .
 
     $default  reduce using rule 162 (rate)
 
 
-State 303
+State 302
 
   142 alg_expr: alg_expr . MULT alg_expr
   143         | alg_expr . PLUS alg_expr

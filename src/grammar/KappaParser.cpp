@@ -253,6 +253,14 @@ namespace yy {
   {
       switch (that.type_get ())
     {
+      case 134: // agent_expression
+        value.move< ast::Agent > (that.value);
+        break;
+
+      case 127: // arrow
+        value.move< ast::Arrow > (that.value);
+        break;
+
       case 104: // comp_expr
         value.move< ast::CompExpression > (that.value);
         break;
@@ -273,9 +281,12 @@ namespace yy {
         value.move< ast::Expression* > (that.value);
         break;
 
-      case 127: // arrow
-      case 139: // link_state
-        value.move< ast::Node > (that.value);
+      case 138: // link_state
+        value.move< ast::Link > (that.value);
+        break;
+
+      case 136: // port_expression
+        value.move< ast::Site > (that.value);
         break;
 
       case 103: // join
@@ -292,6 +303,11 @@ namespace yy {
         value.move< int > (that.value);
         break;
 
+      case 124: // mixture
+      case 133: // non_empty_mixture
+        value.move< std::list<ast::Agent> > (that.value);
+        break;
+
       case 108: // comp_list
         value.move< std::list<ast::CompExpression> > (that.value);
         break;
@@ -300,7 +316,12 @@ namespace yy {
         value.move< std::list<ast::Expression> > (that.value);
         break;
 
+      case 135: // interface_expression
+        value.move< std::list<ast::Site> > (that.value);
+        break;
+
       case 107: // value_list
+      case 137: // internal_state
         value.move< std::list<std::string> > (that.value);
         break;
 
@@ -327,6 +348,14 @@ namespace yy {
     state = that.state;
       switch (that.type_get ())
     {
+      case 134: // agent_expression
+        value.copy< ast::Agent > (that.value);
+        break;
+
+      case 127: // arrow
+        value.copy< ast::Arrow > (that.value);
+        break;
+
       case 104: // comp_expr
         value.copy< ast::CompExpression > (that.value);
         break;
@@ -347,9 +376,12 @@ namespace yy {
         value.copy< ast::Expression* > (that.value);
         break;
 
-      case 127: // arrow
-      case 139: // link_state
-        value.copy< ast::Node > (that.value);
+      case 138: // link_state
+        value.copy< ast::Link > (that.value);
+        break;
+
+      case 136: // port_expression
+        value.copy< ast::Site > (that.value);
         break;
 
       case 103: // join
@@ -366,6 +398,11 @@ namespace yy {
         value.copy< int > (that.value);
         break;
 
+      case 124: // mixture
+      case 133: // non_empty_mixture
+        value.copy< std::list<ast::Agent> > (that.value);
+        break;
+
       case 108: // comp_list
         value.copy< std::list<ast::CompExpression> > (that.value);
         break;
@@ -374,7 +411,12 @@ namespace yy {
         value.copy< std::list<ast::Expression> > (that.value);
         break;
 
+      case 135: // interface_expression
+        value.copy< std::list<ast::Site> > (that.value);
+        break;
+
       case 107: // value_list
+      case 137: // internal_state
         value.copy< std::list<std::string> > (that.value);
         break;
 
@@ -533,7 +575,7 @@ namespace yy {
 	//yydebug_ = 1;
 }
 
-#line 537 "KappaParser.cpp" // lalr1.cc:725
+#line 579 "KappaParser.cpp" // lalr1.cc:725
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -627,6 +669,14 @@ namespace yy {
          when using variants.  */
         switch (yyr1_[yyn])
     {
+      case 134: // agent_expression
+        yylhs.value.build< ast::Agent > ();
+        break;
+
+      case 127: // arrow
+        yylhs.value.build< ast::Arrow > ();
+        break;
+
       case 104: // comp_expr
         yylhs.value.build< ast::CompExpression > ();
         break;
@@ -647,9 +697,12 @@ namespace yy {
         yylhs.value.build< ast::Expression* > ();
         break;
 
-      case 127: // arrow
-      case 139: // link_state
-        yylhs.value.build< ast::Node > ();
+      case 138: // link_state
+        yylhs.value.build< ast::Link > ();
+        break;
+
+      case 136: // port_expression
+        yylhs.value.build< ast::Site > ();
         break;
 
       case 103: // join
@@ -666,6 +719,11 @@ namespace yy {
         yylhs.value.build< int > ();
         break;
 
+      case 124: // mixture
+      case 133: // non_empty_mixture
+        yylhs.value.build< std::list<ast::Agent> > ();
+        break;
+
       case 108: // comp_list
         yylhs.value.build< std::list<ast::CompExpression> > ();
         break;
@@ -674,7 +732,12 @@ namespace yy {
         yylhs.value.build< std::list<ast::Expression> > ();
         break;
 
+      case 135: // interface_expression
+        yylhs.value.build< std::list<ast::Site> > ();
+        break;
+
       case 107: // value_list
+      case 137: // internal_state
         yylhs.value.build< std::list<std::string> > ();
         break;
 
@@ -704,1030 +767,1042 @@ namespace yy {
           switch (yyn)
             {
   case 3:
-#line 87 "kappaParser.y" // lalr1.cc:847
+#line 93 "kappaParser.y" // lalr1.cc:847
     {}
-#line 710 "KappaParser.cpp" // lalr1.cc:847
+#line 773 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 4:
-#line 91 "kappaParser.y" // lalr1.cc:847
+#line 97 "kappaParser.y" // lalr1.cc:847
     {}
-#line 716 "KappaParser.cpp" // lalr1.cc:847
+#line 779 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 5:
-#line 92 "kappaParser.y" // lalr1.cc:847
+#line 98 "kappaParser.y" // lalr1.cc:847
     {return 0;}
-#line 722 "KappaParser.cpp" // lalr1.cc:847
+#line 785 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 7:
-#line 97 "kappaParser.y" // lalr1.cc:847
+#line 103 "kappaParser.y" // lalr1.cc:847
     {}
-#line 728 "KappaParser.cpp" // lalr1.cc:847
+#line 791 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 8:
-#line 99 "kappaParser.y" // lalr1.cc:847
+#line 105 "kappaParser.y" // lalr1.cc:847
     {}
-#line 734 "KappaParser.cpp" // lalr1.cc:847
+#line 797 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 9:
-#line 101 "kappaParser.y" // lalr1.cc:847
+#line 107 "kappaParser.y" // lalr1.cc:847
     {}
-#line 740 "KappaParser.cpp" // lalr1.cc:847
+#line 803 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 11:
-#line 108 "kappaParser.y" // lalr1.cc:847
+#line 114 "kappaParser.y" // lalr1.cc:847
     {}
-#line 746 "KappaParser.cpp" // lalr1.cc:847
+#line 809 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 12:
-#line 110 "kappaParser.y" // lalr1.cc:847
+#line 116 "kappaParser.y" // lalr1.cc:847
     {}
-#line 752 "KappaParser.cpp" // lalr1.cc:847
+#line 815 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 13:
-#line 112 "kappaParser.y" // lalr1.cc:847
+#line 118 "kappaParser.y" // lalr1.cc:847
     {}
-#line 758 "KappaParser.cpp" // lalr1.cc:847
+#line 821 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 14:
-#line 114 "kappaParser.y" // lalr1.cc:847
+#line 120 "kappaParser.y" // lalr1.cc:847
     {}
-#line 764 "KappaParser.cpp" // lalr1.cc:847
+#line 827 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 15:
-#line 116 "kappaParser.y" // lalr1.cc:847
+#line 122 "kappaParser.y" // lalr1.cc:847
     {}
-#line 770 "KappaParser.cpp" // lalr1.cc:847
+#line 833 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 16:
-#line 118 "kappaParser.y" // lalr1.cc:847
+#line 124 "kappaParser.y" // lalr1.cc:847
     {}
-#line 776 "KappaParser.cpp" // lalr1.cc:847
+#line 839 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 17:
-#line 120 "kappaParser.y" // lalr1.cc:847
+#line 126 "kappaParser.y" // lalr1.cc:847
     {}
-#line 782 "KappaParser.cpp" // lalr1.cc:847
+#line 845 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 18:
-#line 122 "kappaParser.y" // lalr1.cc:847
+#line 128 "kappaParser.y" // lalr1.cc:847
     {}
-#line 788 "KappaParser.cpp" // lalr1.cc:847
+#line 851 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 19:
-#line 124 "kappaParser.y" // lalr1.cc:847
+#line 130 "kappaParser.y" // lalr1.cc:847
     {}
-#line 794 "KappaParser.cpp" // lalr1.cc:847
+#line 857 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 20:
-#line 126 "kappaParser.y" // lalr1.cc:847
+#line 132 "kappaParser.y" // lalr1.cc:847
     {driver.addDeclaration(yystack_[0].value.as< ast::Declaration > ());}
-#line 800 "KappaParser.cpp" // lalr1.cc:847
+#line 863 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 21:
-#line 128 "kappaParser.y" // lalr1.cc:847
+#line 134 "kappaParser.y" // lalr1.cc:847
     {}
-#line 806 "KappaParser.cpp" // lalr1.cc:847
+#line 869 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 22:
-#line 130 "kappaParser.y" // lalr1.cc:847
+#line 136 "kappaParser.y" // lalr1.cc:847
     {}
-#line 812 "KappaParser.cpp" // lalr1.cc:847
+#line 875 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 23:
-#line 132 "kappaParser.y" // lalr1.cc:847
+#line 138 "kappaParser.y" // lalr1.cc:847
     {}
-#line 818 "KappaParser.cpp" // lalr1.cc:847
+#line 881 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 24:
-#line 134 "kappaParser.y" // lalr1.cc:847
+#line 140 "kappaParser.y" // lalr1.cc:847
     {}
-#line 824 "KappaParser.cpp" // lalr1.cc:847
+#line 887 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 25:
-#line 136 "kappaParser.y" // lalr1.cc:847
+#line 142 "kappaParser.y" // lalr1.cc:847
     {}
-#line 830 "KappaParser.cpp" // lalr1.cc:847
+#line 893 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 26:
-#line 138 "kappaParser.y" // lalr1.cc:847
+#line 144 "kappaParser.y" // lalr1.cc:847
     {}
-#line 836 "KappaParser.cpp" // lalr1.cc:847
+#line 899 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 27:
-#line 140 "kappaParser.y" // lalr1.cc:847
+#line 146 "kappaParser.y" // lalr1.cc:847
     {}
-#line 842 "KappaParser.cpp" // lalr1.cc:847
+#line 905 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 29:
-#line 145 "kappaParser.y" // lalr1.cc:847
+#line 151 "kappaParser.y" // lalr1.cc:847
     {}
-#line 848 "KappaParser.cpp" // lalr1.cc:847
+#line 911 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 30:
-#line 146 "kappaParser.y" // lalr1.cc:847
+#line 152 "kappaParser.y" // lalr1.cc:847
     {}
-#line 854 "KappaParser.cpp" // lalr1.cc:847
+#line 917 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 31:
-#line 147 "kappaParser.y" // lalr1.cc:847
+#line 153 "kappaParser.y" // lalr1.cc:847
     {}
-#line 860 "KappaParser.cpp" // lalr1.cc:847
+#line 923 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 32:
-#line 154 "kappaParser.y" // lalr1.cc:847
+#line 160 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=true;}
-#line 866 "KappaParser.cpp" // lalr1.cc:847
+#line 929 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 33:
-#line 156 "kappaParser.y" // lalr1.cc:847
+#line 162 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=true;}
-#line 872 "KappaParser.cpp" // lalr1.cc:847
+#line 935 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 34:
-#line 158 "kappaParser.y" // lalr1.cc:847
+#line 164 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=false;}
-#line 878 "KappaParser.cpp" // lalr1.cc:847
+#line 941 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 35:
-#line 162 "kappaParser.y" // lalr1.cc:847
+#line 168 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::CompExpression > ()=ast::CompExpression(yystack_[2].value.as< std::string > (),std::list<ast::Expression>(),NULL,yystack_[2].location);}
-#line 884 "KappaParser.cpp" // lalr1.cc:847
+#line 947 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 36:
-#line 167 "kappaParser.y" // lalr1.cc:847
+#line 173 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Expression> > ()=std::list<ast::Expression>();}
-#line 890 "KappaParser.cpp" // lalr1.cc:847
+#line 953 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 37:
-#line 169 "kappaParser.y" // lalr1.cc:847
+#line 175 "kappaParser.y" // lalr1.cc:847
     {
 		yystack_[0].value.as< std::list<ast::Expression> > ().push_front(yystack_[2].value.as< ast::Expression > ());
  		yylhs.value.as< std::list<ast::Expression> > ()=yystack_[0].value.as< std::list<ast::Expression> > ();
 	}
-#line 899 "KappaParser.cpp" // lalr1.cc:847
+#line 962 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 38:
-#line 177 "kappaParser.y" // lalr1.cc:847
+#line 183 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression* > ()=NULL;}
-#line 905 "KappaParser.cpp" // lalr1.cc:847
+#line 968 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 39:
-#line 179 "kappaParser.y" // lalr1.cc:847
+#line 185 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression* > ()=&yystack_[1].value.as< ast::Expression > ();}
-#line 911 "KappaParser.cpp" // lalr1.cc:847
+#line 974 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 41:
-#line 205 "kappaParser.y" // lalr1.cc:847
+#line 211 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<std::string> > ()=std::list<std::string>(1,yystack_[0].value.as< std::string > ()); }
-#line 917 "KappaParser.cpp" // lalr1.cc:847
+#line 980 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 42:
-#line 207 "kappaParser.y" // lalr1.cc:847
-    {yystack_[0].value.as< std::list<std::string> > ().push_front(yystack_[1].value.as< std::string > ());yylhs.value.as< std::list<std::string> > ()=yystack_[0].value.as< std::list<std::string> > (); }
-#line 923 "KappaParser.cpp" // lalr1.cc:847
+#line 213 "kappaParser.y" // lalr1.cc:847
+    {
+		yystack_[0].value.as< std::list<std::string> > ().push_front(yystack_[1].value.as< std::string > ());
+		yylhs.value.as< std::list<std::string> > ()=yystack_[0].value.as< std::list<std::string> > ();
+	 }
+#line 989 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 43:
-#line 211 "kappaParser.y" // lalr1.cc:847
+#line 220 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::CompExpression> > ()=std::list<ast::CompExpression>(); }
-#line 929 "KappaParser.cpp" // lalr1.cc:847
+#line 995 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 44:
-#line 213 "kappaParser.y" // lalr1.cc:847
+#line 222 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::CompExpression> > ()=std::list<ast::CompExpression>(); }
-#line 935 "KappaParser.cpp" // lalr1.cc:847
+#line 1001 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 45:
-#line 215 "kappaParser.y" // lalr1.cc:847
+#line 224 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::CompExpression> > ()=std::list<ast::CompExpression>(1,yystack_[0].value.as< ast::CompExpression > ()); }
-#line 941 "KappaParser.cpp" // lalr1.cc:847
+#line 1007 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 46:
-#line 217 "kappaParser.y" // lalr1.cc:847
+#line 226 "kappaParser.y" // lalr1.cc:847
     { 
 		yystack_[0].value.as< std::list<ast::CompExpression> > ().push_front(yystack_[1].value.as< ast::CompExpression > ());
  		yylhs.value.as< std::list<ast::CompExpression> > ()=yystack_[0].value.as< std::list<ast::CompExpression> > (); 
 	}
-#line 950 "KappaParser.cpp" // lalr1.cc:847
+#line 1016 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 47:
-#line 222 "kappaParser.y" // lalr1.cc:847
+#line 231 "kappaParser.y" // lalr1.cc:847
     {	
 		yystack_[0].value.as< std::list<ast::CompExpression> > ().push_front(yystack_[2].value.as< ast::CompExpression > ());
 		yylhs.value.as< std::list<ast::CompExpression> > ()=yystack_[0].value.as< std::list<ast::CompExpression> > (); 
 	}
-#line 959 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 49:
-#line 231 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 965 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 50:
-#line 232 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 971 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 51:
-#line 233 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 977 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 53:
-#line 237 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 983 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 54:
-#line 238 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 989 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 55:
-#line 239 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 995 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 57:
-#line 244 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1001 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 58:
-#line 246 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1007 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 59:
-#line 248 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1013 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 60:
-#line 250 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1019 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 61:
-#line 252 "kappaParser.y" // lalr1.cc:847
-    {}
 #line 1025 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 62:
-#line 254 "kappaParser.y" // lalr1.cc:847
+  case 49:
+#line 240 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1031 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 63:
-#line 256 "kappaParser.y" // lalr1.cc:847
+  case 50:
+#line 241 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1037 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 64:
-#line 258 "kappaParser.y" // lalr1.cc:847
+  case 51:
+#line 242 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1043 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 65:
-#line 260 "kappaParser.y" // lalr1.cc:847
+  case 53:
+#line 246 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1049 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 66:
-#line 262 "kappaParser.y" // lalr1.cc:847
+  case 54:
+#line 247 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1055 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 67:
-#line 264 "kappaParser.y" // lalr1.cc:847
+  case 55:
+#line 248 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1061 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 68:
-#line 265 "kappaParser.y" // lalr1.cc:847
+  case 57:
+#line 253 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1067 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 69:
-#line 267 "kappaParser.y" // lalr1.cc:847
+  case 58:
+#line 255 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1073 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 70:
-#line 272 "kappaParser.y" // lalr1.cc:847
+  case 59:
+#line 257 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1079 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 71:
-#line 273 "kappaParser.y" // lalr1.cc:847
+  case 60:
+#line 259 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1085 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 72:
-#line 274 "kappaParser.y" // lalr1.cc:847
+  case 61:
+#line 261 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1091 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 73:
-#line 275 "kappaParser.y" // lalr1.cc:847
+  case 62:
+#line 263 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1097 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 74:
-#line 276 "kappaParser.y" // lalr1.cc:847
+  case 63:
+#line 265 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1103 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 76:
-#line 280 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< bool > ()=true;}
+  case 64:
+#line 267 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1109 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 77:
-#line 281 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< bool > ()=false;}
+  case 65:
+#line 269 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1115 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 78:
-#line 286 "kappaParser.y" // lalr1.cc:847
+  case 66:
+#line 271 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1121 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 79:
-#line 288 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Declaration > () = ast::Declaration(ast::Id(yystack_[1].value.as< std::string > (),yystack_[1].location),yystack_[0].value.as< ast::Expression > (),yylhs.location);}
+  case 67:
+#line 273 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1127 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 80:
-#line 290 "kappaParser.y" // lalr1.cc:847
+  case 68:
+#line 274 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1133 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 82:
-#line 295 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > ()=yystack_[1].value.as< ast::Expression > ();}
+  case 69:
+#line 276 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1139 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 83:
-#line 297 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::AND,yystack_[1].location);}
+  case 70:
+#line 281 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1145 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 84:
-#line 299 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::OR,yystack_[1].location);}
+  case 71:
+#line 282 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1151 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 85:
-#line 301 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::GREATER,yystack_[1].location);}
+  case 72:
+#line 283 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1157 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 86:
-#line 303 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::SMALLER,yystack_[1].location);}
+  case 73:
+#line 284 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1163 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 87:
-#line 305 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::EQUAL,yystack_[1].location);}
+  case 74:
+#line 285 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1169 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 88:
-#line 307 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::DIFF,yystack_[1].location);}
+  case 76:
+#line 289 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< bool > ()=true;}
 #line 1175 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 89:
-#line 309 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Bool(true,yystack_[0].location);}
+  case 77:
+#line 290 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< bool > ()=false;}
 #line 1181 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 90:
-#line 311 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Bool(false,yystack_[0].location);}
+  case 78:
+#line 295 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1187 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 91:
-#line 315 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 79:
+#line 297 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Declaration > () = ast::Declaration(ast::Id(yystack_[1].value.as< std::string > (),yystack_[1].location),yystack_[0].value.as< ast::Expression > (),yylhs.location);}
 #line 1193 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 92:
-#line 316 "kappaParser.y" // lalr1.cc:847
+  case 80:
+#line 299 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1199 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 93:
-#line 317 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 82:
+#line 304 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > ()=yystack_[1].value.as< ast::Expression > ();}
 #line 1205 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 95:
-#line 321 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 83:
+#line 306 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::AND,yystack_[1].location);}
 #line 1211 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 96:
-#line 322 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 84:
+#line 308 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::OR,yystack_[1].location);}
 #line 1217 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 98:
-#line 327 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
+  case 85:
+#line 310 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::GREATER,yystack_[1].location);}
 #line 1223 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 99:
-#line 328 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
+  case 86:
+#line 312 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::SMALLER,yystack_[1].location);}
 #line 1229 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 100:
-#line 329 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > ()= ast::Var(yystack_[0].value.as< std::string > (),ast::Var::VAR,yystack_[0].location); }
+  case 87:
+#line 314 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::EQUAL,yystack_[1].location);}
 #line 1235 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 101:
-#line 334 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::INF,yystack_[0].location);}
+  case 88:
+#line 316 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::DIFF,yystack_[1].location);}
 #line 1241 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 102:
-#line 336 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
+  case 89:
+#line 318 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Bool(true,yystack_[0].location);}
 #line 1247 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 103:
-#line 338 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
+  case 90:
+#line 320 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Bool(false,yystack_[0].location);}
 #line 1253 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 104:
-#line 340 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::EMAX,yystack_[0].location);}
+  case 91:
+#line 324 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1259 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 106:
-#line 345 "kappaParser.y" // lalr1.cc:847
+  case 92:
+#line 325 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1265 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 107:
-#line 347 "kappaParser.y" // lalr1.cc:847
+  case 93:
+#line 326 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1271 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 108:
-#line 351 "kappaParser.y" // lalr1.cc:847
+  case 95:
+#line 330 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1277 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 109:
-#line 355 "kappaParser.y" // lalr1.cc:847
+  case 96:
+#line 331 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1283 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 110:
-#line 356 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 98:
+#line 336 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
 #line 1289 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 111:
-#line 358 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 99:
+#line 337 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
 #line 1295 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 113:
-#line 363 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 100:
+#line 338 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > ()= ast::Var(yystack_[0].value.as< std::string > (),ast::Var::VAR,yystack_[0].location); }
 #line 1301 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 114:
-#line 365 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 101:
+#line 343 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::INF,yystack_[0].location);}
 #line 1307 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 115:
-#line 367 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 102:
+#line 345 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
 #line 1313 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 116:
-#line 371 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 103:
+#line 347 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
 #line 1319 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 119:
-#line 377 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< bool > ()=false;}
+  case 104:
+#line 349 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::EMAX,yystack_[0].location);}
 #line 1325 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 120:
-#line 378 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< bool > ()=true;}
+  case 106:
+#line 354 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1331 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 122:
-#line 384 "kappaParser.y" // lalr1.cc:847
-    { }
+  case 107:
+#line 356 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1337 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 123:
-#line 386 "kappaParser.y" // lalr1.cc:847
+  case 108:
+#line 360 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1343 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 124:
-#line 393 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Node > ()=ast::Arrow(ast::Arrow::RIGHT,yystack_[0].location);}
+  case 109:
+#line 364 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1349 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 125:
-#line 395 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Node > ()=ast::Arrow(ast::Arrow::BI,yystack_[0].location);}
+  case 110:
+#line 365 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1355 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 126:
-#line 400 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::INF,yystack_[0].location);}
+  case 111:
+#line 367 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1361 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 127:
-#line 402 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
+  case 113:
+#line 372 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1367 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 128:
-#line 404 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
+  case 114:
+#line 374 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1373 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 129:
-#line 406 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::EMAX,yystack_[0].location);}
+  case 115:
+#line 376 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1379 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 130:
-#line 408 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::TMAX,yystack_[0].location);}
+  case 116:
+#line 380 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::Agent> > ()=std::list<ast::Agent>();}
 #line 1385 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 131:
-#line 413 "kappaParser.y" // lalr1.cc:847
-    {ast::Var(yystack_[1].value.as< std::string > (),ast::Var::TOKEN,yylhs.location);}
+  case 117:
+#line 382 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::Agent> > ()=yystack_[0].value.as< std::list<ast::Agent> > ();}
 #line 1391 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 132:
-#line 415 "kappaParser.y" // lalr1.cc:847
-    {ast::Var(yystack_[0].value.as< std::string > (),ast::Var::VAR,yylhs.location);}
+  case 119:
+#line 386 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< bool > ()=false;}
 #line 1397 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 133:
-#line 417 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::TIME,yylhs.location);}
+  case 120:
+#line 387 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< bool > ()=true;}
 #line 1403 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 134:
-#line 419 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::EVENT,yylhs.location);}
+  case 122:
+#line 393 "kappaParser.y" // lalr1.cc:847
+    { }
 #line 1409 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 135:
-#line 421 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::NULL_EVENT,yylhs.location);}
+  case 123:
+#line 395 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1415 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 136:
-#line 423 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::PROD_EVENT,yylhs.location);}
+  case 124:
+#line 402 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Arrow > ()=ast::Arrow(ast::Arrow::RIGHT,yystack_[0].location);}
 #line 1421 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 137:
-#line 425 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::ACTIVITY,yylhs.location);}
+  case 125:
+#line 404 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Arrow > ()=ast::Arrow(ast::Arrow::BI,yystack_[0].location);}
 #line 1427 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 138:
-#line 427 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Var::CPUTIME,yystack_[0].location);}
+  case 126:
+#line 409 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::INF,yystack_[0].location);}
 #line 1433 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 139:
-#line 432 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = yystack_[1].value.as< ast::Expression > ();}
+  case 127:
+#line 411 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
 #line 1439 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 140:
-#line 434 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = yystack_[0].value.as< ast::Expression > ();}
+  case 128:
+#line 413 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
 #line 1445 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 141:
-#line 436 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = yystack_[0].value.as< ast::Expression > ();}
+  case 129:
+#line 415 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::EMAX,yystack_[0].location);}
 #line 1451 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 142:
-#line 438 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 130:
+#line 417 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::TMAX,yystack_[0].location);}
 #line 1457 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 143:
-#line 440 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MULT,yystack_[1].location);}
+  case 131:
+#line 422 "kappaParser.y" // lalr1.cc:847
+    {ast::Var(yystack_[1].value.as< std::string > (),ast::Var::TOKEN,yylhs.location);}
 #line 1463 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 144:
-#line 442 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::SUM,yystack_[1].location);}
+  case 132:
+#line 424 "kappaParser.y" // lalr1.cc:847
+    {ast::Var(yystack_[0].value.as< std::string > (),ast::Var::VAR,yylhs.location);}
 #line 1469 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 145:
-#line 444 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::DIV,yystack_[1].location);}
+  case 133:
+#line 426 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::TIME,yylhs.location);}
 #line 1475 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 146:
-#line 446 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MINUS,yystack_[1].location);}
+  case 134:
+#line 428 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::EVENT,yylhs.location);}
 #line 1481 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 147:
-#line 448 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::POW,yystack_[1].location);}
+  case 135:
+#line 430 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::NULL_EVENT,yylhs.location);}
 #line 1487 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 148:
-#line 450 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MODULO,yystack_[1].location);}
+  case 136:
+#line 432 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::PROD_EVENT,yylhs.location);}
 #line 1493 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 149:
-#line 452 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MAX,yystack_[1].location);}
+  case 137:
+#line 434 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::ACTIVITY,yylhs.location);}
 #line 1499 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 150:
-#line 454 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MIN,yystack_[1].location);}
+  case 138:
+#line 436 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Const(ast::Var::CPUTIME,yystack_[0].location);}
 #line 1505 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 151:
-#line 456 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::EXPONENT,yystack_[0].location);}
+  case 139:
+#line 441 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = yystack_[1].value.as< ast::Expression > ();}
 #line 1511 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 152:
-#line 458 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::SINUS,yystack_[0].location);}
+  case 140:
+#line 443 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = yystack_[0].value.as< ast::Expression > ();}
 #line 1517 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 153:
-#line 460 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::COSINUS,yystack_[0].location);}
+  case 141:
+#line 445 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = yystack_[0].value.as< ast::Expression > ();}
 #line 1523 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 154:
-#line 462 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::TAN,yystack_[0].location);}
+  case 142:
+#line 447 "kappaParser.y" // lalr1.cc:847
+    {}
 #line 1529 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 155:
-#line 464 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::ABS,yystack_[0].location);}
+  case 143:
+#line 449 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MULT,yystack_[1].location);}
 #line 1535 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 156:
-#line 466 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::SQRT,yystack_[0].location);}
+  case 144:
+#line 451 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::SUM,yystack_[1].location);}
 #line 1541 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 157:
-#line 468 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::LOG,yystack_[0].location);}
+  case 145:
+#line 453 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::DIV,yystack_[1].location);}
 #line 1547 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 158:
-#line 471 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::ATAN,yystack_[0].location);}
+  case 146:
+#line 455 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MINUS,yystack_[1].location);}
 #line 1553 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 159:
-#line 473 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::COIN,yystack_[0].location);}
+  case 147:
+#line 457 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::POW,yystack_[1].location);}
 #line 1559 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 160:
-#line 475 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::RAND_N,yystack_[0].location);}
+  case 148:
+#line 459 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MODULO,yystack_[1].location);}
 #line 1565 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 161:
-#line 477 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 149:
+#line 461 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MAX,yystack_[1].location);}
 #line 1571 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 163:
-#line 482 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 150:
+#line 463 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MIN,yystack_[1].location);}
 #line 1577 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 164:
-#line 484 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 151:
+#line 465 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::EXPONENT,yystack_[0].location);}
 #line 1583 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 165:
-#line 486 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 152:
+#line 467 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::SINUS,yystack_[0].location);}
 #line 1589 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 167:
-#line 490 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 153:
+#line 469 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::COSINUS,yystack_[0].location);}
 #line 1595 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 168:
-#line 491 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 154:
+#line 471 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::TAN,yystack_[0].location);}
 #line 1601 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 170:
-#line 496 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 155:
+#line 473 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::ABS,yystack_[0].location);}
 #line 1607 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 171:
-#line 498 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 156:
+#line 475 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::SQRT,yystack_[0].location);}
 #line 1613 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 173:
-#line 503 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 157:
+#line 477 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::LOG,yystack_[0].location);}
 #line 1619 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 174:
-#line 505 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 158:
+#line 480 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::ATAN,yystack_[0].location);}
 #line 1625 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 175:
-#line 507 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 159:
+#line 482 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::COIN,yystack_[0].location);}
 #line 1631 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 176:
-#line 512 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 160:
+#line 484 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::RAND_N,yystack_[0].location);}
 #line 1637 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 177:
-#line 514 "kappaParser.y" // lalr1.cc:847
+  case 161:
+#line 486 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1643 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 178:
-#line 519 "kappaParser.y" // lalr1.cc:847
+  case 163:
+#line 491 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1649 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 179:
-#line 521 "kappaParser.y" // lalr1.cc:847
+  case 164:
+#line 493 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1655 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 181:
-#line 526 "kappaParser.y" // lalr1.cc:847
+  case 165:
+#line 495 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1661 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 182:
-#line 528 "kappaParser.y" // lalr1.cc:847
+  case 167:
+#line 499 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1667 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 184:
-#line 534 "kappaParser.y" // lalr1.cc:847
+  case 168:
+#line 500 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1673 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 185:
-#line 538 "kappaParser.y" // lalr1.cc:847
+  case 170:
+#line 505 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1679 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 186:
-#line 540 "kappaParser.y" // lalr1.cc:847
+  case 171:
+#line 507 "kappaParser.y" // lalr1.cc:847
     {}
 #line 1685 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 187:
-#line 542 "kappaParser.y" // lalr1.cc:847
-    {}
+  case 173:
+#line 512 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::Agent> > ()=yystack_[1].value.as< std::list<ast::Agent> > ();}
 #line 1691 "KappaParser.cpp" // lalr1.cc:847
     break;
 
+  case 174:
+#line 514 "kappaParser.y" // lalr1.cc:847
+    {
+		yystack_[0].value.as< std::list<ast::Agent> > ().push_front(yystack_[2].value.as< ast::Agent > ());
+		yylhs.value.as< std::list<ast::Agent> > ()=yystack_[0].value.as< std::list<ast::Agent> > ();
+	}
+#line 1700 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 175:
+#line 519 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::Agent> > ()=std::list<ast::Agent>(1,yystack_[0].value.as< ast::Agent > ());}
+#line 1706 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 176:
+#line 524 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Agent > ()=ast::Agent(yystack_[3].value.as< std::string > (),yystack_[1].value.as< std::list<ast::Site> > (),yystack_[3].location);}
+#line 1712 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 177:
+#line 526 "kappaParser.y" // lalr1.cc:847
+    {yy::KappaParser::error(yystack_[1].location,std::string("Malformed agent ")+yystack_[1].value.as< std::string > ());}
+#line 1718 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 178:
+#line 531 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::Site> > ()=std::list<ast::Site>();}
+#line 1724 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 179:
+#line 533 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::Site> > ()=std::list<ast::Site>(1,yystack_[0].value.as< ast::Site > ());}
+#line 1730 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 180:
+#line 535 "kappaParser.y" // lalr1.cc:847
+    {
+	yystack_[0].value.as< std::list<ast::Site> > ().push_front(yystack_[2].value.as< ast::Site > ());
+	yylhs.value.as< std::list<ast::Site> > ()=yystack_[0].value.as< std::list<ast::Site> > ();
+}
+#line 1739 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 182:
+#line 556 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Site > ()=ast::Site(yystack_[2].value.as< std::string > (),yystack_[1].value.as< std::list<std::string> > (),yystack_[0].value.as< ast::Link > (),yystack_[2].location);}
+#line 1745 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 183:
+#line 561 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<std::string> > ()=std::list<std::string>(); }
+#line 1751 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 184:
+#line 563 "kappaParser.y" // lalr1.cc:847
+    {
+		yystack_[0].value.as< std::list<std::string> > ().push_front(yystack_[1].value.as< std::string > ());
+		yylhs.value.as< std::list<std::string> > ()=yystack_[0].value.as< std::list<std::string> > ();
+	 }
+#line 1760 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 185:
+#line 568 "kappaParser.y" // lalr1.cc:847
+    {yy::KappaParser::error(yystack_[0].location,"Invalid internal state");}
+#line 1766 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 186:
+#line 573 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::FREE,yylhs.location);}
+#line 1772 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 187:
+#line 575 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::VALUE,yystack_[0].value.as< int > (),yystack_[0].location);}
+#line 1778 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
   case 188:
-#line 547 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Node > () = ast::Link(ast::Link::FREE,yylhs.location);}
-#line 1697 "KappaParser.cpp" // lalr1.cc:847
+#line 577 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::SOME,yystack_[0].location);}
+#line 1784 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 189:
-#line 549 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Node > () = ast::Link(ast::Link::VALUE,yystack_[0].value.as< int > (),yystack_[0].location);}
-#line 1703 "KappaParser.cpp" // lalr1.cc:847
+#line 579 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::TYPE,ast::Id(yystack_[2].value.as< std::string > (),yystack_[2].location),ast::Id(yystack_[0].value.as< std::string > (),yystack_[0].location),yystack_[3].location);}
+#line 1790 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 190:
-#line 551 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Node > () = ast::Link(ast::Link::SOME,yystack_[0].location);}
-#line 1709 "KappaParser.cpp" // lalr1.cc:847
+#line 581 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::ANY,yystack_[0].location);}
+#line 1796 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 191:
-#line 553 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Node > () = ast::Link(ast::Link::TYPE,ast::Id(yystack_[2].value.as< std::string > (),yystack_[2].location),ast::Id(yystack_[0].value.as< std::string > (),yystack_[0].location),yystack_[3].location);}
-#line 1715 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 192:
-#line 555 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Node > () = ast::Link(ast::Link::ANY,yystack_[0].location);}
-#line 1721 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 193:
-#line 557 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1727 "KappaParser.cpp" // lalr1.cc:847
+#line 583 "kappaParser.y" // lalr1.cc:847
+    {yy::KappaParser::error(yystack_[1].location,"Invalid link state");}
+#line 1802 "KappaParser.cpp" // lalr1.cc:847
     break;
 
 
-#line 1731 "KappaParser.cpp" // lalr1.cc:847
+#line 1806 "KappaParser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -1982,44 +2057,44 @@ namespace yy {
   }
 
 
-  const short int  KappaParser ::yypact_ninf_ = -199;
+  const short int  KappaParser ::yypact_ninf_ = -198;
 
-  const short int  KappaParser ::yytable_ninf_ = -186;
+  const short int  KappaParser ::yytable_ninf_ = -184;
 
   const short int
    KappaParser ::yypact_[] =
   {
-    -199,   143,  -199,  -199,   602,   -53,   -32,    17,    12,   -53,
-     533,   -23,  -199,   -18,   -12,   117,   -40,   147,  -199,    -2,
-    -199,   781,   940,  -199,  -199,  -199,   838,  -199,  -199,  -199,
-    -199,  -199,  -199,   940,   940,   940,   940,   940,   940,   940,
-     940,   940,  -199,  -199,  -199,     4,   940,   940,  -199,  -199,
-    -199,  -199,  -199,   181,  -199,  -199,  1081,   488,  -199,   -13,
-    -199,    45,  -199,  -199,  -199,   144,  -199,  -199,  -199,    -2,
-    -199,  -199,   940,   556,  -199,    69,   940,   -18,  -199,  -199,
-      29,  -199,    -4,  -199,  -199,  -199,  -199,    -2,    44,    25,
-    -199,   108,   113,   328,   135,  -199,    96,   238,  -199,  -199,
-    -199,   556,   556,   556,  -199,  -199,  -199,    92,   716,   716,
-     895,   895,   432,   432,   940,   940,   940,   940,   940,   940,
-     940,   940,   940,   940,  -199,   985,   341,   556,  -199,   -13,
-    -199,  -199,    -5,   -44,    41,  -199,   233,   940,   155,   556,
-      44,    -2,   -40,  -199,   167,  -199,  -199,    -2,   245,  -199,
-      -2,  -199,  -199,   432,  -199,   895,  -199,    -3,    -3,   895,
-    -199,   158,   432,   331,   417,    95,   -14,   102,   161,     5,
-     176,   126,   -14,   -14,   169,   197,  -199,    -3,    -8,    -3,
-     556,   556,   556,   556,    -8,   153,   153,  -199,    42,   199,
-    -199,   209,  -199,   206,   118,   895,  -199,   -18,   223,  -199,
-    -199,    66,  -199,  1030,  -199,   427,  -199,  -199,   145,     9,
-     232,  -199,   110,  -199,  -199,  -199,  -199,   159,   647,  -199,
-     159,   940,   647,   647,  -199,   216,   940,   940,  -199,  -199,
-     895,   432,  -199,    42,    -7,  -199,    -5,  -199,    69,   130,
-     240,   940,  -199,  -199,   940,   235,   625,   168,  -199,  -199,
-    -199,  -199,  -199,   244,   234,   521,  -199,   556,   242,   247,
-     647,   556,   556,   145,  -199,  -199,  -199,     2,  -199,  -199,
-    -199,  -199,     1,   556,   217,  -199,  -199,   237,   647,  -199,
-     647,  -199,  -199,   248,  -199,  -199,  -199,   246,  -199,   940,
-     940,  1030,  -199,  -199,  -199,   178,   739,   255,   556,  -199,
-    -199,   940,  -199,   556
+    -198,   142,  -198,  -198,   601,   -53,   -54,    17,    12,   -53,
+     532,   -46,  -198,   -31,   -24,   150,   -51,   179,  -198,    -2,
+    -198,   780,   939,  -198,  -198,  -198,   837,  -198,  -198,  -198,
+    -198,  -198,  -198,   939,   939,   939,   939,   939,   939,   939,
+     939,   939,  -198,  -198,  -198,   -15,   939,   939,  -198,  -198,
+    -198,  -198,  -198,   237,  -198,  -198,  1080,   487,  -198,   -25,
+    -198,    58,  -198,  -198,  -198,   197,  -198,  -198,  -198,    -2,
+    -198,  -198,   939,   555,  -198,    62,   939,   -31,  -198,  -198,
+       3,  -198,    -4,  -198,  -198,  -198,  -198,    -2,    63,    -1,
+    -198,    70,   104,   198,   232,  -198,    45,   321,  -198,  -198,
+    -198,   555,   555,   555,  -198,  -198,  -198,    46,   715,   715,
+     894,   894,   431,   431,   939,   939,   939,   939,   939,   939,
+     939,   939,   939,   939,  -198,   984,   340,   555,  -198,   -25,
+    -198,  -198,    -5,    67,    37,  -198,   520,   939,   109,   555,
+      63,    -2,   -51,  -198,   130,  -198,  -198,    -2,   244,  -198,
+      -2,  -198,  -198,   431,  -198,   894,  -198,    -3,    -3,   894,
+    -198,   131,   431,   330,   416,    78,   -14,    80,   139,     5,
+     155,   100,   -14,   -14,   140,   172,  -198,    -3,    -8,    -3,
+     555,   555,   555,   555,    -8,   113,   113,  -198,    42,   175,
+     177,  -198,   180,   216,   894,  -198,   -31,   187,  -198,  -198,
+      66,  -198,  1029,  -198,   426,  -198,  -198,   218,    31,   185,
+    -198,   138,  -198,  -198,  -198,  -198,   221,   646,  -198,   221,
+     939,   646,   646,  -198,   174,   939,   939,  -198,  -198,   894,
+     431,  -198,    42,   -26,  -198,    -5,  -198,    62,   111,   193,
+     939,  -198,  -198,   939,   195,   624,   134,  -198,  -198,  -198,
+    -198,  -198,   207,   202,   110,  -198,   555,   214,   219,   646,
+     555,   555,   218,  -198,  -198,  -198,     2,  -198,  -198,  -198,
+    -198,     1,   555,   135,  -198,  -198,   203,   646,  -198,   646,
+    -198,  -198,   224,  -198,  -198,  -198,   250,  -198,   939,   939,
+    1029,  -198,  -198,  -198,   182,   738,   258,   555,  -198,  -198,
+     939,  -198,   555
   };
 
   const unsigned char
@@ -2044,278 +2119,278 @@ namespace yy {
       83,    84,    52,     0,     0,     0,    91,     0,     0,     0,
        0,     0,    91,    91,    50,    54,    51,   144,   143,   146,
       85,    86,    87,    88,   145,   147,   148,    42,     0,     0,
-     179,   182,    30,     0,     0,    81,    35,     0,     0,    47,
-     173,   118,   111,   112,   110,     0,   174,    50,    25,     0,
-       0,    62,   172,    61,   171,    64,    63,    75,    70,    92,
-      75,     0,    70,    70,    95,     0,     0,     0,    67,    66,
-      81,    52,   187,     0,   188,   176,   180,    31,    36,     0,
-       0,     0,   119,   120,   162,     0,     0,     0,    53,   170,
-      76,    77,    59,    71,     0,    72,    60,    58,     0,     0,
-      70,    65,    57,    27,    55,   186,   192,     0,   184,   181,
-      37,    39,     0,    13,   164,   122,   113,   114,    70,    93,
-      70,    68,    96,     0,   193,   190,   189,     0,    12,   166,
-       0,   112,    73,    74,    69,     0,   167,     0,   165,   115,
-     191,     0,   163,   168
+     179,    30,     0,     0,    81,    35,     0,     0,    47,   173,
+     118,   111,   112,   110,     0,   174,    50,    25,     0,     0,
+      62,   172,    61,   171,    64,    63,    75,    70,    92,    75,
+       0,    70,    70,    95,     0,     0,     0,    67,    66,    81,
+      52,   185,     0,   186,   176,   178,    31,    36,     0,     0,
+       0,   119,   120,   162,     0,     0,     0,    53,   170,    76,
+      77,    59,    71,     0,    72,    60,    58,     0,     0,    70,
+      65,    57,    27,    55,   184,   190,     0,   182,   180,    37,
+      39,     0,    13,   164,   122,   113,   114,    70,    93,    70,
+      68,    96,     0,   191,   188,   187,     0,    12,   166,     0,
+     112,    73,    74,    69,     0,   167,     0,   165,   115,   189,
+       0,   163,   168
   };
 
   const short int
    KappaParser ::yypgoto_[] =
   {
-    -199,  -199,  -199,  -199,  -199,   133,  -199,    -9,    39,  -199,
-     149,   -65,    38,  -111,  -199,   -55,    56,   273,   -20,    60,
-    -199,   154,    16,  -199,   164,  -199,  -198,   151,  -199,  -199,
-     150,  -199,   -10,  -199,  -199,   136,   -47,   295,  -199,    77,
-    -199,    84,  -199
+    -198,  -198,  -198,  -198,  -198,   141,  -198,    -9,    40,  -198,
+     152,   -65,    18,  -111,  -198,   -91,    68,   277,   -20,   101,
+    -198,   156,    20,  -198,   154,  -198,  -197,   158,  -198,  -198,
+     170,  -198,   -10,  -198,  -198,   148,   -47,   309,    82,  -198,
+      86,  -198
   };
 
   const short int
    KappaParser ::yydefgoto_[] =
   {
-      -1,     1,    86,    17,    18,    68,    80,    82,   138,   196,
-     130,    83,    52,   174,   175,   254,   252,    58,    53,   220,
-     225,    69,    54,    19,    88,   149,   204,    89,   244,    20,
-     147,    55,    56,   275,   297,   213,    90,    91,   189,   190,
-     191,   234,   268
+      -1,     1,    86,    17,    18,    68,    80,    82,   138,   195,
+     130,    83,    52,   174,   175,   253,   251,    58,    53,   219,
+     224,    69,    54,    19,    88,   149,   203,    89,   243,    20,
+     147,    55,    56,   274,   296,   212,    90,    91,   189,   190,
+     233,   267
   };
 
   const short int
    KappaParser ::yytable_[] =
   {
-      73,    93,   176,   284,    76,   245,    97,    87,  -183,   142,
-     128,    94,    95,    63,   218,   -28,   -28,   143,    60,   152,
+      73,    93,   176,   283,    76,   244,    97,    87,  -181,   142,
+     128,    94,    95,    63,   217,   -28,   -28,   143,    60,   265,
      115,   -97,   135,    98,    99,   100,   101,   102,   103,   104,
-     105,   106,    57,   223,   110,   111,   108,   109,   266,    64,
-     144,    66,   207,   232,    67,    75,   131,   127,   285,    27,
-     -97,   210,  -185,   121,   132,  -185,    81,    59,   122,    92,
-     123,    74,   136,   122,    96,   123,   139,    75,   140,   267,
-      42,    43,   242,    77,   243,   219,   129,   199,   144,   188,
-     137,    75,    61,   145,    48,   286,   287,  -185,   107,    51,
-     160,   161,    81,   299,   224,    64,    65,    66,   157,   158,
-      67,    61,   148,   206,   177,   178,   179,   180,   181,   182,
-     183,   184,   185,   186,   141,   136,   214,   214,  -185,    87,
-     264,   150,   146,   151,    64,    65,    66,   194,   233,    67,
-     238,   155,   114,   115,   116,   208,    78,    79,   205,   209,
-     114,   115,   116,     2,     3,   154,    -6,    -6,   271,    94,
-      84,    85,  -106,   212,   212,   110,   111,   114,   115,   116,
-     133,   134,   117,   118,   119,   249,   121,   258,   259,   156,
-     110,   111,   195,     4,   121,   239,   122,   200,   123,   120,
-     217,     5,  -106,   110,   122,     6,   123,   221,   240,   222,
-       7,   121,   226,   246,    61,   250,   251,     8,     9,   227,
-      10,   122,   231,   123,   230,   283,   110,   111,   255,   235,
-     263,   257,   255,   255,   112,   113,   261,   262,    11,   122,
-    -106,  -106,   236,   292,   237,   293,   289,  -106,    12,   241,
-     290,   273,   228,   229,   274,    13,    14,    15,    16,   114,
-     115,   116,   248,   154,   260,   276,   202,   272,  -112,  -112,
-     255,  -112,   277,  -112,   203,   114,   115,   116,   278,   291,
-     295,   279,   300,   110,   111,   302,    22,   193,   255,   281,
-     255,   153,   113,   121,   282,   294,   256,   270,   187,   296,
-     298,   205,    70,   122,  -112,   123,    25,   192,   288,   121,
-     197,   303,   198,    27,    28,    29,    30,    31,    32,   122,
-     216,   123,    62,    33,    34,    35,    36,    37,    38,    39,
-      40,   201,    41,   269,    42,    43,    44,   265,     0,     0,
-       0,     0,    45,  -112,     0,     0,    46,    47,    48,    49,
-      50,     0,   211,    51,  -169,  -169,  -169,     0,   152,     0,
-     125,  -169,   131,     0,  -142,  -142,  -142,     0,     0,     0,
-     132,  -142,    22,   110,   111,     0,     0,     0,     0,     0,
-       0,   153,   113,  -142,  -142,  -142,  -169,     0,     0,     0,
-       0,     0,    25,     0,     0,     0,  -142,     0,     0,    27,
-      28,    29,    30,    31,    32,     0,     0,     0,     0,    33,
-      34,    35,    36,    37,    38,    39,    40,  -142,    41,     0,
-      42,    43,    44,     0,     0,     0,     0,  -142,    45,  -142,
-       0,     0,    46,    47,    48,   126,    50,     0,   215,    51,
-    -169,  -169,  -169,     0,     0,  -142,   125,  -169,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,   -56,    22,     0,
-       0,   162,   247,     0,     0,     0,     0,     0,     0,   114,
-     115,   116,  -169,     0,     0,     0,     0,     0,    25,     0,
-       0,     0,     0,   163,   164,    27,    28,    29,    30,    31,
-      32,     0,   165,     0,     0,    33,    34,    35,    36,    37,
-      38,    39,    40,   121,    41,     0,    42,    43,    44,   124,
-       0,  -172,  -172,   122,    45,   123,     0,   125,    46,    47,
-      48,   126,    50,     0,   166,    51,   167,     0,     0,    22,
-       0,   168,   169,     0,     0,     0,   170,   171,     0,     0,
-       0,     0,   172,   173,     0,     0,     0,     0,     0,    25,
-       0,     0,     0,     0,    71,   280,    27,    28,    29,    30,
-      31,    32,    72,   114,   115,   116,    33,    34,    35,    36,
-      37,    38,    39,    40,    22,    41,     0,    42,    43,    44,
-       0,     0,     0,     0,     0,    45,     0,     0,     0,    46,
-      47,    48,   126,    50,    25,     0,    51,   121,   114,   115,
-     116,    27,    28,    29,    30,    31,    32,   122,     0,   123,
-       0,    33,    34,    35,    36,    37,    38,    39,    40,     0,
-      41,     0,    42,    43,    44,   -48,   -48,     0,     0,     0,
-      45,    21,   121,     0,    46,    47,    48,    49,    50,     0,
-       0,    51,   122,    22,   123,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,   154,     0,     0,    23,    24,
-     247,     0,     0,    25,     0,    26,     0,   114,   115,   116,
-      27,    28,    29,    30,    31,    32,    72,     0,     0,     0,
-      33,    34,    35,    36,    37,    38,    39,    40,    22,    41,
-       0,    42,    43,    44,     0,     0,     0,     0,     0,    45,
-       0,   121,     0,    46,    47,    48,    49,    50,    25,     0,
-      51,   122,     0,   123,     0,    27,    28,    29,    30,    31,
-      32,     0,     0,     0,     0,    33,    34,    35,    36,    37,
-      38,    39,    40,     0,    41,     0,    42,    43,    44,     0,
-       0,     0,     0,     0,    45,    72,     0,     0,    46,    47,
-      48,    49,    50,     0,     0,    51,   253,    22,   114,   115,
-     116,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,   301,     0,     0,    25,     0,     0,
-       0,   114,   115,   116,    27,    28,    29,    30,    31,    32,
-       0,     0,   121,     0,    33,    34,    35,    36,    37,    38,
-      39,    40,   122,    41,   123,    42,    43,    44,     0,     0,
-      21,   -48,     0,    45,     0,   121,     0,    46,    47,    48,
-      49,    50,    22,     0,    51,   122,     0,   123,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,    23,    24,     0,
-       0,     0,    25,     0,     0,     0,     0,     0,     0,    27,
-      28,    29,    30,    31,    32,     0,     0,     0,     0,    33,
-      34,    35,    36,    37,    38,    39,    40,    21,    41,     0,
-      42,    43,    44,     0,     0,     0,     0,     0,    45,    22,
-       0,     0,    46,    47,    48,    49,    50,     0,     0,    51,
-       0,     0,     0,   -48,    23,    24,     0,     0,     0,    25,
-       0,     0,     0,     0,     0,     0,    27,    28,    29,    30,
-      31,    32,     0,     0,     0,     0,    33,    34,    35,    36,
-      37,    38,    39,    40,   159,    41,     0,    42,    43,    44,
-       0,     0,     0,     0,     0,    45,    22,     0,     0,    46,
-      47,    48,    49,    50,     0,     0,    51,     0,     0,     0,
-       0,    23,    24,     0,     0,     0,    25,     0,     0,     0,
-       0,     0,     0,    27,    28,    29,    30,    31,    32,    72,
-       0,     0,     0,    33,    34,    35,    36,    37,    38,    39,
-      40,    22,    41,     0,    42,    43,    44,     0,     0,     0,
-       0,     0,    45,     0,     0,     0,    46,    47,    48,    49,
-      50,    25,     0,    51,     0,     0,     0,     0,    27,    28,
-      29,    30,    31,    32,   125,     0,     0,     0,    33,    34,
-      35,    36,    37,    38,    39,    40,    22,    41,     0,    42,
-      43,    44,     0,     0,     0,     0,     0,    45,     0,     0,
-       0,    46,    47,    48,    49,    50,    25,     0,    51,     0,
-       0,     0,     0,    27,    28,    29,    30,    31,    32,   203,
-       0,     0,     0,    33,    34,    35,    36,    37,    38,    39,
-      40,    22,    41,     0,    42,    43,    44,     0,     0,     0,
-       0,     0,    45,     0,     0,     0,    46,    47,    48,   126,
-      50,    25,     0,    51,     0,     0,     0,     0,    27,    28,
+     105,   106,    57,   222,    75,    59,   108,   109,    74,    92,
+     144,   152,   206,   231,    96,    81,   -97,   127,   284,    27,
+     266,   209,  -183,   121,    75,  -183,   110,   111,   122,   131,
+     123,    77,   136,   122,   129,   123,   139,   132,   140,   107,
+      42,    43,   241,   137,   242,   218,   148,   198,   144,   188,
+     155,    75,    61,   150,    48,   285,   286,  -183,   141,    51,
+     160,   161,    81,   298,   223,    64,    65,    66,   157,   158,
+      67,    61,   145,   205,   177,   178,   179,   180,   181,   182,
+     183,   184,   185,   186,   151,   136,   213,   213,  -183,   263,
+      64,    65,    66,   156,   279,    67,   194,   193,   232,   270,
+     257,   258,   114,   115,   116,   207,   110,   111,   204,   208,
+     199,   146,     2,     3,   288,    -6,    -6,    87,   289,    94,
+      64,  -106,    66,   211,   211,    67,   110,   114,   115,   116,
+     114,   115,   116,   216,   248,   220,   121,   221,   282,    78,
+      79,   225,     4,   226,   238,   229,   122,   230,   123,   122,
+       5,  -106,    84,    85,     6,   234,   291,   239,   292,     7,
+     235,   121,   245,   240,   121,   247,     8,     9,   236,    10,
+     271,   122,   259,   123,   122,   275,   123,   254,   152,   262,
+     256,   254,   254,   133,   134,   260,   261,    11,   276,  -106,
+    -106,   277,    61,   110,   111,   290,  -106,    12,   237,   278,
+     272,   153,   113,   273,    13,    14,    15,    16,   114,   115,
+     116,   280,   154,   110,   111,   201,   281,  -112,  -112,   254,
+    -112,   293,  -112,   202,   114,   115,   116,   249,   250,   117,
+     118,   119,   110,   111,   294,    22,   299,   254,   301,   254,
+     112,   113,   121,   227,   228,   192,   120,   269,   295,   297,
+     204,   187,   122,  -112,   123,    25,    70,   255,   121,   191,
+     302,   287,    27,    28,    29,    30,    31,    32,   122,   197,
+     123,   200,    33,    34,    35,    36,    37,    38,    39,    40,
+     196,    41,   215,    42,    43,    44,    62,   268,   264,     0,
+       0,    45,  -112,     0,     0,    46,    47,    48,    49,    50,
+       0,   210,    51,  -169,  -169,  -169,     0,     0,     0,   125,
+    -169,   131,     0,  -142,  -142,  -142,   110,   111,     0,   132,
+    -142,    22,     0,     0,   153,   113,     0,     0,     0,     0,
+       0,     0,  -142,  -142,  -142,  -169,     0,     0,     0,     0,
+       0,    25,     0,     0,     0,  -142,     0,     0,    27,    28,
       29,    30,    31,    32,     0,     0,     0,     0,    33,    34,
-      35,    36,    37,    38,    39,    40,     0,    41,     0,    42,
-      43,    44,     0,   114,   115,   116,     0,    45,   117,   118,
-     119,    46,    47,    48,    49,    50,     0,     0,    51,     0,
-       0,     0,     0,     0,     0,   120,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,   121,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,   122,     0,   123
+      35,    36,    37,    38,    39,    40,  -142,    41,     0,    42,
+      43,    44,     0,     0,     0,     0,  -142,    45,  -142,     0,
+       0,    46,    47,    48,   126,    50,     0,   214,    51,  -169,
+    -169,  -169,     0,     0,  -142,   125,  -169,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,   -56,    22,     0,     0,
+     162,   246,     0,     0,     0,     0,     0,     0,   114,   115,
+     116,  -169,     0,     0,     0,     0,     0,    25,     0,     0,
+       0,     0,   163,   164,    27,    28,    29,    30,    31,    32,
+       0,   165,     0,     0,    33,    34,    35,    36,    37,    38,
+      39,    40,   121,    41,     0,    42,    43,    44,   124,     0,
+    -172,  -172,   122,    45,   123,     0,   125,    46,    47,    48,
+     126,    50,     0,   166,    51,   167,     0,     0,    22,     0,
+     168,   169,     0,     0,     0,   170,   171,     0,     0,     0,
+       0,   172,   173,     0,     0,     0,     0,     0,    25,     0,
+     154,     0,     0,    71,     0,    27,    28,    29,    30,    31,
+      32,    72,   114,   115,   116,    33,    34,    35,    36,    37,
+      38,    39,    40,    22,    41,     0,    42,    43,    44,     0,
+       0,     0,     0,     0,    45,     0,     0,     0,    46,    47,
+      48,   126,    50,    25,     0,    51,   121,   114,   115,   116,
+      27,    28,    29,    30,    31,    32,   122,     0,   123,     0,
+      33,    34,    35,    36,    37,    38,    39,    40,     0,    41,
+       0,    42,    43,    44,   -48,   -48,     0,     0,     0,    45,
+      21,   121,     0,    46,    47,    48,    49,    50,     0,     0,
+      51,   122,    22,   123,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,   154,     0,     0,    23,    24,   246,
+       0,     0,    25,     0,    26,     0,   114,   115,   116,    27,
+      28,    29,    30,    31,    32,    72,     0,     0,     0,    33,
+      34,    35,    36,    37,    38,    39,    40,    22,    41,     0,
+      42,    43,    44,     0,     0,     0,     0,     0,    45,     0,
+     121,     0,    46,    47,    48,    49,    50,    25,     0,    51,
+     122,     0,   123,     0,    27,    28,    29,    30,    31,    32,
+       0,     0,     0,     0,    33,    34,    35,    36,    37,    38,
+      39,    40,     0,    41,     0,    42,    43,    44,     0,     0,
+       0,     0,     0,    45,    72,     0,     0,    46,    47,    48,
+      49,    50,     0,     0,    51,   252,    22,   114,   115,   116,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,   300,     0,     0,    25,     0,     0,     0,
+     114,   115,   116,    27,    28,    29,    30,    31,    32,     0,
+       0,   121,     0,    33,    34,    35,    36,    37,    38,    39,
+      40,   122,    41,   123,    42,    43,    44,     0,     0,    21,
+     -48,     0,    45,     0,   121,     0,    46,    47,    48,    49,
+      50,    22,     0,    51,   122,     0,   123,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    23,    24,     0,     0,
+       0,    25,     0,     0,     0,     0,     0,     0,    27,    28,
+      29,    30,    31,    32,     0,     0,     0,     0,    33,    34,
+      35,    36,    37,    38,    39,    40,    21,    41,     0,    42,
+      43,    44,     0,     0,     0,     0,     0,    45,    22,     0,
+       0,    46,    47,    48,    49,    50,     0,     0,    51,     0,
+       0,     0,   -48,    23,    24,     0,     0,     0,    25,     0,
+       0,     0,     0,     0,     0,    27,    28,    29,    30,    31,
+      32,     0,     0,     0,     0,    33,    34,    35,    36,    37,
+      38,    39,    40,   159,    41,     0,    42,    43,    44,     0,
+       0,     0,     0,     0,    45,    22,     0,     0,    46,    47,
+      48,    49,    50,     0,     0,    51,     0,     0,     0,     0,
+      23,    24,     0,     0,     0,    25,     0,     0,     0,     0,
+       0,     0,    27,    28,    29,    30,    31,    32,    72,     0,
+       0,     0,    33,    34,    35,    36,    37,    38,    39,    40,
+      22,    41,     0,    42,    43,    44,     0,     0,     0,     0,
+       0,    45,     0,     0,     0,    46,    47,    48,    49,    50,
+      25,     0,    51,     0,     0,     0,     0,    27,    28,    29,
+      30,    31,    32,   125,     0,     0,     0,    33,    34,    35,
+      36,    37,    38,    39,    40,    22,    41,     0,    42,    43,
+      44,     0,     0,     0,     0,     0,    45,     0,     0,     0,
+      46,    47,    48,    49,    50,    25,     0,    51,     0,     0,
+       0,     0,    27,    28,    29,    30,    31,    32,   202,     0,
+       0,     0,    33,    34,    35,    36,    37,    38,    39,    40,
+      22,    41,     0,    42,    43,    44,     0,     0,     0,     0,
+       0,    45,     0,     0,     0,    46,    47,    48,   126,    50,
+      25,     0,    51,     0,     0,     0,     0,    27,    28,    29,
+      30,    31,    32,     0,     0,     0,     0,    33,    34,    35,
+      36,    37,    38,    39,    40,     0,    41,     0,    42,    43,
+      44,     0,   114,   115,   116,     0,    45,   117,   118,   119,
+      46,    47,    48,    49,    50,     0,     0,    51,     0,     0,
+       0,     0,     0,     0,   120,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,   121,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,   122,     0,   123
   };
 
   const short int
    KappaParser ::yycheck_[] =
   {
-      10,    21,   113,     1,    13,   203,    26,     9,    13,    13,
-      57,    21,    22,     1,    28,     3,     4,    82,     1,    10,
+      10,    21,   113,     1,    13,   202,    26,     9,    13,    13,
+      57,    21,    22,     1,    28,     3,     4,    82,     1,    45,
       23,     9,    69,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    85,    28,    25,    26,    46,    47,    45,    83,
-      87,    85,   153,     1,    88,    85,     1,    57,    46,    48,
-       9,   162,    10,    56,     9,    13,    96,    89,    66,    21,
-      68,    84,    72,    66,    26,    68,    76,    85,    77,    76,
-      69,    70,     6,    85,     8,    89,    89,   142,   125,    84,
-      11,    85,    84,    39,    83,    83,    84,    45,    84,    88,
-     110,   111,    96,   291,    89,    83,    84,    85,   108,   109,
-      88,    84,    77,   150,   114,   115,   116,   117,   118,   119,
-     120,   121,   122,   123,    85,   125,   163,   164,    76,     9,
-     231,    13,    78,    10,    83,    84,    85,   137,    86,    88,
-      12,    35,    22,    23,    24,   155,    19,    20,   148,   159,
-      22,    23,    24,     0,     1,    10,     3,     4,    18,   159,
-       3,     4,     9,   163,   164,    25,    26,    22,    23,    24,
-      16,    17,    27,    28,    29,   212,    56,   222,   223,    77,
-      25,    26,    17,    30,    56,   195,    66,    10,    68,    44,
-      85,    38,    39,    25,    66,    42,    68,    85,   197,    28,
-      47,    56,    16,   203,    84,    36,    37,    54,    55,    73,
-      57,    66,     5,    68,    35,   260,    25,    26,   218,    10,
-     230,   221,   222,   223,    33,    34,   226,   227,    75,    66,
-      77,    78,    13,   278,    18,   280,     9,    84,    85,     6,
-      13,   241,   172,   173,   244,    92,    93,    94,    95,    22,
-      23,    24,    10,    10,    28,    10,     1,     7,     3,     4,
-     260,     6,    84,     8,     9,    22,    23,    24,    14,    22,
-      14,    27,    84,    25,    26,    10,    21,   134,   278,    27,
-     280,    33,    34,    56,    27,    27,   220,   238,   129,   289,
-     290,   291,     9,    66,    39,    68,    41,   133,   272,    56,
-     140,   301,   141,    48,    49,    50,    51,    52,    53,    66,
-     164,    68,     7,    58,    59,    60,    61,    62,    63,    64,
-      65,   147,    67,   236,    69,    70,    71,   233,    -1,    -1,
-      -1,    -1,    77,    78,    -1,    -1,    81,    82,    83,    84,
-      85,    -1,     1,    88,     3,     4,     5,    -1,    10,    -1,
-       9,    10,     1,    -1,     3,     4,     5,    -1,    -1,    -1,
-       9,    10,    21,    25,    26,    -1,    -1,    -1,    -1,    -1,
-      -1,    33,    34,    22,    23,    24,    35,    -1,    -1,    -1,
-      -1,    -1,    41,    -1,    -1,    -1,    35,    -1,    -1,    48,
-      49,    50,    51,    52,    53,    -1,    -1,    -1,    -1,    58,
-      59,    60,    61,    62,    63,    64,    65,    56,    67,    -1,
-      69,    70,    71,    -1,    -1,    -1,    -1,    66,    77,    68,
-      -1,    -1,    81,    82,    83,    84,    85,    -1,     1,    88,
-       3,     4,     5,    -1,    -1,    84,     9,    10,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,     5,    21,    -1,
-      -1,     9,    15,    -1,    -1,    -1,    -1,    -1,    -1,    22,
-      23,    24,    35,    -1,    -1,    -1,    -1,    -1,    41,    -1,
-      -1,    -1,    -1,    31,    32,    48,    49,    50,    51,    52,
-      53,    -1,    40,    -1,    -1,    58,    59,    60,    61,    62,
-      63,    64,    65,    56,    67,    -1,    69,    70,    71,     1,
-      -1,     3,     4,    66,    77,    68,    -1,     9,    81,    82,
-      83,    84,    85,    -1,    72,    88,    74,    -1,    -1,    21,
-      -1,    79,    80,    -1,    -1,    -1,    84,    85,    -1,    -1,
-      -1,    -1,    90,    91,    -1,    -1,    -1,    -1,    -1,    41,
-      -1,    -1,    -1,    -1,     1,    14,    48,    49,    50,    51,
-      52,    53,     9,    22,    23,    24,    58,    59,    60,    61,
-      62,    63,    64,    65,    21,    67,    -1,    69,    70,    71,
-      -1,    -1,    -1,    -1,    -1,    77,    -1,    -1,    -1,    81,
-      82,    83,    84,    85,    41,    -1,    88,    56,    22,    23,
-      24,    48,    49,    50,    51,    52,    53,    66,    -1,    68,
-      -1,    58,    59,    60,    61,    62,    63,    64,    65,    -1,
-      67,    -1,    69,    70,    71,     3,     4,    -1,    -1,    -1,
-      77,     9,    56,    -1,    81,    82,    83,    84,    85,    -1,
-      -1,    88,    66,    21,    68,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    10,    -1,    -1,    36,    37,
-      15,    -1,    -1,    41,    -1,    43,    -1,    22,    23,    24,
-      48,    49,    50,    51,    52,    53,     9,    -1,    -1,    -1,
-      58,    59,    60,    61,    62,    63,    64,    65,    21,    67,
-      -1,    69,    70,    71,    -1,    -1,    -1,    -1,    -1,    77,
-      -1,    56,    -1,    81,    82,    83,    84,    85,    41,    -1,
-      88,    66,    -1,    68,    -1,    48,    49,    50,    51,    52,
-      53,    -1,    -1,    -1,    -1,    58,    59,    60,    61,    62,
-      63,    64,    65,    -1,    67,    -1,    69,    70,    71,    -1,
-      -1,    -1,    -1,    -1,    77,     9,    -1,    -1,    81,    82,
-      83,    84,    85,    -1,    -1,    88,    89,    21,    22,    23,
-      24,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    15,    -1,    -1,    41,    -1,    -1,
-      -1,    22,    23,    24,    48,    49,    50,    51,    52,    53,
-      -1,    -1,    56,    -1,    58,    59,    60,    61,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,    71,    -1,    -1,
-       9,    10,    -1,    77,    -1,    56,    -1,    81,    82,    83,
-      84,    85,    21,    -1,    88,    66,    -1,    68,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    36,    37,    -1,
-      -1,    -1,    41,    -1,    -1,    -1,    -1,    -1,    -1,    48,
-      49,    50,    51,    52,    53,    -1,    -1,    -1,    -1,    58,
-      59,    60,    61,    62,    63,    64,    65,     9,    67,    -1,
-      69,    70,    71,    -1,    -1,    -1,    -1,    -1,    77,    21,
-      -1,    -1,    81,    82,    83,    84,    85,    -1,    -1,    88,
-      -1,    -1,    -1,    35,    36,    37,    -1,    -1,    -1,    41,
-      -1,    -1,    -1,    -1,    -1,    -1,    48,    49,    50,    51,
-      52,    53,    -1,    -1,    -1,    -1,    58,    59,    60,    61,
-      62,    63,    64,    65,     9,    67,    -1,    69,    70,    71,
-      -1,    -1,    -1,    -1,    -1,    77,    21,    -1,    -1,    81,
-      82,    83,    84,    85,    -1,    -1,    88,    -1,    -1,    -1,
-      -1,    36,    37,    -1,    -1,    -1,    41,    -1,    -1,    -1,
-      -1,    -1,    -1,    48,    49,    50,    51,    52,    53,     9,
-      -1,    -1,    -1,    58,    59,    60,    61,    62,    63,    64,
-      65,    21,    67,    -1,    69,    70,    71,    -1,    -1,    -1,
-      -1,    -1,    77,    -1,    -1,    -1,    81,    82,    83,    84,
-      85,    41,    -1,    88,    -1,    -1,    -1,    -1,    48,    49,
-      50,    51,    52,    53,     9,    -1,    -1,    -1,    58,    59,
-      60,    61,    62,    63,    64,    65,    21,    67,    -1,    69,
-      70,    71,    -1,    -1,    -1,    -1,    -1,    77,    -1,    -1,
-      -1,    81,    82,    83,    84,    85,    41,    -1,    88,    -1,
-      -1,    -1,    -1,    48,    49,    50,    51,    52,    53,     9,
-      -1,    -1,    -1,    58,    59,    60,    61,    62,    63,    64,
-      65,    21,    67,    -1,    69,    70,    71,    -1,    -1,    -1,
-      -1,    -1,    77,    -1,    -1,    -1,    81,    82,    83,    84,
-      85,    41,    -1,    88,    -1,    -1,    -1,    -1,    48,    49,
+      40,    41,    85,    28,    85,    89,    46,    47,    84,    21,
+      87,    10,   153,     1,    26,    96,     9,    57,    46,    48,
+      76,   162,    10,    56,    85,    13,    25,    26,    66,     1,
+      68,    85,    72,    66,    89,    68,    76,     9,    77,    84,
+      69,    70,     6,    11,     8,    89,    77,   142,   125,    84,
+      35,    85,    84,    13,    83,    83,    84,    45,    85,    88,
+     110,   111,    96,   290,    89,    83,    84,    85,   108,   109,
+      88,    84,    39,   150,   114,   115,   116,   117,   118,   119,
+     120,   121,   122,   123,    10,   125,   163,   164,    76,   230,
+      83,    84,    85,    77,    14,    88,    17,   137,    86,    18,
+     221,   222,    22,    23,    24,   155,    25,    26,   148,   159,
+      10,    78,     0,     1,     9,     3,     4,     9,    13,   159,
+      83,     9,    85,   163,   164,    88,    25,    22,    23,    24,
+      22,    23,    24,    85,   211,    85,    56,    28,   259,    19,
+      20,    16,    30,    73,   194,    35,    66,     5,    68,    66,
+      38,    39,     3,     4,    42,    10,   277,   196,   279,    47,
+      13,    56,   202,     6,    56,    10,    54,    55,    18,    57,
+       7,    66,    28,    68,    66,    10,    68,   217,    10,   229,
+     220,   221,   222,    16,    17,   225,   226,    75,    84,    77,
+      78,    14,    84,    25,    26,    22,    84,    85,    12,    27,
+     240,    33,    34,   243,    92,    93,    94,    95,    22,    23,
+      24,    27,    10,    25,    26,     1,    27,     3,     4,   259,
+       6,    27,     8,     9,    22,    23,    24,    36,    37,    27,
+      28,    29,    25,    26,    14,    21,    84,   277,    10,   279,
+      33,    34,    56,   172,   173,   134,    44,   237,   288,   289,
+     290,   129,    66,    39,    68,    41,     9,   219,    56,   133,
+     300,   271,    48,    49,    50,    51,    52,    53,    66,   141,
+      68,   147,    58,    59,    60,    61,    62,    63,    64,    65,
+     140,    67,   164,    69,    70,    71,     7,   235,   232,    -1,
+      -1,    77,    78,    -1,    -1,    81,    82,    83,    84,    85,
+      -1,     1,    88,     3,     4,     5,    -1,    -1,    -1,     9,
+      10,     1,    -1,     3,     4,     5,    25,    26,    -1,     9,
+      10,    21,    -1,    -1,    33,    34,    -1,    -1,    -1,    -1,
+      -1,    -1,    22,    23,    24,    35,    -1,    -1,    -1,    -1,
+      -1,    41,    -1,    -1,    -1,    35,    -1,    -1,    48,    49,
       50,    51,    52,    53,    -1,    -1,    -1,    -1,    58,    59,
-      60,    61,    62,    63,    64,    65,    -1,    67,    -1,    69,
-      70,    71,    -1,    22,    23,    24,    -1,    77,    27,    28,
-      29,    81,    82,    83,    84,    85,    -1,    -1,    88,    -1,
-      -1,    -1,    -1,    -1,    -1,    44,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    56,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    66,    -1,    68
+      60,    61,    62,    63,    64,    65,    56,    67,    -1,    69,
+      70,    71,    -1,    -1,    -1,    -1,    66,    77,    68,    -1,
+      -1,    81,    82,    83,    84,    85,    -1,     1,    88,     3,
+       4,     5,    -1,    -1,    84,     9,    10,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,     5,    21,    -1,    -1,
+       9,    15,    -1,    -1,    -1,    -1,    -1,    -1,    22,    23,
+      24,    35,    -1,    -1,    -1,    -1,    -1,    41,    -1,    -1,
+      -1,    -1,    31,    32,    48,    49,    50,    51,    52,    53,
+      -1,    40,    -1,    -1,    58,    59,    60,    61,    62,    63,
+      64,    65,    56,    67,    -1,    69,    70,    71,     1,    -1,
+       3,     4,    66,    77,    68,    -1,     9,    81,    82,    83,
+      84,    85,    -1,    72,    88,    74,    -1,    -1,    21,    -1,
+      79,    80,    -1,    -1,    -1,    84,    85,    -1,    -1,    -1,
+      -1,    90,    91,    -1,    -1,    -1,    -1,    -1,    41,    -1,
+      10,    -1,    -1,     1,    -1,    48,    49,    50,    51,    52,
+      53,     9,    22,    23,    24,    58,    59,    60,    61,    62,
+      63,    64,    65,    21,    67,    -1,    69,    70,    71,    -1,
+      -1,    -1,    -1,    -1,    77,    -1,    -1,    -1,    81,    82,
+      83,    84,    85,    41,    -1,    88,    56,    22,    23,    24,
+      48,    49,    50,    51,    52,    53,    66,    -1,    68,    -1,
+      58,    59,    60,    61,    62,    63,    64,    65,    -1,    67,
+      -1,    69,    70,    71,     3,     4,    -1,    -1,    -1,    77,
+       9,    56,    -1,    81,    82,    83,    84,    85,    -1,    -1,
+      88,    66,    21,    68,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    10,    -1,    -1,    36,    37,    15,
+      -1,    -1,    41,    -1,    43,    -1,    22,    23,    24,    48,
+      49,    50,    51,    52,    53,     9,    -1,    -1,    -1,    58,
+      59,    60,    61,    62,    63,    64,    65,    21,    67,    -1,
+      69,    70,    71,    -1,    -1,    -1,    -1,    -1,    77,    -1,
+      56,    -1,    81,    82,    83,    84,    85,    41,    -1,    88,
+      66,    -1,    68,    -1,    48,    49,    50,    51,    52,    53,
+      -1,    -1,    -1,    -1,    58,    59,    60,    61,    62,    63,
+      64,    65,    -1,    67,    -1,    69,    70,    71,    -1,    -1,
+      -1,    -1,    -1,    77,     9,    -1,    -1,    81,    82,    83,
+      84,    85,    -1,    -1,    88,    89,    21,    22,    23,    24,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    15,    -1,    -1,    41,    -1,    -1,    -1,
+      22,    23,    24,    48,    49,    50,    51,    52,    53,    -1,
+      -1,    56,    -1,    58,    59,    60,    61,    62,    63,    64,
+      65,    66,    67,    68,    69,    70,    71,    -1,    -1,     9,
+      10,    -1,    77,    -1,    56,    -1,    81,    82,    83,    84,
+      85,    21,    -1,    88,    66,    -1,    68,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    36,    37,    -1,    -1,
+      -1,    41,    -1,    -1,    -1,    -1,    -1,    -1,    48,    49,
+      50,    51,    52,    53,    -1,    -1,    -1,    -1,    58,    59,
+      60,    61,    62,    63,    64,    65,     9,    67,    -1,    69,
+      70,    71,    -1,    -1,    -1,    -1,    -1,    77,    21,    -1,
+      -1,    81,    82,    83,    84,    85,    -1,    -1,    88,    -1,
+      -1,    -1,    35,    36,    37,    -1,    -1,    -1,    41,    -1,
+      -1,    -1,    -1,    -1,    -1,    48,    49,    50,    51,    52,
+      53,    -1,    -1,    -1,    -1,    58,    59,    60,    61,    62,
+      63,    64,    65,     9,    67,    -1,    69,    70,    71,    -1,
+      -1,    -1,    -1,    -1,    77,    21,    -1,    -1,    81,    82,
+      83,    84,    85,    -1,    -1,    88,    -1,    -1,    -1,    -1,
+      36,    37,    -1,    -1,    -1,    41,    -1,    -1,    -1,    -1,
+      -1,    -1,    48,    49,    50,    51,    52,    53,     9,    -1,
+      -1,    -1,    58,    59,    60,    61,    62,    63,    64,    65,
+      21,    67,    -1,    69,    70,    71,    -1,    -1,    -1,    -1,
+      -1,    77,    -1,    -1,    -1,    81,    82,    83,    84,    85,
+      41,    -1,    88,    -1,    -1,    -1,    -1,    48,    49,    50,
+      51,    52,    53,     9,    -1,    -1,    -1,    58,    59,    60,
+      61,    62,    63,    64,    65,    21,    67,    -1,    69,    70,
+      71,    -1,    -1,    -1,    -1,    -1,    77,    -1,    -1,    -1,
+      81,    82,    83,    84,    85,    41,    -1,    88,    -1,    -1,
+      -1,    -1,    48,    49,    50,    51,    52,    53,     9,    -1,
+      -1,    -1,    58,    59,    60,    61,    62,    63,    64,    65,
+      21,    67,    -1,    69,    70,    71,    -1,    -1,    -1,    -1,
+      -1,    77,    -1,    -1,    -1,    81,    82,    83,    84,    85,
+      41,    -1,    88,    -1,    -1,    -1,    -1,    48,    49,    50,
+      51,    52,    53,    -1,    -1,    -1,    -1,    58,    59,    60,
+      61,    62,    63,    64,    65,    -1,    67,    -1,    69,    70,
+      71,    -1,    22,    23,    24,    -1,    77,    27,    28,    29,
+      81,    82,    83,    84,    85,    -1,    -1,    88,    -1,    -1,
+      -1,    -1,    -1,    -1,    44,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    56,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    66,    -1,    68
   };
 
   const unsigned char
@@ -2340,18 +2415,18 @@ namespace yy {
      115,   115,     9,    31,    32,    40,    72,    74,    79,    80,
       84,    85,    90,    91,   110,   111,   110,   129,   129,   129,
      129,   129,   129,   129,   129,   129,   129,   107,    84,   135,
-     136,   137,   118,   102,   129,    17,   106,   127,   124,   108,
-      10,   121,     1,     9,   123,   129,   133,   110,   115,   115,
-     110,     1,   129,   132,   133,     1,   132,    85,    28,    89,
-     116,    85,    28,    28,    89,   117,    16,    73,   116,   116,
-      35,     5,     1,    86,   138,    10,    13,    18,    12,   115,
-     104,     6,     6,     8,   125,   123,   129,    15,    10,   133,
-      36,    37,   113,    89,   112,   129,   113,   129,   112,   112,
-      28,   129,   129,   115,   110,   138,    45,    76,   139,   136,
-     105,    18,     7,   129,   129,   130,    10,    84,    14,    27,
-      14,    27,    27,   112,     1,    46,    83,    84,   119,     9,
-      13,    22,   112,   112,    27,    14,   129,   131,   129,   123,
-      84,    15,    10,   129
+     136,   118,   102,   129,    17,   106,   127,   124,   108,    10,
+     121,     1,     9,   123,   129,   133,   110,   115,   115,   110,
+       1,   129,   132,   133,     1,   132,    85,    28,    89,   116,
+      85,    28,    28,    89,   117,    16,    73,   116,   116,    35,
+       5,     1,    86,   137,    10,    13,    18,    12,   115,   104,
+       6,     6,     8,   125,   123,   129,    15,    10,   133,    36,
+      37,   113,    89,   112,   129,   113,   129,   112,   112,    28,
+     129,   129,   115,   110,   137,    45,    76,   138,   135,   105,
+      18,     7,   129,   129,   130,    10,    84,    14,    27,    14,
+      27,    27,   112,     1,    46,    83,    84,   119,     9,    13,
+      22,   112,   112,    27,    14,   129,   131,   129,   123,    84,
+      15,    10,   129
   };
 
   const unsigned char
@@ -2375,8 +2450,8 @@ namespace yy {
      129,   129,   129,   129,   129,   129,   129,   129,   129,   129,
      129,   129,   130,   130,   130,   130,   131,   131,   131,   132,
      132,   132,   133,   133,   133,   133,   134,   134,   135,   135,
-     136,   136,   136,   137,   137,   138,   138,   138,   139,   139,
-     139,   139,   139,   139
+     135,   136,   136,   137,   137,   137,   138,   138,   138,   138,
+     138,   138
   };
 
   const unsigned char
@@ -2400,8 +2475,8 @@ namespace yy {
        3,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     1,     0,     4,     1,     3,     0,     1,     3,     0,
        2,     1,     0,     3,     3,     1,     4,     2,     0,     1,
-       0,     3,     1,     0,     3,     0,     2,     1,     0,     2,
-       2,     4,     1,     2
+       3,     0,     3,     0,     2,     1,     0,     2,     2,     4,
+       1,     2
   };
 
 
@@ -2432,34 +2507,34 @@ namespace yy {
   "rule_label", "lhs_rhs", "token_expr", "sum_token", "mixture",
   "rate_sep", "rule_expression", "arrow", "variable", "alg_expr", "rate",
   "alg_with_radius", "multiple_mixture", "non_empty_mixture",
-  "agent_expression", "interface_expression", "ne_interface_expression",
-  "port_expression", "internal_state", "link_state", YY_NULLPTR
+  "agent_expression", "interface_expression", "port_expression",
+  "internal_state", "link_state", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned short int
    KappaParser ::yyrline_[] =
   {
-       0,    85,    85,    86,    91,    92,    95,    96,    98,   100,
-     105,   107,   109,   111,   113,   115,   117,   119,   121,   123,
-     125,   127,   129,   131,   133,   135,   137,   139,   143,   144,
-     146,   147,   154,   155,   157,   161,   167,   168,   177,   178,
-     203,   204,   206,   211,   212,   214,   216,   221,   230,   231,
-     232,   233,   236,   237,   238,   239,   242,   243,   245,   247,
-     249,   251,   253,   255,   257,   259,   261,   263,   265,   266,
-     272,   273,   274,   275,   276,   279,   280,   281,   285,   287,
-     289,   293,   294,   296,   298,   300,   302,   304,   306,   308,
-     310,   315,   316,   317,   320,   321,   322,   326,   327,   328,
-     329,   333,   335,   337,   339,   341,   345,   346,   351,   355,
-     356,   357,   361,   362,   364,   366,   371,   372,   376,   377,
-     378,   382,   383,   385,   392,   394,   399,   401,   403,   405,
-     407,   412,   414,   416,   418,   420,   422,   424,   426,   431,
-     433,   435,   437,   439,   441,   443,   445,   447,   449,   451,
-     453,   455,   457,   459,   461,   463,   465,   467,   470,   472,
-     474,   476,   480,   481,   483,   485,   489,   490,   491,   494,
-     495,   497,   501,   502,   504,   506,   511,   513,   519,   520,
-     524,   525,   527,   532,   533,   538,   539,   541,   547,   548,
-     550,   552,   554,   556
+       0,    91,    91,    92,    97,    98,   101,   102,   104,   106,
+     111,   113,   115,   117,   119,   121,   123,   125,   127,   129,
+     131,   133,   135,   137,   139,   141,   143,   145,   149,   150,
+     152,   153,   160,   161,   163,   167,   173,   174,   183,   184,
+     209,   210,   212,   220,   221,   223,   225,   230,   239,   240,
+     241,   242,   245,   246,   247,   248,   251,   252,   254,   256,
+     258,   260,   262,   264,   266,   268,   270,   272,   274,   275,
+     281,   282,   283,   284,   285,   288,   289,   290,   294,   296,
+     298,   302,   303,   305,   307,   309,   311,   313,   315,   317,
+     319,   324,   325,   326,   329,   330,   331,   335,   336,   337,
+     338,   342,   344,   346,   348,   350,   354,   355,   360,   364,
+     365,   366,   370,   371,   373,   375,   380,   381,   385,   386,
+     387,   391,   392,   394,   401,   403,   408,   410,   412,   414,
+     416,   421,   423,   425,   427,   429,   431,   433,   435,   440,
+     442,   444,   446,   448,   450,   452,   454,   456,   458,   460,
+     462,   464,   466,   468,   470,   472,   474,   476,   479,   481,
+     483,   485,   489,   490,   492,   494,   498,   499,   500,   503,
+     504,   506,   510,   511,   513,   518,   523,   525,   531,   532,
+     534,   554,   555,   561,   562,   567,   573,   574,   576,   578,
+     580,   582
   };
 
   // Print the state stack on the debug stream.
@@ -2494,8 +2569,8 @@ namespace yy {
 
 
 } // yy
-#line 2498 "KappaParser.cpp" // lalr1.cc:1155
-#line 560 "kappaParser.y" // lalr1.cc:1156
+#line 2573 "KappaParser.cpp" // lalr1.cc:1155
+#line 586 "kappaParser.y" // lalr1.cc:1156
 
 
 void yy::KappaParser::error(const location &loc , const std::string &message) {

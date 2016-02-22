@@ -113,7 +113,7 @@ instruction:
 | COMPARTMENT comp_expr alg_expr
  	{}
 | C_LINK LABEL comp_expr arrow comp_expr ATD constant
- 	{}
+ 	{cout<<"Hola";}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
 | USE comp_list
@@ -131,9 +131,9 @@ instruction:
 | LET variable_declaration 
 	{driver.addDeclaration($2);}
 | OBS variable_declaration
-	{}
+	{$$=ast::Obs($2,@2);}
 | PLOT alg_expr 
-	{}
+	{$$=ast::Plot($2,@2);}
 | PLOT error 
 	{}
 | PERT perturbation_declaration 

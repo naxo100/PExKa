@@ -238,6 +238,22 @@ public:
 	virtual ~Rule();
 };
 
-}
+class Plot : public Node {
+public:
+	Plot():{};
+	Plot(const Expression &e, const yy::location &l) : e(e),loc(l) {};
+protected:
+	Expression e;	
+};
+
+class Obs : public None {
+public:
+	Obs():{};
+	Obs(const Declaration &e, const yy::location &l) : e(e),loc(l) {};
+protected:
+	Declaration e;	
+
+};
+
 
 #endif /* GRAMMAR_AST_ASTSTRUCTS_H_ */

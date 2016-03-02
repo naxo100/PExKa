@@ -327,40 +327,62 @@ namespace yy {
       // port_expression
       char dummy8[sizeof(ast::Site)];
 
+      // alg_with_radius
+      char dummy9[sizeof(ast::alg_pair)];
+
+      // multiple_mixture
+      char dummy10[sizeof(ast::mix_pair)];
+
+      // effect
+      char dummy11[sizeof(ast::modif_expr)];
+
+      // opt_string
+      // string_or_pr_expr
+      char dummy12[sizeof(ast::ptr_pair)];
+
+      // rate
+      char dummy13[sizeof(ast::rate_triplet)];
+
       // join
       // boolean
       // rate_sep
-      char dummy9[sizeof(bool)];
+      char dummy14[sizeof(bool)];
 
       // FLOAT
-      char dummy10[sizeof(float)];
+      char dummy15[sizeof(float)];
 
       // INT
-      char dummy11[sizeof(int)];
+      char dummy16[sizeof(int)];
 
       // mixture
       // non_empty_mixture
-      char dummy12[sizeof(std::list<ast::Agent>)];
+      char dummy17[sizeof(std::list<ast::Agent>)];
 
       // comp_list
-      char dummy13[sizeof(std::list<ast::CompExpression>)];
+      char dummy18[sizeof(std::list<ast::CompExpression>)];
 
       // dimension
-      char dummy14[sizeof(std::list<ast::Expression>)];
+      char dummy19[sizeof(std::list<ast::Expression>)];
 
       // interface_expression
-      char dummy15[sizeof(std::list<ast::Site>)];
+      char dummy20[sizeof(std::list<ast::Site>)];
+
+      // effect_list
+      char dummy21[sizeof(std::list<ast::modif_expr>)];
+
+      // print_expr
+      char dummy22[sizeof(std::list<ast::print_expr>)];
 
       // value_list
       // internal_state
-      char dummy16[sizeof(std::list<std::string>)];
+      char dummy23[sizeof(std::list<std::string>)];
 
       // ID
       // LABEL
       // KAPPA_MRK
       // NAME
       // STRING
-      char dummy17[sizeof(std::string)];
+      char dummy24[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -526,6 +548,16 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const ast::Site v, const location_type& l);
 
+  basic_symbol (typename Base::kind_type t, const ast::alg_pair v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ast::mix_pair v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ast::modif_expr v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ast::ptr_pair v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ast::rate_triplet v, const location_type& l);
+
   basic_symbol (typename Base::kind_type t, const bool v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const float v, const location_type& l);
@@ -539,6 +571,10 @@ namespace yy {
   basic_symbol (typename Base::kind_type t, const std::list<ast::Expression> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::list<ast::Site> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::list<ast::modif_expr> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::list<ast::print_expr> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::list<std::string> v, const location_type& l);
 
@@ -1303,6 +1339,27 @@ namespace yy {
         value.copy< ast::Site > (other.value);
         break;
 
+      case 131: // alg_with_radius
+        value.copy< ast::alg_pair > (other.value);
+        break;
+
+      case 132: // multiple_mixture
+        value.copy< ast::mix_pair > (other.value);
+        break;
+
+      case 111: // effect
+        value.copy< ast::modif_expr > (other.value);
+        break;
+
+      case 116: // opt_string
+      case 117: // string_or_pr_expr
+        value.copy< ast::ptr_pair > (other.value);
+        break;
+
+      case 130: // rate
+        value.copy< ast::rate_triplet > (other.value);
+        break;
+
       case 103: // join
       case 113: // boolean
       case 125: // rate_sep
@@ -1332,6 +1389,14 @@ namespace yy {
 
       case 135: // interface_expression
         value.copy< std::list<ast::Site> > (other.value);
+        break;
+
+      case 110: // effect_list
+        value.copy< std::list<ast::modif_expr> > (other.value);
+        break;
+
+      case 112: // print_expr
+        value.copy< std::list<ast::print_expr> > (other.value);
         break;
 
       case 107: // value_list
@@ -1400,6 +1465,27 @@ namespace yy {
         value.copy< ast::Site > (v);
         break;
 
+      case 131: // alg_with_radius
+        value.copy< ast::alg_pair > (v);
+        break;
+
+      case 132: // multiple_mixture
+        value.copy< ast::mix_pair > (v);
+        break;
+
+      case 111: // effect
+        value.copy< ast::modif_expr > (v);
+        break;
+
+      case 116: // opt_string
+      case 117: // string_or_pr_expr
+        value.copy< ast::ptr_pair > (v);
+        break;
+
+      case 130: // rate
+        value.copy< ast::rate_triplet > (v);
+        break;
+
       case 103: // join
       case 113: // boolean
       case 125: // rate_sep
@@ -1429,6 +1515,14 @@ namespace yy {
 
       case 135: // interface_expression
         value.copy< std::list<ast::Site> > (v);
+        break;
+
+      case 110: // effect_list
+        value.copy< std::list<ast::modif_expr> > (v);
+        break;
+
+      case 112: // print_expr
+        value.copy< std::list<ast::print_expr> > (v);
         break;
 
       case 107: // value_list
@@ -1516,6 +1610,41 @@ namespace yy {
   {}
 
   template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::alg_pair v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::mix_pair v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::modif_expr v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::ptr_pair v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::rate_triplet v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
    KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const bool v, const location_type& l)
     : Base (t)
     , value (v)
@@ -1559,6 +1688,20 @@ namespace yy {
 
   template <typename Base>
    KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::list<ast::Site> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::list<ast::modif_expr> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+   KappaParser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::list<ast::print_expr> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1630,6 +1773,27 @@ namespace yy {
         value.template destroy< ast::Site > ();
         break;
 
+      case 131: // alg_with_radius
+        value.template destroy< ast::alg_pair > ();
+        break;
+
+      case 132: // multiple_mixture
+        value.template destroy< ast::mix_pair > ();
+        break;
+
+      case 111: // effect
+        value.template destroy< ast::modif_expr > ();
+        break;
+
+      case 116: // opt_string
+      case 117: // string_or_pr_expr
+        value.template destroy< ast::ptr_pair > ();
+        break;
+
+      case 130: // rate
+        value.template destroy< ast::rate_triplet > ();
+        break;
+
       case 103: // join
       case 113: // boolean
       case 125: // rate_sep
@@ -1659,6 +1823,14 @@ namespace yy {
 
       case 135: // interface_expression
         value.template destroy< std::list<ast::Site> > ();
+        break;
+
+      case 110: // effect_list
+        value.template destroy< std::list<ast::modif_expr> > ();
+        break;
+
+      case 112: // print_expr
+        value.template destroy< std::list<ast::print_expr> > ();
         break;
 
       case 107: // value_list
@@ -1724,6 +1896,27 @@ namespace yy {
         value.move< ast::Site > (s.value);
         break;
 
+      case 131: // alg_with_radius
+        value.move< ast::alg_pair > (s.value);
+        break;
+
+      case 132: // multiple_mixture
+        value.move< ast::mix_pair > (s.value);
+        break;
+
+      case 111: // effect
+        value.move< ast::modif_expr > (s.value);
+        break;
+
+      case 116: // opt_string
+      case 117: // string_or_pr_expr
+        value.move< ast::ptr_pair > (s.value);
+        break;
+
+      case 130: // rate
+        value.move< ast::rate_triplet > (s.value);
+        break;
+
       case 103: // join
       case 113: // boolean
       case 125: // rate_sep
@@ -1753,6 +1946,14 @@ namespace yy {
 
       case 135: // interface_expression
         value.move< std::list<ast::Site> > (s.value);
+        break;
+
+      case 110: // effect_list
+        value.move< std::list<ast::modif_expr> > (s.value);
+        break;
+
+      case 112: // print_expr
+        value.move< std::list<ast::print_expr> > (s.value);
         break;
 
       case 107: // value_list
@@ -2391,7 +2592,7 @@ namespace yy {
 
 
 } // yy
-#line 2395 "KappaParser.hpp" // lalr1.cc:372
+#line 2596 "KappaParser.hpp" // lalr1.cc:372
 
 
 

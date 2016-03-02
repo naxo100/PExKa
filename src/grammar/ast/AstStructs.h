@@ -41,7 +41,7 @@ class Id : public Node {
 public:
 	Id(const string &s): Node(),id(s){};
 	Id(const string &s,Node t): Node(t),id(s){};
-//	Id(const string &s,yy::locattion& l): Node(l),id(s){};
+//	Id(const string &s,const yy::locattion &l): Node(l),id(s){};
 	Id(): Node(),id(){};
 };
 
@@ -189,23 +189,31 @@ class Effect : Node{
 };
 
 class Perturbation: public Node {
+public:
+	Perturbation();
+	virtual ~Perturbation();
 protected:
 	Node repeat;
 	Expression test;
 	Node do_tok;
 	list<Effect> mods;
-public:
-	Perturbation();
-	virtual ~Perturbation();
 };
 
 class Declaration: public Node{
-	Id label;
-	Expression exp;
 public:
-	Declaration(const Id &lab,const Expression e,const yy::location &loc):
-		Node(loc),exp(e),label(lab){}
+	enum VarType{ALG,KAPPA};	
+	Declaration(const Id &lab,const Expression e,const yy::location &loc): 
+		Node(loc),exp(e),label(lab),type(ALG) {};
+	
+	Declaration(const Id &lab,const std::list<Agent> m,const yy::location &loc): 
+		Node(loc),mixture(m),label(lab),type(KAPPA) {};
+
 	Declaration():label(Id("",yy::location())){}
+protected:
+	Id label;
+	VarType type;
+	Expression exp;
+	std::list<Agent> mixture;
 };
 
 class CompExpression: public Node {
@@ -238,22 +246,97 @@ public:
 	virtual ~Rule();
 };
 
-class Plot : public Node {
+//struct PrintElement
+//{
+//    enum{STR,EXP} tag;
+//    union
+//    {
+//        std::string s;
+//        ast::Expression;
+//    };
+//};
+ 
+
+
+class print_expr : public Node {
 public:
-	Plot():{};
-	Plot(const Expression &e, const yy::location &l) : e(e),loc(l) {};
+	print_expr(const std::string     &s, const yy::location &l): str(s),tag(STR),Node(l) {};
+	print_expr(const ast::Expression &e, const yy::location &l): exp(e),tag(EXP),Node(l) {};  
 protected:
-	Expression e;	
+    enum{STR,EXP} tag;
+	std::string str;
+	Expression  exp;
 };
 
-class Obs : public None {
+class modif_expr : public Node {
 public:
-	Obs():{};
-	Obs(const Declaration &e, const yy::location &l) : e(e),loc(l) {};
+	enum Action {INTRO,DELETE,UPDATE,UPDATE_TOK,STOP,SNAPSHOT,PRINT,CFLOW,CFLOWOFF,FLUX,FLUXOFF};
+	modif_expr() {};
+	modif_expr(const Action &a,const Expression &e,const std::list<Agent> &m,const yy::location &l): action(a),expr(e),mixture(m),Node(l) {};
+	modif_expr(const Action &a,const std::string &s,const Expression &e,const yy::location &l): action(a),str_pos(s),expr(e),Node(l) {};
+	modif_expr(const Action &a,const std::list<print_expr> &pe,const yy::location &l): action(a),pexpr(),Node(l) {};
+	modif_expr(const Action &a,const std::list<print_expr> &pe,const std::list<print_expr> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
+	modif_expr(const Action &a,const std::string &s,const yy::location &l): action(a),str_pos(s),Node(l) {};
+	
 protected:
-	Declaration e;	
-
+	Action                   action;
+	Expression               expr;
+	std::string              str_pos;
+	std::list<print_expr>    pexpr;
+	std::list<print_expr>    pexpr2;
+	std::list<Agent>         mixture;
 };
+
+struct ptr_pair
+{
+	ptr_pair(): str(NULL), pexpr(NULL) {};
+	ptr_pair(std::string* s,std::list<print_expr>* pe): str(s), pexpr(pe) {};
+	std::string*             str;
+	std::list<print_expr>*   pexpr;
+};
+
+struct mix_pair
+{
+	mix_pair() {};
+	mix_pair(const Expression &e,const std::list<ast::Agent> &m): alg(e), mix(m) {};
+	Expression             alg;
+	std::list<ast::Agent>  mix;
+};
+
+struct alg_pair
+{
+	alg_pair():exp1(),exp2(NULL) {};
+	alg_pair(const Expression &e1, Expression *e2): exp1(e1), exp2(e2) {};
+	Expression   exp1;
+	Expression*  exp2;
+};
+
+struct rate_triplet
+{
+	rate_triplet():exp(),pair(NULL),ptr_exp(NULL) {};
+	rate_triplet(const Expression &e,alg_pair *p,Expression *ptr_e): exp(e), pair(p),ptr_exp(ptr_e) {};
+	Expression   exp;
+	alg_pair*    pair;
+	Expression*  ptr_exp;
+};
+
+//class Plot : public Node {
+//public:
+//	Plot():{};
+//	Plot(const Expression &e, const yy::location &l) : e(e),loc(l) {};
+//protected:
+//	Expression e;	
+//};
+//
+//class Obs : public None {
+//public:
+//	Obs():{};
+//	Obs(const Declaration &e, const yy::location &l) : e(e),loc(l) {};
+//protected:
+//	Declaration e;	
+//
+}
+
 
 
 #endif /* GRAMMAR_AST_ASTSTRUCTS_H_ */

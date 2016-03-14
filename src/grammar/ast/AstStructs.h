@@ -85,10 +85,11 @@ class Arrow : public Node {
 public:
 	enum ArrType {LEFT,RIGHT,BI};
 	Arrow(){};
-	Arrow(ArrType t): Node(),type(t) {};
-	Arrow(ArrType t,const yy::location &loc): Node(loc), type(t) {};
+	Arrow(ArrType t): Node(),thetype(t) {};
+	Arrow(ArrType t,const yy::location &loc): Node(loc), thetype(t) {};
+	ArrType type(){return thetype;};
 protected:
-	ArrType type;
+	ArrType thetype;
 };
 
 class Bool : public Expression {
@@ -304,6 +305,7 @@ struct mix_pair
 	std::list<ast::Agent>  mix;
 };
 
+
 struct Radius
 {
 	Radius(): k1(),opt(NULL) {};
@@ -341,6 +343,13 @@ struct RuleSide
 	std::list<ast::Token> tokens;
 };
 
+struct tt
+{
+	string str;
+	int i;
+	float f;
+	bool b;
+};
 
 class Rule : public Node {
 protected:
@@ -353,28 +362,29 @@ protected:
 	Expression	k_def;
 	Radius*     k_un;
 	Expression* k_op;
-	//(***)Preguntar Naxo
-	//int use_id;
-	//bool fixed;
-	//transport_to;
+	//(***)
+	int         use_id;
+	bool        fixed;
+	tt*         transport_to;
 	
 public:
 	Rule() {};
+	//constructors
 	Rule(	const Id          &label,
 			const RuleSide    &lhs,
 			const RuleSide    &rhs,
 			const Arrow       &arrow,
 			const Rate 		  &rate,
-			//const Expression  &k_def,
-			//const Radius      &k_un,
-            //const Expression  &k_op,
+			int               id,
+			tt*               &tr,
+			bool              sep,
 			const yy::location &pos
 	):
 	label(label), lhs(lhs.agents), rhs(rhs.agents),
 	rm_token(lhs.tokens), add_token(rhs.tokens),
 	arrow(arrow), k_def(rate.def), k_un(rate.un),
-	k_op(rate.op), Node(pos) {};
-	
+	k_op(rate.op), use_id(id),	transport_to(tr),
+	fixed(fixed), Node(pos) {};
 //	virtual ~Rule();
 };
 

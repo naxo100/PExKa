@@ -467,7 +467,11 @@ rate_sep:
 
 rule_expression:
 | rule_label lhs_rhs arrow lhs_rhs rate_sep rate 
-	{$$=ast::Rule($1,$2,$4,$3,$6,@1);}
+	{
+		if(($3.type() == ast::Arrow::BI && $6.op == NULL) || ($3.type() == ast::Arrow::RIGHT && $6.op != NULL)) 
+			yy::KappaParser::error(@1,"Malformed bi-directional rule expression");
+		$$=ast::Rule($1,$2,$4,$3,$6,-1,NULL,$5,@1);
+	}
 | rule_label lhs_rhs arrow lhs_rhs 
 	{$$=ast::Rule();}
 ;

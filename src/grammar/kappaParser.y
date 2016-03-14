@@ -87,11 +87,16 @@
 %type <ast::Expression*> where_expr
 /*%type <std::list<void*>> print_expr*/
 %type <std::list<ast::print_expr>> print_expr
-%type <ast::modif_expr> effect
-%type <std::list<ast::modif_expr>> effect_list
+%type <ast::Effect> effect
+%type <std::list<ast::Effect>> effect_list
 %type <ast::ptr_pair> opt_string string_or_pr_expr
-%type <ast::alg_pair>   alg_with_radius   
-%type <ast::rate_triplet> rate
+%type <ast::Radius>   alg_with_radius   
+%type <ast::Rate> rate
+%type <ast::Perturbation> perturbation_declaration
+%type <std::list<ast::Token>> sum_token token_expr
+%type <ast::RuleSide> lhs_rhs
+%type <ast::Id> rule_label
+%type <ast::Rule> rule_expression
 /*%type <std::list> value_list*/
 %start statements
 
@@ -247,14 +252,19 @@ comp_list:
 
 
 perturbation_declaration:
-| OP_PAR perturbation_declaration CL_PAR {}
-| bool_expr DO effect_list {}
-| bool_expr SET effect_list {} /*For backward compatibility*/
+| OP_PAR perturbation_declaration CL_PAR {$$=$2;}
+| bool_expr DO effect_list {$$=ast::Perturbation($1,$3,@2);}
+| bool_expr SET effect_list
+	{
+		// temporal, preguntarle a naxo
+		cout<<"Deprecated perturbation syntax: 'set' keyword is replaced by 'do'"<<endl;
+		$$=ast::Perturbation($1,$3,@2);
+	} /*For backward compatibility*/
 ;
 
 effect_list:
 | OP_PAR effect_list CL_PAR {$$=$2;}
-| effect {$$=std::list<ast::modif_expr>(1,$1);}
+| effect {$$=std::list<ast::Effect>(1,$1);}
 | effect SEMICOLON effect_list 
 	{
 		$3.push_front($1);
@@ -264,67 +274,67 @@ effect_list:
 
 effect:
 | LABEL ASSIGN alg_expr /*updating the rate of a rule -backward compatibility*/
-	{$$=ast::modif_expr(ast::modif_expr::UPDATE,std::string($1),$3,@2);}
+	{$$=ast::Effect(ast::Effect::UPDATE,std::string($1),$3,@2);}
 | ASSIGN2 LABEL alg_expr /*updating the rate of a rule*/
-	{$$=ast::modif_expr(ast::modif_expr::UPDATE,std::string($2),$3,@1);}
+	{$$=ast::Effect(ast::Effect::UPDATE,std::string($2),$3,@1);}
 | TRACK LABEL boolean 
 	{
 		if($3)
-			$$=ast::modif_expr(ast::modif_expr::CFLOW   ,std::string($2),@1);
+			$$=ast::Effect(ast::Effect::CFLOW   ,std::string($2),@1);
 		else 
-			$$=ast::modif_expr(ast::modif_expr::CFLOWOFF,std::string($2),@1);
+			$$=ast::Effect(ast::Effect::CFLOWOFF,std::string($2),@1);
 	}
 
 | FLUX opt_string boolean 
 	{
-		ast::modif_expr::Action action= $3 ? ast::modif_expr::FLUX : ast::modif_expr::FLUXOFF;
+		ast::Effect::Action action= $3 ? ast::Effect::FLUX : ast::Effect::FLUXOFF;
 
 		if($2.str   != NULL) 
-			$$=ast::modif_expr(action,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
+			$$=ast::Effect(action,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
 		else if($2.pexpr != NULL) 
-			$$=ast::modif_expr(action,*($2.pexpr),@1);
+			$$=ast::Effect(action,*($2.pexpr),@1);
 		else
-			$$=ast::modif_expr(action,std::list<ast::print_expr>(),@1);
+			$$=ast::Effect(action,std::list<ast::print_expr>(),@1);
 	}
 | INTRO multiple_mixture 
-	{$$=ast::modif_expr(ast::modif_expr::INTRO,$2.alg,$2.mix,@1);}
+	{$$=ast::Effect(ast::Effect::INTRO,$2.alg,$2.mix,@1);}
 | INTRO error
 	{}
 | DELETE multiple_mixture 
-	{$$=ast::modif_expr(ast::modif_expr::DELETE,$2.alg,$2.mix,@1);}
+	{$$=ast::Effect(ast::Effect::DELETE,$2.alg,$2.mix,@1);}
 | DELETE error
 	{}
 | ID LAR alg_expr /*updating the value of a token*/
-	{$$=ast::modif_expr(ast::modif_expr::UPDATE_TOK,$1,$3,@2);}
+	{$$=ast::Effect(ast::Effect::UPDATE_TOK,$1,$3,@2);}
 | SNAPSHOT opt_string
 	{	
 		if($2.str   != NULL) 
-			$$=ast::modif_expr(ast::modif_expr::SNAPSHOT,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
+			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
 		else if($2.pexpr != NULL) 
-			$$=ast::modif_expr(ast::modif_expr::SNAPSHOT,*($2.pexpr),@1);
+			$$=ast::Effect(ast::Effect::SNAPSHOT,*($2.pexpr),@1);
 		else
-			$$=ast::modif_expr(ast::modif_expr::SNAPSHOT,std::list<ast::print_expr>(),@1);
+			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::print_expr>(),@1);
 	}
 | STOP opt_string
 	{
 		if($2.str   != NULL) 
-			$$=ast::modif_expr(ast::modif_expr::STOP,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
+			$$=ast::Effect(ast::Effect::STOP,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
 		else if($2.pexpr != NULL) 
-			$$=ast::modif_expr(ast::modif_expr::STOP,*($2.pexpr),@1);
+			$$=ast::Effect(ast::Effect::STOP,*($2.pexpr),@1);
 		else
-			$$=ast::modif_expr(ast::modif_expr::STOP,std::list<ast::print_expr>(),@1);
+			$$=ast::Effect(ast::Effect::STOP,std::list<ast::print_expr>(),@1);
 
 	}
 | PRINT SMALLER print_expr GREATER 
-	{$$=ast::modif_expr(ast::modif_expr::PRINT,std::list<ast::print_expr>(),$3,@1);}
+	{$$=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(),$3,@1);}
 | PRINTF string_or_pr_expr SMALLER print_expr GREATER 
 	{
 		if($2.str   != NULL) 
-			$$=ast::modif_expr(ast::modif_expr::PRINT,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),$4,@1);
+			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),$4,@1);
 		else if($2.pexpr != NULL) 
-			$$=ast::modif_expr(ast::modif_expr::PRINT,*($2.pexpr),$4,@1);
+			$$=ast::Effect(ast::Effect::PRINT,*($2.pexpr),$4,@1);
 		else
-			$$=ast::modif_expr(ast::modif_expr::PRINT,std::list<ast::print_expr>(),$4,@1);
+			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(),$4,@1);
 	}
 ;
 
@@ -414,29 +424,32 @@ constant:
 
 rule_label: 
 /*empty */
-	{}
+	{$$=ast::Id();}
 | LABEL 
-	{}
+	{$$=ast::Id($1,@1);}
 ;
 
 lhs_rhs:
-mixture token_expr {}
+mixture token_expr {$$=ast::RuleSide($1,$2);}
 ;
 
 token_expr:
-/*empty*/ {}
-| PIPE sum_token {} 
+/*empty*/ {$$=std::list<ast::Token>();}
+| PIPE sum_token {$$=$2;} 
 | PIPE error 
 	{}
 ;
 
 sum_token:
 | OP_PAR sum_token CL_PAR 
-	{} 
+	{$$=$2;} 
 | alg_expr TYPE ID 
-	{}
+	{$$=std::list<ast::Token>(1,ast::Token($1,ast::Id($3)));}
 | alg_expr TYPE ID PLUS sum_token 
-	{}
+	{
+		$5.push_front(ast::Token($1,ast::Id($3)));
+		$$=$5;
+	}
 
 mixture:
 /*empty*/ 
@@ -450,12 +463,13 @@ rate_sep:
 | FIX {$$=true;}
 
 /*(**  **)*/
+/*{$$=ast::Rule($1,$2.agents,$4.agents,$2.tokens,$4.tokens,$3,$6.);}*/
 
 rule_expression:
 | rule_label lhs_rhs arrow lhs_rhs rate_sep rate 
-	{}
+	{$$=ast::Rule($1,$2,$4,$3,$6,@1);}
 | rule_label lhs_rhs arrow lhs_rhs 
-	{}
+	{$$=ast::Rule();}
 ;
 
 
@@ -551,16 +565,16 @@ alg_expr:
 
 rate:
 | alg_expr OP_PAR alg_with_radius CL_PAR 
-	{$$=ast::rate_triplet($1,&$3,NULL);}
+	{$$=ast::Rate($1,&$3,NULL);}
 | alg_expr 
-	{$$=ast::rate_triplet($1,NULL,NULL);}
+	{$$=ast::Rate($1,NULL,NULL);}
 | alg_expr COMMA alg_expr 
-	{$$=ast::rate_triplet($1,NULL,&$3);}
+	{$$=ast::Rate($1,NULL,&$3);}
 ;
 
 alg_with_radius:
-| alg_expr {$$=ast::alg_pair($1,NULL);}
-| alg_expr TYPE alg_expr {$$=ast::alg_pair($1,&$3);}
+| alg_expr {$$=ast::Radius($1);}
+| alg_expr TYPE alg_expr {$$=ast::Radius($1,&$3);}
 ;
 
 multiple_mixture:

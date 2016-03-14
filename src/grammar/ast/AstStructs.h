@@ -17,6 +17,15 @@
 using namespace std;
 
 namespace ast {
+//Declaration of structures to implement duplas from Ocaml
+//struct ptr_pair;
+//struct mix_pair;
+//struct rate_triplet;
+//struct token;
+//struct RuleSide;
+//struct Radius;
+
+
 class Node {
 	yy::location loc;
 public:
@@ -37,12 +46,13 @@ public:
 
 
 class Id : public Node {
+protected:
 	string id;
 public:
 	Id(const string &s): Node(),id(s){};
 	Id(const string &s,Node t): Node(t),id(s){};
-//	Id(const string &s,const yy::locattion &l): Node(l),id(s){};
-	Id(): Node(),id(){};
+	Id(const string &s,const yy::location &l): id(s),Node(l){};
+	Id(){};
 };
 
 class Var : public Expression {
@@ -178,26 +188,16 @@ protected:
 	Func func;
 };
 
-class Effect : Node{
-	Node mod;
-	enum Mod {ASSIGN,TRACK,FLUX,INTRO,DELETE,TOKEN,SNAPSHOT,STOP,PRINT,PRINTF};
-	Id str1,str2;
-	Expression exp;
-	bool b;
-	list<Agent> mixture;
+//class Effect : Node{
+//	Node mod;
+//	enum Mod {ASSIGN,TRACK,FLUX,INTRO,DELETE,TOKEN,SNAPSHOT,STOP,PRINT,PRINTF};
+//	Id str1,str2;
+//	Expression exp;
+//	bool b;
+//	list<Agent> mixture;
+//
+//};
 
-};
-
-class Perturbation: public Node {
-public:
-	Perturbation();
-	virtual ~Perturbation();
-protected:
-	Node repeat;
-	Expression test;
-	Node do_tok;
-	list<Effect> mods;
-};
 
 class Declaration: public Node{
 public:
@@ -231,20 +231,6 @@ class Compartment : public Node {
 };
 
 
-class Rule : public Node {
-protected:
-	list<Agent> lhs;
-	list<Agent> rhs;
-	Arrow arrow;
-	Expression	rate;
-
-	Id label;
-
-
-public:
-	Rule();
-	virtual ~Rule();
-};
 
 //struct PrintElement
 //{
@@ -268,15 +254,15 @@ protected:
 	Expression  exp;
 };
 
-class modif_expr : public Node {
+class Effect : public Node {
 public:
 	enum Action {INTRO,DELETE,UPDATE,UPDATE_TOK,STOP,SNAPSHOT,PRINT,CFLOW,CFLOWOFF,FLUX,FLUXOFF};
-	modif_expr() {};
-	modif_expr(const Action &a,const Expression &e,const std::list<Agent> &m,const yy::location &l): action(a),expr(e),mixture(m),Node(l) {};
-	modif_expr(const Action &a,const std::string &s,const Expression &e,const yy::location &l): action(a),str_pos(s),expr(e),Node(l) {};
-	modif_expr(const Action &a,const std::list<print_expr> &pe,const yy::location &l): action(a),pexpr(),Node(l) {};
-	modif_expr(const Action &a,const std::list<print_expr> &pe,const std::list<print_expr> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
-	modif_expr(const Action &a,const std::string &s,const yy::location &l): action(a),str_pos(s),Node(l) {};
+	Effect() {};
+	Effect(const Action &a,const Expression &e,const std::list<Agent> &m,const yy::location &l): action(a),expr(e),mixture(m),Node(l) {};
+	Effect(const Action &a,const std::string &s,const Expression &e,const yy::location &l): action(a),str_pos(s),expr(e),Node(l) {};
+	Effect(const Action &a,const std::list<print_expr> &pe,const yy::location &l): action(a),pexpr(),Node(l) {};
+	Effect(const Action &a,const std::list<print_expr> &pe,const std::list<print_expr> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
+	Effect(const Action &a,const std::string &s,const yy::location &l): action(a),str_pos(s),Node(l) {};
 	
 protected:
 	Action                   action;
@@ -285,6 +271,21 @@ protected:
 	std::list<print_expr>    pexpr;
 	std::list<print_expr>    pexpr2;
 	std::list<Agent>         mixture;
+};
+
+class Perturbation: public Node {
+public:
+	Perturbation(){};
+	Perturbation(const Expression &t,const list<Effect> &le, const yy::location &tok):
+	mods(le), test(t), do_tok(tok) {};
+	//preguntar a naxo
+	virtual ~Perturbation() {};
+protected:
+	//preguntar al naxo
+	Node repeat;
+	Expression test;
+	Node do_tok;
+	list<Effect> mods;
 };
 
 struct ptr_pair
@@ -303,22 +304,90 @@ struct mix_pair
 	std::list<ast::Agent>  mix;
 };
 
-struct alg_pair
+struct Radius
 {
-	alg_pair():exp1(),exp2(NULL) {};
-	alg_pair(const Expression &e1, Expression *e2): exp1(e1), exp2(e2) {};
-	Expression   exp1;
-	Expression*  exp2;
+	Radius(): k1(),opt(NULL) {};
+	Radius(const Expression &k1): k1(k1), opt(NULL) {};
+	Radius(const Expression &k1, Expression *opt): k1(k1), opt(opt) {};
+	Expression   k1;
+	Expression*  opt;
 };
 
-struct rate_triplet
+
+
+struct Rate
 {
-	rate_triplet():exp(),pair(NULL),ptr_exp(NULL) {};
-	rate_triplet(const Expression &e,alg_pair *p,Expression *ptr_e): exp(e), pair(p),ptr_exp(ptr_e) {};
-	Expression   exp;
-	alg_pair*    pair;
-	Expression*  ptr_exp;
+	Rate():def(),un(NULL),op(NULL) {};
+	Rate(const Expression &def,Radius *un,Expression *op): def(def), un(un), op(op) {};
+	Expression   def;
+	Radius*       un;
+	Expression*   op;
 };
+
+struct Token
+{	
+	Token() {};
+	Token(const Expression &e,const Id &id): exp(e), id(id) {};	
+	Expression	exp;
+	Id			id;
+};
+
+struct RuleSide
+{
+	RuleSide(){};
+	RuleSide(const std::list<ast::Agent> &agents,const std::list<ast::Token> &tokens):
+	agents(agents), tokens(tokens) {};
+	std::list<ast::Agent> agents;
+	std::list<ast::Token> tokens;
+};
+
+
+class Rule : public Node {
+protected:
+	Id label;
+	list<Agent> lhs;
+	list<Agent> rhs;
+	list<Token> rm_token;
+	list<Token> add_token;
+	Arrow       arrow;
+	Expression	k_def;
+	Radius*     k_un;
+	Expression* k_op;
+	//(***)Preguntar Naxo
+	//int use_id;
+	//bool fixed;
+	//transport_to;
+	
+public:
+	Rule() {};
+	Rule(	const Id          &label,
+			const RuleSide    &lhs,
+			const RuleSide    &rhs,
+			const Arrow       &arrow,
+			const Rate 		  &rate,
+			//const Expression  &k_def,
+			//const Radius      &k_un,
+            //const Expression  &k_op,
+			const yy::location &pos
+	):
+	label(label), lhs(lhs.agents), rhs(rhs.agents),
+	rm_token(lhs.tokens), add_token(rhs.tokens),
+	arrow(arrow), k_def(rate.def), k_un(rate.un),
+	k_op(rate.op), Node(pos) {};
+	
+//	virtual ~Rule();
+};
+
+//struct rule_name
+//{
+//	lbl_pair(){};
+//	lbl_pair(const std::string &s,const yy::location &p): str(s),pos(p){};
+//	std::string str;
+//	yy::location pos;
+//	void	
+//};
+
+//};
 
 //class Plot : public Node {
 //public:

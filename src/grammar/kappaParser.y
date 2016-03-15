@@ -81,15 +81,14 @@
 %type <ast::Agent> agent_expression
 %type <std::list<ast::Agent>> non_empty_mixture
 %type <std::list<ast::Agent>> mixture
-%type <ast::mix_pair> multiple_mixture
+%type <ast::Multiple_Mixture> multiple_mixture
 %type <std::list<ast::CompExpression>> comp_list
 %type <std::list<ast::Expression>> dimension
 %type <ast::Expression*> where_expr
-/*%type <std::list<void*>> print_expr*/
-%type <std::list<ast::print_expr>> print_expr
+%type <std::list<ast::PrintObj>> print_expr
 %type <ast::Effect> effect
 %type <std::list<ast::Effect>> effect_list
-%type <ast::ptr_pair> opt_string string_or_pr_expr
+%type <ast::OptString> opt_string string_or_pr_expr
 %type <ast::Radius>   alg_with_radius   
 %type <ast::Rate> rate
 %type <ast::Perturbation> perturbation_declaration
@@ -97,6 +96,7 @@
 %type <ast::RuleSide> lhs_rhs
 %type <ast::Id> rule_label
 %type <ast::Rule> rule_expression
+%type <ast::Init_Declaration> init_declaration
 /*%type <std::list> value_list*/
 %start statements
 
@@ -161,11 +161,14 @@ instruction:
 
 init_declaration:
 | multiple non_empty_mixture 
-	{}
+	{$$=ast::Init_Declaration(ast::Init_t($1,$2),NULL);}
 | ID LAR multiple
-	{}
+	{$$=ast::Init_Declaration(ast::Init_t($3,$1),NULL);}
 | ID OP_CUR init_declaration CL_CUR 
-	{}
+	{
+		ast::Id id($1);
+		$$=ast::Init_Declaration($3.init_t,&id);
+	}
 ;
 
 
@@ -289,12 +292,12 @@ effect:
 	{
 		ast::Effect::Action action= $3 ? ast::Effect::FLUX : ast::Effect::FLUXOFF;
 
-		if($2.str   != NULL) 
-			$$=ast::Effect(action,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
-		else if($2.pexpr != NULL) 
-			$$=ast::Effect(action,*($2.pexpr),@1);
+		if($2.str_ptr   != NULL) 
+			$$=ast::Effect(action,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),@1);
+		else if($2.print_list_ptr != NULL) 
+			$$=ast::Effect(action,*($2.print_list_ptr),@1);
 		else
-			$$=ast::Effect(action,std::list<ast::print_expr>(),@1);
+			$$=ast::Effect(action,std::list<ast::PrintObj>(),@1);
 	}
 | INTRO multiple_mixture 
 	{$$=ast::Effect(ast::Effect::INTRO,$2.alg,$2.mix,@1);}
@@ -308,52 +311,52 @@ effect:
 	{$$=ast::Effect(ast::Effect::UPDATE_TOK,$1,$3,@2);}
 | SNAPSHOT opt_string
 	{	
-		if($2.str   != NULL) 
-			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
-		else if($2.pexpr != NULL) 
-			$$=ast::Effect(ast::Effect::SNAPSHOT,*($2.pexpr),@1);
+		if($2.str_ptr   != NULL) 
+			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),@1);
+		else if($2.print_list_ptr != NULL) 
+			$$=ast::Effect(ast::Effect::SNAPSHOT,*($2.print_list_ptr),@1);
 		else
-			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::print_expr>(),@1);
+			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::PrintObj>(),@1);
 	}
 | STOP opt_string
 	{
-		if($2.str   != NULL) 
-			$$=ast::Effect(ast::Effect::STOP,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),@1);
-		else if($2.pexpr != NULL) 
-			$$=ast::Effect(ast::Effect::STOP,*($2.pexpr),@1);
+		if($2.str_ptr   != NULL) 
+			$$=ast::Effect(ast::Effect::STOP,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),@1);
+		else if($2.print_list_ptr != NULL) 
+			$$=ast::Effect(ast::Effect::STOP,*($2.print_list_ptr),@1);
 		else
-			$$=ast::Effect(ast::Effect::STOP,std::list<ast::print_expr>(),@1);
+			$$=ast::Effect(ast::Effect::STOP,std::list<ast::PrintObj>(),@1);
 
 	}
 | PRINT SMALLER print_expr GREATER 
-	{$$=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(),$3,@1);}
+	{$$=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(),$3,@1);}
 | PRINTF string_or_pr_expr SMALLER print_expr GREATER 
 	{
-		if($2.str   != NULL) 
-			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(1,ast::print_expr(*($2.str),@2)),$4,@1);
-		else if($2.pexpr != NULL) 
-			$$=ast::Effect(ast::Effect::PRINT,*($2.pexpr),$4,@1);
+		if($2.str_ptr   != NULL) 
+			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),$4,@1);
+		else if($2.print_list_ptr != NULL) 
+			$$=ast::Effect(ast::Effect::PRINT,*($2.print_list_ptr),$4,@1);
 		else
-			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(),$4,@1);
+			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(),$4,@1);
 	}
 ;
 
 
 print_expr:
 /*empty*/ 
-	{ $$=std::list<ast::print_expr>(); }
+	{ $$=std::list<ast::PrintObj>(); }
 | STRING 
-	{$$=std::list<ast::print_expr>(1,ast::print_expr($1,@1)); }
+	{$$=std::list<ast::PrintObj>(1,ast::PrintObj($1,@1)); }
 | alg_expr 
-	{$$=std::list<ast::print_expr>(1,ast::print_expr($1,@1)); }
+	{$$=std::list<ast::PrintObj>(1,ast::PrintObj($1,@1)); }
 | STRING DOT print_expr 
 	{
-		$3.push_front(ast::print_expr($1,@1));
+		$3.push_front(ast::PrintObj($1,@1));
 		$$=$3;
 	}
 | alg_expr DOT print_expr 
 	{
-		$3.push_front(ast::print_expr($1,@1));
+		$3.push_front(ast::PrintObj($1,@1));
 		$$=$3;
 	}
 ;
@@ -394,14 +397,14 @@ bool_expr:
 ;
 
 opt_string:
-/*empty*/ {$$=(ast::ptr_pair(NULL,NULL));}
-| STRING {$$=(ast::ptr_pair(&$1,NULL));}
-| SMALLER print_expr GREATER {$$=(ast:: ptr_pair(NULL,&$2));}
+/*empty*/ {$$=(ast::OptString(NULL,NULL));}
+| STRING  {$$=(ast::OptString(&$1,NULL));}
+| SMALLER print_expr GREATER {$$=(ast:: OptString(NULL,&$2));}
 ;
 
 string_or_pr_expr:
-| STRING {$$=(ast::ptr_pair(&$1,NULL));}
-| SMALLER print_expr GREATER {$$=(ast::ptr_pair(NULL,&$2));}
+| STRING {$$=(ast::OptString(&$1,NULL));}
+| SMALLER print_expr GREATER {$$=(ast::OptString(NULL,&$2));}
 ;
 
 
@@ -473,7 +476,11 @@ rule_expression:
 		$$=ast::Rule($1,$2,$4,$3,$6,-1,NULL,$5,@1);
 	}
 | rule_label lhs_rhs arrow lhs_rhs 
-	{$$=ast::Rule();}
+	{
+		cout<<"Warning: Rule has no kinetics. Default rate of 0.0 is assumed."<<endl;
+		ast::Rate rate(ast::Const(0.0f,yy::location()),NULL,NULL);
+		$$=ast::Rule($1,$2,$4,$3,rate,-1,NULL,true,@1);;
+	}
 ;
 
 
@@ -525,7 +532,7 @@ alg_expr:
 | variable
 	{$$ = $1;}
 | ID
-	{}
+	{$$ = ast::Var($1,ast::Var::TOKEN,@1);}
 | alg_expr MULT alg_expr
 	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MULT,@2);}
 | alg_expr PLUS alg_expr
@@ -583,9 +590,9 @@ alg_with_radius:
 
 multiple_mixture:
 | alg_expr non_empty_mixture /*conflict here because ID (blah) could be token non_empty mixture or mixture...*/
-	{$$=ast::mix_pair($1,$2);}
+	{$$=ast::Multiple_Mixture($1,$2);}
 | non_empty_mixture 
-	{$$=ast::mix_pair(ast::Const(1.0f,@1),$1);}
+	{$$=ast::Multiple_Mixture(ast::Const(1.0f,yy::location()),$1);}
 ;
 
 non_empty_mixture:

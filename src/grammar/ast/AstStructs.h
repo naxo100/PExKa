@@ -18,13 +18,6 @@ using namespace std;
 
 namespace ast {
 //Declaration of structures to implement duplas from Ocaml
-//struct ptr_pair;
-//struct mix_pair;
-//struct rate_triplet;
-//struct token;
-//struct RuleSide;
-//struct Radius;
-
 
 class Node {
 	yy::location loc;
@@ -80,6 +73,8 @@ protected:
 	ConstType type;
 	union {int n;float f;};
 };
+
+
 
 class Arrow : public Node {
 public:
@@ -198,7 +193,26 @@ protected:
 //	list<Agent> mixture;
 //
 //};
+class Init_t : public Node
+{
+	enum InitType {MIX,TOK} type;
+	Expression  alg;
+	list<Agent> mix;
+	string      str;
+public:
+	Init_t() {};
+	Init_t(const Expression &e, const list<Agent> &mix): alg(e),mix(mix),type(MIX) {};
+	Init_t(const Expression &e, const string      &str): alg(e),str(str),type(TOK) {};
+		
+};
 
+struct Init_Declaration : public Node
+{
+	Init_Declaration() {};
+	Init_Declaration(const Init_t &i,Id* id): init_t(i),id(id) {};
+	Init_t init_t;
+	Id* id;
+};
 
 class Declaration: public Node{
 public:
@@ -245,14 +259,14 @@ class Compartment : public Node {
  
 
 
-class print_expr : public Node {
+class PrintObj : public Node {
 public:
-	print_expr(const std::string     &s, const yy::location &l): str(s),tag(STR),Node(l) {};
-	print_expr(const ast::Expression &e, const yy::location &l): exp(e),tag(EXP),Node(l) {};  
+	PrintObj(const std::string     &s, const yy::location &l): str(s),tag(STR),Node(l) {};
+	PrintObj(const ast::Expression &e, const yy::location &l): alg(e),tag(ALG),Node(l) {};  
 protected:
-    enum{STR,EXP} tag;
+    enum{STR,ALG} tag;
 	std::string str;
-	Expression  exp;
+	Expression  alg;
 };
 
 class Effect : public Node {
@@ -261,16 +275,16 @@ public:
 	Effect() {};
 	Effect(const Action &a,const Expression &e,const std::list<Agent> &m,const yy::location &l): action(a),expr(e),mixture(m),Node(l) {};
 	Effect(const Action &a,const std::string &s,const Expression &e,const yy::location &l): action(a),str_pos(s),expr(e),Node(l) {};
-	Effect(const Action &a,const std::list<print_expr> &pe,const yy::location &l): action(a),pexpr(),Node(l) {};
-	Effect(const Action &a,const std::list<print_expr> &pe,const std::list<print_expr> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
+	Effect(const Action &a,const std::list<PrintObj> &pe,const yy::location &l): action(a),pexpr(),Node(l) {};
+	Effect(const Action &a,const std::list<PrintObj> &pe,const std::list<PrintObj> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
 	Effect(const Action &a,const std::string &s,const yy::location &l): action(a),str_pos(s),Node(l) {};
 	
 protected:
 	Action                   action;
 	Expression               expr;
 	std::string              str_pos;
-	std::list<print_expr>    pexpr;
-	std::list<print_expr>    pexpr2;
+	std::list<PrintObj>    pexpr;
+	std::list<PrintObj>    pexpr2;
 	std::list<Agent>         mixture;
 };
 
@@ -289,18 +303,18 @@ protected:
 	list<Effect> mods;
 };
 
-struct ptr_pair
+struct OptString
 {
-	ptr_pair(): str(NULL), pexpr(NULL) {};
-	ptr_pair(std::string* s,std::list<print_expr>* pe): str(s), pexpr(pe) {};
-	std::string*             str;
-	std::list<print_expr>*   pexpr;
+	OptString(): str_ptr(NULL), print_list_ptr(NULL) {};
+	OptString(std::string* s,std::list<PrintObj>* plist): str_ptr(s), print_list_ptr(plist) {};
+	std::string*             str_ptr;
+	std::list<PrintObj>*   print_list_ptr;
 };
 
-struct mix_pair
+struct Multiple_Mixture
 {
-	mix_pair() {};
-	mix_pair(const Expression &e,const std::list<ast::Agent> &m): alg(e), mix(m) {};
+	Multiple_Mixture() {};
+	Multiple_Mixture(const Expression &e,const std::list<ast::Agent> &m): alg(e), mix(m) {};
 	Expression             alg;
 	std::list<ast::Agent>  mix;
 };
@@ -376,8 +390,8 @@ public:
 			const Arrow       &arrow,
 			const Rate 		  &rate,
 			int               id,
-			tt*               &tr,
-			bool              sep,
+			tt*               tr,
+			bool              fixed,
 			const yy::location &pos
 	):
 	label(label), lhs(lhs.agents), rhs(rhs.agents),

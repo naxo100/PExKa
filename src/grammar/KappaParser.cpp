@@ -289,8 +289,21 @@ namespace yy {
         value.move< ast::Id > (that.value);
         break;
 
+      case 102: // init_declaration
+        value.move< ast::Init_Declaration > (that.value);
+        break;
+
       case 138: // link_state
         value.move< ast::Link > (that.value);
+        break;
+
+      case 132: // multiple_mixture
+        value.move< ast::Multiple_Mixture > (that.value);
+        break;
+
+      case 116: // opt_string
+      case 117: // string_or_pr_expr
+        value.move< ast::OptString > (that.value);
         break;
 
       case 109: // perturbation_declaration
@@ -315,15 +328,6 @@ namespace yy {
 
       case 136: // port_expression
         value.move< ast::Site > (that.value);
-        break;
-
-      case 132: // multiple_mixture
-        value.move< ast::mix_pair > (that.value);
-        break;
-
-      case 116: // opt_string
-      case 117: // string_or_pr_expr
-        value.move< ast::ptr_pair > (that.value);
         break;
 
       case 103: // join
@@ -357,6 +361,10 @@ namespace yy {
         value.move< std::list<ast::Expression> > (that.value);
         break;
 
+      case 112: // print_expr
+        value.move< std::list<ast::PrintObj> > (that.value);
+        break;
+
       case 135: // interface_expression
         value.move< std::list<ast::Site> > (that.value);
         break;
@@ -364,10 +372,6 @@ namespace yy {
       case 122: // token_expr
       case 123: // sum_token
         value.move< std::list<ast::Token> > (that.value);
-        break;
-
-      case 112: // print_expr
-        value.move< std::list<ast::print_expr> > (that.value);
         break;
 
       case 107: // value_list
@@ -434,8 +438,21 @@ namespace yy {
         value.copy< ast::Id > (that.value);
         break;
 
+      case 102: // init_declaration
+        value.copy< ast::Init_Declaration > (that.value);
+        break;
+
       case 138: // link_state
         value.copy< ast::Link > (that.value);
+        break;
+
+      case 132: // multiple_mixture
+        value.copy< ast::Multiple_Mixture > (that.value);
+        break;
+
+      case 116: // opt_string
+      case 117: // string_or_pr_expr
+        value.copy< ast::OptString > (that.value);
         break;
 
       case 109: // perturbation_declaration
@@ -460,15 +477,6 @@ namespace yy {
 
       case 136: // port_expression
         value.copy< ast::Site > (that.value);
-        break;
-
-      case 132: // multiple_mixture
-        value.copy< ast::mix_pair > (that.value);
-        break;
-
-      case 116: // opt_string
-      case 117: // string_or_pr_expr
-        value.copy< ast::ptr_pair > (that.value);
         break;
 
       case 103: // join
@@ -502,6 +510,10 @@ namespace yy {
         value.copy< std::list<ast::Expression> > (that.value);
         break;
 
+      case 112: // print_expr
+        value.copy< std::list<ast::PrintObj> > (that.value);
+        break;
+
       case 135: // interface_expression
         value.copy< std::list<ast::Site> > (that.value);
         break;
@@ -509,10 +521,6 @@ namespace yy {
       case 122: // token_expr
       case 123: // sum_token
         value.copy< std::list<ast::Token> > (that.value);
-        break;
-
-      case 112: // print_expr
-        value.copy< std::list<ast::print_expr> > (that.value);
         break;
 
       case 107: // value_list
@@ -675,7 +683,7 @@ namespace yy {
 	//yydebug_ = 1;
 }
 
-#line 679 "KappaParser.cpp" // lalr1.cc:725
+#line 687 "KappaParser.cpp" // lalr1.cc:725
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -805,8 +813,21 @@ namespace yy {
         yylhs.value.build< ast::Id > ();
         break;
 
+      case 102: // init_declaration
+        yylhs.value.build< ast::Init_Declaration > ();
+        break;
+
       case 138: // link_state
         yylhs.value.build< ast::Link > ();
+        break;
+
+      case 132: // multiple_mixture
+        yylhs.value.build< ast::Multiple_Mixture > ();
+        break;
+
+      case 116: // opt_string
+      case 117: // string_or_pr_expr
+        yylhs.value.build< ast::OptString > ();
         break;
 
       case 109: // perturbation_declaration
@@ -831,15 +852,6 @@ namespace yy {
 
       case 136: // port_expression
         yylhs.value.build< ast::Site > ();
-        break;
-
-      case 132: // multiple_mixture
-        yylhs.value.build< ast::mix_pair > ();
-        break;
-
-      case 116: // opt_string
-      case 117: // string_or_pr_expr
-        yylhs.value.build< ast::ptr_pair > ();
         break;
 
       case 103: // join
@@ -873,6 +885,10 @@ namespace yy {
         yylhs.value.build< std::list<ast::Expression> > ();
         break;
 
+      case 112: // print_expr
+        yylhs.value.build< std::list<ast::PrintObj> > ();
+        break;
+
       case 135: // interface_expression
         yylhs.value.build< std::list<ast::Site> > ();
         break;
@@ -880,10 +896,6 @@ namespace yy {
       case 122: // token_expr
       case 123: // sum_token
         yylhs.value.build< std::list<ast::Token> > ();
-        break;
-
-      case 112: // print_expr
-        yylhs.value.build< std::list<ast::print_expr> > ();
         break;
 
       case 107: // value_list
@@ -919,1096 +931,1103 @@ namespace yy {
   case 3:
 #line 106 "kappaParser.y" // lalr1.cc:847
     {}
-#line 923 "KappaParser.cpp" // lalr1.cc:847
+#line 935 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 4:
 #line 110 "kappaParser.y" // lalr1.cc:847
     {}
-#line 929 "KappaParser.cpp" // lalr1.cc:847
+#line 941 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 5:
 #line 111 "kappaParser.y" // lalr1.cc:847
     {return 0;}
-#line 935 "KappaParser.cpp" // lalr1.cc:847
+#line 947 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 7:
 #line 116 "kappaParser.y" // lalr1.cc:847
     {}
-#line 941 "KappaParser.cpp" // lalr1.cc:847
+#line 953 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 8:
 #line 118 "kappaParser.y" // lalr1.cc:847
     {}
-#line 947 "KappaParser.cpp" // lalr1.cc:847
+#line 959 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 9:
 #line 120 "kappaParser.y" // lalr1.cc:847
     {}
-#line 953 "KappaParser.cpp" // lalr1.cc:847
+#line 965 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 11:
 #line 127 "kappaParser.y" // lalr1.cc:847
     {}
-#line 959 "KappaParser.cpp" // lalr1.cc:847
+#line 971 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 12:
 #line 129 "kappaParser.y" // lalr1.cc:847
     {cout<<"Hola";}
-#line 965 "KappaParser.cpp" // lalr1.cc:847
+#line 977 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 13:
 #line 131 "kappaParser.y" // lalr1.cc:847
     {}
-#line 971 "KappaParser.cpp" // lalr1.cc:847
+#line 983 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 14:
 #line 133 "kappaParser.y" // lalr1.cc:847
     {}
-#line 977 "KappaParser.cpp" // lalr1.cc:847
+#line 989 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 15:
 #line 135 "kappaParser.y" // lalr1.cc:847
     {}
-#line 983 "KappaParser.cpp" // lalr1.cc:847
+#line 995 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 16:
 #line 137 "kappaParser.y" // lalr1.cc:847
     {}
-#line 989 "KappaParser.cpp" // lalr1.cc:847
+#line 1001 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 17:
 #line 139 "kappaParser.y" // lalr1.cc:847
     {}
-#line 995 "KappaParser.cpp" // lalr1.cc:847
+#line 1007 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 18:
 #line 141 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1001 "KappaParser.cpp" // lalr1.cc:847
+#line 1013 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 19:
 #line 143 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1007 "KappaParser.cpp" // lalr1.cc:847
+#line 1019 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 20:
 #line 145 "kappaParser.y" // lalr1.cc:847
     {driver.addDeclaration(yystack_[0].value.as< ast::Declaration > ());}
-#line 1013 "KappaParser.cpp" // lalr1.cc:847
+#line 1025 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 21:
 #line 147 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1019 "KappaParser.cpp" // lalr1.cc:847
+#line 1031 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 22:
 #line 149 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1025 "KappaParser.cpp" // lalr1.cc:847
+#line 1037 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 23:
 #line 151 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1031 "KappaParser.cpp" // lalr1.cc:847
+#line 1043 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 24:
 #line 153 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1037 "KappaParser.cpp" // lalr1.cc:847
+#line 1049 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 25:
 #line 155 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1043 "KappaParser.cpp" // lalr1.cc:847
+#line 1055 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 26:
 #line 157 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1049 "KappaParser.cpp" // lalr1.cc:847
+#line 1061 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 27:
 #line 159 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1055 "KappaParser.cpp" // lalr1.cc:847
+#line 1067 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 29:
 #line 164 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1061 "KappaParser.cpp" // lalr1.cc:847
+    {yylhs.value.as< ast::Init_Declaration > ()=ast::Init_Declaration(ast::Init_t(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< std::list<ast::Agent> > ()),NULL);}
+#line 1073 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 30:
 #line 166 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1067 "KappaParser.cpp" // lalr1.cc:847
+    {yylhs.value.as< ast::Init_Declaration > ()=ast::Init_Declaration(ast::Init_t(yystack_[0].value.as< ast::Expression > (),yystack_[2].value.as< std::string > ()),NULL);}
+#line 1079 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 31:
 #line 168 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1073 "KappaParser.cpp" // lalr1.cc:847
+    {
+		ast::Id id(yystack_[3].value.as< std::string > ());
+		yylhs.value.as< ast::Init_Declaration > ()=ast::Init_Declaration(yystack_[1].value.as< ast::Init_Declaration > ().init_t,&id);
+	}
+#line 1088 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 32:
-#line 175 "kappaParser.y" // lalr1.cc:847
+#line 178 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=true;}
-#line 1079 "KappaParser.cpp" // lalr1.cc:847
+#line 1094 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 33:
-#line 177 "kappaParser.y" // lalr1.cc:847
+#line 180 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=true;}
-#line 1085 "KappaParser.cpp" // lalr1.cc:847
+#line 1100 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 34:
-#line 179 "kappaParser.y" // lalr1.cc:847
+#line 182 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=false;}
-#line 1091 "KappaParser.cpp" // lalr1.cc:847
+#line 1106 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 35:
-#line 183 "kappaParser.y" // lalr1.cc:847
+#line 186 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::CompExpression > ()=ast::CompExpression(yystack_[2].value.as< std::string > (),std::list<ast::Expression>(),NULL,yystack_[2].location);}
-#line 1097 "KappaParser.cpp" // lalr1.cc:847
+#line 1112 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 36:
-#line 188 "kappaParser.y" // lalr1.cc:847
+#line 191 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Expression> > ()=std::list<ast::Expression>();}
-#line 1103 "KappaParser.cpp" // lalr1.cc:847
+#line 1118 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 37:
-#line 190 "kappaParser.y" // lalr1.cc:847
+#line 193 "kappaParser.y" // lalr1.cc:847
     {
 		yystack_[0].value.as< std::list<ast::Expression> > ().push_front(yystack_[2].value.as< ast::Expression > ());
  		yylhs.value.as< std::list<ast::Expression> > ()=yystack_[0].value.as< std::list<ast::Expression> > ();
 	}
-#line 1112 "KappaParser.cpp" // lalr1.cc:847
+#line 1127 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 38:
-#line 198 "kappaParser.y" // lalr1.cc:847
+#line 201 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression* > ()=NULL;}
-#line 1118 "KappaParser.cpp" // lalr1.cc:847
+#line 1133 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 39:
-#line 200 "kappaParser.y" // lalr1.cc:847
+#line 203 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression* > ()=&yystack_[1].value.as< ast::Expression > ();}
-#line 1124 "KappaParser.cpp" // lalr1.cc:847
+#line 1139 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 41:
-#line 226 "kappaParser.y" // lalr1.cc:847
+#line 229 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<std::string> > ()=std::list<std::string>(1,yystack_[0].value.as< std::string > ()); }
-#line 1130 "KappaParser.cpp" // lalr1.cc:847
+#line 1145 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 42:
-#line 228 "kappaParser.y" // lalr1.cc:847
+#line 231 "kappaParser.y" // lalr1.cc:847
     {
 		yystack_[0].value.as< std::list<std::string> > ().push_front(yystack_[1].value.as< std::string > ());
 		yylhs.value.as< std::list<std::string> > ()=yystack_[0].value.as< std::list<std::string> > ();
 	 }
-#line 1139 "KappaParser.cpp" // lalr1.cc:847
+#line 1154 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 43:
-#line 235 "kappaParser.y" // lalr1.cc:847
+#line 238 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::CompExpression> > ()=std::list<ast::CompExpression>(); }
-#line 1145 "KappaParser.cpp" // lalr1.cc:847
+#line 1160 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 44:
-#line 237 "kappaParser.y" // lalr1.cc:847
+#line 240 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::CompExpression> > ()=std::list<ast::CompExpression>(); }
-#line 1151 "KappaParser.cpp" // lalr1.cc:847
+#line 1166 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 45:
-#line 239 "kappaParser.y" // lalr1.cc:847
+#line 242 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::CompExpression> > ()=std::list<ast::CompExpression>(1,yystack_[0].value.as< ast::CompExpression > ()); }
-#line 1157 "KappaParser.cpp" // lalr1.cc:847
+#line 1172 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 46:
-#line 241 "kappaParser.y" // lalr1.cc:847
+#line 244 "kappaParser.y" // lalr1.cc:847
     { 
 		yystack_[0].value.as< std::list<ast::CompExpression> > ().push_front(yystack_[1].value.as< ast::CompExpression > ());
  		yylhs.value.as< std::list<ast::CompExpression> > ()=yystack_[0].value.as< std::list<ast::CompExpression> > (); 
 	}
-#line 1166 "KappaParser.cpp" // lalr1.cc:847
+#line 1181 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 47:
-#line 246 "kappaParser.y" // lalr1.cc:847
+#line 249 "kappaParser.y" // lalr1.cc:847
     {	
 		yystack_[0].value.as< std::list<ast::CompExpression> > ().push_front(yystack_[2].value.as< ast::CompExpression > ());
 		yylhs.value.as< std::list<ast::CompExpression> > ()=yystack_[0].value.as< std::list<ast::CompExpression> > (); 
 	}
-#line 1175 "KappaParser.cpp" // lalr1.cc:847
+#line 1190 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 49:
-#line 255 "kappaParser.y" // lalr1.cc:847
+#line 258 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Perturbation > ()=yystack_[1].value.as< ast::Perturbation > ();}
-#line 1181 "KappaParser.cpp" // lalr1.cc:847
+#line 1196 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 50:
-#line 256 "kappaParser.y" // lalr1.cc:847
+#line 259 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Perturbation > ()=ast::Perturbation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< std::list<ast::Effect> > (),yystack_[1].location);}
-#line 1187 "KappaParser.cpp" // lalr1.cc:847
+#line 1202 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 51:
-#line 258 "kappaParser.y" // lalr1.cc:847
+#line 261 "kappaParser.y" // lalr1.cc:847
     {
 		// temporal, preguntarle a naxo
 		cout<<"Deprecated perturbation syntax: 'set' keyword is replaced by 'do'"<<endl;
 		yylhs.value.as< ast::Perturbation > ()=ast::Perturbation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< std::list<ast::Effect> > (),yystack_[1].location);
 	}
-#line 1197 "KappaParser.cpp" // lalr1.cc:847
+#line 1212 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 53:
-#line 266 "kappaParser.y" // lalr1.cc:847
+#line 269 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Effect> > ()=yystack_[1].value.as< std::list<ast::Effect> > ();}
-#line 1203 "KappaParser.cpp" // lalr1.cc:847
+#line 1218 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 54:
-#line 267 "kappaParser.y" // lalr1.cc:847
+#line 270 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Effect> > ()=std::list<ast::Effect>(1,yystack_[0].value.as< ast::Effect > ());}
-#line 1209 "KappaParser.cpp" // lalr1.cc:847
+#line 1224 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 55:
-#line 269 "kappaParser.y" // lalr1.cc:847
+#line 272 "kappaParser.y" // lalr1.cc:847
     {
 		yystack_[0].value.as< std::list<ast::Effect> > ().push_front(yystack_[2].value.as< ast::Effect > ());
 		yylhs.value.as< std::list<ast::Effect> > ()=yystack_[0].value.as< std::list<ast::Effect> > ();
 	}
-#line 1218 "KappaParser.cpp" // lalr1.cc:847
+#line 1233 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 57:
-#line 277 "kappaParser.y" // lalr1.cc:847
+#line 280 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::UPDATE,std::string(yystack_[2].value.as< std::string > ()),yystack_[0].value.as< ast::Expression > (),yystack_[1].location);}
-#line 1224 "KappaParser.cpp" // lalr1.cc:847
+#line 1239 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 58:
-#line 279 "kappaParser.y" // lalr1.cc:847
+#line 282 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::UPDATE,std::string(yystack_[1].value.as< std::string > ()),yystack_[0].value.as< ast::Expression > (),yystack_[2].location);}
-#line 1230 "KappaParser.cpp" // lalr1.cc:847
+#line 1245 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 59:
-#line 281 "kappaParser.y" // lalr1.cc:847
+#line 284 "kappaParser.y" // lalr1.cc:847
     {
 		if(yystack_[0].value.as< bool > ())
 			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::CFLOW   ,std::string(yystack_[1].value.as< std::string > ()),yystack_[2].location);
 		else 
 			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::CFLOWOFF,std::string(yystack_[1].value.as< std::string > ()),yystack_[2].location);
 	}
-#line 1241 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 60:
-#line 289 "kappaParser.y" // lalr1.cc:847
-    {
-		ast::Effect::Action action= yystack_[0].value.as< bool > () ? ast::Effect::FLUX : ast::Effect::FLUXOFF;
-
-		if(yystack_[1].value.as< ast::ptr_pair > ().str   != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(action,std::list<ast::print_expr>(1,ast::print_expr(*(yystack_[1].value.as< ast::ptr_pair > ().str),yystack_[1].location)),yystack_[2].location);
-		else if(yystack_[1].value.as< ast::ptr_pair > ().pexpr != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(action,*(yystack_[1].value.as< ast::ptr_pair > ().pexpr),yystack_[2].location);
-		else
-			yylhs.value.as< ast::Effect > ()=ast::Effect(action,std::list<ast::print_expr>(),yystack_[2].location);
-	}
 #line 1256 "KappaParser.cpp" // lalr1.cc:847
     break;
 
+  case 60:
+#line 292 "kappaParser.y" // lalr1.cc:847
+    {
+		ast::Effect::Action action= yystack_[0].value.as< bool > () ? ast::Effect::FLUX : ast::Effect::FLUXOFF;
+
+		if(yystack_[1].value.as< ast::OptString > ().str_ptr   != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(action,std::list<ast::PrintObj>(1,ast::PrintObj(*(yystack_[1].value.as< ast::OptString > ().str_ptr),yystack_[1].location)),yystack_[2].location);
+		else if(yystack_[1].value.as< ast::OptString > ().print_list_ptr != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(action,*(yystack_[1].value.as< ast::OptString > ().print_list_ptr),yystack_[2].location);
+		else
+			yylhs.value.as< ast::Effect > ()=ast::Effect(action,std::list<ast::PrintObj>(),yystack_[2].location);
+	}
+#line 1271 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
   case 61:
-#line 300 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::INTRO,yystack_[0].value.as< ast::mix_pair > ().alg,yystack_[0].value.as< ast::mix_pair > ().mix,yystack_[1].location);}
-#line 1262 "KappaParser.cpp" // lalr1.cc:847
+#line 303 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::INTRO,yystack_[0].value.as< ast::Multiple_Mixture > ().alg,yystack_[0].value.as< ast::Multiple_Mixture > ().mix,yystack_[1].location);}
+#line 1277 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 62:
-#line 302 "kappaParser.y" // lalr1.cc:847
+#line 305 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1268 "KappaParser.cpp" // lalr1.cc:847
+#line 1283 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 63:
-#line 304 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::DELETE,yystack_[0].value.as< ast::mix_pair > ().alg,yystack_[0].value.as< ast::mix_pair > ().mix,yystack_[1].location);}
-#line 1274 "KappaParser.cpp" // lalr1.cc:847
+#line 307 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::DELETE,yystack_[0].value.as< ast::Multiple_Mixture > ().alg,yystack_[0].value.as< ast::Multiple_Mixture > ().mix,yystack_[1].location);}
+#line 1289 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 64:
-#line 306 "kappaParser.y" // lalr1.cc:847
+#line 309 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1280 "KappaParser.cpp" // lalr1.cc:847
+#line 1295 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 65:
-#line 308 "kappaParser.y" // lalr1.cc:847
+#line 311 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::UPDATE_TOK,yystack_[2].value.as< std::string > (),yystack_[0].value.as< ast::Expression > (),yystack_[1].location);}
-#line 1286 "KappaParser.cpp" // lalr1.cc:847
+#line 1301 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 66:
-#line 310 "kappaParser.y" // lalr1.cc:847
+#line 313 "kappaParser.y" // lalr1.cc:847
     {	
-		if(yystack_[0].value.as< ast::ptr_pair > ().str   != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::print_expr>(1,ast::print_expr(*(yystack_[0].value.as< ast::ptr_pair > ().str),yystack_[0].location)),yystack_[1].location);
-		else if(yystack_[0].value.as< ast::ptr_pair > ().pexpr != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::SNAPSHOT,*(yystack_[0].value.as< ast::ptr_pair > ().pexpr),yystack_[1].location);
+		if(yystack_[0].value.as< ast::OptString > ().str_ptr   != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::PrintObj>(1,ast::PrintObj(*(yystack_[0].value.as< ast::OptString > ().str_ptr),yystack_[0].location)),yystack_[1].location);
+		else if(yystack_[0].value.as< ast::OptString > ().print_list_ptr != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::SNAPSHOT,*(yystack_[0].value.as< ast::OptString > ().print_list_ptr),yystack_[1].location);
 		else
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::print_expr>(),yystack_[1].location);
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::PrintObj>(),yystack_[1].location);
 	}
-#line 1299 "KappaParser.cpp" // lalr1.cc:847
+#line 1314 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 67:
-#line 319 "kappaParser.y" // lalr1.cc:847
+#line 322 "kappaParser.y" // lalr1.cc:847
     {
-		if(yystack_[0].value.as< ast::ptr_pair > ().str   != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::STOP,std::list<ast::print_expr>(1,ast::print_expr(*(yystack_[0].value.as< ast::ptr_pair > ().str),yystack_[0].location)),yystack_[1].location);
-		else if(yystack_[0].value.as< ast::ptr_pair > ().pexpr != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::STOP,*(yystack_[0].value.as< ast::ptr_pair > ().pexpr),yystack_[1].location);
+		if(yystack_[0].value.as< ast::OptString > ().str_ptr   != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::STOP,std::list<ast::PrintObj>(1,ast::PrintObj(*(yystack_[0].value.as< ast::OptString > ().str_ptr),yystack_[0].location)),yystack_[1].location);
+		else if(yystack_[0].value.as< ast::OptString > ().print_list_ptr != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::STOP,*(yystack_[0].value.as< ast::OptString > ().print_list_ptr),yystack_[1].location);
 		else
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::STOP,std::list<ast::print_expr>(),yystack_[1].location);
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::STOP,std::list<ast::PrintObj>(),yystack_[1].location);
 
 	}
-#line 1313 "KappaParser.cpp" // lalr1.cc:847
+#line 1328 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 68:
-#line 329 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(),yystack_[1].value.as< std::list<ast::print_expr> > (),yystack_[3].location);}
-#line 1319 "KappaParser.cpp" // lalr1.cc:847
+#line 332 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(),yystack_[1].value.as< std::list<ast::PrintObj> > (),yystack_[3].location);}
+#line 1334 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 69:
-#line 331 "kappaParser.y" // lalr1.cc:847
+#line 334 "kappaParser.y" // lalr1.cc:847
     {
-		if(yystack_[3].value.as< ast::ptr_pair > ().str   != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(1,ast::print_expr(*(yystack_[3].value.as< ast::ptr_pair > ().str),yystack_[3].location)),yystack_[1].value.as< std::list<ast::print_expr> > (),yystack_[4].location);
-		else if(yystack_[3].value.as< ast::ptr_pair > ().pexpr != NULL) 
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,*(yystack_[3].value.as< ast::ptr_pair > ().pexpr),yystack_[1].value.as< std::list<ast::print_expr> > (),yystack_[4].location);
+		if(yystack_[3].value.as< ast::OptString > ().str_ptr   != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(1,ast::PrintObj(*(yystack_[3].value.as< ast::OptString > ().str_ptr),yystack_[3].location)),yystack_[1].value.as< std::list<ast::PrintObj> > (),yystack_[4].location);
+		else if(yystack_[3].value.as< ast::OptString > ().print_list_ptr != NULL) 
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,*(yystack_[3].value.as< ast::OptString > ().print_list_ptr),yystack_[1].value.as< std::list<ast::PrintObj> > (),yystack_[4].location);
 		else
-			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,std::list<ast::print_expr>(),yystack_[1].value.as< std::list<ast::print_expr> > (),yystack_[4].location);
+			yylhs.value.as< ast::Effect > ()=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(),yystack_[1].value.as< std::list<ast::PrintObj> > (),yystack_[4].location);
 	}
-#line 1332 "KappaParser.cpp" // lalr1.cc:847
+#line 1347 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 70:
-#line 344 "kappaParser.y" // lalr1.cc:847
-    { yylhs.value.as< std::list<ast::print_expr> > ()=std::list<ast::print_expr>(); }
-#line 1338 "KappaParser.cpp" // lalr1.cc:847
+#line 347 "kappaParser.y" // lalr1.cc:847
+    { yylhs.value.as< std::list<ast::PrintObj> > ()=std::list<ast::PrintObj>(); }
+#line 1353 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 71:
-#line 346 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< std::list<ast::print_expr> > ()=std::list<ast::print_expr>(1,ast::print_expr(yystack_[0].value.as< std::string > (),yystack_[0].location)); }
-#line 1344 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 72:
-#line 348 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< std::list<ast::print_expr> > ()=std::list<ast::print_expr>(1,ast::print_expr(yystack_[0].value.as< ast::Expression > (),yystack_[0].location)); }
-#line 1350 "KappaParser.cpp" // lalr1.cc:847
-    break;
-
-  case 73:
-#line 350 "kappaParser.y" // lalr1.cc:847
-    {
-		yystack_[0].value.as< std::list<ast::print_expr> > ().push_front(ast::print_expr(yystack_[2].value.as< std::string > (),yystack_[2].location));
-		yylhs.value.as< std::list<ast::print_expr> > ()=yystack_[0].value.as< std::list<ast::print_expr> > ();
-	}
+#line 349 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::PrintObj> > ()=std::list<ast::PrintObj>(1,ast::PrintObj(yystack_[0].value.as< std::string > (),yystack_[0].location)); }
 #line 1359 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 74:
-#line 355 "kappaParser.y" // lalr1.cc:847
-    {
-		yystack_[0].value.as< std::list<ast::print_expr> > ().push_front(ast::print_expr(yystack_[2].value.as< ast::Expression > (),yystack_[2].location));
-		yylhs.value.as< std::list<ast::print_expr> > ()=yystack_[0].value.as< std::list<ast::print_expr> > ();
-	}
-#line 1368 "KappaParser.cpp" // lalr1.cc:847
+  case 72:
+#line 351 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< std::list<ast::PrintObj> > ()=std::list<ast::PrintObj>(1,ast::PrintObj(yystack_[0].value.as< ast::Expression > (),yystack_[0].location)); }
+#line 1365 "KappaParser.cpp" // lalr1.cc:847
     break;
 
-  case 76:
-#line 362 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< bool > ()=true;}
+  case 73:
+#line 353 "kappaParser.y" // lalr1.cc:847
+    {
+		yystack_[0].value.as< std::list<ast::PrintObj> > ().push_front(ast::PrintObj(yystack_[2].value.as< std::string > (),yystack_[2].location));
+		yylhs.value.as< std::list<ast::PrintObj> > ()=yystack_[0].value.as< std::list<ast::PrintObj> > ();
+	}
 #line 1374 "KappaParser.cpp" // lalr1.cc:847
     break;
 
+  case 74:
+#line 358 "kappaParser.y" // lalr1.cc:847
+    {
+		yystack_[0].value.as< std::list<ast::PrintObj> > ().push_front(ast::PrintObj(yystack_[2].value.as< ast::Expression > (),yystack_[2].location));
+		yylhs.value.as< std::list<ast::PrintObj> > ()=yystack_[0].value.as< std::list<ast::PrintObj> > ();
+	}
+#line 1383 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
+  case 76:
+#line 365 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< bool > ()=true;}
+#line 1389 "KappaParser.cpp" // lalr1.cc:847
+    break;
+
   case 77:
-#line 363 "kappaParser.y" // lalr1.cc:847
+#line 366 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=false;}
-#line 1380 "KappaParser.cpp" // lalr1.cc:847
+#line 1395 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 78:
-#line 368 "kappaParser.y" // lalr1.cc:847
+#line 371 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Declaration > () = ast::Declaration(ast::Id(yystack_[1].value.as< std::string > (),yystack_[1].location),yystack_[0].value.as< std::list<ast::Agent> > (),yylhs.location);}
-#line 1386 "KappaParser.cpp" // lalr1.cc:847
+#line 1401 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 79:
-#line 370 "kappaParser.y" // lalr1.cc:847
+#line 373 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Declaration > () = ast::Declaration(ast::Id(yystack_[1].value.as< std::string > (),yystack_[1].location),yystack_[0].value.as< ast::Expression > (),yylhs.location);}
-#line 1392 "KappaParser.cpp" // lalr1.cc:847
+#line 1407 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 80:
-#line 372 "kappaParser.y" // lalr1.cc:847
+#line 375 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1398 "KappaParser.cpp" // lalr1.cc:847
+#line 1413 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 82:
-#line 377 "kappaParser.y" // lalr1.cc:847
+#line 380 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > ()=yystack_[1].value.as< ast::Expression > ();}
-#line 1404 "KappaParser.cpp" // lalr1.cc:847
+#line 1419 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 83:
-#line 379 "kappaParser.y" // lalr1.cc:847
+#line 382 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::AND,yystack_[1].location);}
-#line 1410 "KappaParser.cpp" // lalr1.cc:847
+#line 1425 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 84:
-#line 381 "kappaParser.y" // lalr1.cc:847
+#line 384 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::OR,yystack_[1].location);}
-#line 1416 "KappaParser.cpp" // lalr1.cc:847
+#line 1431 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 85:
-#line 383 "kappaParser.y" // lalr1.cc:847
+#line 386 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::GREATER,yystack_[1].location);}
-#line 1422 "KappaParser.cpp" // lalr1.cc:847
+#line 1437 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 86:
-#line 385 "kappaParser.y" // lalr1.cc:847
+#line 388 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::SMALLER,yystack_[1].location);}
-#line 1428 "KappaParser.cpp" // lalr1.cc:847
+#line 1443 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 87:
-#line 387 "kappaParser.y" // lalr1.cc:847
+#line 390 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::EQUAL,yystack_[1].location);}
-#line 1434 "KappaParser.cpp" // lalr1.cc:847
+#line 1449 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 88:
-#line 389 "kappaParser.y" // lalr1.cc:847
+#line 392 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BoolOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BoolOperation::DIFF,yystack_[1].location);}
-#line 1440 "KappaParser.cpp" // lalr1.cc:847
+#line 1455 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 89:
-#line 391 "kappaParser.y" // lalr1.cc:847
+#line 394 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Bool(true,yystack_[0].location);}
-#line 1446 "KappaParser.cpp" // lalr1.cc:847
+#line 1461 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 90:
-#line 393 "kappaParser.y" // lalr1.cc:847
+#line 396 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Bool(false,yystack_[0].location);}
-#line 1452 "KappaParser.cpp" // lalr1.cc:847
+#line 1467 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 91:
-#line 397 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::ptr_pair > ()=(ast::ptr_pair(NULL,NULL));}
-#line 1458 "KappaParser.cpp" // lalr1.cc:847
+#line 400 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::OptString > ()=(ast::OptString(NULL,NULL));}
+#line 1473 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 92:
-#line 398 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::ptr_pair > ()=(ast::ptr_pair(&yystack_[0].value.as< std::string > (),NULL));}
-#line 1464 "KappaParser.cpp" // lalr1.cc:847
+#line 401 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::OptString > ()=(ast::OptString(&yystack_[0].value.as< std::string > (),NULL));}
+#line 1479 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 93:
-#line 399 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::ptr_pair > ()=(ast:: ptr_pair(NULL,&yystack_[1].value.as< std::list<ast::print_expr> > ()));}
-#line 1470 "KappaParser.cpp" // lalr1.cc:847
+#line 402 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::OptString > ()=(ast:: OptString(NULL,&yystack_[1].value.as< std::list<ast::PrintObj> > ()));}
+#line 1485 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 95:
-#line 403 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::ptr_pair > ()=(ast::ptr_pair(&yystack_[0].value.as< std::string > (),NULL));}
-#line 1476 "KappaParser.cpp" // lalr1.cc:847
+#line 406 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::OptString > ()=(ast::OptString(&yystack_[0].value.as< std::string > (),NULL));}
+#line 1491 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 96:
-#line 404 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::ptr_pair > ()=(ast::ptr_pair(NULL,&yystack_[1].value.as< std::list<ast::print_expr> > ()));}
-#line 1482 "KappaParser.cpp" // lalr1.cc:847
+#line 407 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::OptString > ()=(ast::OptString(NULL,&yystack_[1].value.as< std::list<ast::PrintObj> > ()));}
+#line 1497 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 98:
-#line 409 "kappaParser.y" // lalr1.cc:847
+#line 412 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
-#line 1488 "KappaParser.cpp" // lalr1.cc:847
+#line 1503 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 99:
-#line 410 "kappaParser.y" // lalr1.cc:847
+#line 413 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
-#line 1494 "KappaParser.cpp" // lalr1.cc:847
+#line 1509 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 100:
-#line 411 "kappaParser.y" // lalr1.cc:847
+#line 414 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Var(yystack_[0].value.as< std::string > (),ast::Var::VAR,yystack_[0].location); }
-#line 1500 "KappaParser.cpp" // lalr1.cc:847
+#line 1515 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 101:
-#line 416 "kappaParser.y" // lalr1.cc:847
+#line 419 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::INF,yystack_[0].location);}
-#line 1506 "KappaParser.cpp" // lalr1.cc:847
+#line 1521 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 102:
-#line 418 "kappaParser.y" // lalr1.cc:847
+#line 421 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
-#line 1512 "KappaParser.cpp" // lalr1.cc:847
+#line 1527 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 103:
-#line 420 "kappaParser.y" // lalr1.cc:847
+#line 423 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
-#line 1518 "KappaParser.cpp" // lalr1.cc:847
+#line 1533 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 104:
-#line 422 "kappaParser.y" // lalr1.cc:847
+#line 425 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::EMAX,yystack_[0].location);}
-#line 1524 "KappaParser.cpp" // lalr1.cc:847
+#line 1539 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 106:
-#line 427 "kappaParser.y" // lalr1.cc:847
+#line 430 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Id > ()=ast::Id();}
-#line 1530 "KappaParser.cpp" // lalr1.cc:847
+#line 1545 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 107:
-#line 429 "kappaParser.y" // lalr1.cc:847
+#line 432 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Id > ()=ast::Id(yystack_[0].value.as< std::string > (),yystack_[0].location);}
-#line 1536 "KappaParser.cpp" // lalr1.cc:847
+#line 1551 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 108:
-#line 433 "kappaParser.y" // lalr1.cc:847
+#line 436 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::RuleSide > ()=ast::RuleSide(yystack_[1].value.as< std::list<ast::Agent> > (),yystack_[0].value.as< std::list<ast::Token> > ());}
-#line 1542 "KappaParser.cpp" // lalr1.cc:847
+#line 1557 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 109:
-#line 437 "kappaParser.y" // lalr1.cc:847
+#line 440 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Token> > ()=std::list<ast::Token>();}
-#line 1548 "KappaParser.cpp" // lalr1.cc:847
+#line 1563 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 110:
-#line 438 "kappaParser.y" // lalr1.cc:847
+#line 441 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Token> > ()=yystack_[0].value.as< std::list<ast::Token> > ();}
-#line 1554 "KappaParser.cpp" // lalr1.cc:847
+#line 1569 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 111:
-#line 440 "kappaParser.y" // lalr1.cc:847
+#line 443 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1560 "KappaParser.cpp" // lalr1.cc:847
+#line 1575 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 113:
-#line 445 "kappaParser.y" // lalr1.cc:847
+#line 448 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Token> > ()=yystack_[1].value.as< std::list<ast::Token> > ();}
-#line 1566 "KappaParser.cpp" // lalr1.cc:847
+#line 1581 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 114:
-#line 447 "kappaParser.y" // lalr1.cc:847
+#line 450 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Token> > ()=std::list<ast::Token>(1,ast::Token(yystack_[2].value.as< ast::Expression > (),ast::Id(yystack_[0].value.as< std::string > ())));}
-#line 1572 "KappaParser.cpp" // lalr1.cc:847
+#line 1587 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 115:
-#line 449 "kappaParser.y" // lalr1.cc:847
+#line 452 "kappaParser.y" // lalr1.cc:847
     {
 		yystack_[0].value.as< std::list<ast::Token> > ().push_front(ast::Token(yystack_[4].value.as< ast::Expression > (),ast::Id(yystack_[2].value.as< std::string > ())));
 		yylhs.value.as< std::list<ast::Token> > ()=yystack_[0].value.as< std::list<ast::Token> > ();
 	}
-#line 1581 "KappaParser.cpp" // lalr1.cc:847
+#line 1596 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 116:
-#line 456 "kappaParser.y" // lalr1.cc:847
+#line 459 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Agent> > ()=std::list<ast::Agent>();}
-#line 1587 "KappaParser.cpp" // lalr1.cc:847
+#line 1602 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 117:
-#line 458 "kappaParser.y" // lalr1.cc:847
+#line 461 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Agent> > ()=yystack_[0].value.as< std::list<ast::Agent> > ();}
-#line 1593 "KappaParser.cpp" // lalr1.cc:847
+#line 1608 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 119:
-#line 462 "kappaParser.y" // lalr1.cc:847
+#line 465 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=false;}
-#line 1599 "KappaParser.cpp" // lalr1.cc:847
+#line 1614 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 120:
-#line 463 "kappaParser.y" // lalr1.cc:847
+#line 466 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< bool > ()=true;}
-#line 1605 "KappaParser.cpp" // lalr1.cc:847
+#line 1620 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 122:
-#line 470 "kappaParser.y" // lalr1.cc:847
+#line 473 "kappaParser.y" // lalr1.cc:847
     {
 		if((yystack_[3].value.as< ast::Arrow > ().type() == ast::Arrow::BI && yystack_[0].value.as< ast::Rate > ().op == NULL) || (yystack_[3].value.as< ast::Arrow > ().type() == ast::Arrow::RIGHT && yystack_[0].value.as< ast::Rate > ().op != NULL)) 
 			yy::KappaParser::error(yystack_[5].location,"Malformed bi-directional rule expression");
 		yylhs.value.as< ast::Rule > ()=ast::Rule(yystack_[5].value.as< ast::Id > (),yystack_[4].value.as< ast::RuleSide > (),yystack_[2].value.as< ast::RuleSide > (),yystack_[3].value.as< ast::Arrow > (),yystack_[0].value.as< ast::Rate > (),-1,NULL,yystack_[1].value.as< bool > (),yystack_[5].location);
 	}
-#line 1615 "KappaParser.cpp" // lalr1.cc:847
+#line 1630 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 123:
-#line 476 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::Rule > ()=ast::Rule();}
-#line 1621 "KappaParser.cpp" // lalr1.cc:847
+#line 479 "kappaParser.y" // lalr1.cc:847
+    {
+		cout<<"Warning: Rule has no kinetics. Default rate of 0.0 is assumed."<<endl;
+		ast::Rate rate(ast::Const(0.0f,yy::location()),NULL,NULL);
+		yylhs.value.as< ast::Rule > ()=ast::Rule(yystack_[3].value.as< ast::Id > (),yystack_[2].value.as< ast::RuleSide > (),yystack_[0].value.as< ast::RuleSide > (),yystack_[1].value.as< ast::Arrow > (),rate,-1,NULL,true,yystack_[3].location);;
+	}
+#line 1640 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 124:
-#line 483 "kappaParser.y" // lalr1.cc:847
+#line 490 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Arrow > ()=ast::Arrow(ast::Arrow::RIGHT,yystack_[0].location);}
-#line 1627 "KappaParser.cpp" // lalr1.cc:847
+#line 1646 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 125:
-#line 485 "kappaParser.y" // lalr1.cc:847
+#line 492 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Arrow > ()=ast::Arrow(ast::Arrow::BI,yystack_[0].location);}
-#line 1633 "KappaParser.cpp" // lalr1.cc:847
+#line 1652 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 126:
-#line 490 "kappaParser.y" // lalr1.cc:847
+#line 497 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::INF,yystack_[0].location);}
-#line 1639 "KappaParser.cpp" // lalr1.cc:847
+#line 1658 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 127:
-#line 492 "kappaParser.y" // lalr1.cc:847
+#line 499 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< float > (),yystack_[0].location);}
-#line 1645 "KappaParser.cpp" // lalr1.cc:847
+#line 1664 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 128:
-#line 494 "kappaParser.y" // lalr1.cc:847
+#line 501 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(yystack_[0].value.as< int > (),yystack_[0].location);}
-#line 1651 "KappaParser.cpp" // lalr1.cc:847
+#line 1670 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 129:
-#line 496 "kappaParser.y" // lalr1.cc:847
+#line 503 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::EMAX,yystack_[0].location);}
-#line 1657 "KappaParser.cpp" // lalr1.cc:847
+#line 1676 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 130:
-#line 498 "kappaParser.y" // lalr1.cc:847
+#line 505 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(ast::Const::TMAX,yystack_[0].location);}
-#line 1663 "KappaParser.cpp" // lalr1.cc:847
+#line 1682 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 131:
-#line 503 "kappaParser.y" // lalr1.cc:847
+#line 510 "kappaParser.y" // lalr1.cc:847
     {ast::Var(yystack_[1].value.as< std::string > (),ast::Var::TOKEN,yylhs.location);}
-#line 1669 "KappaParser.cpp" // lalr1.cc:847
+#line 1688 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 132:
-#line 505 "kappaParser.y" // lalr1.cc:847
+#line 512 "kappaParser.y" // lalr1.cc:847
     {ast::Var(yystack_[0].value.as< std::string > (),ast::Var::VAR,yylhs.location);}
-#line 1675 "KappaParser.cpp" // lalr1.cc:847
+#line 1694 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 133:
-#line 507 "kappaParser.y" // lalr1.cc:847
+#line 514 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::TIME,yylhs.location);}
-#line 1681 "KappaParser.cpp" // lalr1.cc:847
+#line 1700 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 134:
-#line 509 "kappaParser.y" // lalr1.cc:847
+#line 516 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::EVENT,yylhs.location);}
-#line 1687 "KappaParser.cpp" // lalr1.cc:847
+#line 1706 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 135:
-#line 511 "kappaParser.y" // lalr1.cc:847
+#line 518 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::NULL_EVENT,yylhs.location);}
-#line 1693 "KappaParser.cpp" // lalr1.cc:847
+#line 1712 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 136:
-#line 513 "kappaParser.y" // lalr1.cc:847
+#line 520 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::PROD_EVENT,yylhs.location);}
-#line 1699 "KappaParser.cpp" // lalr1.cc:847
+#line 1718 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 137:
-#line 515 "kappaParser.y" // lalr1.cc:847
+#line 522 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Var(ast::Var::ACTIVITY,yylhs.location);}
-#line 1705 "KappaParser.cpp" // lalr1.cc:847
+#line 1724 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 138:
-#line 517 "kappaParser.y" // lalr1.cc:847
+#line 524 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::Const(ast::Var::CPUTIME,yystack_[0].location);}
-#line 1711 "KappaParser.cpp" // lalr1.cc:847
+#line 1730 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 139:
-#line 522 "kappaParser.y" // lalr1.cc:847
+#line 529 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = yystack_[1].value.as< ast::Expression > ();}
-#line 1717 "KappaParser.cpp" // lalr1.cc:847
+#line 1736 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 140:
-#line 524 "kappaParser.y" // lalr1.cc:847
+#line 531 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = yystack_[0].value.as< ast::Expression > ();}
-#line 1723 "KappaParser.cpp" // lalr1.cc:847
+#line 1742 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 141:
-#line 526 "kappaParser.y" // lalr1.cc:847
+#line 533 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = yystack_[0].value.as< ast::Expression > ();}
-#line 1729 "KappaParser.cpp" // lalr1.cc:847
+#line 1748 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 142:
-#line 528 "kappaParser.y" // lalr1.cc:847
-    {}
-#line 1735 "KappaParser.cpp" // lalr1.cc:847
+#line 535 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Expression > () = ast::Var(yystack_[0].value.as< std::string > (),ast::Var::TOKEN,yystack_[0].location);}
+#line 1754 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 143:
-#line 530 "kappaParser.y" // lalr1.cc:847
+#line 537 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MULT,yystack_[1].location);}
-#line 1741 "KappaParser.cpp" // lalr1.cc:847
+#line 1760 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 144:
-#line 532 "kappaParser.y" // lalr1.cc:847
+#line 539 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::SUM,yystack_[1].location);}
-#line 1747 "KappaParser.cpp" // lalr1.cc:847
+#line 1766 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 145:
-#line 534 "kappaParser.y" // lalr1.cc:847
+#line 541 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::DIV,yystack_[1].location);}
-#line 1753 "KappaParser.cpp" // lalr1.cc:847
+#line 1772 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 146:
-#line 536 "kappaParser.y" // lalr1.cc:847
+#line 543 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MINUS,yystack_[1].location);}
-#line 1759 "KappaParser.cpp" // lalr1.cc:847
+#line 1778 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 147:
-#line 538 "kappaParser.y" // lalr1.cc:847
+#line 545 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::POW,yystack_[1].location);}
-#line 1765 "KappaParser.cpp" // lalr1.cc:847
+#line 1784 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 148:
-#line 540 "kappaParser.y" // lalr1.cc:847
+#line 547 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[2].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MODULO,yystack_[1].location);}
-#line 1771 "KappaParser.cpp" // lalr1.cc:847
+#line 1790 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 149:
-#line 542 "kappaParser.y" // lalr1.cc:847
+#line 549 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MAX,yystack_[1].location);}
-#line 1777 "KappaParser.cpp" // lalr1.cc:847
+#line 1796 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 150:
-#line 544 "kappaParser.y" // lalr1.cc:847
+#line 551 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::BinaryOperation(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< ast::Expression > (),ast::BinaryOperation::MIN,yystack_[1].location);}
-#line 1783 "KappaParser.cpp" // lalr1.cc:847
+#line 1802 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 151:
-#line 546 "kappaParser.y" // lalr1.cc:847
+#line 553 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::EXPONENT,yystack_[0].location);}
-#line 1789 "KappaParser.cpp" // lalr1.cc:847
+#line 1808 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 152:
-#line 548 "kappaParser.y" // lalr1.cc:847
+#line 555 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::SINUS,yystack_[0].location);}
-#line 1795 "KappaParser.cpp" // lalr1.cc:847
+#line 1814 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 153:
-#line 550 "kappaParser.y" // lalr1.cc:847
+#line 557 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::COSINUS,yystack_[0].location);}
-#line 1801 "KappaParser.cpp" // lalr1.cc:847
+#line 1820 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 154:
-#line 552 "kappaParser.y" // lalr1.cc:847
+#line 559 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::TAN,yystack_[0].location);}
-#line 1807 "KappaParser.cpp" // lalr1.cc:847
+#line 1826 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 155:
-#line 554 "kappaParser.y" // lalr1.cc:847
+#line 561 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::ABS,yystack_[0].location);}
-#line 1813 "KappaParser.cpp" // lalr1.cc:847
+#line 1832 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 156:
-#line 556 "kappaParser.y" // lalr1.cc:847
+#line 563 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::SQRT,yystack_[0].location);}
-#line 1819 "KappaParser.cpp" // lalr1.cc:847
+#line 1838 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 157:
-#line 558 "kappaParser.y" // lalr1.cc:847
+#line 565 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::LOG,yystack_[0].location);}
-#line 1825 "KappaParser.cpp" // lalr1.cc:847
+#line 1844 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 158:
-#line 561 "kappaParser.y" // lalr1.cc:847
+#line 568 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::ATAN,yystack_[0].location);}
-#line 1831 "KappaParser.cpp" // lalr1.cc:847
+#line 1850 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 159:
-#line 563 "kappaParser.y" // lalr1.cc:847
+#line 570 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::COIN,yystack_[0].location);}
-#line 1837 "KappaParser.cpp" // lalr1.cc:847
+#line 1856 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 160:
-#line 565 "kappaParser.y" // lalr1.cc:847
+#line 572 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Expression > () = ast::UnaryOperation(yystack_[0].value.as< ast::Expression > (),ast::UnaryOperation::RAND_N,yystack_[0].location);}
-#line 1843 "KappaParser.cpp" // lalr1.cc:847
+#line 1862 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 161:
-#line 567 "kappaParser.y" // lalr1.cc:847
+#line 574 "kappaParser.y" // lalr1.cc:847
     {}
-#line 1849 "KappaParser.cpp" // lalr1.cc:847
+#line 1868 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 163:
-#line 572 "kappaParser.y" // lalr1.cc:847
+#line 579 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Rate > ()=ast::Rate(yystack_[3].value.as< ast::Expression > (),&yystack_[1].value.as< ast::Radius > (),NULL);}
-#line 1855 "KappaParser.cpp" // lalr1.cc:847
+#line 1874 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 164:
-#line 574 "kappaParser.y" // lalr1.cc:847
+#line 581 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Rate > ()=ast::Rate(yystack_[0].value.as< ast::Expression > (),NULL,NULL);}
-#line 1861 "KappaParser.cpp" // lalr1.cc:847
+#line 1880 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 165:
-#line 576 "kappaParser.y" // lalr1.cc:847
+#line 583 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Rate > ()=ast::Rate(yystack_[2].value.as< ast::Expression > (),NULL,&yystack_[0].value.as< ast::Expression > ());}
-#line 1867 "KappaParser.cpp" // lalr1.cc:847
+#line 1886 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 167:
-#line 580 "kappaParser.y" // lalr1.cc:847
+#line 587 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Radius > ()=ast::Radius(yystack_[0].value.as< ast::Expression > ());}
-#line 1873 "KappaParser.cpp" // lalr1.cc:847
+#line 1892 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 168:
-#line 581 "kappaParser.y" // lalr1.cc:847
+#line 588 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Radius > ()=ast::Radius(yystack_[2].value.as< ast::Expression > (),&yystack_[0].value.as< ast::Expression > ());}
-#line 1879 "KappaParser.cpp" // lalr1.cc:847
+#line 1898 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 170:
-#line 586 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::mix_pair > ()=ast::mix_pair(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< std::list<ast::Agent> > ());}
-#line 1885 "KappaParser.cpp" // lalr1.cc:847
+#line 593 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Multiple_Mixture > ()=ast::Multiple_Mixture(yystack_[1].value.as< ast::Expression > (),yystack_[0].value.as< std::list<ast::Agent> > ());}
+#line 1904 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 171:
-#line 588 "kappaParser.y" // lalr1.cc:847
-    {yylhs.value.as< ast::mix_pair > ()=ast::mix_pair(ast::Const(1.0f,yystack_[0].location),yystack_[0].value.as< std::list<ast::Agent> > ());}
-#line 1891 "KappaParser.cpp" // lalr1.cc:847
+#line 595 "kappaParser.y" // lalr1.cc:847
+    {yylhs.value.as< ast::Multiple_Mixture > ()=ast::Multiple_Mixture(ast::Const(1.0f,yy::location()),yystack_[0].value.as< std::list<ast::Agent> > ());}
+#line 1910 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 173:
-#line 593 "kappaParser.y" // lalr1.cc:847
+#line 600 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Agent> > ()=yystack_[1].value.as< std::list<ast::Agent> > ();}
-#line 1897 "KappaParser.cpp" // lalr1.cc:847
+#line 1916 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 174:
-#line 595 "kappaParser.y" // lalr1.cc:847
+#line 602 "kappaParser.y" // lalr1.cc:847
     {
 		yystack_[0].value.as< std::list<ast::Agent> > ().push_front(yystack_[2].value.as< ast::Agent > ());
 		yylhs.value.as< std::list<ast::Agent> > ()=yystack_[0].value.as< std::list<ast::Agent> > ();
 	}
-#line 1906 "KappaParser.cpp" // lalr1.cc:847
+#line 1925 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 175:
-#line 600 "kappaParser.y" // lalr1.cc:847
+#line 607 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Agent> > ()=std::list<ast::Agent>(1,yystack_[0].value.as< ast::Agent > ());}
-#line 1912 "KappaParser.cpp" // lalr1.cc:847
+#line 1931 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 176:
-#line 605 "kappaParser.y" // lalr1.cc:847
+#line 612 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Agent > ()=ast::Agent(yystack_[3].value.as< std::string > (),yystack_[1].value.as< std::list<ast::Site> > (),yystack_[3].location);}
-#line 1918 "KappaParser.cpp" // lalr1.cc:847
+#line 1937 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 177:
-#line 607 "kappaParser.y" // lalr1.cc:847
+#line 614 "kappaParser.y" // lalr1.cc:847
     {yy::KappaParser::error(yystack_[1].location,std::string("Malformed agent ")+yystack_[1].value.as< std::string > ());}
-#line 1924 "KappaParser.cpp" // lalr1.cc:847
+#line 1943 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 178:
-#line 612 "kappaParser.y" // lalr1.cc:847
+#line 619 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Site> > ()=std::list<ast::Site>();}
-#line 1930 "KappaParser.cpp" // lalr1.cc:847
+#line 1949 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 179:
-#line 614 "kappaParser.y" // lalr1.cc:847
+#line 621 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<ast::Site> > ()=std::list<ast::Site>(1,yystack_[0].value.as< ast::Site > ());}
-#line 1936 "KappaParser.cpp" // lalr1.cc:847
+#line 1955 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 180:
-#line 616 "kappaParser.y" // lalr1.cc:847
+#line 623 "kappaParser.y" // lalr1.cc:847
     {
 	yystack_[0].value.as< std::list<ast::Site> > ().push_front(yystack_[2].value.as< ast::Site > ());
 	yylhs.value.as< std::list<ast::Site> > ()=yystack_[0].value.as< std::list<ast::Site> > ();
 }
-#line 1945 "KappaParser.cpp" // lalr1.cc:847
+#line 1964 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 182:
-#line 637 "kappaParser.y" // lalr1.cc:847
+#line 644 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Site > ()=ast::Site(yystack_[2].value.as< std::string > (),yystack_[1].value.as< std::list<std::string> > (),yystack_[0].value.as< ast::Link > (),yystack_[2].location);}
-#line 1951 "KappaParser.cpp" // lalr1.cc:847
+#line 1970 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 183:
-#line 642 "kappaParser.y" // lalr1.cc:847
+#line 649 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< std::list<std::string> > ()=std::list<std::string>(); }
-#line 1957 "KappaParser.cpp" // lalr1.cc:847
+#line 1976 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 184:
-#line 644 "kappaParser.y" // lalr1.cc:847
+#line 651 "kappaParser.y" // lalr1.cc:847
     {
 		yystack_[0].value.as< std::list<std::string> > ().push_front(yystack_[1].value.as< std::string > ());
 		yylhs.value.as< std::list<std::string> > ()=yystack_[0].value.as< std::list<std::string> > ();
 	 }
-#line 1966 "KappaParser.cpp" // lalr1.cc:847
+#line 1985 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 185:
-#line 649 "kappaParser.y" // lalr1.cc:847
+#line 656 "kappaParser.y" // lalr1.cc:847
     {yy::KappaParser::error(yystack_[0].location,"Invalid internal state");}
-#line 1972 "KappaParser.cpp" // lalr1.cc:847
+#line 1991 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 186:
-#line 654 "kappaParser.y" // lalr1.cc:847
+#line 661 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::FREE,yylhs.location);}
-#line 1978 "KappaParser.cpp" // lalr1.cc:847
+#line 1997 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 187:
-#line 656 "kappaParser.y" // lalr1.cc:847
+#line 663 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::VALUE,yystack_[0].value.as< int > (),yystack_[0].location);}
-#line 1984 "KappaParser.cpp" // lalr1.cc:847
+#line 2003 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 188:
-#line 658 "kappaParser.y" // lalr1.cc:847
+#line 665 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::SOME,yystack_[0].location);}
-#line 1990 "KappaParser.cpp" // lalr1.cc:847
+#line 2009 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 189:
-#line 660 "kappaParser.y" // lalr1.cc:847
+#line 667 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::TYPE,ast::Id(yystack_[2].value.as< std::string > (),yystack_[2].location),ast::Id(yystack_[0].value.as< std::string > (),yystack_[0].location),yystack_[3].location);}
-#line 1996 "KappaParser.cpp" // lalr1.cc:847
+#line 2015 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 190:
-#line 662 "kappaParser.y" // lalr1.cc:847
+#line 669 "kappaParser.y" // lalr1.cc:847
     {yylhs.value.as< ast::Link > () = ast::Link(ast::Link::ANY,yystack_[0].location);}
-#line 2002 "KappaParser.cpp" // lalr1.cc:847
+#line 2021 "KappaParser.cpp" // lalr1.cc:847
     break;
 
   case 191:
-#line 664 "kappaParser.y" // lalr1.cc:847
+#line 671 "kappaParser.y" // lalr1.cc:847
     {yy::KappaParser::error(yystack_[1].location,"Invalid link state");}
-#line 2008 "KappaParser.cpp" // lalr1.cc:847
+#line 2027 "KappaParser.cpp" // lalr1.cc:847
     break;
 
 
-#line 2012 "KappaParser.cpp" // lalr1.cc:847
+#line 2031 "KappaParser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -2724,23 +2743,23 @@ namespace yy {
        0,   104,   104,   105,   110,   111,   114,   115,   117,   119,
      124,   126,   128,   130,   132,   134,   136,   138,   140,   142,
      144,   146,   148,   150,   152,   154,   156,   158,   162,   163,
-     165,   167,   175,   176,   178,   182,   188,   189,   198,   199,
-     224,   225,   227,   235,   236,   238,   240,   245,   254,   255,
-     256,   257,   265,   266,   267,   268,   275,   276,   278,   280,
-     288,   299,   301,   303,   305,   307,   309,   318,   328,   330,
-     344,   345,   347,   349,   354,   361,   362,   363,   367,   369,
-     371,   375,   376,   378,   380,   382,   384,   386,   388,   390,
-     392,   397,   398,   399,   402,   403,   404,   408,   409,   410,
-     411,   415,   417,   419,   421,   423,   427,   428,   433,   437,
-     438,   439,   443,   444,   446,   448,   456,   457,   461,   462,
-     463,   468,   469,   475,   482,   484,   489,   491,   493,   495,
-     497,   502,   504,   506,   508,   510,   512,   514,   516,   521,
-     523,   525,   527,   529,   531,   533,   535,   537,   539,   541,
-     543,   545,   547,   549,   551,   553,   555,   557,   560,   562,
-     564,   566,   570,   571,   573,   575,   579,   580,   581,   584,
-     585,   587,   591,   592,   594,   599,   604,   606,   612,   613,
-     615,   635,   636,   642,   643,   648,   654,   655,   657,   659,
-     661,   663
+     165,   167,   178,   179,   181,   185,   191,   192,   201,   202,
+     227,   228,   230,   238,   239,   241,   243,   248,   257,   258,
+     259,   260,   268,   269,   270,   271,   278,   279,   281,   283,
+     291,   302,   304,   306,   308,   310,   312,   321,   331,   333,
+     347,   348,   350,   352,   357,   364,   365,   366,   370,   372,
+     374,   378,   379,   381,   383,   385,   387,   389,   391,   393,
+     395,   400,   401,   402,   405,   406,   407,   411,   412,   413,
+     414,   418,   420,   422,   424,   426,   430,   431,   436,   440,
+     441,   442,   446,   447,   449,   451,   459,   460,   464,   465,
+     466,   471,   472,   478,   489,   491,   496,   498,   500,   502,
+     504,   509,   511,   513,   515,   517,   519,   521,   523,   528,
+     530,   532,   534,   536,   538,   540,   542,   544,   546,   548,
+     550,   552,   554,   556,   558,   560,   562,   564,   567,   569,
+     571,   573,   577,   578,   580,   582,   586,   587,   588,   591,
+     592,   594,   598,   599,   601,   606,   611,   613,   619,   620,
+     622,   642,   643,   649,   650,   655,   661,   662,   664,   666,
+     668,   670
   };
 
   // Print the state stack on the debug stream.
@@ -2775,8 +2794,8 @@ namespace yy {
 
 
 } // yy
-#line 2779 "KappaParser.cpp" // lalr1.cc:1155
-#line 667 "kappaParser.y" // lalr1.cc:1156
+#line 2798 "KappaParser.cpp" // lalr1.cc:1155
+#line 674 "kappaParser.y" // lalr1.cc:1156
 
 
 void yy::KappaParser::error(const location &loc , const std::string &message) {

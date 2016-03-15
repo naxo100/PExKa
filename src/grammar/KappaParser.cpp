@@ -1863,7 +1863,7 @@ namespace yy {
 
   case 161:
 #line 574 "kappaParser.y" // lalr1.cc:847
-    {}
+    {yylhs.value.as< ast::Expression > () = ast::NullaryOperation(ast::NullaryOperation::RAND_1,yystack_[0].location);}
 #line 1868 "KappaParser.cpp" // lalr1.cc:847
     break;
 

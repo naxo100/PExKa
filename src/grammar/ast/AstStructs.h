@@ -165,24 +165,30 @@ protected:
 
 class BinaryOperation: public Expression {
 public:
-	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN};
+	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN} op;
 	BinaryOperation(Expression &e1,Expression &e2,Operator o,yy::location &l)
 		: Expression(l),exp1(e1),exp2(e2),op(o){};
 protected:
 	Expression exp1;
 	Expression exp2;
-	Operator op;
 };
 
 class UnaryOperation: public Expression{
 public:
-	enum Func {EXPONENT,LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS,ATAN,COIN,RAND_N};
+	enum Func {EXPONENT,LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS,ATAN,COIN,RAND_N} func;
 	UnaryOperation(Expression &e,const Func f,const yy::location &t)
 		:Expression(t),exp(e),func(f){};
 protected:	
 	const Expression exp;
-	Func func;
 };
+
+class NullaryOperation: public Expression
+{
+public:
+	enum Func {RAND_1} func;
+	NullaryOperation(const Func f,const yy::location &t): func(f), Expression(t) {};
+};
+
 
 //class Effect : Node{
 //	Node mod;
@@ -244,20 +250,6 @@ protected:
 class Compartment : public Node {
 
 };
-
-
-
-//struct PrintElement
-//{
-//    enum{STR,EXP} tag;
-//    union
-//    {
-//        std::string s;
-//        ast::Expression;
-//    };
-//};
- 
-
 
 class PrintObj : public Node {
 public:

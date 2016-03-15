@@ -571,7 +571,7 @@ alg_expr:
 | RAND_N alg_expr
 	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::RAND_N,@2);}
 | RAND_1
-	{}
+	{$$ = ast::NullaryOperation(ast::NullaryOperation::RAND_1,@1);}
 ;
 
 rate:

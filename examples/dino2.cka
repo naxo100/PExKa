@@ -1,0 +1,1 @@
+%mod:  repeat 3 >1 do $UPDATE 'x' 12*'x' until 1 < 2

@@ -180,12 +180,11 @@ class Init_t : public Node
 	enum InitType {MIX,TOK} type;
 	Expression  alg;
 	list<Agent> mix;
-	string      str;
+	Id           id;
 public:
 	Init_t() {};
 	Init_t(const Expression &e, const list<Agent> &mix): alg(e),mix(mix),type(MIX) {};
-	Init_t(const Expression &e, const string      &str): alg(e),str(str),type(TOK) {};
-		
+	Init_t(const Expression &e, const Id          &id) : alg(e), id(id) ,type(TOK) {};
 };
 
 struct Init_Declaration : public Node
@@ -341,18 +340,18 @@ struct tt
 	bool b;
 };
 
-//Class to storage all data aboute a rule 
+//A Rule with their Right Hand Side (rhs) and Left Hand Side (lhs) Agents, Tokens and Rates
 class Rule : public Node {
 protected:
 	Id label;
 	list<Agent> lhs;
 	list<Agent> rhs;
-	list<Token> rm_token;
-	list<Token> add_token;
-	Arrow       arrow;
-	Expression	k_def;
-	Radius*     k_un;
-	Expression* k_op;
+	list<Token> rm_token;//Rms
+	list<Token> add_token;//Added Tokens
+	Arrow       arrow;//Direction of the Rule
+	Expression	k_def;//Defined   Rate for Right-Direction  Rule 
+	Radius*     k_un; //Undefined Rate for Right-Direction  Rule
+	Expression* k_op; //Defined   Rate for Left-Direction   Rule 
 	//(***)
 	int         use_id;
 	bool        fixed;

@@ -260,7 +260,7 @@ perturbation_declaration:
 | bool_expr SET effect_list
 	{
 		// temporal, preguntarle a naxo
-		cout<<"Deprecated perturbation syntax: 'set' keyword is replaced by 'do'"<<endl;
+		cerr<<"Warning at "<<@3<<" : Deprecated perturbation syntax: 'set' keyword is replaced by 'do'"<<endl;
 		$$=ast::Perturbation($1,$3,@2);
 	} /*For backward compatibility*/
 ;
@@ -477,7 +477,7 @@ rule_expression:
 	}
 | rule_label lhs_rhs arrow lhs_rhs 
 	{
-		cout<<"Warning: Rule has no kinetics. Default rate of 0.0 is assumed."<<endl;
+		cerr<<"Warning: Rule has no kinetics. Default rate of 0.0 is assumed."<<endl;
 		ast::Rate rate(ast::Const(0.0f,yy::location()),NULL,NULL);
 		$$=ast::Rule($1,$2,$4,$3,rate,-1,NULL,true,@1);;
 	}
@@ -571,7 +571,7 @@ alg_expr:
 | RAND_N alg_expr
 	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::RAND_N,@2);}
 | RAND_1
-	{}
+	{$$ = ast::NullaryOperation(ast::NullaryOperation::RAND_1,@1);}
 ;
 
 rate:

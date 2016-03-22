@@ -11,9 +11,14 @@
 #include <string>
 #include <list>
 #include "../location.hh"
+
+#define DEBUG
+
 using namespace std;
 
 namespace ast {
+//Declaration of structures to implement duplas from Ocaml
+
 class Node {
 	yy::location loc;
 public:
@@ -34,12 +39,13 @@ public:
 
 
 class Id : public Node {
+protected:
 	string id;
 public:
 	Id(const string &s): Node(),id(s){};
 	Id(const string &s,Node t): Node(t),id(s){};
-//	Id(const string &s,yy::locattion& l): Node(l),id(s){};
-	Id(): Node(),id(){};
+	Id(const string &s,const yy::location &l): id(s),Node(l){};
+	Id(){};
 };
 
 class Var : public Expression {
@@ -68,11 +74,24 @@ protected:
 	union {int n;float f;};
 };
 
+
+
 class Arrow : public Node {
-	enum ARR {LEFT,RIGHT,BI} dir;
+public:
+	enum ArrType {LEFT,RIGHT,BI};
+	Arrow(){};
+	Arrow(ArrType t): Node(),thetype(t) {};
+	Arrow(ArrType t,const yy::location &loc): Node(loc), thetype(t) {};
+	ArrType type(){return thetype;};
+protected:
+	ArrType thetype;
 };
 
 class Bool : public Expression {
+public:
+	Bool(bool val): val(val) {};
+	Bool(bool val,const yy::location &l): Expression(l), val(val) {};
+protected:
 	bool val;
 };
 
@@ -91,24 +110,67 @@ protected:
 	Id id2;
 };
 
-class Site {
+//class PortExpression : public Node {
+//public:
+//	enum PortType {EMPTY,NONEMPTY};
+//	PortExpression() {};
+//	PortExpression(const std::string &id,const std::list<string> &is,const Link &l,const yy::location &loc): Node(loc),id(id), internal_state(is), link(l) {};
+//protected:
+//	std::string id;
+//	std::list<string> internal_state;
+//	Link link;
+//};
+
+class Site: Node {
+public:
+	Site() {};
+	Site(const std::string &id,const std::list<string> &s,const Link &l,const yy::location &loc): Node(loc), id(id), states(s), link(l) {};
+protected:
 	Id id;
-	list<Id> values;
+	std::list<string> states;
 	Link link;
 };
+//class Site {
+//	Id id;
+//	list<Id> values;
+//	Link link;
+//};
 
-class Agent {
+class Agent: Node {
+public:
+	Agent() {};
+	Agent(const std::string &id,const std::list<Site> s,const yy::location &loc): Node(loc), id(id),sites(s) {};
+protected:
 	Id id;
-	list<Site> sites;
+	std::list<Site> sites;
+};
+
+//class IndexOperation: public Expression {
+//public:
+//	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO};
+//	IndexOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){};
+//protected:
+//	Expression exp1,exp2;
+//	Operator op;
+//};
+
+class BoolOperation: public Expression {
+public:
+	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};	
+	BoolOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){cout<<"Bool Operation"<<endl;};
+protected:
+	Expression exp1,exp2;
+	Operator op;
 };
 
 class BinaryOperation: public Expression {
 public:
 	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN};
 	BinaryOperation(Expression &e1,Expression &e2,Operator o,yy::location &l)
-		:Expression(l),exp1(e1),exp2(e2),op(o){};
+		: Expression(l),exp1(e1),exp2(e2),op(o){};
 protected:
-	Expression exp1,exp2;
+	Expression exp1;
+	Expression exp2;
 	Operator op;
 };
 
@@ -122,59 +184,252 @@ protected:
 	Func func;
 };
 
-class Effect : Node{
-	Node mod;
-	enum Mod {ASSIGN,TRACK,FLUX,INTRO,DELETE,TOKEN,SNAPSHOT,STOP,PRINT,PRINTF};
-	Id str1,str2;
-	Expression exp;
-	bool b;
-	list<Agent> mixture;
-
+//class Effect : Node{
+//	Node mod;
+//	enum Mod {ASSIGN,TRACK,FLUX,INTRO,DELETE,TOKEN,SNAPSHOT,STOP,PRINT,PRINTF};
+//	Id str1,str2;
+//	Expression exp;
+//	bool b;
+//	list<Agent> mixture;
+//
+//};
+class Init_t : public Node
+{
+	enum InitType {MIX,TOK} type;
+	Expression  alg;
+	list<Agent> mix;
+	string      str;
+public:
+	Init_t() {};
+	Init_t(const Expression &e, const list<Agent> &mix): alg(e),mix(mix),type(MIX) {};
+	Init_t(const Expression &e, const string      &str): alg(e),str(str),type(TOK) {};
+		
 };
 
-class Perturbation: public Node {
-protected:
-	Node repeat;
-	Expression test;
-	Node do_tok;
-	list<Effect> mods;
-public:
-	Perturbation();
-	virtual ~Perturbation();
+struct Init_Declaration : public Node
+{
+	Init_Declaration() {};
+	Init_Declaration(const Init_t &i,Id* id): init_t(i),id(id) {};
+	Init_t init_t;
+	Id* id;
 };
 
 class Declaration: public Node{
-	Id label;
-	Expression exp;
 public:
-	Declaration(const Id &lab,const Expression e,const yy::location &loc):
-		Node(loc),exp(e),label(lab){}
+	enum VarType{ALG,KAPPA};	
+	Declaration(const Id &lab,const Expression e,const yy::location &loc): 
+		Node(loc),exp(e),label(lab),type(ALG) {};
+	
+	Declaration(const Id &lab,const std::list<Agent> m,const yy::location &loc): 
+		Node(loc),mixture(m),label(lab),type(KAPPA) {};
+
 	Declaration():label(Id("",yy::location())){}
+protected:
+	Id label;
+	VarType type;
+	Expression exp;
+	std::list<Agent> mixture;
 };
 
 class CompExpression: public Node {
-
+public:
+	CompExpression() {};
+	CompExpression(const std::string &la,const std::list<Expression> &d,Expression* w,const yy::location &l): Node(l),label(la), dim(d), where(w) {};
+protected:
+	std::string            label;
+	std::list<Expression>    dim;
+	Expression*            where;
 };
 
 class Compartment : public Node {
 
 };
 
-class Rule : public Node {
-protected:
-	list<Agent> lhs;
-	list<Agent> rhs;
-	Arrow arrow;
-	Expression	rate;
-
-	Id label;
 
 
+//struct PrintElement
+//{
+//    enum{STR,EXP} tag;
+//    union
+//    {
+//        std::string s;
+//        ast::Expression;
+//    };
+//};
+ 
+
+
+class PrintObj : public Node {
 public:
-	Rule();
-	virtual ~Rule();
+	PrintObj(const std::string     &s, const yy::location &l): str(s),tag(STR),Node(l) {};
+	PrintObj(const ast::Expression &e, const yy::location &l): alg(e),tag(ALG),Node(l) {};  
+protected:
+    enum{STR,ALG} tag;
+	std::string str;
+	Expression  alg;
 };
 
+class Effect : public Node {
+public:
+	enum Action {INTRO,DELETE,UPDATE,UPDATE_TOK,STOP,SNAPSHOT,PRINT,CFLOW,CFLOWOFF,FLUX,FLUXOFF};
+	Effect() {};
+	Effect(const Action &a,const Expression &e,const std::list<Agent> &m,const yy::location &l): action(a),expr(e),mixture(m),Node(l) {};
+	Effect(const Action &a,const std::string &s,const Expression &e,const yy::location &l): action(a),str_pos(s),expr(e),Node(l) {};
+	Effect(const Action &a,const std::list<PrintObj> &pe,const yy::location &l): action(a),pexpr(),Node(l) {};
+	Effect(const Action &a,const std::list<PrintObj> &pe,const std::list<PrintObj> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
+	Effect(const Action &a,const std::string &s,const yy::location &l): action(a),str_pos(s),Node(l) {};
+	
+protected:
+	Action                   action;
+	Expression               expr;
+	std::string              str_pos;
+	std::list<PrintObj>    pexpr;
+	std::list<PrintObj>    pexpr2;
+	std::list<Agent>         mixture;
+};
+
+class Perturbation: public Node {
+public:
+	Perturbation(){};
+	Perturbation(const Expression &t,const list<Effect> &le, const yy::location &tok):
+	mods(le), test(t), do_tok(tok) {};
+	//preguntar a naxo
+	virtual ~Perturbation() {};
+protected:
+	//preguntar al naxo
+	Node repeat;
+	Expression test;
+	Node do_tok;
+	list<Effect> mods;
+};
+
+struct OptString
+{
+	OptString(): str_ptr(NULL), print_list_ptr(NULL) {};
+	OptString(std::string* s,std::list<PrintObj>* plist): str_ptr(s), print_list_ptr(plist) {};
+	std::string*             str_ptr;
+	std::list<PrintObj>*   print_list_ptr;
+};
+
+struct Multiple_Mixture
+{
+	Multiple_Mixture() {};
+	Multiple_Mixture(const Expression &e,const std::list<ast::Agent> &m): alg(e), mix(m) {};
+	Expression             alg;
+	std::list<ast::Agent>  mix;
+};
+
+
+struct Radius
+{
+	Radius(): k1(),opt(NULL) {};
+	Radius(const Expression &k1): k1(k1), opt(NULL) {};
+	Radius(const Expression &k1, Expression *opt): k1(k1), opt(opt) {};
+	Expression   k1;
+	Expression*  opt;
+};
+
+
+
+struct Rate
+{
+	Rate():def(),un(NULL),op(NULL) {};
+	Rate(const Expression &def,Radius *un,Expression *op): def(def), un(un), op(op) {};
+	Expression   def;
+	Radius*       un;
+	Expression*   op;
+};
+
+struct Token
+{	
+	Token() {};
+	Token(const Expression &e,const Id &id): exp(e), id(id) {};	
+	Expression	exp;
+	Id			id;
+};
+
+struct RuleSide
+{
+	RuleSide(){};
+	RuleSide(const std::list<ast::Agent> &agents,const std::list<ast::Token> &tokens):
+	agents(agents), tokens(tokens) {};
+	std::list<ast::Agent> agents;
+	std::list<ast::Token> tokens;
+};
+
+struct tt
+{
+	string str;
+	int i;
+	float f;
+	bool b;
+};
+
+class Rule : public Node {
+protected:
+	Id label;
+	list<Agent> lhs;
+	list<Agent> rhs;
+	list<Token> rm_token;
+	list<Token> add_token;
+	Arrow       arrow;
+	Expression	k_def;
+	Radius*     k_un;
+	Expression* k_op;
+	//(***)
+	int         use_id;
+	bool        fixed;
+	tt*         transport_to;
+	
+public:
+	Rule() {};
+	//constructors
+	Rule(	const Id          &label,
+			const RuleSide    &lhs,
+			const RuleSide    &rhs,
+			const Arrow       &arrow,
+			const Rate 		  &rate,
+			int               id,
+			tt*               tr,
+			bool              fixed,
+			const yy::location &pos
+	):
+	label(label), lhs(lhs.agents), rhs(rhs.agents),
+	rm_token(lhs.tokens), add_token(rhs.tokens),
+	arrow(arrow), k_def(rate.def), k_un(rate.un),
+	k_op(rate.op), use_id(id),	transport_to(tr),
+	fixed(fixed), Node(pos) {};
+//	virtual ~Rule();
+};
+
+//struct rule_name
+//{
+//	lbl_pair(){};
+//	lbl_pair(const std::string &s,const yy::location &p): str(s),pos(p){};
+//	std::string str;
+//	yy::location pos;
+//	void	
+//};
+
+//};
+
+//class Plot : public Node {
+//public:
+//	Plot():{};
+//	Plot(const Expression &e, const yy::location &l) : e(e),loc(l) {};
+//protected:
+//	Expression e;	
+//};
+//
+//class Obs : public None {
+//public:
+//	Obs():{};
+//	Obs(const Declaration &e, const yy::location &l) : e(e),loc(l) {};
+//protected:
+//	Declaration e;	
+//
 }
+
+
 
 #endif /* GRAMMAR_AST_ASTSTRUCTS_H_ */

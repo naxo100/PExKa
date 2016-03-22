@@ -4,4 +4,4 @@
 
 %agent: S(i~1~2)
 
-%compartment: 'cell'[2] 1.0
+%compartment: 'cell' [2] 1.0

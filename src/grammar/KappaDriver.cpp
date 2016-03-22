@@ -41,11 +41,6 @@ int KappaDriver::parse(){
 	return r;
 }
 
-void KappaDriver::addDeclaration(ast::Declaration d){
-	decls.push_back(d);
-	std::cout << "declaration pushed." << endl;
-}
-
 yy::KappaParser::symbol_type KappaDriver::getNextToken(){
 	return lexer.get_next_token();
 }
@@ -56,6 +51,10 @@ std::string* KappaDriver::getCurrentFileName() const{
 
 yy::location* KappaDriver::getLocation(){
 	return &loc;
+}
+
+ast::KappaAst KappaDriver::getAst(){
+	return syntax_tree;
 }
 
 

@@ -13,6 +13,7 @@
 #include <list>
 #include <vector>
 #include <fstream>
+#include "ast/KappaAst.h"
 #include "location.hh"
 #include "KappaLexer.h"
 #include "KappaParser.hpp"
@@ -30,9 +31,7 @@ class KappaDriver {
 	yy::KappaParser parser;
 	yy::KappaLexer lexer;
 	yy::location loc;
-
-	list<ast::Perturbation> perts;
-	list<ast::Declaration> decls;
+	ast::KappaAst syntax_tree;
 
 public:
 	KappaDriver(const vector<string> &files);
@@ -42,9 +41,10 @@ public:
 	int parse();
 	yy::KappaParser::symbol_type getNextToken();
 
-	void addDeclaration(ast::Declaration d);
 	string* getCurrentFileName() const;
 	yy::location* getLocation();
+
+	ast::KappaAst getAst();
 };
 
 } /* namespace ast */

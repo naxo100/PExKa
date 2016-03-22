@@ -260,7 +260,7 @@ perturbation_declaration:
 | bool_expr SET effect_list
 	{
 		// temporal, preguntarle a naxo
-		cout<<"Deprecated perturbation syntax: 'set' keyword is replaced by 'do'"<<endl;
+		cerr<<"Warning at "<<@3<<" : Deprecated perturbation syntax: 'set' keyword is replaced by 'do'"<<endl;
 		$$=ast::Perturbation($1,$3,@2);
 	} /*For backward compatibility*/
 ;

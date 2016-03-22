@@ -1,1 +1,2 @@
-%mod:  repeat 3 >1 do $UPDATE 'x' 12*'x' until 1 < 2
+%mod: 4 > 2 do ($STOP <"hola",34,"chao"> ; $PRINTF "lala" <"HOLA", 'x' + 2,"lala">) until 'd' > 23 
+'Rule1' A(R~a~b!_) | (13:AB + 4:DF) -> C(S~y~h?) @ 1.2

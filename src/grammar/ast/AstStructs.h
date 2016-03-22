@@ -29,6 +29,7 @@ public:
 	Node(){};
 };
 
+//Base Class for Math Algebraic Expression
 class Expression : public Node{
 
 public:
@@ -37,7 +38,7 @@ public:
 	Expression(){};
 };
 
-
+//Agent Name and Similars
 class Id : public Node {
 protected:
 	string id;
@@ -48,6 +49,7 @@ public:
 	Id(){};
 };
 
+//User variables
 class Var : public Expression {
 public:
 	enum VarType {VAR,TOKEN,TIME,EVENT,NULL_EVENT,PROD_EVENT,CPUTIME,ACTIVITY};
@@ -60,6 +62,7 @@ protected:
 	VarType type;
 };
 
+//Constants in a Math Expression or Rate value
 class Const : public Expression {
 public:
 	enum ConstType {INTEGER,FLOAT,INF,INF_NEG,TMAX,EMAX};
@@ -75,7 +78,7 @@ protected:
 };
 
 
-
+//Direction of a Rule
 class Arrow : public Node {
 public:
 	enum ArrType {LEFT,RIGHT,BI};
@@ -87,6 +90,7 @@ protected:
 	ArrType thetype;
 };
 
+//The "True" and "False" Variable
 class Bool : public Expression {
 public:
 	Bool(bool val): val(val) {};
@@ -94,7 +98,7 @@ public:
 protected:
 	bool val;
 };
-
+//Link of an Agent
 class Link : public Node {
 public:
 	enum LinkType {VALUE,FREE,ANY,SOME,TYPE};
@@ -110,17 +114,7 @@ protected:
 	Id id2;
 };
 
-//class PortExpression : public Node {
-//public:
-//	enum PortType {EMPTY,NONEMPTY};
-//	PortExpression() {};
-//	PortExpression(const std::string &id,const std::list<string> &is,const Link &l,const yy::location &loc): Node(loc),id(id), internal_state(is), link(l) {};
-//protected:
-//	std::string id;
-//	std::list<string> internal_state;
-//	Link link;
-//};
-
+//Base Rule For All Clases Conected
 class Site: Node {
 public:
 	Site() {};
@@ -130,12 +124,8 @@ protected:
 	std::list<string> states;
 	Link link;
 };
-//class Site {
-//	Id id;
-//	list<Id> values;
-//	Link link;
-//};
 
+//Agent created by User 
 class Agent: Node {
 public:
 	Agent() {};
@@ -145,15 +135,7 @@ protected:
 	std::list<Site> sites;
 };
 
-//class IndexOperation: public Expression {
-//public:
-//	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO};
-//	IndexOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){};
-//protected:
-//	Expression exp1,exp2;
-//	Operator op;
-//};
-
+//A boolean Operation between two boolean Expression
 class BoolOperation: public Expression {
 public:
 	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};	
@@ -163,6 +145,7 @@ protected:
 	Operator op;
 };
 
+//An Algebratic Operation or Function with 2 arguments
 class BinaryOperation: public Expression {
 public:
 	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN} op;
@@ -173,6 +156,7 @@ protected:
 	Expression exp2;
 };
 
+//An Algebraic Operation or Function with only 1 argument
 class UnaryOperation: public Expression{
 public:
 	enum Func {EXPONENT,LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS,ATAN,COIN,RAND_N} func;
@@ -182,6 +166,7 @@ protected:
 	const Expression exp;
 };
 
+//A Math "Procedure" or Function witout arguments
 class NullaryOperation: public Expression
 {
 public:
@@ -189,16 +174,7 @@ public:
 	NullaryOperation(const Func f,const yy::location &t): func(f), Expression(t) {};
 };
 
-
-//class Effect : Node{
-//	Node mod;
-//	enum Mod {ASSIGN,TRACK,FLUX,INTRO,DELETE,TOKEN,SNAPSHOT,STOP,PRINT,PRINTF};
-//	Id str1,str2;
-//	Expression exp;
-//	bool b;
-//	list<Agent> mixture;
-//
-//};
+//The Number of Agents and the Agents at the start
 class Init_t : public Node
 {
 	enum InitType {MIX,TOK} type;
@@ -322,7 +298,10 @@ struct Radius
 };
 
 
-
+//Structure to storages Rate Values
+//def: (defined)   precise    rate for rule in the right direction
+//un : (undefined) a range of rate for rule in the right direction (optional)
+//op : (defined)   precise    rate for rule in the left  direction (optional)
 struct Rate
 {
 	Rate():def(),un(NULL),op(NULL) {};
@@ -340,6 +319,9 @@ struct Token
 	Id			id;
 };
 
+//Structure to storage Agents and Tokens that are part of either the right or left side in a Rule
+//Agents: list of Agents
+//Tokens: list of Tokens used
 struct RuleSide
 {
 	RuleSide(){};
@@ -349,6 +331,8 @@ struct RuleSide
 	std::list<ast::Token> tokens;
 };
 
+//transport_to
+//structure used inside Rule Class 
 struct tt
 {
 	string str;
@@ -357,6 +341,7 @@ struct tt
 	bool b;
 };
 
+//Class to storage all data aboute a rule 
 class Rule : public Node {
 protected:
 	Id label;
@@ -391,35 +376,9 @@ public:
 	arrow(arrow), k_def(rate.def), k_un(rate.un),
 	k_op(rate.op), use_id(id),	transport_to(tr),
 	fixed(fixed), Node(pos) {};
-//	virtual ~Rule();
+	virtual ~Rule() {};
 };
 
-//struct rule_name
-//{
-//	lbl_pair(){};
-//	lbl_pair(const std::string &s,const yy::location &p): str(s),pos(p){};
-//	std::string str;
-//	yy::location pos;
-//	void	
-//};
-
-//};
-
-//class Plot : public Node {
-//public:
-//	Plot():{};
-//	Plot(const Expression &e, const yy::location &l) : e(e),loc(l) {};
-//protected:
-//	Expression e;	
-//};
-//
-//class Obs : public None {
-//public:
-//	Obs():{};
-//	Obs(const Declaration &e, const yy::location &l) : e(e),loc(l) {};
-//protected:
-//	Declaration e;	
-//
 }
 
 

@@ -17,8 +17,7 @@
 using namespace std;
 
 namespace ast {
-//Declaration of structures to implement duplas from Ocaml
-
+///The base Class of all Ast Classes
 class Node {
 	yy::location loc;
 public:
@@ -29,7 +28,7 @@ public:
 	Node(){};
 };
 
-//Base Class for Math Algebraic Expression
+///The Base Class of All type of Math or Algebraic Expressions
 class Expression : public Node{
 
 public:
@@ -38,10 +37,10 @@ public:
 	Expression(){};
 };
 
-//Agent Name and Similars
+///A Name or ID of an entity of the kappa Lenguafe (Agents, Rules, etc)
 class Id : public Node {
 protected:
-	string id;
+	string id;///< String containg the name.
 public:
 	Id(const string &s): Node(),id(s){};
 	Id(const string &s,Node t): Node(t),id(s){};
@@ -49,7 +48,7 @@ public:
 	Id(){};
 };
 
-//User variables
+///A kappa Variable
 class Var : public Expression {
 public:
 	enum VarType {VAR,TOKEN,TIME,EVENT,NULL_EVENT,PROD_EVENT,CPUTIME,ACTIVITY};
@@ -58,11 +57,12 @@ public:
 	Var(const VarType &t,const yy::location& l):
 		Expression(l),type(t){};
 protected:
-	string id;
-	VarType type;
+	string id; ///< The name of the variable
+	VarType type;///< The type of the variable
 };
 
-//Constants in a Math Expression or Rate value
+
+///A Numeric Constant of a Algebraic Expression 
 class Const : public Expression {
 public:
 	enum ConstType {INTEGER,FLOAT,INF,INF_NEG,TMAX,EMAX};
@@ -73,12 +73,12 @@ public:
 	Const (const ConstType t,const yy::location &loc):
 		Expression(loc),type(t){}
 protected:
-	ConstType type;
-	union {int n;float f;};
+	ConstType type; ///< The type of the constant. It support special type for non-numeric values.
+	union {int n;float f;}; ///< The value of the constant.
 };
 
 
-//Direction of a Rule
+///The Arrow use for the direction of a Kappa Rule or other kappa sintaxes
 class Arrow : public Node {
 public:
 	enum ArrType {LEFT,RIGHT,BI};
@@ -87,10 +87,10 @@ public:
 	Arrow(ArrType t,const yy::location &loc): Node(loc), thetype(t) {};
 	ArrType type(){return thetype;};
 protected:
-	ArrType thetype;
+	ArrType thetype;///<  
 };
 
-//The "True" and "False" Variable
+///The "True" and "False" Variables
 class Bool : public Expression {
 public:
 	Bool(bool val): val(val) {};
@@ -98,7 +98,8 @@ public:
 protected:
 	bool val;
 };
-//Link of an Agent
+
+///A Link of a Kappa Agent
 class Link : public Node {
 public:
 	enum LinkType {VALUE,FREE,ANY,SOME,TYPE};
@@ -113,8 +114,7 @@ protected:
 	Id id1;
 	Id id2;
 };
-
-//Base Rule For All Clases Conected
+ 
 class Site: Node {
 public:
 	Site() {};
@@ -125,7 +125,7 @@ protected:
 	Link link;
 };
 
-//Agent created by User 
+///A Kappa Agent
 class Agent: Node {
 public:
 	Agent() {};
@@ -135,7 +135,7 @@ protected:
 	std::list<Site> sites;
 };
 
-//A boolean Operation between two boolean Expression
+///A boolean Operation between two boolean Expression
 class BoolOperation: public Expression {
 public:
 	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};	
@@ -145,7 +145,7 @@ protected:
 	Operator op;
 };
 
-//An Algebratic Operation or Function with 2 arguments
+///A Math Operation or Function with 2 arguments
 class BinaryOperation: public Expression {
 public:
 	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN} op;
@@ -156,7 +156,7 @@ protected:
 	Expression exp2;
 };
 
-//An Algebraic Operation or Function with only 1 argument
+///A Math Function with only 1 argument
 class UnaryOperation: public Expression{
 public:
 	enum Func {EXPONENT,LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS,ATAN,COIN,RAND_N} func;
@@ -166,7 +166,7 @@ protected:
 	const Expression exp;
 };
 
-//A Math "Procedure" or Function witout arguments
+///Math Function with no arguments
 class NullaryOperation: public Expression
 {
 public:
@@ -174,25 +174,26 @@ public:
 	NullaryOperation(const Func f,const yy::location &t): func(f), Expression(t) {};
 };
 
-//The Number of Agents and the Agents at the start
+///Initial State of Agents and Tokens Declared
 class Init_t : public Node
 {
 	enum InitType {MIX,TOK} type;
-	Expression  alg;
-	list<Agent> mix;
-	Id           id;
+	Expression  alg;///> Initial Concentration Declared
+	list<Agent> mix;///> Initial State Mixture Declared
+	Id           id;///> Token ID Declared
 public:
 	Init_t() {};
 	Init_t(const Expression &e, const list<Agent> &mix): alg(e),mix(mix),type(MIX) {};
 	Init_t(const Expression &e, const Id          &id) : alg(e), id(id) ,type(TOK) {};
 };
 
+///A Initial State Declaration
 struct Init_Declaration : public Node
 {
 	Init_Declaration() {};
 	Init_Declaration(const Init_t &i,Id* id): init_t(i),id(id) {};
-	Init_t init_t;
-	Id* id;
+	Init_t init_t;///< Initial Data of Agents and Tokend.
+	Id* id;///< Name or ID of this declaration.
 };
 
 class Declaration: public Node{
@@ -221,21 +222,18 @@ protected:
 	std::list<Expression>    dim;
 	Expression*            where;
 };
-
-class Compartment : public Node {
-
-};
-
+///String or a Variable (or alg_expr) that is part of a string expression.
 class PrintObj : public Node {
 public:
 	PrintObj(const std::string     &s, const yy::location &l): str(s),tag(STR),Node(l) {};
 	PrintObj(const ast::Expression &e, const yy::location &l): alg(e),tag(ALG),Node(l) {};  
 protected:
-    enum{STR,ALG} tag;
-	std::string str;
+    enum{STR,ALG} tag;///> Identigy if it is a string or a alg
+	std::string str;///>
 	Expression  alg;
 };
 
+///A
 class Effect : public Node {
 public:
 	enum Action {INTRO,DELETE,UPDATE,UPDATE_TOK,STOP,SNAPSHOT,PRINT,CFLOW,CFLOWOFF,FLUX,FLUXOFF};
@@ -255,15 +253,14 @@ protected:
 	std::list<Agent>         mixture;
 };
 
+///A 
 class Perturbation: public Node {
 public:
 	Perturbation(){};
 	Perturbation(const Expression &t,const list<Effect> &le, const yy::location &tok):
 	mods(le), test(t), do_tok(tok) {};
-	//preguntar a naxo
 	virtual ~Perturbation() {};
 protected:
-	//preguntar al naxo
 	Node repeat;
 	Expression test;
 	Node do_tok;
@@ -286,52 +283,47 @@ struct Multiple_Mixture
 	std::list<ast::Agent>  mix;
 };
 
-
+///Structure containing the unary-instance rate
 struct Radius
 {
 	Radius(): k1(),opt(NULL) {};
 	Radius(const Expression &k1): k1(k1), opt(NULL) {};
 	Radius(const Expression &k1, Expression *opt): k1(k1), opt(opt) {};
-	Expression   k1;
-	Expression*  opt;
+	Expression   k1;///< Unary-instance rate of an ambigous rule.
+	Expression*  opt;///< ( I dont know what is this :/ )
 };
 
 
-//Structure to storages Rate Values
-//def: (defined)   precise    rate for rule in the right direction
-//un : (undefined) a range of rate for rule in the right direction (optional)
-//op : (defined)   precise    rate for rule in the left  direction (optional)
+///Structure containing all Setting-Rate Values of a kappa Rule 
 struct Rate
 {
 	Rate():def(),un(NULL),op(NULL) {};
 	Rate(const Expression &def,Radius *un,Expression *op): def(def), un(un), op(op) {};
-	Expression   def;
-	Radius*       un;
-	Expression*   op;
+	Expression   def;///< Right-direction Rate of a normal or bidirectional rule; or in case of an ambiguous rule, the binary-instance rate.
+	Radius*       un;///< Unary-instance Rate of an ambiguous rule.
+	Expression*   op;///< Left-direction (Opposite) Rate of a bidirectional rule.
 };
 
+///Structure containing a token and its used in a Rule.
 struct Token
 {	
 	Token() {};
 	Token(const Expression &e,const Id &id): exp(e), id(id) {};	
-	Expression	exp;
-	Id			id;
+	Expression	exp;///> Concentration of the token (consumed or produced)
+	Id			id;///> ID or Name of the Tokens
 };
 
-//Structure to storage Agents and Tokens that are part of either the right or left side in a Rule
-//Agents: list of Agents
-//Tokens: list of Tokens used
+///Structure containing the list of agents and tokens in one of the side (left or right) of a Kappa Rule
 struct RuleSide
 {
 	RuleSide(){};
 	RuleSide(const std::list<ast::Agent> &agents,const std::list<ast::Token> &tokens):
 	agents(agents), tokens(tokens) {};
-	std::list<ast::Agent> agents;
-	std::list<ast::Token> tokens;
+	std::list<ast::Agent> agents;///> List of Agents Consumed or Produced of the Rule
+	std::list<ast::Token> tokens;///> List of Tokens Consumed or Produced of the Rule
 };
 
-//transport_to
-//structure used inside Rule Class 
+///Transport_To, setting of a Transport Rule
 struct tt
 {
 	string str;
@@ -340,18 +332,21 @@ struct tt
 	bool b;
 };
 
-//A Rule with their Right Hand Side (rhs) and Left Hand Side (lhs) Agents, Tokens and Rates
+/*! \brief A Kappa Rule.
+ * 
+ * ashlkdlask asñdañsld sadkljsa
+ */
 class Rule : public Node {
 protected:
 	Id label;
-	list<Agent> lhs;
-	list<Agent> rhs;
-	list<Token> rm_token;//Rms
-	list<Token> add_token;//Added Tokens
-	Arrow       arrow;//Direction of the Rule
-	Expression	k_def;//Defined   Rate for Right-Direction  Rule 
-	Radius*     k_un; //Undefined Rate for Right-Direction  Rule
-	Expression* k_op; //Defined   Rate for Left-Direction   Rule 
+	list<Agent> lhs;///<Consumed (Left hand side) Agents
+	list<Agent> rhs;///<Produced (Right hand side) Agents
+	list<Token> rm_token;///<Consumed (Left hand side) Tokens
+	list<Token> add_token;///<Produced (Right hand side) Tokens
+	Arrow       arrow;///<Direction of the Rule
+	Expression	k_def;///<Right-direction Rate of a normal or bidirectional rule; or in case of an ambiguous rule, the binary-instance rate. 
+	Radius*     k_un; ///<Unary-instance Rate of an ambiguous rule.
+	Expression* k_op; ///<(Opposite) Left-direction Rate of bidirectional rule.
 	//(***)
 	int         use_id;
 	bool        fixed;

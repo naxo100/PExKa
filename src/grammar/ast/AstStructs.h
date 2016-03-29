@@ -32,8 +32,9 @@ public:
 class Expression : public Node{
 
 public:
-	Expression(const yy::location& l)
-		:Node(l){};
+	///Init a expression with a location loc
+	Expression(const yy::location& loc)
+		:Node(loc){};
 	Expression(){};
 };
 
@@ -62,19 +63,24 @@ protected:
 };
 
 
-///A Numeric Constant of a Algebraic Expression 
+///A Numeric Constant in a Algebraic Expression 
 class Const : public Expression {
 public:
 	enum ConstType {INTEGER,FLOAT,INF,INF_NEG,TMAX,EMAX};
+	///Init a floating point (real number) constant with a value f
 	Const (const float f,const yy::location &loc):
 		Expression(loc),f(f),type(FLOAT){}
+	///Init an integer constant of value i
 	Const (const int i,const yy::location &loc):
 		Expression(loc),n(i),type(INTEGER){}
+	///Init a constant of special type t
 	Const (const ConstType t,const yy::location &loc):
 		Expression(loc),type(t){}
 protected:
 	ConstType type; ///< The type of the constant. It support special type for non-numeric values.
-	union {int n;float f;}; ///< The value of the constant.
+	union {	int n;///< value for a integer constant
+			float f;///< value for a float constant
+	}; ///< The value of the constant.
 };
 
 
@@ -82,8 +88,11 @@ protected:
 class Arrow : public Node {
 public:
 	enum ArrType {LEFT,RIGHT,BI};
+	///Empty Constructor
 	Arrow(){};
+	///Init an arrow with a direcction t
 	Arrow(ArrType t): Node(),thetype(t) {};
+	///Init an arrow with a direccion t and location loc
 	Arrow(ArrType t,const yy::location &loc): Node(loc), thetype(t) {};
 	ArrType type(){return thetype;};
 protected:
@@ -99,118 +108,161 @@ protected:
 	bool val;
 };
 
-///A Link of a Kappa Agent
+///A Link of a Site in a Kappa Agent
 class Link : public Node {
 public:
-	enum LinkType {VALUE,FREE,ANY,SOME,TYPE};
+	///The types of links.
+	enum LinkType {VALUE,///< The site is bound to a specific edge.
+	FREE,///< The site is not bound (it is not member of an edge).
+	ANY,///< The state of the link doesn't matter. 
+	SOME,///< The site is bound but it doesn't matter to what.
+	TYPE///< The site is bound to a specific site of a specific agent.
+	};
+	///Empty Constructor
 	Link() {};
+	///Init a FREE, ANY or SOME link.
 	Link(LinkType t,const yy::location &loc): Node(loc), type(t)  {};
-	Link(LinkType t,int val, const yy::location &loc): Node(loc),type(t), value(val) {};
-	Link(LinkType t,const Id &id1,const Id &id2,const yy::location &loc): type(t), id1(id1), id2(id2), Node(loc) {};
+	///Init a VALUE link.
+	Link(LinkType t,int ed/**/, const yy::location &loc): Node(loc),type(t), edge(ed) {};
+	///Init a TYPE link.
+	Link(LinkType t,const Id &s,const Id &a,const yy::location &loc): type(t), site(s), agent(a), Node(loc) {};
 	//Link(LinkType t,std::string &id1,std::string &id2,const yy::location &loc): type(t), id1(id1), id2(id2), Node(loc) {};
 protected:
-	LinkType type;
-	int value;
-	Id id1;
-	Id id2;
+	LinkType type;///< The type of this link.
+	int edge;///< The edge identifier (for VALUE links).
+	Id site;///< The site id (for TYPE links)
+	Id agent;///< The agent id (for TYPE links)
 };
- 
+
+///A site of a Kappa Agent
 class Site: Node {
 public:
+	///Empty constructor.
 	Site() {};
+	///Init a site id located on loc and a list of internal states. 
 	Site(const std::string &id,const std::list<string> &s,const Link &l,const yy::location &loc): Node(loc), id(id), states(s), link(l) {};
 protected:
-	Id id;
-	std::list<string> states;
-	Link link;
+	Id id;//< The "name" of the site
+	std::list<string> states;///< The list of the states that can be taken by this site.
+	Link link;///< The link of this site.
 };
 
 ///A Kappa Agent
 class Agent: Node {
 public:
+	///Empty constructor.
 	Agent() {};
-	Agent(const std::string &id,const std::list<Site> s,const yy::location &loc): Node(loc), id(id),sites(s) {};
+	///Init the Agent id located on loc with a list of sites s.
+	Agent(const std::string &a,const std::list<Site> s,const yy::location &loc): Node(loc), id(id),sites(s) {};
 protected:
-	Id id;
-	std::list<Site> sites;
+	Id id;///< The name of this agent.
+	std::list<Site> sites;///< The list of sites of this agents.
 };
 
 ///A boolean Operation between two boolean Expression
 class BoolOperation: public Expression {
 public:
-	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};	
-	BoolOperation(Expression &e1,Expression &e2,Operator o,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(o){cout<<"Bool Operation"<<endl;};
+	enum Operator {AND,OR,GREATER,SMALLER,EQUAL,DIFF,TRUE,FALSE};
+	///Init a Boolean Operation op on the localation l between two boolean wxpression e1 and e2
+	BoolOperation(Expression &e1,Expression &e2,Operator op,yy::location &l) : Expression(l),exp1(e1),exp2(e2),op(op){cout<<"Bool Operation"<<endl;};
 protected:
-	Expression exp1,exp2;
-	Operator op;
+	Expression exp1;///< The first operand.
+	Expression exp2;///< The Second operand.
+	Operator op;///< The operation.
 };
 
-///A Math Operation or Function with 2 arguments
+///A Math Operation beetween two algebraic expression
 class BinaryOperation: public Expression {
 public:
-	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN} op;
-	BinaryOperation(Expression &e1,Expression &e2,Operator o,yy::location &l)
-		: Expression(l),exp1(e1),exp2(e2),op(o){};
+	enum Operator {SUM,MULT,DIV,MINUS,POW,MODULO,MAX,MIN};
+	///Init a Binary Operation op located on l operating on two algebraic expression e1 and e2 
+	BinaryOperation(Expression &e1,Expression &e2,Operator op,yy::location &l)
+		: Expression(l),exp1(e1),exp2(e2),op(op){};
 protected:
-	Expression exp1;
-	Expression exp2;
+	Expression exp1;///< The first operand.
+	Expression exp2;///< The Second operand.
+	Operator op;///< The operation.
 };
 
-///A Math Function with only 1 argument
+///A Math Operation with only one operand
 class UnaryOperation: public Expression{
 public:
-	enum Func {EXPONENT,LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS,ATAN,COIN,RAND_N} func;
-	UnaryOperation(Expression &e,const Func f,const yy::location &t)
-		:Expression(t),exp(e),func(f){};
+	enum Func {EXPONENT,LOG,SQRT,EXP,SINUS,COSINUS,TAN,ABS,ATAN,COIN,RAND_N};
+	///< Init an unary operation f located on l operating on the algebraic expresion e1
+	UnaryOperation(Expression &e,const Func f,const yy::location &l)
+		:Expression(l),exp(e),func(f){};
 protected:	
-	const Expression exp;
+	const Expression exp;///< the operand.
+	Func func;///< The operation.
 };
 
-///Math Function with no arguments
+///A Math Operation with no arguments
 class NullaryOperation: public Expression
 {
 public:
-	enum Func {RAND_1} func;
-	NullaryOperation(const Func f,const yy::location &t): func(f), Expression(t) {};
+	enum Func {RAND_1};
+	///< Init a Nullary Operation f located on l
+	NullaryOperation(const Func f,const yy::location &l): func(f), Expression(l) {};
+protected:
+	Func func;///< the operation
 };
 
-///Initial State of Agents and Tokens Declared
+///Initial Conditions of Agents and Tokens declared with a "%init" instruction
 class Init_t : public Node
 {
-	enum InitType {MIX,TOK} type;
-	Expression  alg;///> Initial Concentration Declared
-	list<Agent> mix;///> Initial State Mixture Declared
-	Id           id;///> Token ID Declared
 public:
+	///Specify the what information has the initial condition.
+	enum InitType {
+		MIX,///< The initial condition is the quantity of agents in a mixture.
+		TOK///< The initial condition is the-concetration of a token.
+	}; 
+	/// Empty Constructor
 	Init_t() {};
-	Init_t(const Expression &e, const list<Agent> &mix): alg(e),mix(mix),type(MIX) {};
-	Init_t(const Expression &e, const Id          &id) : alg(e), id(id) ,type(TOK) {};
+	/// Specify a initial a number n of agents in the mixture mix.
+	Init_t(const Expression &n, const list<Agent> &mix): n(n),mix(mix),type(MIX) {};
+	/// Specify a initial concentration c of the token t
+	Init_t(const Expression &c, const Id &t) : n(c), tok(t) ,type(TOK) {};
+protected:
+	InitType    type;//> 
+	Id          tok;///> The token (of a TOK condition)
+	list<Agent> mix;///> The initial agent mixture (of a MIX condition)
+	Expression  n;///> The initial concentration of the declared token (TOK condition) or the initial number of agents of the declared mixture (MIX condition).
+
 };
 
-///A Initial State Declaration
+///A declaration of a initial State
 struct Init_Declaration : public Node
 {
+	/// Empty Constructor.
 	Init_Declaration() {};
+	/// Create a initial state with an optional name id and init conditions init_t
 	Init_Declaration(const Init_t &i,Id* id): init_t(i),id(id) {};
-	Init_t init_t;///< Initial Data of Agents and Tokend.
-	Id* id;///< Name or ID of this declaration.
+	Init_t init_t;///< Initial Conditions of Agents and Tokens.
+	Id* id;///< Identificator of this declaration.
 };
 
+/// A declaration of a variable
 class Declaration: public Node{
 public:
-	enum VarType{ALG,KAPPA};	
-	Declaration(const Id &lab,const Expression e,const yy::location &loc): 
-		Node(loc),exp(e),label(lab),type(ALG) {};
+	//the two type of variable declaration
+	enum VarType{
+		ALG,///< The value of the variable is an algebraic expression.
+		KAPPA///< The value of the variable is the number of occurences of a agent pattern on a kappa_expression (mixture).
+	};
 	
-	Declaration(const Id &lab,const std::list<Agent> m,const yy::location &loc): 
-		Node(loc),mixture(m),label(lab),type(KAPPA) {};
-
-	Declaration():label(Id("",yy::location())){}
+	/// Empty Contructor
+	Declaration():label(Id("",yy::location())){};
+	/// Specify a variable of name n with the value give by the algebraic expression e.
+	Declaration(const Id &n,const Expression e,const yy::location &l):
+    Node(loc),exp(e),name(n),type(ALG) {};
+	/// Specify a variable of name n with the number of occurences of the agent pattern in the mixture m.
+	Declaration(const Id &n,const std::list<Agent> m,const yy::location &loc): 
+		Node(loc),mixture(m),name(n),type(KAPPA) {};
 protected:
-	Id label;
-	VarType type;
-	Expression exp;
-	std::list<Agent> mixture;
+	VarType type;///< Specify what type of variable is this.
+	Id name;///< The name of the variable.
+	Expression exp;///< The algebraic expression to evaluate the value the variable.
+	std::list<Agent> mixture;///< The agent parttern to determinate the number of occurrences to evaluate the variable.
 };
 
 class CompExpression: public Node {
@@ -222,18 +274,26 @@ protected:
 	std::list<Expression>    dim;
 	Expression*            where;
 };
-///String or a Variable (or alg_expr) that is part of a string expression.
+
+///Contains a string or an algebraic expression (use to determinate a numeric value) to be writen to the standard output (or to a file)
 class PrintObj : public Node {
 public:
+	/// Indicate what type of the object contains
+    enum PrintType{
+		STR, ///< it contains a string.
+		ALG ///< it contains a algebraic expression.
+	};
+	///Init the printing object with a string s.
 	PrintObj(const std::string     &s, const yy::location &l): str(s),tag(STR),Node(l) {};
+	///Init the printing object with a algebraic expression e.
 	PrintObj(const ast::Expression &e, const yy::location &l): alg(e),tag(ALG),Node(l) {};  
 protected:
-    enum{STR,ALG} tag;///> Identigy if it is a string or a alg
-	std::string str;///>
-	Expression  alg;
+    enum{STR,ALG} tag;///> Identify what object contains.
+	std::string str;///> The string to be printing.
+	Expression  alg;///> The algebraic expression to determinate a value to be printing.
 };
 
-///A
+///A 
 class Effect : public Node {
 public:
 	enum Action {INTRO,DELETE,UPDATE,UPDATE_TOK,STOP,SNAPSHOT,PRINT,CFLOW,CFLOWOFF,FLUX,FLUXOFF};

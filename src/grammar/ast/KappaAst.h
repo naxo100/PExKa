@@ -15,15 +15,49 @@ using namespace std;
 
 namespace ast {
 
+/** \brief Store the abstract syntax tree of the model written in Kappa.
+ *
+ * Contains several list of syntax trees that represent the model
+ * read by the parser from kappa files. Evaluate methods in this
+ * produce the initial state of the system and the mappings of
+ * ids and names.
+ */
 class KappaAst {
-	//list<Perturbation> perts;
+
+	//AST structures
 	list<Declaration> decls;
+	//list<Perturbation> perts;
+
 public:
 	KappaAst();
 	virtual ~KappaAst();
 
+	//ADD functions
 	void add(Declaration d);
 	//void add(Perturbation p);
+
+	/** \brief Evaluate global properties from AST.
+	 *
+	 * Evaluate global properties (for all compartments) to been distributed among MPI processes.
+	 * Return an object of class Environment with mappings of compartment, link and use instructions.
+	 */
+	//pattern::Environment evaluateGlobals();
+
+	/** \brief Evaluate local properties from AST.
+	 *
+	 * Evaluate all local properties and variables of this compartment
+	 * to return an object of class Environment with all mappings needed by the state of
+	 * system.
+	 */
+	//pattern::Environment evaluateEnvironment(pattern::Environment globs, int comp_id);
+
+	/** \brief Initialize SiteGraph and all structures to create the state of system.
+	 *
+	 * Evaluate the initial state of this compartment from AST, and return it in an object of
+	 * class State.
+	 */
+	//state::State evaluateState(pattern::Environment env, int comp_id);
+
 
 };
 

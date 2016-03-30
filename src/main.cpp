@@ -16,6 +16,7 @@
 #include <boost/program_options/variables_map.hpp>
 #include <vector>
 #include "grammar/KappaDriver.h"
+#include "grammar/ast/KappaAst.h"
 
 
 using namespace boost::program_options;
@@ -56,15 +57,26 @@ int main(int argc, char* argv[]){
 	    return 1;
 	}
 
-	grammar::KappaDriver *ast_model;
+	grammar::KappaDriver *driver;
 	if (vm.count("input-file"))
-		ast_model = new grammar::KappaDriver(vm["input-file"].as<vector<string> >());
+		driver = new grammar::KappaDriver(vm["input-file"].as<vector<string> >());
 	else
-		ast_model = new grammar::KappaDriver();
+		driver = new grammar::KappaDriver();
 
-	ast_model->parse();
+	driver->parse();
 
-	delete ast_model;
+	ast::KappaAst ast = driver->getAst();
+
+	/* TODO
+	 * Environment env = ast.evaluateGlobals();
+	 * MPI::Bcast((void*)&env,Nbytes,MPI::Datatype.PACKED, 0);
+	 * env = ast.evaluateEnvironment(env,my_rank);
+	 * State state = ast.evaluateState(env,my_rank);
+	 *
+	 * state.run(env) ?
+	 */
+
+	delete driver;
 	return 0;
 }
 

@@ -211,10 +211,10 @@ protected:
 class Init_t : public Node
 {
 public:
-	///Specify the what information has the initial condition.
+	///Specify the information that contains this object
 	enum InitType {
-		MIX,///< The initial condition is the quantity of agents in a mixture.
-		TOK///< The initial condition is the-concetration of a token.
+		MIX,///< it contains the initial number of agents specific in a mixture.
+		TOK///< It contains the initial concetration of a token.
 	}; 
 	/// Empty Constructor
 	Init_t() {};
@@ -223,10 +223,10 @@ public:
 	/// Specify a initial concentration c of the token t
 	Init_t(const Expression &c, const Id &t) : n(c), tok(t) ,type(TOK) {};
 protected:
-	InitType    type;//> 
-	Id          tok;///> The token (of a TOK condition)
-	list<Agent> mix;///> The initial agent mixture (of a MIX condition)
-	Expression  n;///> The initial concentration of the declared token (TOK condition) or the initial number of agents of the declared mixture (MIX condition).
+	InitType    type;//> The type of this object.
+	Id          tok;///> The token (for a TOK object type)
+	list<Agent> mix;///> The initial agent mixture (for MIX object type)
+	Expression  n;///> The initial concentration of the declared token (for a TOK object type) or the initial number of agents of the declared mixture (MIX object type).
 
 };
 
@@ -237,8 +237,8 @@ struct Init_Declaration : public Node
 	Init_Declaration() {};
 	/// Create a initial state with an optional name id and init conditions init_t
 	Init_Declaration(const Init_t &i,Id* id): init_t(i),id(id) {};
-	Init_t init_t;///< Initial Conditions of Agents and Tokens.
-	Id* id;///< Identificator of this declaration.
+	Init_t init_t;///< Initial Conditions of Agents or Tokens.
+	Id* id;///< Identificator of this declaration (optional).
 };
 
 /// A declaration of a variable
@@ -246,23 +246,23 @@ class Declaration: public Node{
 public:
 	//the two type of variable declaration
 	enum VarType{
-		ALG,///< The value of the variable is an algebraic expression.
-		KAPPA///< The value of the variable is the number of occurences of a agent pattern on a kappa_expression (mixture).
+		ALG,///< The value of the variable is get from an algebraic expression.
+		KAPPA///< The value of the variable is the number of occurences of an agent pattern on a kappa_expression (mixture).
 	};
 	
 	/// Empty Contructor
-	Declaration():label(Id("",yy::location())){};
-	/// Specify a variable of name n with the value give by the algebraic expression e.
+	Declaration():name(Id("",yy::location())){};
+	/// Specify a variable of name n that contains the resulting value of the algebraic expression e.
 	Declaration(const Id &n,const Expression e,const yy::location &l):
-    Node(loc),exp(e),name(n),type(ALG) {};
-	/// Specify a variable of name n with the number of occurences of the agent pattern in the mixture m.
+    Node(l),exp(e),name(n),type(ALG) {};
+	/// Specify a variable of name n that contains the number of occurences of the agent pattern in the mixture m.
 	Declaration(const Id &n,const std::list<Agent> m,const yy::location &loc): 
 		Node(loc),mixture(m),name(n),type(KAPPA) {};
 protected:
-	VarType type;///< Specify what type of variable is this.
+	VarType type;///< The type of this variable.
 	Id name;///< The name of the variable.
-	Expression exp;///< The algebraic expression to evaluate the value the variable.
-	std::list<Agent> mixture;///< The agent parttern to determinate the number of occurrences to evaluate the variable.
+	Expression exp;///< The algebraic expression to get the value of the variable.
+	std::list<Agent> mixture;///< The agent parttern to get the number of occurrences to evaluate the variable.
 };
 
 class CompExpression: public Node {
@@ -275,10 +275,10 @@ protected:
 	Expression*            where;
 };
 
-///Contains a string or an algebraic expression (use to determinate a numeric value) to be writen to the standard output (or to a file)
+///Contains a string or an algebraic expression (use to determinate a numeric value) that can be writen to the standard output (or to a file)
 class PrintObj : public Node {
 public:
-	/// Indicate what type of the object contains
+	/// Specify the object that are contained in this object
     enum PrintType{
 		STR, ///< it contains a string.
 		ALG ///< it contains a algebraic expression.
@@ -288,28 +288,47 @@ public:
 	///Init the printing object with a algebraic expression e.
 	PrintObj(const ast::Expression &e, const yy::location &l): alg(e),tag(ALG),Node(l) {};  
 protected:
-    enum{STR,ALG} tag;///> Identify what object contains.
+    PrintType tag;///> Identify what object contains.
 	std::string str;///> The string to be printing.
 	Expression  alg;///> The algebraic expression to determinate a value to be printing.
 };
 
-///A 
+///A kappa perturbation declared in a "%mod" instruction
 class Effect : public Node {
 public:
-	enum Action {INTRO,DELETE,UPDATE,UPDATE_TOK,STOP,SNAPSHOT,PRINT,CFLOW,CFLOWOFF,FLUX,FLUXOFF};
+	///Describe the action that will do over system during the simulation
+	enum Action {
+		INTRO,		///< Add a specific number of agents from a mixture.
+		DELETE,		///< Delete a specific number of agents from a mixture.
+		UPDATE,		///< Set the value of a variable or the kinetic rule of a specific rule.
+		UPDATE_TOK, ///< Set the concentration of a token.
+		STOP,		///< Stop the simulation.
+		SNAPSHOT,	///< Export to a file an snaphot of the mixture at a given time point as a new kappa file.
+		PRINT,		///< Print output values during a computation to standard output, or to a speciﬁc ﬁle.
+		CFLOW,		///< 
+		CFLOWOFF,	///
+		FLUX,		///< Start a flux map analysis (that tracks the influence that rule applications have on others).
+		FLUXOFF		///< Stop a flux map analysis
+	};
+	///Empty Constructors
 	Effect() {};
-	Effect(const Action &a,const Expression &e,const std::list<Agent> &m,const yy::location &l): action(a),expr(e),mixture(m),Node(l) {};
-	Effect(const Action &a,const std::string &s,const Expression &e,const yy::location &l): action(a),str_pos(s),expr(e),Node(l) {};
-	Effect(const Action &a,const std::list<PrintObj> &pe,const yy::location &l): action(a),pexpr(),Node(l) {};
+	///Init an INTRO or a DELETE effect, located on "l", with a number of agent "n" from a mixture "m".
+	Effect(const Action &a,const Expression &n,const std::list<Agent> &m,const yy::location &l): action(a),val(n),mixture(m),Node(l) {};
+	///Init an UPDATE (or UPDATE_TOK) effect, located on l, with the rule (or token) name "id" and its new kinetic (or concentration) value "v"
+	Effect(const Action &a,const std::string &r,const Expression &v,const yy::location &l): action(a),id(id),val(v),Node(l) {};
+	Effect(const Action &a,const std::list<PrintObj> &pe,const yy::location &l): action(a),pexpr(pe),Node(l) {};
 	Effect(const Action &a,const std::list<PrintObj> &pe,const std::list<PrintObj> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
-	Effect(const Action &a,const std::string &s,const yy::location &l): action(a),str_pos(s),Node(l) {};
+	///Init a FLUX, FLUXOFF, CFLOW, CFLOWOFF effect, located on l, with the string s (filename or varname for FLUX or CFLOW).
+	Effect(const Action &a,const std::string &s,const yy::location &l): action(a),str(s),Node(l) {};
+	
 	
 protected:
 	Action                   action;
-	Expression               expr;
-	std::string              str_pos;
-	std::list<PrintObj>    pexpr;
-	std::list<PrintObj>    pexpr2;
+	Expression               val;
+	Id                       id;
+	std::string              str;
+	std::list<PrintObj>      pexpr;
+	std::list<PrintObj>      pexpr2;
 	std::list<Agent>         mixture;
 };
 

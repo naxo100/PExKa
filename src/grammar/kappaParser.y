@@ -153,7 +153,7 @@ instruction:
 	{}
 | PERT REPEAT perturbation_declaration UNTIL bool_expr 
 	{}
-| CONFIG STRING value_list 
+| CONFIG STRING value_list /*set the type of compression of a a causal flow*/
 	{}  
 | PERT bool_expr DO effect_list UNTIL bool_expr /*for backward compatibility*/
 	{}
@@ -532,7 +532,7 @@ alg_expr:
 | variable
 	{$$ = $1;}
 | ID
-	{$$ = ast::Var($1,ast::Var::TOKEN,@1);}
+	{$$ = ast::Var($1,ast::Var::VAR,@1);}
 | alg_expr MULT alg_expr
 	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MULT,@2);}
 | alg_expr PLUS alg_expr

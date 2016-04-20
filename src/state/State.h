@@ -8,6 +8,8 @@
 #ifndef STATE_STATE_H_
 #define STATE_STATE_H_
 
+#include <array>
+
 namespace state {
 
 /** \brief The state of a (set of) compartment(s).
@@ -19,6 +21,13 @@ namespace state {
  * Kappa.
  */
 class State {
+	std::vector<SiteGraph> graph;
+	//Variable alg_vars;
+	std::vector<float> tokens;
+	simulation::Counter counter;
+	time_t program_t0;
+
+
 public:
 	State();
 	~State();

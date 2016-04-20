@@ -296,7 +296,7 @@ protected:
 ///A kappa perturbation declared in a "%mod" instruction
 class Effect : public Node {
 public:
-	///Describe the action that will do over system during the simulation
+	///Describe the action that will be done over system during the simulation
 	enum Action {
 		INTRO,		///< Add a specific number of agents from a mixture.
 		DELETE,		///< Delete a specific number of agents from a mixture.
@@ -305,8 +305,8 @@ public:
 		STOP,		///< Stop the simulation.
 		SNAPSHOT,	///< Export to a file an snaphot of the mixture at a given time point as a new kappa file.
 		PRINT,		///< Print output values during a computation to standard output, or to a speciﬁc ﬁle.
-		CFLOW,		///< 
-		CFLOWOFF,	///
+		CFLOW,		///< Start a causal flow analysis (a set of rule application ordered by causality and displayed as a graph using dot format)
+		CFLOWOFF,	///< Stop  a causal flow analysis
 		FLUX,		///< Start a flux map analysis (that tracks the influence that rule applications have on others).
 		FLUXOFF		///< Stop a flux map analysis
 	};
@@ -314,22 +314,24 @@ public:
 	Effect() {};
 	///Init an INTRO or a DELETE effect, located on "l", with a number of agent "n" from a mixture "m".
 	Effect(const Action &a,const Expression &n,const std::list<Agent> &m,const yy::location &l): action(a),val(n),mixture(m),Node(l) {};
-	///Init an UPDATE (or UPDATE_TOK) effect, located on l, with the rule (or token) name "id" and its new kinetic (or concentration) value "v"
-	Effect(const Action &a,const std::string &r,const Expression &v,const yy::location &l): action(a),id(id),val(v),Node(l) {};
-	Effect(const Action &a,const std::list<PrintObj> &pe,const yy::location &l): action(a),pexpr(pe),Node(l) {};
-	Effect(const Action &a,const std::list<PrintObj> &pe,const std::list<PrintObj> &pe2,const yy::location &l): action(a),pexpr(pe),pexpr2(pe2),Node(l) {};
-	///Init a FLUX, FLUXOFF, CFLOW, CFLOWOFF effect, located on l, with the string s (filename or varname for FLUX or CFLOW).
+	///Init an UPDATE (or UPDATE_TOK) effect, located on l, with the rule name (or token-name) id and its new kinetic-rate (or concentration) value "v"
+	Effect(const Action &a,const std::string &id,const Expression &v,const yy::location &l): action(a),id(id),val(v),Node(l) {};
+	///Init a FLUX, FLUXOFF or a SNAPSHOT effect, located on l, with a filename f.
+	Effect(const Action &a,const std::list<PrintObj> &f,const yy::location &l): action(a),pexpr(f),Node(l) {};
+	///Init a PRINT effect, located on l, with a filename f and a string_expression se
+	Effect(const Action &a,const std::list<PrintObj> &f,const std::list<PrintObj> &se,const yy::location &l): action(a),pexpr(f),pexpr2(se),Node(l) {};
+	///Init a FLUX, FLUXOFF, CFLOW, CFLOWOFF or a SNAPSHOT effect, located on l, with the string s which is a filename for FLUX(OFF) or SNAPSHOT, or varname for CFLOW(OFF).
 	Effect(const Action &a,const std::string &s,const yy::location &l): action(a),str(s),Node(l) {};
 	
 	
 protected:
-	Action                   action;
-	Expression               val;
-	Id                       id;
-	std::string              str;
-	std::list<PrintObj>      pexpr;
-	std::list<PrintObj>      pexpr2;
-	std::list<Agent>         mixture;
+	Action                   action;    ///<The action that will be done over system during the simulation.
+	Expression               val;       ///<A kinetic-rate value or a token concentration.
+	Id                       id;        ///<A token id or a rule name.
+	std::string              str;       ///<A varname or filename.
+	std::list<PrintObj>      pexpr;     ///<A prefix of a filename.
+	std::list<PrintObj>      pexpr2;    ///<A string_expression to write.
+	std::list<Agent>         mixture;	///<A mixture.
 };
 
 ///A 

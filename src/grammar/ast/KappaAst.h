@@ -18,7 +18,7 @@ namespace ast {
 /** \brief Store the abstract syntax tree of the model written in Kappa.
  *
  * Contains several list of syntax trees that represent the model
- * read by the parser from kappa files. Evaluate methods in this
+ * read by the parser from kappa files. Evaluate methods in this class
  * produce the initial state of the system and the mappings of
  * ids and names.
  */

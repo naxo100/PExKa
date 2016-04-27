@@ -8,9 +8,12 @@
 #ifndef UTIL_MASKEDBINARYTREE_H_
 #define UTIL_MASKEDBINARYTREE_H_
 
+#include <iostream>
 #include <map>
 #include <set>
-#include <math.h>
+#include <list>
+#include <cmath>
+#include <cfloat>
 
 using namespace std;
 
@@ -32,23 +35,33 @@ class MaskedBinaryTree {
 		float value;
 		float sub_tree;
 	};
-	const int           fresh_id;
+	int                 fresh_id;
 	Node*               nodes;
 	map<int,int>        mask;
 	map<int,int>        unmask;
-	unordered_set<int>  inf_list;///<the list of infinite-rate rule
+	set<int>            inf_list;///<the list of infinite-rate rule
 	bool*               unbalanced_events;
 	list<int>*          unbalanced_events_by_layer;
+
+	int mask_id(int i);
+	int unmask_id(int i);
+
 
 	int* layer;
 	bool isConsistent;
 
 	void update();
-	void leftSon(int i);
-	void rightSon(int i);
+	int  pere(int i);
+	int  leftSon(int i);
+	int  rightSon(int i);
+	
+	bool isLeftSon(int i);
+	bool isRightSon(int i)
+	bool isRoot(int i);
 
 	void declare_unbalanced(int i);
 
+	void aux(int*,int,int,int,int);
 
 public:
 	/** \brief Create a new tree with n nodes.
@@ -68,15 +81,7 @@ public:
 
 	/** \brief Choose random node from tree with probability = weight/total()
 	 */
-	int chooseRandom();
-
-	/** \brief adas
-	*/
-	int mask(int i);
-
-	/** \brief gdgfd
-	*/
-	int unmask(int i);
+	std::pair<int,float> chooseRandom();
 
 	/** \brief gdgfd
 	*/

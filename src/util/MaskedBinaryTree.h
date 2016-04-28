@@ -14,6 +14,8 @@
 #include <list>
 #include <cmath>
 #include <cfloat>
+#include <random>
+
 
 using namespace std;
 
@@ -50,24 +52,35 @@ class MaskedBinaryTree {
 	int* layer;
 	bool isConsistent;
 
-	void update();
-	int  pere(int i);
-	int  leftSon(int i);
-	int  rightSon(int i);
+	void  update();
+	//inline  functions
+	float weight_of_subtree(int i);
+	int   pere(int i);
+	int   father(int i);//same that pere
+	int   leftSon(int i);
+	int   rightSon(int i);
 	
 	bool isLeftSon(int i);
-	bool isRightSon(int i)
+	bool isRightSon(int i);
 	bool isRoot(int i);
 
 	void declare_unbalanced(int i);
 
 	void aux(int*,int,int,int,int);
-
+	
+	default_random_engine             generator;
+	uniform_real_distribution<double> random_real;
+	
 public:
 	/** \brief Create a new tree with n nodes.
 	 */
 	MaskedBinaryTree(int n);
+	MaskedBinaryTree(const MaskedBinaryTree &o);//copy constructor
 	~MaskedBinaryTree();
+
+	/** \brief Calculate total sum of nodes.
+	 */
+	void copy_in(MaskedBinaryTree &o);
 
 	int getSize();
 

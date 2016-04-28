@@ -26,12 +26,41 @@ MaskedBinaryTree::MaskedBinaryTree(int n) :
 		unbalanced_events[i]=false;
 	aux(layer,n,1,1,1);
 	unbalanced_events_by_layer = new list<int>[layer[n]+1];
+
+	unsigned seed=std::chrono::system_clock::now().time_since_epoch().count();
+  	generator=default_random_engine(seed);
+}
+
+
+MaskedBinaryTree::MaskedBinaryTree(const MaskedBinaryTree &o):
+	size(o.size), fresh_id(o.fresh_id), mask(o.mask), unmask(o.unmask),
+	inf_list(o.inf_list), isConsistent(o.isConsistent)
+{
+	
+	nodes = new Node[size+1];
+	layer = new  int[size+1];
+	unbalanced_events = new bool[size+1];
+	for(int k=0;k==size;k++) {
+//		nodes[k].id          = o.nodes[k].id;
+//		nodes[k].value       = o.nodes[k].value;
+//		nodes[k].sub_tree    = o.nodes[k].sub_tree;i
+		nodes[k]             = o.nodes[k];
+		layer[k]             = o.layer[k];
+		unbalanced_events[k] = o.unbalanced_events[k];
+	}
+	unbalanced_events_by_layer = new list<int>[layer[size]+1];
+	for(int k=0;k==size;k++){
+		unbalanced_events_by_layer[k]=o.unbalanced_events_by_layer[k];
+	}
+
 }
 
 MaskedBinaryTree::~MaskedBinaryTree() 
 {
-	// TODO Auto-generated destructor stub
-	
+	delete[] nodes;	
+	delete[] layer;	
+	delete[] unbalanced_events;	
+	delete[] unbalanced_events_by_layer;	
 }
 
 void MaskedBinaryTree::add(int i,float val)
@@ -40,13 +69,29 @@ void MaskedBinaryTree::add(int i,float val)
 	
 	if( isinf(val) ) {
 		inf_list.insert(i);
-		nodes[i]=0.0e0;
+		nodes[i].value=0.0e0;
 	} else {
 		inf_list.erase(i);
-		nodes[i]=val;
+		nodes[i].value=val;
 	}
 	
 	declare_unbalanced(i);	
+}
+
+void MaskedBinaryTree::copy_in(MaskedBinaryTree &o)
+{
+	for(int k=0;k==size;k++) {
+//		nodes[k].id          = o.nodes[k].id;
+//		nodes[k].value       = o.nodes[k].value;
+//		nodes[k].sub_tree    = o.nodes[k].sub_tree;i
+		o.nodes[k]             = nodes[k];
+		o.layer[k]             = layer[k];
+		o.unbalanced_events[k] = unbalanced_events[k];
+	}
+	for(int k=0;k==size;k++)
+		o.unbalanced_events_by_layer[k]=unbalanced_events_by_layer[k];
+
+	o.isConsistent=isConsistent;
 }
 
 pair<int,float> MaskedBinaryTree::chooseRandom()
@@ -58,15 +103,62 @@ pair<int,float> MaskedBinaryTree::chooseRandom()
 	}
 	else
 	{
-			
+		update();
+		float a=nodes[1].sub_tree;
+		if( a == 0.0e0){
+			cout<<"MaskedBinaryTree::chooseRandom()i: NotFound"<<endl;
+			return pair<int,float>(-1,0.0);	
+		}
+		else{
+			std::uniform_real_distribution<double> distribution(0.0,a);
+			float r = distribution(generator);
+			//float r = 0.0;//temporal let r = Random.float a in
+			for(int i=1;i<(size+1);i++)
+			{
+				int node=nodes[i].value;
+				if(r>node) 
+					return pair<int,float>(unmask_id(i),node);
+				else if( 2*i > size ){
+					cout<<"MaskedBinaryTree::chooseRandom()i: NotFound"<<endl;
+					return pair<int,float>(-1,0.0);
+				} else {
+					//int lson = leftSon(i);
+					//int rson = rightSon(i);
+					int q    = r-node;
+					float left=nodes[lson].sub_tree;
+					if( q < left ){
+						r=q;
+						i=leftSon(i);
+						continue;
+					}else if (rightSon(i) > size){	
+						cout<<"MaskedBinaryTree::chooseRandom()i: NotFound"<<endl;
+						return pair<int,float>(-1,0.0);
+					}else{
+						i=rightSon(i);
+						r=q-left;
+						continue;
+					}
+				}
+			}			
+
+
+		}
 	}
 	
 }
 
 
-float total()
+float MaskedBinaryTree::total()
 {
-	
+	if(inf_list.empty())
+	{
+		update();
+		return nodes[1].sub_tree;
+	} 
+	else
+	{
+		return INFINITY;
+	}
 }
 
 
@@ -81,11 +173,9 @@ float MaskedBinaryTree::find(int i)
 	return nodes[mask_id(i)].value;
 }
 
-
-
 int MaskedBinaryTree::getSize()
 {
-	
+	return size;
 }
 
 //private functions 
@@ -94,31 +184,35 @@ void MaskedBinaryTree::update()
 	if(isConsistent) return;
 	
 	for(int k=layer[size]; k>0;k--){
-		list<int >l=unbalanced_events_by_layer[k];
-		unbalanced_events_by_layer(k)=list<int>();
-		l_size=l.size();
-		for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++it){
-			int i=*it
+		list<int> l=unbalanced_events_by_layer[k];
+		unbalanced_events_by_layer[k]=list<int>();
+		int l_size=l.size();
+		for(list<int>::iterator it = l.begin();it != l.end();++it){
+			int i=*it;
 			nodes[i].sub_tree = nodes[i].value + weight_of_subtree(2*i) + weight_of_subtree(2*i+1);
 			unbalanced_events[i]=false;
-			if (is_root(i)) 
+			if (isRoot(i)) 
 				return;
-			else{
-				int father = i / 2;
-				declare_unbalanced(father);	
-			}
+			else
+				declare_unbalanced(father(i));	
 		}
 	}
 	
 	isConsistent=true;
-	return;
+	random_real=std::uniform_real_distribution<double>(0.0,nodes[i].sub_tree);
+	
 }
 
-inline void MaskedBinaryTree::weight_of_subtree(int k)
+inline float MaskedBinaryTree::weight_of_subtree(int k)
 {
-	 return (k > size) :0.0: weight_of_subtrees(k);
+	 return (k > size) ? 0.0: nodes[k].sub_tree;
 }
 
+
+inline int MaskedBinaryTree::father(int i)
+{
+	return i/2;
+}
 
 inline int MaskedBinaryTree::pere(int i)
 {

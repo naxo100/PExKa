@@ -8,6 +8,10 @@
 #ifndef PATTERN_ENVIRONMENT_H_
 #define PATTERN_ENVIRONMENT_H_
 
+#include <map>
+
+using namespace std;
+
 namespace pattern {
 
 /** \brief All the mappings for names and ids needed by the simulation.

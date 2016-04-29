@@ -13,14 +13,15 @@ int main(){
 	cin>>size;
 	MaskedBinaryTree t1(size);
 	for(int i=0;i<size;i++)
-		t1.add(34,1.0);
+		t1.add(2*i+3,1.0);
+	
+	pair<int,float> p;
+	for(int i=0;i<size;i++){
+		p=t1.chooseRandom();
+		cout<<"id  : "<<p.first<<endl;
+		cout<<"rate: "<<p.second<<endl;
+	}
 
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	std::default_random_engine generator (seed);
-	std::uniform_real_distribution<double> distribution(0.0,10.0);	
-	for (int i=0; i<20; ++i) {
-    	cout<<distribution(generator)<<endl;
-  	}
 	return 0;	
 }
 

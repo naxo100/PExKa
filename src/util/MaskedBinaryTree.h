@@ -10,12 +10,13 @@
 
 #include <iostream>
 #include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <list>
 #include <cmath>
 #include <cfloat>
-#include <random>
-#include <chrono>
+#include <random>//to compute a random number
+#include <chrono>//to select a seed for the random number generator
 
 
 using namespace std;
@@ -42,10 +43,11 @@ class MaskedBinaryTree {
 	Node*               nodes;
 	map<int,int>        mask;
 	map<int,int>        unmask;
-	set<int>            inf_list;///<the list of infinite-rate rule
+	unordered_set<int>  inf_list;///<the list of infinite-rate rule
 	bool*               unbalanced_events;
 	list<int>*          unbalanced_events_by_layer;
 
+	void  update();
 	int mask_id(int i);
 	int unmask_id(int i);
 
@@ -53,7 +55,6 @@ class MaskedBinaryTree {
 	int* layer;
 	bool isConsistent;
 
-	void  update();
 	//inline  functions
 	float weight_of_subtree(int i);
 	int   pere(int i);
@@ -69,8 +70,8 @@ class MaskedBinaryTree {
 
 	void aux(int*,int,int,int,int);
 	
-	default_random_engine             generator;
-	uniform_real_distribution<double> random_real;
+	std::default_random_engine             generator;
+	std::uniform_real_distribution<double> random_real;
 	
 public:
 	/** \brief Create a new tree with n nodes.
@@ -96,6 +97,7 @@ public:
 	/** \brief Choose random node from tree with probability = weight/total()
 	 */
 	std::pair<int,float> chooseRandom();
+	//int chooseRandom();
 
 	/** \brief gdgfd
 	*/

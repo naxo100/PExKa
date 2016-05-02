@@ -99,43 +99,46 @@ void MaskedBinaryTree::copy_in(MaskedBinaryTree &o)
 }
 
 pair<int,float> MaskedBinaryTree::chooseRandom()
+//int MaskedBinaryTree::chooseRandom()
 {
 	if(!inf_list.empty())
 	{
-		std::set<int>::iterator it=inf_list.begin();
+		std::unordered_set<int>::iterator it=inf_list.begin();
+		//this selection choice should be random
 		return pair<int,float>(unmask_id(*it),INFINITY);
 	}
 	else
 	{
 		update();
-		float a=nodes[1].sub_tree;
+  	float a=nodes[1].sub_tree;
 		if( a == 0.0e0){
 			cout<<"MaskedBinaryTree::chooseRandom(): NotFound"<<endl;
 			return pair<int,float>(-1,0.0);	
 		}
 		else{
-			std::uniform_real_distribution<double> distribution(0.0,a);
+			std::uniform_real_distribution<float> distribution(0.0,a);
 			float r = distribution(generator);
-			//float r = 0.0;//temporal let r = Random.float a in
-			for(int i=1;i<(size+1);i++)
+			int i=1;//position in the tree
+			do 
 			{
 				int node=nodes[i].value;
-				if(r<node) 
+				if(r<=node) 
+					//return unmask_id(i);
 					return pair<int,float>(unmask_id(i),node);
 				else if( leftSon(i) > size ){
 					cout<<"MaskedBinaryTree::chooseRandom(): NotFound"<<endl;
+					//return -1;
 					return pair<int,float>(-1,0.0);
 				} else {
-					//int lson = leftSon(i);
-					//int rson = rightSon(i);
 					float q    = r-node;
 					float left=nodes[leftSon(i)].sub_tree;
-					if( q < left ){
+					if( q <= left ){
 						r=q;
 						i=leftSon(i);
 						continue;
 					}else if (rightSon(i) > size){	
-						cout<<"MaskedBinaryTree::chooseRandom()i: NotFound"<<endl;
+						cout<<"MaskedBinaryTree::chooseRandom(): NotFound"<<endl;
+						//return -1;
 						return pair<int,float>(-1,0.0);
 					}else{
 						i=rightSon(i);
@@ -143,7 +146,7 @@ pair<int,float> MaskedBinaryTree::chooseRandom()
 						continue;
 					}
 				}
-			}			
+			} while(true);			
 
 
 		}
@@ -263,7 +266,6 @@ void MaskedBinaryTree::aux(int* layer,int n, int k,int current_layer,int layer_e
 
 int MaskedBinaryTree::mask_id(int i)
 {
-	int m;
 	pair<map<int,int>::iterator,bool> ret;
 	ret = mask.insert(std::pair<int,int>(i,fresh_id));
 	if(ret.second)//it was inserted a new element (i,fresh_id)

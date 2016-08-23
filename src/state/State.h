@@ -8,7 +8,10 @@
 #ifndef STATE_STATE_H_
 #define STATE_STATE_H_
 
-#include <array>
+#include <vector>
+#include "Variable.h"
+#include "SiteGraph.h"
+#include "../simulation/Counter.h"
 
 namespace state {
 
@@ -22,7 +25,7 @@ namespace state {
  */
 class State {
 	std::vector<SiteGraph> graph;
-	//Variable alg_vars;
+	std::vector<Variable> alg_vars;
 	std::vector<float> tokens;
 	simulation::Counter counter;
 	time_t program_t0;

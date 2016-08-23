@@ -9,7 +9,8 @@
 #define GRAMMAR_AST_KAPPAAST_H_
 
 #include <list>
-#include "AstStructs.h"
+
+#include "Statements.h"
 
 using namespace std;
 
@@ -32,8 +33,10 @@ public:
 	KappaAst();
 	virtual ~KappaAst();
 
+	void evaluateVariables(pattern::Environment &env);
+
 	//ADD functions
-	void add(Declaration d);
+	void add(const Declaration &d);
 	//void add(Perturbation p);
 
 	/** \brief Evaluate global properties from AST.

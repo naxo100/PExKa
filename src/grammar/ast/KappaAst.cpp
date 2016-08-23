@@ -6,10 +6,11 @@
  */
 
 #include "KappaAst.h"
+#include "../../pattern/Environment.h"
 
 namespace ast {
 
-KappaAst::KappaAst() {
+KappaAst::KappaAst() : decls() {
 	// TODO Auto-generated constructor stub
 
 }
@@ -18,8 +19,18 @@ KappaAst::~KappaAst() {
 	// TODO Auto-generated destructor stub
 }
 
+void KappaAst::evaluateVariables(pattern::Environment &env){
+	cout << "evaluating variables" << endl;
+	for(list<Declaration>::iterator it = decls.begin();it != decls.end(); it++){
+		//delete &(*it);
+		Variable* var = it->eval(env);
+		cout << "Variable " << var->getName() << ": " ;
+		//env.declareVariable(var->getName(),it->isKappa());
+	}
+}
 
-void KappaAst::add(Declaration d){
+
+void KappaAst::add(const Declaration &d){
 	decls.push_back(d);
 }
 

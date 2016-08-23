@@ -18,9 +18,11 @@
 %code requires{
 	#include <iostream>
 	#include <string>
-	#include "ast/AstStructs.h"
+	#include "ast/Statements.h"
+	#include "location.hh"
 	
 	using namespace std;
+    using namespace ast;
 	
 	namespace yy {
 		class KappaLexer;
@@ -34,7 +36,6 @@
 %code top {
     #include "KappaLexer.h"
     #include "KappaParser.hpp"
-    #include "location.hh"
     
 	#define yylex(x) x.getNextToken()
 
@@ -48,7 +49,7 @@
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
 %token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
-%token KAPPA_WLD KAPPA_SEMI SIGNATURE INFINITY TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
+%token KAPPA_WLD KAPPA_SEMI SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
 %token EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
 %token <int> INT 
 %token <std::string> ID LABEL KAPPA_MRK NAME 
@@ -68,62 +69,60 @@
 %left AND
 
 
-/*%type <ast::Agent> agent_expression*/
-%type <ast::Declaration> variable_declaration
-%type <ast::Expression> alg_expr bool_expr  constant variable multiple 
-%type <ast::Arrow> arrow 
-%type <bool> rate_sep boolean join
-%type <std::list<std::string>> value_list internal_state
-%type <ast::Link> link_state
-%type <ast::CompExpression> comp_expr
-%type <ast::Site> port_expression
-%type <std::list<ast::Site>> interface_expression
-%type <ast::Agent> agent_expression
-%type <std::list<ast::Agent>> non_empty_mixture
-%type <std::list<ast::Agent>> mixture
-%type <ast::Multiple_Mixture> multiple_mixture
-%type <std::list<ast::CompExpression>> comp_list
-%type <std::list<ast::Expression>> dimension
-%type <ast::Expression*> where_expr
-%type <std::list<ast::PrintObj>> print_expr
-%type <ast::Effect> effect
-%type <std::list<ast::Effect>> effect_list
-%type <ast::OptString> opt_string string_or_pr_expr
-%type <ast::Radius>   alg_with_radius   
-%type <ast::Rate> rate
-%type <ast::Perturbation> perturbation_declaration
-%type <std::list<ast::Token>> sum_token token_expr
-%type <ast::RuleSide> lhs_rhs
-%type <ast::Id> rule_label
-%type <ast::Rule> rule_expression
-%type <ast::Init_Declaration> init_declaration
+/*%type <Agent> agent_expression*/
+%type <Declaration> 			variable_declaration
+%type <Expression*> 			alg_expr bool_expr constant variable multiple where_expr
+%type <Arrow> 					arrow 
+%type <bool>					rate_sep boolean join
+%type <std::list<std::string> > value_list
+%type <std::list<Id> >			internal_state
+%type <Link> 					link_state
+%type <CompExpression> 			comp_expr
+%type <Site> 					port_expression
+%type <std::list<Site> > 		interface_expression
+%type <Agent> 					agent_expression
+%type <std::list<Agent> > 		non_empty_mixture mixture
+%type <MultipleMixture> 		multiple_mixture
+%type <std::list<CompExpression> > comp_list
+%type <std::list<const Expression*>> 	dimension
+%type <StringExpression> 		print_expr
+%type <Effect> 					effect
+%type <std::list<Effect> > 		effect_list
+%type <StringExpression> 		string_or_pr_expr
+%type <Radius>   				alg_with_radius   
+%type <Rate> 					rate
+%type <Perturbation> 			perturbation_declaration
+%type <std::list<Token> > 		sum_token token_expr
+%type <RuleSide> 				lhs_rhs
+%type <Id> 						rule_label
+%type <Rule> 					rule_expression
+%type <Init> 					init_declaration
 /*%type <std::list> value_list*/
 %start statements
 
 %%
 statements:
 | statements statement newline
-	{}
+	{std::cout << "statement" << endl;}
 ;
 
 newline:
 NEWLINE {}
-| END {return 0;}
+| END {std::cout << "ending" << endl; return 0;}
 
 
 statement:
 | rule_expression
 	{}
 | instruction
-	{} 
+	{std::cout << "instruction" << endl;} 
 | error 
 	{}
 ;
 
 
 instruction:
-/* */
-| COMPARTMENT comp_expr alg_expr
+ COMPARTMENT comp_expr alg_expr
  	{}
 | C_LINK LABEL comp_expr arrow comp_expr ATD constant
  	{cout<<"Hola";}
@@ -142,7 +141,7 @@ instruction:
 | INIT error
 	{}
 | LET variable_declaration 
-	{driver.getAst().add($2);}
+	{this->driver.getAst().add($2);}
 | OBS variable_declaration
 	{}
 | PLOT alg_expr 
@@ -154,21 +153,21 @@ instruction:
 | PERT REPEAT perturbation_declaration UNTIL bool_expr 
 	{}
 | CONFIG STRING value_list 
-	{}  
-| PERT bool_expr DO effect_list UNTIL bool_expr /*for backward compatibility*/
 	{}
 ;
 
 init_declaration:
-| multiple non_empty_mixture 
-	{$$=ast::Init_Declaration(ast::Init_t($1,$2),NULL);}
+ multiple non_empty_mixture 
+	{$$=Init(@$,$1,$2);}
 | ID LAR multiple
-	{$$=ast::Init_Declaration(ast::Init_t($3,$1),NULL);}
+	{$$=Init(@$,$3,Id(@1,$1));}
+/*** TODO ???
 | ID OP_CUR init_declaration CL_CUR 
 	{
 		ast::Id id($1);
-		$$=ast::Init_Declaration($3.init_t,&id);
+		$$=ast::Init_Declaration($3.Init,&id);
 	}
+*/
 ;
 
 
@@ -180,15 +179,18 @@ join:
 	{$$=true;}
 | FREE
 	{$$=false;}
+;
 
 comp_expr:
-  LABEL dimension where_expr
-	{$$=ast::CompExpression($1,std::list<ast::Expression>(),NULL,@1);}
+ LABEL dimension
+	{ $$ = CompExpression(@$,Id(@1,$1),$2); }
+| LABEL dimension where_expr
+	{ $$ = CompExpression(@$,Id(@1,$1),$2,$3); }
 ;
 
 dimension: 
 /*empty*/
-	{$$=std::list<ast::Expression>();}
+	{$$=std::list<const ast::Expression*>();}
 | OP_BRA alg_expr CL_BRA dimension
 	{
 		$4.push_front($2);
@@ -197,10 +199,8 @@ dimension:
 ;
 
 where_expr:
- /*empty*/
- 	{$$=NULL;}
-| OP_CUR bool_expr CL_CUR
-	{$$=&$2;}
+ OP_CUR bool_expr CL_CUR
+	{$$=$2;}
 ;
 
 /*index_expr:
@@ -211,21 +211,21 @@ INT
 | OP_PAR index_expr CL_PAR 
 	{$$=$2;}
 | index_expr MULT index_expr
-	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::MULT,@2);}
+	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::MULT);}
 | index_expr PLUS index_expr
-	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::SUM,@2);}
+	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::SUM);}
 | index_expr DIV index_expr
-	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::DIV,@2);}
+	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::DIV);}
 | index_expr MINUS index_expr
-	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::MINUS,@2);}
+	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::MINUS);}
 | index_expr POW index_expr
-	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::POW,@2);}
+	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::POW);}
 | index_expr MODULO index_expr
-	{$$=ast::IndexOperation($1,$3,ast::IndexOperation::MODULO,@2);}
+	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::MODULO);}
 ;*/
 
 value_list: 
-| STRING 
+ STRING 
 	{$$=std::list<std::string>(1,$1); }
 | STRING value_list 
 	{
@@ -255,18 +255,16 @@ comp_list:
 
 
 perturbation_declaration:
-| OP_PAR perturbation_declaration CL_PAR {$$=$2;}
-| bool_expr DO effect_list {$$=ast::Perturbation($1,$3,@2);}
-| bool_expr SET effect_list
-	{
-		// temporal, preguntarle a naxo
-		cerr<<"Warning at "<<@3<<" : Deprecated perturbation syntax: 'set' keyword is replaced by 'do'"<<endl;
-		$$=ast::Perturbation($1,$3,@2);
-	} /*For backward compatibility*/
+ bool_expr DO effect_list 
+	{ $$ = Perturbation(@$,$1,$3); }
+| REPEAT bool_expr DO effect_list UNTIL bool_expr
+	{ $$ = Perturbation(@$,$2,$4,$6); }
+| REPEAT OP_PAR bool_expr DO effect_list CL_PAR UNTIL bool_expr
+	{ $$ = Perturbation(@$,$3,$5,$8); }
 ;
 
 effect_list:
-| OP_PAR effect_list CL_PAR {$$=$2;}
+ OP_PAR effect_list CL_PAR {$$=$2;}
 | effect {$$=std::list<ast::Effect>(1,$1);}
 | effect SEMICOLON effect_list 
 	{
@@ -276,210 +274,161 @@ effect_list:
 ;
 
 effect:
-| LABEL ASSIGN alg_expr /*updating the rate of a rule -backward compatibility*/
-	{$$=ast::Effect(ast::Effect::UPDATE,std::string($1),$3,@2);}
-| ASSIGN2 LABEL alg_expr /*updating the rate of a rule*/
-	{$$=ast::Effect(ast::Effect::UPDATE,std::string($2),$3,@1);}
-| TRACK LABEL boolean 
-	{
-		if($3)
-			$$=ast::Effect(ast::Effect::CFLOW   ,std::string($2),@1);
-		else 
-			$$=ast::Effect(ast::Effect::CFLOWOFF,std::string($2),@1);
-	}
-
-| FLUX opt_string boolean 
-	{
-		ast::Effect::Action action= $3 ? ast::Effect::FLUX : ast::Effect::FLUXOFF;
-
-		if($2.str_ptr   != NULL) 
-			$$=ast::Effect(action,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),@1);
-		else if($2.print_list_ptr != NULL) 
-			$$=ast::Effect(action,*($2.print_list_ptr),@1);
-		else
-			$$=ast::Effect(action,std::list<ast::PrintObj>(),@1);
-	}
-| INTRO multiple_mixture 
-	{$$=ast::Effect(ast::Effect::INTRO,$2.alg,$2.mix,@1);}
+ INTRO multiple_mixture 
+	{ $$ = Effect(@$,Effect::INTRO, $2); }
 | INTRO error
 	{}
 | DELETE multiple_mixture 
-	{$$=ast::Effect(ast::Effect::DELETE,$2.alg,$2.mix,@1);}
+	{ $$ = Effect(@$,Effect::DELETE,$2); }
 | DELETE error
 	{}
+| STOP string_or_pr_expr
+	{ $$ = Effect(@$,Effect::STOP,$2); }
+| FLUX string_or_pr_expr boolean 
+	{ $$ = Effect(@$,$3 ? Effect::FLUX : Effect::FLUX_OFF,$2); }
+| TRACK LABEL boolean 
+	{ $$ = Effect(@$,$3 ? Effect::CFLOW : Effect::CFLOW_OFF , Id($2,@2)); }
+| LABEL ASSIGN alg_expr /*updating the rate of a rule -backward compatibility*/
+	{ $$ = Effect(@$,Effect::UPDATE,VarValue(Id($1,@1),$3,@2)); }
+| ASSIGN2 LABEL alg_expr /*updating the rate of a rule*/
+	{ $$ = Effect(@$,Effect::UPDATE,VarValue(Id($2,@2),$3,@1)); }
 | ID LAR alg_expr /*updating the value of a token*/
-	{$$=ast::Effect(ast::Effect::UPDATE_TOK,$1,$3,@2);}
-| SNAPSHOT opt_string
-	{	
-		if($2.str_ptr   != NULL) 
-			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),@1);
-		else if($2.print_list_ptr != NULL) 
-			$$=ast::Effect(ast::Effect::SNAPSHOT,*($2.print_list_ptr),@1);
-		else
-			$$=ast::Effect(ast::Effect::SNAPSHOT,std::list<ast::PrintObj>(),@1);
-	}
-| STOP opt_string
-	{
-		if($2.str_ptr   != NULL) 
-			$$=ast::Effect(ast::Effect::STOP,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),@1);
-		else if($2.print_list_ptr != NULL) 
-			$$=ast::Effect(ast::Effect::STOP,*($2.print_list_ptr),@1);
-		else
-			$$=ast::Effect(ast::Effect::STOP,std::list<ast::PrintObj>(),@1);
-
-	}
+	{ $$ = Effect(@$,Effect::UPDATE_TOK,VarValue(Id($1,@1),$3,@2));}
+| SNAPSHOT string_or_pr_expr
+	{ $$ = Effect(@$,Effect::SNAPSHOT,$2); }
 | PRINT SMALLER print_expr GREATER 
-	{$$=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(),$3,@1);}
+	{ $$ = Effect(@$,Effect::PRINT,$3);}
 | PRINTF string_or_pr_expr SMALLER print_expr GREATER 
-	{
-		if($2.str_ptr   != NULL) 
-			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(1,ast::PrintObj(*($2.str_ptr),@2)),$4,@1);
-		else if($2.print_list_ptr != NULL) 
-			$$=ast::Effect(ast::Effect::PRINT,*($2.print_list_ptr),$4,@1);
-		else
-			$$=ast::Effect(ast::Effect::PRINT,std::list<ast::PrintObj>(),$4,@1);
-	}
+	{ $$ = Effect(@$,Effect::PRINT,$2,$4); }
 ;
 
 
 print_expr:
-/*empty*/ 
-	{ $$=std::list<ast::PrintObj>(); }
-| STRING 
-	{$$=std::list<ast::PrintObj>(1,ast::PrintObj($1,@1)); }
+ STRING 
+	{ $$ = StringExpression(@$,$1); }
 | alg_expr 
-	{$$=std::list<ast::PrintObj>(1,ast::PrintObj($1,@1)); }
+	{ $$ = StringExpression(@$,$1); }
 | STRING DOT print_expr 
-	{
-		$3.push_front(ast::PrintObj($1,@1));
-		$$=$3;
-	}
+	{ $$ = StringExpression(@$,$1,&$3); }
 | alg_expr DOT print_expr 
-	{
-		$3.push_front(ast::PrintObj($1,@1));
-		$$=$3;
-	}
+	{ $$ = StringExpression(@$,$1,&$3); }
 ;
 
 boolean:
-| TRUE {$$=true;}
+ TRUE {$$=true;}
 | FALSE {$$=false;}
 ;
 
 variable_declaration:
  LABEL non_empty_mixture 
-	{$$ = ast::Declaration(ast::Id($1,@1),$2,@$);}
+	{$$ = ast::Declaration(@$,Id(@1,$1),$2);}
 | LABEL alg_expr 
-	{$$ = ast::Declaration(ast::Id($1,@1),$2,@$);}
+	{$$ = ast::Declaration(@$,Id(@1,$1),$2);}
 | LABEL error 
 	{}
 ;
 
 bool_expr:
-| OP_PAR bool_expr CL_PAR 
+ OP_PAR bool_expr CL_PAR 
 	{$$=$2;}
 | bool_expr AND bool_expr 
-	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::AND,@2);}
+	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::AND);}
 | bool_expr OR bool_expr 
-	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::OR,@2);}
+	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::OR);}
 | alg_expr GREATER alg_expr 
-	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::GREATER,@2);}
+	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::GREATER);}
 | alg_expr SMALLER alg_expr 
-	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::SMALLER,@2);}
+	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::SMALLER);}
 | alg_expr EQUAL alg_expr 
-	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::EQUAL,@2);}
+	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::EQUAL);}
 | alg_expr DIFF alg_expr  
-	{$$ = ast::BoolOperation($1,$3,ast::BoolOperation::DIFF,@2);}
+	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::DIFF);}
 | TRUE
-	{$$ = ast::Bool(true,@1);}
+	{$$ = new Const(@$,true);}
 | FALSE
-	{$$ = ast::Bool(false,@1);}
-;
-
-opt_string:
-/*empty*/ {$$=(ast::OptString(NULL,NULL));}
-| STRING  {$$=(ast::OptString(&$1,NULL));}
-| SMALLER print_expr GREATER {$$=(ast:: OptString(NULL,&$2));}
+	{$$ = new Const(@$,false);}
 ;
 
 string_or_pr_expr:
-| STRING {$$=(ast::OptString(&$1,NULL));}
-| SMALLER print_expr GREATER {$$=(ast::OptString(NULL,&$2));}
+ STRING {$$ = StringExpression(@$,$1);}
+| SMALLER print_expr GREATER {$$ = $2;}
 ;
 
 
 multiple:
-| INT   {$$ = ast::Const($1,@1);}
-| FLOAT	{$$ = ast::Const($1,@1);}
-| LABEL {$$ = ast::Var($1,ast::Var::VAR,@1); }
+ INT   {$$ = new Const(@$,$1);}
+| FLOAT	{$$ = new Const(@$,$1);}
+| LABEL {$$ = new Var(@$,$1,Var::VAR); }
 ;
 
 constant:
- INFINITY
-	{$$ = ast::Const(ast::Const::INF,@1);}
+ INF
+	{$$ = new Const(@$,Const::INF);}
 | FLOAT
-	{$$ = ast::Const($1,@1);}
+	{$$ = new Const(@$,$1);}
 | INT 
-	{$$ = ast::Const($1,@1);}
+	{$$ = new Const(@$,$1);}
 | EMAX
-	{$$ = ast::Const(ast::Const::EMAX,@1);}
+	{$$ = new Const(@$,Const::EMAX);}
 | TMAX
+	{$$ = new Const(@$,Const::TMAX);}
 
 rule_label: 
 /*empty */
-	{$$=ast::Id();}
+	{$$=Id("",yy::location());}
 | LABEL 
-	{$$=ast::Id($1,@1);}
+	{$$=Id(@$,$1);}
 ;
 
 lhs_rhs:
-mixture token_expr {$$=ast::RuleSide($1,$2);}
+mixture token_expr 
+	{ $$ = RuleSide(@$,$1,$2); }
 ;
 
 token_expr:
-/*empty*/ {$$=std::list<ast::Token>();}
-| PIPE sum_token {$$=$2;} 
+/*empty*/
+	{ $$ = std::list<Token>();}
+| PIPE sum_token 
+	{ $$ = $2; } 
 | PIPE error 
 	{}
 ;
 
 sum_token:
-| OP_PAR sum_token CL_PAR 
-	{$$=$2;} 
+ OP_PAR sum_token CL_PAR 
+	{ $$ = $2; } 
 | alg_expr TYPE ID 
-	{$$=std::list<ast::Token>(1,ast::Token($1,ast::Id($3)));}
+	{$$=std::list<Token>(1,Token(@$,$1,Id(@3,$3)));}
 | alg_expr TYPE ID PLUS sum_token 
 	{
-		$5.push_front(ast::Token($1,ast::Id($3)));
+		$5.push_front(Token(@1+@2+@3,$1,Id(@3,$3)));
 		$$=$5;
 	}
 
 mixture:
 /*empty*/ 
-	{$$=std::list<ast::Agent>();}
+	{ $$ = std::list<ast::Agent>(); }
 | non_empty_mixture 
-	{$$=$1;}
+	{ $$ = $1; }
 ;
 
 rate_sep:
-| AT {$$=false;}
+ AT {$$=false;}
 | FIX {$$=true;}
 
 /*(**  **)*/
 /*{$$=ast::Rule($1,$2.agents,$4.agents,$2.tokens,$4.tokens,$3,$6.);}*/
 
 rule_expression:
-| rule_label lhs_rhs arrow lhs_rhs rate_sep rate 
+ rule_label lhs_rhs arrow lhs_rhs rate 
 	{
-		if(($3.type() == ast::Arrow::BI && $6.op == NULL) || ($3.type() == ast::Arrow::RIGHT && $6.op != NULL)) 
-			yy::KappaParser::error(@1,"Malformed bi-directional rule expression");
-		$$=ast::Rule($1,$2,$4,$3,$6,-1,NULL,$5,@1);
+		$$=Rule(@$,$1,$2,$4,$3,$5);
 	}
 | rule_label lhs_rhs arrow lhs_rhs 
 	{
 		cerr<<"Warning: Rule has no kinetics. Default rate of 0.0 is assumed."<<endl;
-		ast::Rate rate(ast::Const(0.0f,yy::location()),NULL,NULL);
-		$$=ast::Rule($1,$2,$4,$3,rate,-1,NULL,true,@1);;
+		Rate rate(new Const(0.0f,yy::location()),false,yy::location());
+		$$=ast::Rule(@$,$1,$2,$4,$3,rate);;
 	}
 ;
 
@@ -487,41 +436,30 @@ rule_expression:
 
 arrow:
  KAPPA_RAR 
-	{$$=ast::Arrow(ast::Arrow::RIGHT,@1);}
+	{$$=ast::Arrow(@$,ast::Arrow::RIGHT);}
 | KAPPA_LRAR
-	{$$=ast::Arrow(ast::Arrow::BI,@1);}
-;
-
-constant:
- INFINITY
-	{$$ = ast::Const(ast::Const::INF,@1);}
-| FLOAT
-	{$$ = ast::Const($1,@1);}
-| INT 
-	{$$ = ast::Const($1,@1);}
-| EMAX
-	{$$ = ast::Const(ast::Const::EMAX,@1);}
-| TMAX
-	{$$ = ast::Const(ast::Const::TMAX,@1);}
+	{$$=ast::Arrow(@$,ast::Arrow::BI);}
 ;
 
 variable:
- PIPE ID PIPE 
-	{ast::Var($2,ast::Var::TOKEN,@$);}
+ ID
+	{$$ = new Var(@$,$1,Var::AUX);}
+| PIPE ID PIPE 
+	{$$ = new Var(@$,$2,Var::TOKEN);}
 | LABEL 
-	{ast::Var($1,ast::Var::VAR,@$);}
+	{$$ = new Var(@$,$1,Var::VAR);}
 | TIME
-	{$$ = ast::Var(ast::Var::TIME,@$);}
+	{$$ = new Var(@$,Var::TIME);}
 | EVENT
-	{$$ = ast::Var(ast::Var::EVENT,@$);}
+	{$$ = new Var(@$,Var::EVENT);}
 | NULL_EVENT
-	{$$ = ast::Var(ast::Var::NULL_EVENT,@$);}
+	{$$ = new Var(@$,Var::NULL_EVENT);}
 | PROD_EVENT
-	{$$ = ast::Var(ast::Var::PROD_EVENT,@$);}
+	{$$ = new Var(@$,Var::PROD_EVENT);}
 | ACTIVITY
-	{$$ = ast::Var(ast::Var::ACTIVITY,@$);}
+	{$$ = new Var(@$,Var::ACTIVITY);}
 | CPUTIME
-	{$$ = ast::Const(ast::Var::CPUTIME,@1);}
+	{$$ = new Const(@$,Var::CPUTIME);}
 ;
 
 alg_expr:
@@ -531,85 +469,85 @@ alg_expr:
 	{$$ = $1;}
 | variable
 	{$$ = $1;}
-| ID
-	{$$ = ast::Var($1,ast::Var::TOKEN,@1);}
+| bool_expr
+	{$$ = $1;}
 | alg_expr MULT alg_expr
-	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MULT,@2);}
+	{$$ = new AlgBinaryOperation(@$,$1,$3,BaseExpression::AlgebraicOp::MULT);}
 | alg_expr PLUS alg_expr
-	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::SUM,@2);}
+	{$$ = new AlgBinaryOperation(@$,$1,$3,BaseExpression::AlgebraicOp::SUM);}
 | alg_expr DIV alg_expr
-	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::DIV,@2);}
+	{$$ = new AlgBinaryOperation(@$,$1,$3,BaseExpression::AlgebraicOp::DIV);}
 | alg_expr MINUS alg_expr
-	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MINUS,@2);}
+	{$$ = new AlgBinaryOperation(@$,$1,$3,BaseExpression::AlgebraicOp::MINUS);}
 | alg_expr POW alg_expr
-	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::POW,@2);}
+	{$$ = new AlgBinaryOperation(@$,$1,$3,BaseExpression::AlgebraicOp::POW);}
 | alg_expr MODULO alg_expr
-	{$$ = ast::BinaryOperation($1,$3,ast::BinaryOperation::MODULO,@2);}	
+	{$$ = new AlgBinaryOperation(@$,$1,$3,BaseExpression::AlgebraicOp::MODULO);}	
 | MAX alg_expr alg_expr
-	{$$ = ast::BinaryOperation($2,$3,ast::BinaryOperation::MAX,@2);}
+	{$$ = new AlgBinaryOperation(@$,$2,$3,BaseExpression::AlgebraicOp::MAX);}
 | MIN alg_expr alg_expr
-	{$$ = ast::BinaryOperation($2,$3,ast::BinaryOperation::MIN,@2);}
+	{$$ = new AlgBinaryOperation(@$,$2,$3,BaseExpression::AlgebraicOp::MIN);}
 | EXPONENT alg_expr 
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::EXPONENT,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::EXPONENT);}
 | SINUS alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::SINUS,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::SINUS);}
 | COSINUS alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::COSINUS,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::COSINUS);}
 | TAN alg_expr 
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::TAN,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::TAN);}
 | ABS alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::ABS,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::ABS);}
 | SQRT alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::SQRT,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::SQRT);}
 | LOG alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::LOG,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::LOG);}
 /*(***)*/
 | ATAN alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::ATAN,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::ATAN);}
 | COIN alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::COIN,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::COIN);}
 | RAND_N alg_expr
-	{$$ = ast::UnaryOperation($2,ast::UnaryOperation::RAND_N,@2);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::RAND_N);}
 | RAND_1
-	{$$ = ast::NullaryOperation(ast::NullaryOperation::RAND_1,@1);}
+	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::RAND_1);}
 ;
 
 rate:
-| alg_expr OP_PAR alg_with_radius CL_PAR 
-	{$$=ast::Rate($1,&$3,NULL);}
-| alg_expr 
-	{$$=ast::Rate($1,NULL,NULL);}
-| alg_expr COMMA alg_expr 
-	{$$=ast::Rate($1,NULL,&$3);}
+ rate_sep alg_expr OP_PAR alg_with_radius CL_PAR 
+	{$$=ast::Rate(@$,$2,$1,&$4);}
+| rate_sep alg_expr 
+	{$$=ast::Rate(@$,$2,$1);}
+| rate_sep alg_expr COMMA alg_expr 
+	{$$=ast::Rate(@$,$2,$1,$4);}
 ;
 
 alg_with_radius:
-| alg_expr {$$=ast::Radius($1);}
-| alg_expr TYPE alg_expr {$$=ast::Radius($1,&$3);}
+ alg_expr {$$=ast::Radius(@$,$1);}
+| alg_expr TYPE alg_expr {$$=ast::Radius(@$,$1,$3);}
 ;
 
 multiple_mixture:
-| alg_expr non_empty_mixture /*conflict here because ID (blah) could be token non_empty mixture or mixture...*/
-	{$$=ast::Multiple_Mixture($1,$2);}
+ alg_expr non_empty_mixture /*conflict here because ID (blah) could be token non_empty mixture or mixture...*/
+	{$$=ast::MultipleMixture(@$,$1,$2);}
 | non_empty_mixture 
-	{$$=ast::Multiple_Mixture(ast::Const(1.0f,yy::location()),$1);}
+	{$$=ast::MultipleMixture(@$,new Const(1,yy::location()),$1);}
 ;
 
 non_empty_mixture:
-| OP_PAR non_empty_mixture CL_PAR
-	{$$=$2;}
+ OP_PAR non_empty_mixture CL_PAR
+	{ $$ = $2; }
 | agent_expression COMMA non_empty_mixture  
 	{
 		$3.push_front($1);
-		$$=$3;
+		$$ = $3;
 	}
 | agent_expression 
-	{$$=std::list<ast::Agent>(1,$1);}
+	{ $$ = std::list<Agent>(1,$1); }
 ;
 /*Make a list for interface_expression*/
 agent_expression:
  ID OP_PAR interface_expression CL_PAR 
-	{$$=ast::Agent($1,$3,@1);}
+	{ $$ = Agent(@$,Id(@1,$1),$3); }
 | ID error 
 	{yy::KappaParser::error(@1,std::string("Malformed agent ")+$1);}
 ;
@@ -618,7 +556,7 @@ interface_expression:
 	/*empty*/
 	{$$=std::list<ast::Site>();}
 | port_expression
-	{$$=std::list<ast::Site>(1,$1);}
+	{$$=std::list<ast::Site>(@$,1);}
 | port_expression COMMA interface_expression
 {
 	$3.push_front($1);
@@ -640,16 +578,16 @@ interface_expression:
 
 
 port_expression:
-| ID internal_state link_state 
-	{$$=ast::Site($1,$2,$3,@1);}
+ ID internal_state link_state 
+	{$$=Site(@$,Id(@1,$1),$2,$3);}
 ;
 
 internal_state:
 /*empty*/ 
-	{$$=std::list<std::string>(); }
+	{$$=std::list<Id>(); }
 | KAPPA_MRK internal_state 
 	{
-		$2.push_front($1);
+		$2.push_front(Id(@1,$1));
 		$$=$2;
 	 }
 | error 
@@ -658,15 +596,15 @@ internal_state:
 
 link_state:
 /*empty*/ 
-	{$$ = ast::Link(ast::Link::FREE,@$);}
+	{$$ = ast::Link(@$,ast::Link::FREE);}
 | KAPPA_LNK INT 
-	{$$ = ast::Link(ast::Link::VALUE,$2,@2);}
+	{$$ = ast::Link(@$,ast::Link::VALUE,$2);}
 | KAPPA_LNK KAPPA_SEMI 
-	{$$ = ast::Link(ast::Link::SOME,@2);}
+	{$$ = ast::Link(@$,ast::Link::SOME);}
 | KAPPA_LNK ID DOT ID
-	{$$ = ast::Link(ast::Link::TYPE,ast::Id($2,@2),ast::Id($4,@4),@1);}
+	{$$ = ast::Link(@$,ast::Link::AG_SITE,ast::Id(@4,$4),ast::Id(@2,$2));}
 | KAPPA_WLD 
-	{$$ = ast::Link(ast::Link::ANY,@1);}
+	{$$ = ast::Link(@$,ast::Link::ANY);}
 | KAPPA_LNK error 
 	{yy::KappaParser::error(@1,"Invalid link state");}
 ;

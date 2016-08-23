@@ -22,6 +22,7 @@
 %option nodefault
 %option noyywrap
 %option c++
+%option 8bit warn nodefault
 %option yyclass="KappaLexer"
 %option prefix="kappa_"
 
@@ -127,7 +128,7 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "[abs]"		return KappaParser::make_ABS(loc);
 "[mod]"		return KappaParser::make_MODULO(loc);
 "[sqrt]"	return KappaParser::make_SQRT(loc);
-"[inf]"		return KappaParser::make_INFINITY(loc);
+"[inf]"		return KappaParser::make_INF(loc);
 "[true]"	return KappaParser::make_TRUE(loc);
 "[false]"	return KappaParser::make_FALSE(loc);
 "[pi]"		return KappaParser::make_FLOAT(3.14159,loc);
@@ -141,7 +142,8 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "[rand1]"	return KappaParser::make_RAND_1(loc);
 ":"			return KappaParser::make_TYPE(loc);
 ";"			return KappaParser::make_SEMICOLON(loc);
-\".*\"		return KappaParser::make_STRING(yytext,loc);
+\"[\"\n]^*\"
+			return KappaParser::make_STRING(yytext,loc);
 [\n]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 [\r]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 "#"[\n]^*	loc.step();//return KappaParser::make_NEWLINE(loc);	

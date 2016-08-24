@@ -17,6 +17,7 @@
 #include <vector>
 #include "grammar/KappaDriver.h"
 #include "grammar/ast/KappaAst.h"
+#include "pattern/Environment.h"
 
 
 using namespace boost::program_options;
@@ -66,6 +67,9 @@ int main(int argc, char* argv[]){
 	driver->parse();
 
 	ast::KappaAst ast = driver->getAst();
+
+	pattern::Environment env;
+	driver->getAst().evaluateVariables(env);
 
 	/* TODO
 	 * Environment env = ast.evaluateGlobals();

@@ -11,9 +11,9 @@ namespace ast {
 
 /****** Class CompExpression *********/
 CompExpression::CompExpression(){}
-CompExpression::CompExpression(const Id &id,const list<const Expression*> &dim,const location &l):
+CompExpression::CompExpression(const location &l,const Id &id,const list<const Expression*> &dim):
 	Node(l),name(id), index(dim),where(NULL) {};
-CompExpression::CompExpression(const Id &id,const list<const Expression*> &dim,const Expression* w,const location &l):
+CompExpression::CompExpression(const location &l,const Id &id,const list<const Expression*> &dim,const Expression* w):
 	Node(l),name(id), index(dim),where(w) {};
 
 

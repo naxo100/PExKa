@@ -20,8 +20,8 @@ using namespace std;
 class CompExpression: public Node {
 public:
 	CompExpression();
-	CompExpression(const Id &id,const list<const Expression*> &dim,const location &l);
-	CompExpression(const Id &id,const list<const Expression*> &dim,const Expression* w,const location &l);
+	CompExpression(const location &l,const Id &id,const list<const Expression*> &dim);
+	CompExpression(const location &l,const Id &id,const list<const Expression*> &dim,const Expression* w);
 protected:
 	Id name;
 	list<const Expression*> index;

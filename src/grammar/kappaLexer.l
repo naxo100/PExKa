@@ -66,8 +66,8 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 					return KappaParser::make_TOKEN(loc);
 				else if(!strcmp(yytext,"%compartment:"))
 					return KappaParser::make_COMPARTMENT(loc);
-				else if(!strcmp(yytext,"%link:"))
-					return KappaParser::make_C_LINK(loc);
+				else if(!strcmp(yytext,"%channel:"))
+					return KappaParser::make_CHANNEL(loc);
 				else if(!strcmp(yytext,"%transport:"))
 					return KappaParser::make_TRANSPORT(loc);
 				else if(!strcmp(yytext,"%use:"))

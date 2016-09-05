@@ -57,7 +57,7 @@
 %token <std::string> STRING
 %token STOP SNAPSHOT
 
-%token COMPARTMENT C_LINK TRANSPORT USE
+%token COMPARTMENT CHANNEL TRANSPORT USE
 
 %left MINUS PLUS MIN MAX
 %left MULT DIV
@@ -79,9 +79,10 @@
 %type <Link> 					link_state
 %type <CompExpression> 			comp_expr
 %type <Site> 					port_expression
-%type <std::list<Site> > 		interface_expression
+%type <std::list<Site> > 		interface_expression ne_interface_expression
 %type <Agent> 					agent_expression
-%type <std::list<Agent> > 		non_empty_mixture mixture
+%type <std::list<Agent> > 		non_empty_mixture 
+%type <Mixture>					mixture
 %type <MultipleMixture> 		multiple_mixture
 %type <std::list<CompExpression> > comp_list
 %type <std::list<const Expression*>> 	dimension
@@ -124,14 +125,14 @@ statement:
 instruction:
  COMPARTMENT comp_expr alg_expr
  	{}
-| C_LINK LABEL comp_expr arrow comp_expr ATD constant
+| CHANNEL LABEL comp_expr arrow comp_expr ATD constant
  	{cout<<"Hola";}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
-| USE comp_list
+| USE comp_list where_expr
  	{}
 | SIGNATURE agent_expression  
-	{}
+	{this->driver.getAst().add($2);}
 | TOKEN ID
 	{}
 | SIGNATURE error
@@ -158,7 +159,7 @@ instruction:
 
 init_declaration:
  multiple non_empty_mixture 
-	{$$=Init(@$,$1,$2);}
+	{$$=Init(@$,$1,Mixture(@2,$2));}
 | ID LAR multiple
 	{$$=Init(@$,$3,Id(@1,$1));}
 /*** TODO ???
@@ -184,8 +185,6 @@ join:
 comp_expr:
  LABEL dimension
 	{ $$ = CompExpression(@$,Id(@1,$1),$2); }
-| LABEL dimension where_expr
-	{ $$ = CompExpression(@$,Id(@1,$1),$2,$3); }
 ;
 
 dimension: 
@@ -199,7 +198,9 @@ dimension:
 ;
 
 where_expr:
- OP_CUR bool_expr CL_CUR
+/*empty*/
+	{$$ = nullptr;}
+| OP_CUR bool_expr CL_CUR
 	{$$=$2;}
 ;
 
@@ -287,13 +288,13 @@ effect:
 | FLUX string_or_pr_expr boolean 
 	{ $$ = Effect(@$,$3 ? Effect::FLUX : Effect::FLUX_OFF,$2); }
 | TRACK LABEL boolean 
-	{ $$ = Effect(@$,$3 ? Effect::CFLOW : Effect::CFLOW_OFF , Id($2,@2)); }
+	{ $$ = Effect(@$,$3 ? Effect::CFLOW : Effect::CFLOW_OFF , Id(@2,$2)); }
 | LABEL ASSIGN alg_expr /*updating the rate of a rule -backward compatibility*/
-	{ $$ = Effect(@$,Effect::UPDATE,VarValue(Id($1,@1),$3,@2)); }
+	{ $$ = Effect(@$,Effect::UPDATE,VarValue(@2,Id(@1,$1),$3)); }
 | ASSIGN2 LABEL alg_expr /*updating the rate of a rule*/
-	{ $$ = Effect(@$,Effect::UPDATE,VarValue(Id($2,@2),$3,@1)); }
+	{ $$ = Effect(@$,Effect::UPDATE,VarValue(@1,Id(@2,$2),$3)); }
 | ID LAR alg_expr /*updating the value of a token*/
-	{ $$ = Effect(@$,Effect::UPDATE_TOK,VarValue(Id($1,@1),$3,@2));}
+	{ $$ = Effect(@$,Effect::UPDATE_TOK,VarValue(@2,Id(@1,$1),$3));}
 | SNAPSHOT string_or_pr_expr
 	{ $$ = Effect(@$,Effect::SNAPSHOT,$2); }
 | PRINT SMALLER print_expr GREATER 
@@ -321,9 +322,9 @@ boolean:
 
 variable_declaration:
  LABEL non_empty_mixture 
-	{$$ = ast::Declaration(@$,Id(@1,$1),$2);}
+	{$$ = Declaration(@$,Id(@1,$1),Mixture(@2,$2));}
 | LABEL alg_expr 
-	{$$ = ast::Declaration(@$,Id(@1,$1),$2);}
+	{$$ = Declaration(@$,Id(@1,$1),$2);}
 | LABEL error 
 	{}
 ;
@@ -358,7 +359,7 @@ string_or_pr_expr:
 multiple:
  INT   {$$ = new Const(@$,$1);}
 | FLOAT	{$$ = new Const(@$,$1);}
-| LABEL {$$ = new Var(@$,$1,Var::VAR); }
+| LABEL {$$ = new ast::Var(@$,Var::VAR,$1); }
 ;
 
 constant:
@@ -375,7 +376,7 @@ constant:
 
 rule_label: 
 /*empty */
-	{$$=Id("",yy::location());}
+	{$$=Id(yy::location(),"");}
 | LABEL 
 	{$$=Id(@$,$1);}
 ;
@@ -407,9 +408,9 @@ sum_token:
 
 mixture:
 /*empty*/ 
-	{ $$ = std::list<ast::Agent>(); }
+	{ $$ = Mixture(location(),std::list<ast::Agent>()); }
 | non_empty_mixture 
-	{ $$ = $1; }
+	{ $$ = Mixture(@1,$1); }
 ;
 
 rate_sep:
@@ -420,15 +421,15 @@ rate_sep:
 /*{$$=ast::Rule($1,$2.agents,$4.agents,$2.tokens,$4.tokens,$3,$6.);}*/
 
 rule_expression:
- rule_label lhs_rhs arrow lhs_rhs rate 
+ rule_label lhs_rhs arrow lhs_rhs where_expr rate 
 	{
-		$$=Rule(@$,$1,$2,$4,$3,$5);
+		$$=Rule(@$,$1,$2,$4,$3,$5,$6);
 	}
-| rule_label lhs_rhs arrow lhs_rhs 
+| rule_label lhs_rhs arrow lhs_rhs where_expr
 	{
 		cerr<<"Warning: Rule has no kinetics. Default rate of 0.0 is assumed."<<endl;
-		Rate rate(new Const(0.0f,yy::location()),false,yy::location());
-		$$=ast::Rule(@$,$1,$2,$4,$3,rate);;
+		Rate rate(yy::location(),new Const(yy::location(),0.0f),false);
+		$$=ast::Rule(@$,$1,$2,$4,$3,$5,rate);;
 	}
 ;
 
@@ -443,11 +444,11 @@ arrow:
 
 variable:
  ID
-	{$$ = new Var(@$,$1,Var::AUX);}
+	{$$ = new Var(@$,Var::AUX,$1);}
 | PIPE ID PIPE 
-	{$$ = new Var(@$,$2,Var::TOKEN);}
+	{$$ = new Var(@$,Var::TOKEN,$2);}
 | LABEL 
-	{$$ = new Var(@$,$1,Var::VAR);}
+	{$$ = new Var(@$,Var::VAR,$1);}
 | TIME
 	{$$ = new Var(@$,Var::TIME);}
 | EVENT
@@ -528,9 +529,9 @@ alg_with_radius:
 
 multiple_mixture:
  alg_expr non_empty_mixture /*conflict here because ID (blah) could be token non_empty mixture or mixture...*/
-	{$$=ast::MultipleMixture(@$,$1,$2);}
+	{$$=ast::MultipleMixture(@$,$2,$1);}
 | non_empty_mixture 
-	{$$=ast::MultipleMixture(@$,new Const(1,yy::location()),$1);}
+	{$$=ast::MultipleMixture(@$,$1,new Const(yy::location(),1));}
 ;
 
 non_empty_mixture:
@@ -552,29 +553,22 @@ agent_expression:
 	{yy::KappaParser::error(@1,std::string("Malformed agent ")+$1);}
 ;
 
-interface_expression: 
-	/*empty*/
+interface_expression:
+/* empty */
 	{$$=std::list<ast::Site>();}
-| port_expression
-	{$$=std::list<ast::Site>(@$,1);}
-| port_expression COMMA interface_expression
+| ne_interface_expression 
+	{$$ = $1;}
+;
+
+ne_interface_expression:
+| port_expression COMMA ne_interface_expression 
 {
 	$3.push_front($1);
 	$$=$3;
-};
-
-/*interface_expression: 
-	{}
-| ne_interface_expression 
-	{}
-;*/
-
-/*ne_interface_expression:
-| port_expression COMMA ne_interface_expression 
-	{}
+}
 | port_expression  
-	{}
-;*/
+	{$$=std::list<ast::Site>(1,$1);}
+;
 
 
 port_expression:

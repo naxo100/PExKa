@@ -9,6 +9,8 @@
 #define GRAMMAR_AST_KAPPAAST_H_
 
 #include <list>
+#include <vector>
+#include <utility>  //std::pair
 
 #include "Statements.h"
 
@@ -27,16 +29,22 @@ class KappaAst {
 
 	//AST structures
 	list<Declaration> decls;
+	list<Agent> signatures;
 	//list<Perturbation> perts;
 
 public:
 	KappaAst();
 	virtual ~KappaAst();
 
-	void evaluateVariables(pattern::Environment &env);
+	vector<float> evaluateTokens(pattern::Environment &env);
+	void evaluateSignatures(pattern::Environment &env);
+	pair< vector<KappaVar>, vector<Variable> >* evaluateVariables(pattern::Environment &env);
+	void evaluateCompartments(pattern::Environment &env);
 
 	//ADD functions
 	void add(const Declaration &d);
+	void add(const Agent &a);
+	void add(const Compartment &c);
 	//void add(Perturbation p);
 
 	/** \brief Evaluate global properties from AST.

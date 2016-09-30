@@ -31,29 +31,30 @@ Expression::~Expression(){};
 bool Expression::isConstant(){
 	return false;
 }
-state::SomeAlgExpression Expression::eval(pattern::Environment& env) const{
+state::BaseExpression* Expression::eval(pattern::Environment& env,
+		const unordered_map<string,state::Variable*> &vars) const{
 	cout << "do not call this function" << endl;
 	throw;
-	return state::SomeAlgExpression();
+	return nullptr;
 }
 
 
 /****** Class VarValue ***************/
-VarValue::VarValue(){}
+VarValue::VarValue() : value(nullptr){}
 VarValue::VarValue(const location &l,const Id &name,const Expression *exp) :
 	Node(l),var(name),value(exp) {}
 
 
 /****** Class StringExpression *******/
-StringExpression::StringExpression(){}
+StringExpression::StringExpression() : t(STR),str(nullptr),next(nullptr){}
 StringExpression::StringExpression(const location &l,const string &s):
-	Node(l),str(new string(s)),t(STR),next(NULL) {};
+	Node(l),t(STR),str(new string(s)),next(nullptr) {};
 StringExpression::StringExpression(const location &l,const Expression *e):
-	Node(l),alg(e),t(ALG),next(NULL) {};
+	Node(l),t(ALG),alg(e),next(nullptr) {};
 StringExpression::StringExpression(const location &l,const Expression *e, const StringExpression* nxt):
-	Node(l),alg(e),t(ALG),next(new StringExpression(*nxt)) {};
+	Node(l),t(ALG),alg(e),next(new StringExpression(*nxt)) {};
 StringExpression::StringExpression(const location &l,const string &s, const StringExpression* nxt):
-	Node(l),str(new string(s)),t(STR),next(new StringExpression(*nxt)) {};
+	Node(l),t(STR),str(new string(s)),next(new StringExpression(*nxt)) {};
 
 StringExpression::~StringExpression(){
 	if(t)

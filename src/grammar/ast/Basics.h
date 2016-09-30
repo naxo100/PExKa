@@ -48,13 +48,15 @@ public:
  *
  */
 class Expression : public Node {
+	enum FLAGS {FORCE,AUX,CONST};
 public:
 	Expression();
 	Expression(const location &l);
 	using Node::Node;
 	virtual ~Expression()=0;
 
-	virtual state::SomeAlgExpression eval(pattern::Environment&) const;
+	virtual state::BaseExpression* eval(pattern::Environment& env,
+			const unordered_map<string,state::Variable*> &vars) const;
 	virtual bool isConstant();
 	virtual Expression* clone() const = 0;
 };

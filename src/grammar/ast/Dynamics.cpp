@@ -10,7 +10,7 @@
 namespace ast {
 
 /****** Class Arrow **********/
-Arrow::Arrow(){}
+Arrow::Arrow(): type(RIGHT){}
 Arrow::Arrow(const location &loc,ArrType t):
 		Node(loc), type(t) {};
 Arrow::ArrType Arrow::getType(){
@@ -19,7 +19,7 @@ Arrow::ArrType Arrow::getType(){
 
 
 /****** Class Link ***********/
-Link::Link(){}
+Link::Link() : type(FREE){}
 Link::Link(const location &l,LinkType t):
 	Node(l), type(t)  {};
 Link::Link(const location &l,LinkType t,int val):
@@ -69,42 +69,29 @@ Agent::Agent(const location &l,const Id &id,const list<Site> s):
 	Node(l), id(id),sites(s) {};
 
 
-/****** Class Init ***********/
-Init::Init(){}
-Init::Init(const location &l,const Expression *e, const list<Agent> &mix):
-		Node(l),type(MIXTURE),alg(e),mixture(mix) {};
-Init::Init(const location &l,const Expression *e, const Id &tok):
-		Node(l),type(TOKEN),alg(e),token(tok) {};
 
-Init::Init(const Init &init) :
-		Node(init.loc),type(init.type),alg(init.alg) {
-	if(type)
-		token = init.token;
-	else
-		mixture = init.mixture;
+
+/****** Class Mixture ************/
+Mixture::Mixture(const location &l,const list<Agent> &m):
+	Node(l), mix(m) {};
+
+/*TODO*/
+pattern::Mixture Mixture::eval(pattern::Environment &env) const{
+
+	for(list<Agent>::const_iterator it = mix.cbegin();it != mix.cend();it++){
+		//it->;
+	}
+	return pattern::Mixture();
 }
-Init& Init::operator=(const Init &init) {
-	loc = init.loc;
-	type = init.type;
-	if(type)
-		token = init.token;
-	else
-		mixture = init.mixture;
-	return *this;
-}
-Init::~Init(){};
-
-
-
 
 
 /****** Class MultipleMixture ****/
-MultipleMixture::MultipleMixture(): n(nullptr){};
+//MultipleMixture::MultipleMixture(): n(nullptr){};
 MultipleMixture::MultipleMixture(const location &l,const list<Agent> &m,const Expression *e):
-	Node(l), n(e), mix(m) {};
+	Mixture(l,m), n(e) {};
 
 /*TODO*/
-pattern::Mixture MultipleMixture::eval(pattern::Environment &env){
+pattern::Mixture MultipleMixture::eval(pattern::Environment &env) const{
 
 	for(list<Agent>::const_iterator it = mix.cbegin();it != mix.cend();it++){
 		//it->;
@@ -230,8 +217,8 @@ Token::Token(const location &l,const Expression *e,const Id &id):
 	Node(l), exp(e), id(id) {};
 
 /****** Class RuleSide ***********/
-RuleSide::RuleSide(){}
-RuleSide::RuleSide(const location &l,const list<Agent> &agents,const list<Token> &tokens):
+RuleSide::RuleSide() : agents(location(),list<Agent>()){}
+RuleSide::RuleSide(const location &l,const Mixture &agents,const list<Token> &tokens):
 	Node(l), agents(agents), tokens(tokens) {};
 
 /****** Class Rule ***************/
@@ -242,9 +229,10 @@ Rule::Rule(	const location &l,
 		const RuleSide    &lhs,
 		const RuleSide    &rhs,
 		const Arrow       &arrow,
+		const Expression* where,
 		const Rate 		  &rate):
 	Node(l), label(label), lhs(lhs), rhs(rhs),
-	arrow(arrow),rate(rate) {};
+	arrow(arrow),filter(where),rate(rate) {};
 Rule::~Rule() {};
 
 } /* namespace ast */

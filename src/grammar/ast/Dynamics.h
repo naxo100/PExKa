@@ -52,12 +52,12 @@ protected:
 		} ag_site;
 	};
 };
-
-//Base Rule For All Clases Conected
 class Site: public Node {
 public:
 	Site();
 	Site(const location &l,const Id &id,const list<Id> &s,const Link &lnk);
+	void eval(pattern::Environment &env,pattern::Signature &agent);
+	void eval(pattern::Environment &env,pattern::Mixture::Agent &agent);
 protected:
 	Id id;
 	list<Id> states;
@@ -69,41 +69,34 @@ class Agent: Node {
 public:
 	Agent();
 	Agent(const location &l,const Id &id,const list<Site> s);
+
+	pattern::Signature* eval(pattern::Environment &env);
+	pattern::Mixture::Agent* eval(pattern::Environment &env,bool is_pattern);
 protected:
 	Id id;
 	list<Site> sites;
 };
 
 
-//The Number of Agents and the Agents at the start
-class Init : public Node {
-	enum InitType {MIXTURE,TOKEN} type;
-	const Expression *alg;
-	union {
-		list<Agent> mixture;
-		Id token;
-	};
+class Mixture : public Node {
+protected:
+	list<Agent>  mix;
 public:
-	Init();
-	Init(const location &l,const Expression *e, const list<Agent> &mix);
-	Init(const location &l,const Expression *e, const Id &tok);
-
-	Init(const Init &init);
-	Init& operator=(const Init &init);
-	~Init();
-
+	Mixture();
+	Mixture(const location &l,const list<Agent> &m);
+	virtual pattern::Mixture eval(pattern::Environment &env) const;
+	virtual ~Mixture();
 };
 
-
-class MultipleMixture : public Node{
+class MultipleMixture : public Mixture{
 	const Expression *n;
-	list<Agent>  mix;
 public:
 	MultipleMixture();
 	MultipleMixture(const location &l,const list<Agent> &m,
 			const Expression *e);
 
-	pattern::Mixture eval(pattern::Environment&);
+	pattern::Mixture eval(pattern::Environment &env) const;
+	~MultipleMixture();
 };
 
 class Effect : public Node {
@@ -189,11 +182,11 @@ public:
 //Agents: list of Agents
 //Tokens: list of Tokens used
 class RuleSide : Node{
-	list<Agent> agents;
+	Mixture agents;
 	list<Token> tokens;
 public:
 	RuleSide();
-	RuleSide(const location &l,const list<Agent> &agents,const list<Token> &tokens);
+	RuleSide(const location &l,const Mixture &agents,const list<Token> &tokens);
 };
 
 
@@ -204,11 +197,12 @@ protected:
 	Id label;
 	RuleSide lhs,rhs;
 	Arrow arrow;
+	const Expression* filter;
 	Rate rate;
 public:
 	Rule();
 	Rule(const location &l,const Id &label,const RuleSide &lhs,
-		const RuleSide &rhs,const Arrow &arrow,const Rate &rate);
+		const RuleSide &rhs,const Arrow &arrow,const Expression* where,const Rate &rate);
 	~Rule();
 };
 

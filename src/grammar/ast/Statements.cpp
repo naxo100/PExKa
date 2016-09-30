@@ -17,12 +17,12 @@ Declaration::Declaration() : type(ALG),expr(NULL){};
 Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
 	Node(loc),name(lab),type(ALG),expr(e) {};
 
-Declaration::Declaration(const location &l,const Id &lab,const list<Agent> &m):
-	Node(loc),name(lab),type(KAPPA),mixture(new MultipleMixture(m)) {};
+Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
+	Node(loc),name(lab),type(KAPPA),mixture(new Mixture(m)) {};
 
 Declaration::Declaration(const Declaration &d) : name(d.name),type(d.type){
 	if(type)
-		mixture = new MultipleMixture(*(d.mixture));
+		mixture = new Mixture(*(d.mixture));
 	else
 		if(d.expr) expr = d.expr->clone();
 		else expr=NULL;
@@ -36,7 +36,7 @@ Declaration& Declaration::operator=(const Declaration &d){
 		delete expr;
 
 	if(type)
-		mixture = new MultipleMixture(*(d.mixture));
+		mixture = new Mixture(*(d.mixture));
 	else
 		if(d.expr) expr = d.expr->clone();
 		else expr=NULL;
@@ -75,7 +75,8 @@ Declaration::~Declaration(){
 		if (expr) delete expr;
 };
 
-Variable* Declaration::eval(pattern::Environment &env){
+Variable* Declaration::eval(pattern::Environment &env,
+		unordered_map<string,Variable*> &vars) const{
 	Variable* var;
 	short id = 0;
 	try {
@@ -84,16 +85,56 @@ Variable* Declaration::eval(pattern::Environment &env){
 		ex.setLocation(this->loc);
 		throw ex;
 	}
-	if(type)
-		var = new state::AlgebraicVar(name.getString(),false,
-				SomeAlgExpression(expr->eval(env)));
-	else
-		var = new state::KappaVar(name.getString(),false,mixture->eval(env));
+	if(type){
+		BaseExpression* b_expr = expr->eval(env,vars);
+		switch(b_expr->getType()){
+		case BaseExpression::FLOAT:
+			var = new state::AlgebraicVar<float>(id,name.getString(),false,
+				dynamic_cast<AlgebraicVar<float>*>(b_expr));
+			break;
+		case BaseExpression::INT:
+			var = new state::AlgebraicVar<int>(id,name.getString(),false,
+				dynamic_cast<AlgebraicVar<int>*>(b_expr));
+			break;
+		case BaseExpression::BOOL:
+			var = new state::AlgebraicVar<bool>(id,name.getString(),false,
+				dynamic_cast<AlgebraicVar<bool>*>(b_expr));
+			break;
+		}
+	}else
+		var = new state::KappaVar(id,name.getString(),false,mixture->eval(env));
 	return var;
 }
 
 bool Declaration::isKappa(){
 	return type;
 }
+
+
+
+/****** Class Init ***********/
+Init::Init(){}
+Init::Init(const location &l,const Expression *e, const Mixture &mix):
+		Node(l),type(MIXTURE),alg(e),mixture(mix) {};
+Init::Init(const location &l,const Expression *e, const Id &tok):
+		Node(l),type(TOKEN),alg(e),token(tok) {};
+
+Init::Init(const Init &init) :
+		Node(init.loc),type(init.type),alg(init.alg) {
+	if(type)
+		token = init.token;
+	else
+		mixture = init.mixture;
+}
+Init& Init::operator=(const Init &init) {
+	loc = init.loc;
+	type = init.type;
+	if(type)
+		token = init.token;
+	else
+		mixture = init.mixture;
+	return *this;
+}
+Init::~Init(){};
 
 } /* namespace ast */

@@ -11,7 +11,10 @@
 #include <unordered_map>
 #include <vector>
 #include <utility> //pair
+#include <string>
 
+
+using namespace std;
 
 namespace pattern {
 
@@ -19,21 +22,32 @@ class Mixture {
 public:
 	struct Site;
 	struct Agent;
+	enum LinkType {WILD,BIND,FREE,BIND_TO,PATH};
 	Mixture();
 	~Mixture();
+
+	short addAgent(short name_id);
+	short addSite(short mix_ag, short name_id);
+	void setSiteValue(short mix_site,short label);
+	void setSiteValue(short mix_site,int val);
+	void setSiteValue(short mix_site,float val);
+
+	void setSiteLink(short mix_site,LinkType l);
+
+
 private:
-	std::vector<Agent> agents;
+	vector<Agent> agents;
 	short sitesCount;
 	//std::unordered_map< std::pair<short,short> , std::pair<short,short> > graph;
 
 };
 
 struct Mixture::Site {
-	enum {WILD,BIND,FREE,BIND_TO,PATH} link_type;
+	LinkType link_type;
 	union {
 		int int_value;
 		float float_value;
-		int id_value;
+		short id_value;
 	} state;
 	short path_id;
 	std::pair<short,short> lnk;

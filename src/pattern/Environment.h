@@ -13,7 +13,10 @@
 #include <vector>
 #include <string>
 #include "Signature.h"
-#include "../grammar/ast/Basics.h"
+#include "Compartment.h"
+#include "Channel.h"
+#include "../state/AlgExpression.h"
+//#include "../grammar/ast/Basics.h"
 #include "../util/Exceptions.h"
 
 using namespace std;
@@ -29,19 +32,32 @@ typedef unsigned short short_id;
  * to broadcast the global environment among MPI processes.
  */
 class Environment {
+protected:
 	typedef unordered_map<string,short> IdMap;
 
-	IdMap algMap,kappaMap;
-	vector<string> algNames, kappaNames, tokenNames;
+	IdMap algMap, kappaMap, tokenMap, comparmentMap, channelMap;
+	vector<string> algNames, kappaNames, tokenNames, compartmentNames;
 	vector<Signature> signatures;
+	vector<Compartment> compartments;
+	vector<Channel> channels;
 
 	bool exists(const string &name,const IdMap &map);
 public:
 	Environment();
 	~Environment();
 
+	short declareToken(const string &name);
 	short declareVariable(const string &name,bool isKappa);
+	short declareSignature(const Signature& sign);
+	short declareChannel(const string &name);
 	short idOfAlg(const string& name);
+
+	Signature& getSignature(short id) const;
+	const Channel& getChannel(short id) const;
+
+	short getVarId(const string &name) const;
+	short getChannelId(const string &name) const;
+	state::BaseExpression* getVarExpression(const string &name) const;
 
 };
 

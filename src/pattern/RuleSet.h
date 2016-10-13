@@ -11,7 +11,7 @@
 namespace pattern {
 
 class RuleSet {
-	util::MaskedBinaryTree activity;
+	//util::MaskedBinaryTree activity;
 
 public:
 	RuleSet();

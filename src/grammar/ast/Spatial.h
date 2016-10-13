@@ -25,7 +25,7 @@ public:
 
 	list<int> evalDimensions(pattern::Environment &env,
 			const unordered_map<string,state::Variable*> &vars);
-	string evalName(pattern::Environment& env,bool declare=false);
+	short evalName(pattern::Environment& env,bool declare=false);
 
 	/** \brief Evaluate compExpression using auxiliars.
 	 *
@@ -37,7 +37,7 @@ public:
 	 */
 	list<state::BaseExpression*> evalExpression(const pattern::Environment &env,
 			const unordered_map<string,state::Variable*> &vars,
-			unordered_map<string,int*> *aux_values);
+			map<string,int*> *aux_values);
 
 
 protected:
@@ -56,7 +56,7 @@ class Channel : public Node {
 	Expression* filter;//bool expr?
 	Expression* delay;
 public:
-	void eval(pattern::Environment &env,
+	pattern::Channel* eval(pattern::Environment &env,
 			const unordered_map<string,state::Variable*> &vars);
 
 };

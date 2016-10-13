@@ -53,7 +53,7 @@ yy::location* KappaDriver::getLocation(){
 	return &loc;
 }
 
-const ast::KappaAst& KappaDriver::getAst(){
+ast::KappaAst& KappaDriver::getAst(){
 	return syntax_tree;
 }
 

@@ -66,9 +66,10 @@ int main(int argc, char* argv[]){
 
 	driver->parse();
 
-	ast::KappaAst ast = driver->getAst();
+	ast::KappaAst &ast = driver->getAst();
 
 	pattern::Environment env;
+	driver->getAst().evaluateSignatures(env);
 	driver->getAst().evaluateVariables(env);
 
 	/* TODO

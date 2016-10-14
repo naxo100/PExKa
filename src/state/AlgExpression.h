@@ -8,8 +8,17 @@
 #ifndef STATE_ALGEXPRESSION_H_
 #define STATE_ALGEXPRESSION_H_
 
+#include <unordered_map>
+#include <vector>
+#include <string>
+
 namespace state {
 
+/** \brief Base class for algebraic and every number-evaluated expression.
+ *
+ *
+ *
+ */
 class BaseExpression {
 public:
 	enum Type {FLOAT,INT,BOOL};
@@ -21,12 +30,24 @@ public:
 
 	virtual ~BaseExpression() = 0;
 	const virtual Type getType() const;
-	template <Type n> struct TypeDef { typedef float t;};
+	//template <Type n> struct TypeDef { typedef float t;};
 	template <typename T>
 	struct EnumType {static const Type t = FLOAT;};
 
-	//template <> struct TypeDef<INT>;
-	//template <> struct TypeDef<BOOL>;
+	virtual void value(float &ret);
+	virtual void value(int &ret);
+	virtual void value(bool &ret);
+
+	/** \brief Return an int vector that represents this expression
+	 * as an equation on auxiliars.
+	 *
+	 */
+	virtual int auxFactors(std::unordered_map<std::string,int> &factor) const = 0;
+
+	template <bool isBool>
+	static BaseExpression* makeBinaryExpression(const BaseExpression *ex1,const BaseExpression *ex2,
+			const int op);
+
 protected:
 	//BaseExpression();
 	Type t;
@@ -43,25 +64,25 @@ struct BinaryOperations<bool,T1,T2> {
 };
 
 template <typename T>
-class AlgExpression : public BaseExpression{
+class AlgExpression : public virtual BaseExpression{
 public:
 	AlgExpression();
 	virtual ~AlgExpression() = 0;
-	virtual T evaluate(/*const State &state*/) const = 0;
+	virtual T evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
 };
 
-struct SomeAlgExpression {
+/*
+struct SomeAlgExpression : public BaseExpression {
 	union {
 		AlgExpression<float>* floatExp;
 		AlgExpression<int>* intExp;
 		AlgExpression<bool>* boolExp;
 	};
-	BaseExpression::Type t;
 	template <bool isBool>
 	static SomeAlgExpression makeBinaryOperation
-			(const SomeAlgExpression &ex1,const SomeAlgExpression &ex2,
+			(const BaseExpression &ex1,const BaseExpression &ex2,
 				const int op);
-};
+};*/
 
 class SomeValue {
 	union {
@@ -83,7 +104,8 @@ class Constant : public AlgExpression<T> {
 	T val;
 public:
 	Constant(T v);
-	T evaluate(/*const State &state*/) const;
+	T evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	int auxFactors(std::unordered_map<std::string,int> &factor) const override;
 };
 
 template<typename R,typename T1,typename T2>
@@ -92,19 +114,32 @@ class BinaryOperation : public AlgExpression<R> {
 	const AlgExpression<T2>* exp2;
 	//static R (*operations[]) (T1,T2);
 	R (*func) (T1,T2);
+	const char op;
 public:
-	R evaluate(/*const State &state*/) const;
-public:
+	R evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	int auxFactors(std::unordered_map<std::string,int> &factor) const override;
 	~BinaryOperation();
 	BinaryOperation
-			(const AlgExpression<T1> *ex1,const AlgExpression<T2> *ex2,const int op);
+			(const BaseExpression *ex1,const BaseExpression *ex2,const short op);
 };
 
 template <typename R>
-class Var : public AlgExpression<R> {
-	int id;
+class VarLabel : public AlgExpression<R> {
+	AlgExpression<R>* var;
 
-	R evaluate() const;
+public:
+	VarLabel(BaseExpression* expr);
+	R evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	int auxFactors(std::unordered_map<std::string,int> &factor) const override;
+};
+
+
+class Auxiliar : AlgExpression<int> {
+	std::string name;
+public:
+	Auxiliar(const std::string &nme);
+	int evaluate(std::unordered_map<std::string,int> *aux_values) const override;
+	int auxFactors(std::unordered_map<std::string,int> &factor) const override;
 };
 
 

@@ -9,8 +9,9 @@
 #define STATE_STATE_H_
 
 #include <vector>
+#include <ctime>
 #include "Variable.h"
-#include "SiteGraph.h"
+//#include "SiteGraph.h"
 #include "../simulation/Counter.h"
 
 namespace state {
@@ -24,7 +25,7 @@ namespace state {
  * Kappa.
  */
 class State {
-	std::vector<SiteGraph> graph;
+	//std::vector<SiteGraph> graph;
 	std::vector<Variable> alg_vars;
 	std::vector<float> tokens;
 	simulation::Counter counter;

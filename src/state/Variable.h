@@ -16,40 +16,47 @@
 
 namespace state {
 
-
-class Variable {
-	int id;
-	std::string name;
+/** \brief Declared variables using '%var:' in Kappa
+ *
+ *
+ *
+ */
+class Variable : public virtual BaseExpression {
+	const short id;
+	const std::string &name;
 	bool isObservable;
-	//SomeAlgExpression value;
+	bool updated;
+
 public:
-	Variable(const std::string &nme,const bool is_obs);
+	Variable(const short id, const std::string &nme,const bool is_obs);
 	virtual ~Variable() = 0;
 
 	//template <typename T>
-	virtual SomeValue getValue(const State &state) const = 0;
+	//virtual SomeValue getValue(/*const State &state*/) const = 0;
 	//virtual int getValue() const = 0;
 	//virtual bool getValue() const = 0;
 	const std::string& getName() const;
 
 };
 
-class AlgebraicVar : public Variable {
-	SomeAlgExpression value;
-
+template <typename T>
+class AlgebraicVar : public Variable, public AlgExpression<T> {
+	const AlgExpression<T>* expression;
 public:
-	AlgebraicVar(const std::string &nme,const bool is_obs,
-			const SomeAlgExpression &exp);
+	AlgebraicVar(const short var_id, const std::string &nme,const bool is_obs,
+			const AlgExpression<T> *exp);
 
+	virtual T evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 
 };
 
-class KappaVar : public Variable {
+class KappaVar : public Variable, public AlgExpression<int> {
 	pattern::Mixture mixture;
 public:
-	KappaVar(const std::string &nme,const bool is_obs,
+	KappaVar(const short var_id, const std::string &nme,const bool is_obs,
 			const pattern::Mixture &kappa);
-	SomeValue getValue() const override;
+	virtual int evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+
 };
 
 

@@ -10,12 +10,12 @@
 namespace state {
 
 Variable::Variable
-	(const std::string &nme,const bool is_obs):
-		name(nme),isObservable(is_obs),id(-1){}
+	(const short var_id, const std::string &nme,const bool is_obs):
+		id(var_id),name(nme),isObservable(is_obs),updated(false){}
 
-Variable::~Variable() {
+/*Variable::~Variable() {
 
-}
+}*/
 
 const std::string& Variable::getName() const {return name;};
 
@@ -33,24 +33,26 @@ template float Variable::getValue<float>() const;
 
 
 /******* class AlgebraicVar **************/
-AlgebraicVar::AlgebraicVar(const std::string &nme,const bool is_obs,
-		const SomeAlgExpression &exp): Variable(nme,is_obs),value(exp) {};
+template <typename T>
+AlgebraicVar<T>::AlgebraicVar(const short var_id, const std::string &nme,
+		const bool is_obs,const AlgExpression<T> *exp):
+		BaseExpression(), Variable(var_id,nme,is_obs),expression(exp) {};
 
-SomeValue AlgebraicVar::getValue(const State &state) const {
-	switch(value.t){
-	case BaseExpression::FLOAT:
+/*SomeValue AlgebraicVar::getValue() const {
+	switch(value.getType()){
+	case FLOAT:
 		return SomeValue(value.floatExp->evaluate());
-	case BaseExpression::INT:
+	case INT:
 		return SomeValue(value.intExp->evaluate());
-	case BaseExpression::BOOL:
+	case BOOL:
 		return SomeValue(value.boolExp->evaluate());
 	}
 	return SomeValue(0);
-}
+}*/
 
 /******* class KappaVar ****************/
-KappaVar::KappaVar(const std::string &nme,const bool is_obs,
-		const pattern::Mixture &kappa) : Variable(nme,is_obs), mixture(kappa) {}
+KappaVar::KappaVar(const short id,const std::string &nme,const bool is_obs,
+		const pattern::Mixture &kappa) : BaseExpression(),Variable(id,nme,is_obs), mixture(kappa) {}
 
 
 

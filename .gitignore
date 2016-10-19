@@ -28,4 +28,5 @@
 *.app
 
 /bin/
-/Debug/
+/Debug/src
+/Debug/parser

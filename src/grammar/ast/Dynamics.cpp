@@ -9,14 +9,6 @@
 
 namespace ast {
 
-/****** Class Arrow **********/
-Arrow::Arrow(): type(RIGHT){}
-Arrow::Arrow(const location &loc,ArrType t):
-		Node(loc), type(t) {};
-Arrow::ArrType Arrow::getType(){
-	return type;
-};
-
 
 /****** Class Link ***********/
 Link::Link() : type(FREE){}
@@ -57,18 +49,41 @@ Link& Link::operator=(const Link &l){
 Link::~Link(){};
 
 
+/****** Class SiteState ***********/
+
+SiteState::SiteState() :Node(),type(LABEL) {}
+SiteState::SiteState(const location& loc, const list<Id> &labs)
+		: Node(loc),type(LABEL),labels(labs){}
+
+SiteState::SiteState(const location& loc, const Expression* min,
+		const Expression* max): Node(loc),range(min,max){}
+
+
+
+
 /****** Class Site ***********/
 Site::Site(){}
-Site::Site(const location &l,const Id &id,const list<Id> &s,const Link &lnk):
-	Node(l), id(id), states(s), link(lnk) {};
+Site::Site(const location &l,const Id &id,const SiteState &s,const Link &lnk):
+	Node(l), id(id), stateInfo(s), link(lnk) {};
 
 
 /****** Class Agent **********/
 Agent::Agent(){}
 Agent::Agent(const location &l,const Id &id,const list<Site> s):
-	Node(l), id(id),sites(s) {};
+	Node(l), name(id),sites(s) {};
 
+pattern::Signature* Agent::eval(pattern::Environment &env){
+	//using namespace pattern;
+	pattern::Signature* sign = new pattern::Signature(name.getString());
+	short id = env.declareSignature(*sign);
+	sign->setId(id);
 
+	for(list<Site>::iterator it = sites.begin(); it != sites.end(); it++){
+		if(it->getLink().getType())
+			throw std::exception();//TODO
+
+	}
+}
 
 
 /****** Class Mixture ************/
@@ -228,11 +243,11 @@ Rule::Rule(	const location &l,
 		const Id          &label,
 		const RuleSide    &lhs,
 		const RuleSide    &rhs,
-		const Arrow       &arrow,
+		const bool       arrow,
 		const Expression* where,
 		const Rate 		  &rate):
 	Node(l), label(label), lhs(lhs), rhs(rhs),
-	arrow(arrow),filter(where),rate(rate) {};
+	bidirectional(arrow),filter(where),rate(rate) {};
 Rule::~Rule() {};
 
 } /* namespace ast */

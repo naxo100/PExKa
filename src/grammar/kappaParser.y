@@ -49,7 +49,7 @@
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
 %token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
-%token KAPPA_WLD KAPPA_SEMI SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
+%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
 %token EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
 %token <int> INT 
 %token <std::string> ID LABEL KAPPA_MRK NAME 
@@ -72,10 +72,11 @@
 /*%type <Agent> agent_expression*/
 %type <Declaration> 			variable_declaration
 %type <Expression*> 			alg_expr bool_expr constant variable multiple where_expr
-%type <Arrow> 					arrow 
-%type <bool>					rate_sep boolean join
+/*%type <Arrow> 					arrow */
+%type <bool>					rate_sep boolean join arrow
 %type <std::list<std::string> > value_list
-%type <std::list<Id> >			internal_state
+%type <SiteState>				internal_state
+%type <std::list<Id> >			state_enum
 %type <Link> 					link_state
 %type <CompExpression> 			comp_expr
 %type <Site> 					port_expression
@@ -437,9 +438,9 @@ rule_expression:
 
 arrow:
  KAPPA_RAR 
-	{$$=ast::Arrow(@$,ast::Arrow::RIGHT);}
+	{$$=false;/*ast::Arrow(@$,ast::Arrow::RIGHT);*/}
 | KAPPA_LRAR
-	{$$=ast::Arrow(@$,ast::Arrow::BI);}
+	{$$=true;/*ast::Arrow(@$,ast::Arrow::BI);*/}
 ;
 
 variable:
@@ -577,9 +578,15 @@ port_expression:
 ;
 
 internal_state:
+ state_enum 
+	{$$ = SiteState(@$,$1);}
+| KAPPA_INTER constant MINUS constant CL_BRA
+	{$$ = SiteState(@$,$2,$4);}
+
+state_enum:
 /*empty*/ 
 	{$$=std::list<Id>(); }
-| KAPPA_MRK internal_state 
+| KAPPA_MRK state_enum
 	{
 		$2.push_front(Id(@1,$1));
 		$$=$2;

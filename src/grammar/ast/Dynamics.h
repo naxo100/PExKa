@@ -10,6 +10,7 @@
 
 #include <list>
 #include <string>
+#include <utility>
 
 #include "AlgebraicExpressions.h"
 
@@ -17,18 +18,7 @@ namespace ast {
 
 using namespace std;
 
-/** \brief Direction of a Reaction
- *
- */
-class Arrow : public Node {
-public:
-	Arrow();
-	enum ArrType {RIGHT,LEFT,BI};
-	Arrow(const location &l,ArrType t);
-	ArrType getType();
-protected:
-	ArrType type;
-};
+
 
 //Link of an Agent
 class Link : public Node {
@@ -41,6 +31,7 @@ public:
 	Link(const Link &l);
 	Link& operator=(const Link &l);
 	~Link();
+	const LinkType& getType() const;
 
 protected:
 	LinkType type;
@@ -52,15 +43,28 @@ protected:
 		} ag_site;
 	};
 };
+
+class SiteState : public Node{
+public:
+	enum StateType {LABEL,RANGE} type;
+		list<Id> labels;
+		pair<const Expression*,const Expression*> range;
+	SiteState();
+	SiteState(const location& loc, const list<Id> &labs);
+	SiteState(const location& loc, const Expression* min,
+			const Expression* max);
+};
+
 class Site: public Node {
 public:
 	Site();
-	Site(const location &l,const Id &id,const list<Id> &s,const Link &lnk);
+	Site(const location &l,const Id &id,const SiteState &s,const Link &lnk);
 	void eval(pattern::Environment &env,pattern::Signature &agent);
 	void eval(pattern::Environment &env,pattern::Mixture::Agent &agent);
+	const Link& getLink();
 protected:
 	Id id;
-	list<Id> states;
+	SiteState stateInfo;
 	Link link;
 };
 
@@ -73,7 +77,7 @@ public:
 	pattern::Signature* eval(pattern::Environment &env);
 	pattern::Mixture::Agent* eval(pattern::Environment &env,bool is_pattern);
 protected:
-	Id id;
+	Id name;
 	list<Site> sites;
 };
 
@@ -196,13 +200,13 @@ class Rule : public Node {
 protected:
 	Id label;
 	RuleSide lhs,rhs;
-	Arrow arrow;
+	bool bidirectional;
 	const Expression* filter;
 	Rate rate;
 public:
 	Rule();
 	Rule(const location &l,const Id &label,const RuleSide &lhs,
-		const RuleSide &rhs,const Arrow &arrow,const Expression* where,const Rate &rate);
+		const RuleSide &rhs,const bool arrow,const Expression* where,const Rate &rate);
 	~Rule();
 };
 

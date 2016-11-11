@@ -12,6 +12,7 @@ namespace state {
 Variable::Variable
 	(const short var_id, const std::string &nme,const bool is_obs):
 		id(var_id),name(nme),isObservable(is_obs),updated(false){}
+Variable::~Variable(){}
 
 /*Variable::~Variable() {
 
@@ -36,7 +37,20 @@ template float Variable::getValue<float>() const;
 template <typename T>
 AlgebraicVar<T>::AlgebraicVar(const short var_id, const std::string &nme,
 		const bool is_obs,const AlgExpression<T> *exp):
-		BaseExpression(), Variable(var_id,nme,is_obs),expression(exp) {};
+		BaseExpression(), Variable(var_id,nme,is_obs),expression(exp) {}
+template <typename T>
+T AlgebraicVar<T>::evaluate(std::unordered_map<std::string,int> *aux_values) const{
+	expression->evaluate(aux_values);
+}
+template <typename T>
+int AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,int> &aux_values) const{
+	expression->auxFactors(aux_values);
+}
+
+template class AlgebraicVar<float>;
+template class AlgebraicVar<int>;
+template class AlgebraicVar<bool>;
+
 
 /*SomeValue AlgebraicVar::getValue() const {
 	switch(value.getType()){
@@ -52,8 +66,18 @@ AlgebraicVar<T>::AlgebraicVar(const short var_id, const std::string &nme,
 
 /******* class KappaVar ****************/
 KappaVar::KappaVar(const short id,const std::string &nme,const bool is_obs,
-		const pattern::Mixture &kappa) : BaseExpression(),Variable(id,nme,is_obs), mixture(kappa) {}
+		const pattern::Mixture &kappa) :
+				AlgExpression<int>(),
+				Variable(id,nme,is_obs),
+				mixture(kappa) {}
 
-
+//TODO
+int KappaVar::auxFactors(std::unordered_map<std::string,int> &factor) const {
+	return 0;
+}
+//TODO
+int KappaVar::evaluate(std::unordered_map<std::string,int> *aux_values) const {
+	return 0;
+}
 
 } /* namespace state */

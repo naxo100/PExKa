@@ -14,6 +14,8 @@
 
 namespace state {
 
+class SomeValue;
+
 /** \brief Base class for algebraic and every number-evaluated expression.
  *
  *
@@ -34,9 +36,10 @@ public:
 	template <typename T>
 	struct EnumType {static const Type t = FLOAT;};
 
-	virtual void value(float &ret);
-	virtual void value(int &ret);
-	virtual void value(bool &ret);
+	virtual const SomeValue getValue() const = 0;
+//	virtual void value(float &ret);
+//	virtual void value(int &ret);
+//	virtual void value(bool &ret);
 
 	/** \brief Return an int vector that represents this expression
 	 * as an equation on auxiliars.
@@ -69,6 +72,8 @@ public:
 	AlgExpression();
 	virtual ~AlgExpression() = 0;
 	virtual T evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
+	virtual int auxFactors(std::unordered_map<std::string,int> &factor) const override = 0;
+	virtual const SomeValue getValue() const override;
 };
 
 /*
@@ -85,6 +90,7 @@ struct SomeAlgExpression : public BaseExpression {
 };*/
 
 class SomeValue {
+public:
 	union {
 		float fVal;
 		int iVal;
@@ -92,7 +98,6 @@ class SomeValue {
 	};
 	BaseExpression::Type t;
 
-public:
 	SomeValue(float f);
 	SomeValue(int i);
 	SomeValue(bool b);

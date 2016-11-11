@@ -86,6 +86,15 @@ template BaseExpression* BaseExpression::makeBinaryExpression<false>
 
 
 
+/****** SomeValue ************/
+SomeValue::SomeValue(float f) : fVal(f),t(BaseExpression::FLOAT){}
+SomeValue::SomeValue(int i) : iVal(i),t(BaseExpression::INT){}
+SomeValue::SomeValue(bool b) : bVal(b),t(BaseExpression::BOOL){}
+
+
+
+
+
 /****** AlgExpression ********/
 template <typename T>
 AlgExpression<T>::AlgExpression(){
@@ -112,6 +121,10 @@ T AlgExpression<T>::evaluate(std::unordered_map<std::string,int> *aux_values) co
 	}
 }*/
 
+template <typename T>
+const SomeValue AlgExpression<T>::getValue() const{
+	return SomeValue(this->evaluate());
+}
 
 
 /******* Constant ************/
@@ -122,6 +135,11 @@ template <typename T>
 T Constant<T>::evaluate(std::unordered_map<std::string,int> *aux_values) const{
 	return val;
 }
+//TODO
+template <typename T>
+int Constant<T>::auxFactors(std::unordered_map<std::string,int> &aux_values) const{
+	return (int)val;
+}
 
 template class Constant<float>;
 template class Constant<int>;
@@ -129,7 +147,7 @@ template class Constant<bool>;
 
 
 
-
+/*********** BinaryOperations ******************/
 
 
 template <typename T1,typename T2>

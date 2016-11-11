@@ -46,15 +46,18 @@ public:
 	AlgebraicVar(const short var_id, const std::string &nme,const bool is_obs,
 			const AlgExpression<T> *exp);
 
+	virtual int auxFactors(std::unordered_map<std::string,int> &factor) const override;
 	virtual T evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 
 };
 
-class KappaVar : public Variable, public AlgExpression<int> {
+class KappaVar : public AlgExpression<int>, public Variable {
 	pattern::Mixture mixture;
 public:
 	KappaVar(const short var_id, const std::string &nme,const bool is_obs,
 			const pattern::Mixture &kappa);
+
+	virtual int auxFactors(std::unordered_map<std::string,int> &factor) const override;
 	virtual int evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 
 };

@@ -28,7 +28,7 @@ void KappaAst::evaluateSignatures(pattern::Environment &env){
 
 pair< vector<KappaVar>, vector<Variable> >* KappaAst::evaluateVariables(pattern::Environment &env){
 	cout << "evaluating variables" << endl;
-	unordered_map<string,Variable*> vars;
+	Expression::VAR vars;
 	for(list<Declaration>::iterator it = decls.begin();it != decls.end(); it++){
 		//delete &(*it);
 		Variable* var = it->eval(env,vars);

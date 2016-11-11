@@ -76,7 +76,7 @@ Declaration::~Declaration(){
 };
 
 Variable* Declaration::eval(pattern::Environment &env,
-		unordered_map<string,Variable*> &vars) const{
+		Expression::VAR &vars) const{
 	Variable* var;
 	short id = 0;
 	try {
@@ -90,15 +90,15 @@ Variable* Declaration::eval(pattern::Environment &env,
 		switch(b_expr->getType()){
 		case BaseExpression::FLOAT:
 			var = new state::AlgebraicVar<float>(id,name.getString(),false,
-				dynamic_cast<AlgebraicVar<float>*>(b_expr));
+				dynamic_cast<AlgExpression<float>*>(b_expr));
 			break;
 		case BaseExpression::INT:
 			var = new state::AlgebraicVar<int>(id,name.getString(),false,
-				dynamic_cast<AlgebraicVar<int>*>(b_expr));
+				dynamic_cast<AlgExpression<int>*>(b_expr));
 			break;
 		case BaseExpression::BOOL:
 			var = new state::AlgebraicVar<bool>(id,name.getString(),false,
-				dynamic_cast<AlgebraicVar<bool>*>(b_expr));
+				dynamic_cast<AlgExpression<bool>*>(b_expr));
 			break;
 		}
 	}else

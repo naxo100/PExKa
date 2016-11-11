@@ -38,7 +38,7 @@ public:
 	~Declaration();
 
 	Variable* eval(pattern::Environment &env,
-			unordered_map<string,Variable*> &vars) const;
+			Expression::VAR &vars) const;
 	bool isKappa();
 
 	//Declaration():label(Id("",yy::location())){}

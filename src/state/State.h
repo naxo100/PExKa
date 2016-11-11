@@ -28,7 +28,7 @@ class State {
 	//std::vector<SiteGraph> graph;
 	std::vector<Variable> alg_vars;
 	std::vector<float> tokens;
-	simulation::Counter counter;
+	//simulation::Counter counter;
 	time_t program_t0;
 
 

@@ -47,25 +47,84 @@ Link& Link::operator=(const Link &l){
 	return *this;
 };
 Link::~Link(){};
+const Link::LinkType& Link::getType() const{
+	return type;
+}
 
 
 /****** Class SiteState ***********/
 
 SiteState::SiteState() :Node(),type(LABEL) {}
+SiteState::~SiteState(){};
 SiteState::SiteState(const location& loc, const list<Id> &labs)
 		: Node(loc),type(LABEL),labels(labs){}
 
 SiteState::SiteState(const location& loc, const Expression* min,
-		const Expression* max): Node(loc),range(min,max){}
+		const Expression* max,const Expression* def)
+	: Node(loc),type(RANGE),range{min,def,max}{}
 
+const vector<string>& SiteState::evalLabels(){
+	vector<string> *labs = new vector<string>(labels.size());
+	for(list<Id>::iterator it = labels.begin();it != labels.end(); it++)
+		labs->push_back(it->getString());
+	return *labs;
+}
 
+bool SiteState::evalRange(pattern::Environment &env,
+		BaseExpression** expr_values){
+	//using ast::Expression::VAR;
+	//using ast::Expression::FLAGS;
+	expr_values[0] = range[0]->eval(env,Expression::VAR(),
+			Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
+	expr_values[2] = range[2]->eval(env,Expression::VAR(),
+			Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
+	if(range[1] != nullptr)
+		expr_values[1] = range[1]->eval(env,Expression::VAR(),
+					Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
+	else
+		expr_values[1] = expr_values[0];
+	//Test
+	bool isInt = true;
+	for(int i = 0; i < 3; i++)
+		switch(expr_values[i]->getType()){
+		case BaseExpression::BOOL:
+			throw std::exception();
+		case BaseExpression::FLOAT:
+			isInt = false;
+			break;
+		default:break;
+		}
+	return isInt;
+}
 
 
 /****** Class Site ***********/
 Site::Site(){}
 Site::Site(const location &l,const Id &id,const SiteState &s,const Link &lnk):
-	Node(l), id(id), stateInfo(s), link(lnk) {};
+	Node(l), name(id), stateInfo(s), link(lnk) {};
 
+void Site::eval(pattern::Environment &env,pattern::Signature &sign){
+	if(link.getType())
+		throw std::exception();//TODO
+	//short id;
+	switch(stateInfo.type){
+	case SiteState::LABEL:
+		sign.addSite(name.getString(),stateInfo.evalLabels());
+
+		break;
+	case SiteState::RANGE:
+		BaseExpression* range[3];
+		if(stateInfo.evalRange(env,range))
+			sign.addSite(name.getString(),range[0]->getValue().fVal,
+					range[2]->getValue().fVal);
+		else
+			sign.addSite(name.getString(),range[0]->getValue().iVal,
+					range[2]->getValue().iVal);
+		break;
+	}
+}
+
+//SiteState::~SiteState(){}
 
 /****** Class Agent **********/
 Agent::Agent(){}
@@ -79,17 +138,21 @@ pattern::Signature* Agent::eval(pattern::Environment &env){
 	sign->setId(id);
 
 	for(list<Site>::iterator it = sites.begin(); it != sites.end(); it++){
-		if(it->getLink().getType())
-			throw std::exception();//TODO
-
+		it->eval(env,*sign);
 	}
+	return sign;
 }
 
 
 /****** Class Mixture ************/
+//TODO
+Mixture::Mixture(){}
+
 Mixture::Mixture(const location &l,const list<Agent> &m):
 	Node(l), mix(m) {};
 
+//TODO
+Mixture::~Mixture(){};
 /*TODO*/
 pattern::Mixture Mixture::eval(pattern::Environment &env) const{
 
@@ -101,9 +164,14 @@ pattern::Mixture Mixture::eval(pattern::Environment &env) const{
 
 
 /****** Class MultipleMixture ****/
-//MultipleMixture::MultipleMixture(): n(nullptr){};
+MultipleMixture::MultipleMixture(): n(nullptr){};
 MultipleMixture::MultipleMixture(const location &l,const list<Agent> &m,const Expression *e):
 	Mixture(l,m), n(e) {};
+
+MultipleMixture::~MultipleMixture(){
+	if(n)
+		delete n;
+}
 
 /*TODO*/
 pattern::Mixture MultipleMixture::eval(pattern::Environment &env) const{
@@ -113,6 +181,8 @@ pattern::Mixture MultipleMixture::eval(pattern::Environment &env) const{
 	}
 	return pattern::Mixture();
 }
+
+
 
 
 /****** Class Effect *************/

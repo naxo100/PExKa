@@ -46,13 +46,30 @@ protected:
 
 class SiteState : public Node{
 public:
-	enum StateType {LABEL,RANGE} type;
+	enum {LABEL,RANGE} type;
+	//union {
 		list<Id> labels;
-		pair<const Expression*,const Expression*> range;
+		const Expression* range[3];//{min,default,max}
+	//};
 	SiteState();
 	SiteState(const location& loc, const list<Id> &labs);
 	SiteState(const location& loc, const Expression* min,
-			const Expression* max);
+			const Expression* max,const Expression* def=nullptr);
+	~SiteState();
+
+	/** \brief return a vector of the site labels.
+	 * 	Do not test if there are duplicates.
+	 *
+	 */
+	const vector<string>& evalLabels();
+	/** \brief Set min and max pointers to the BaseExpression
+	 * of min and max values for range. (set default TODO).
+	 * return true if this is an int range, false if float and
+	 * raise an exception if other.
+	 *
+	 */
+	bool evalRange(pattern::Environment &env,
+			BaseExpression** expr_values);
 };
 
 class Site: public Node {
@@ -61,9 +78,9 @@ public:
 	Site(const location &l,const Id &id,const SiteState &s,const Link &lnk);
 	void eval(pattern::Environment &env,pattern::Signature &agent);
 	void eval(pattern::Environment &env,pattern::Mixture::Agent &agent);
-	const Link& getLink();
+	//const Link& getLink();
 protected:
-	Id id;
+	Id name;
 	SiteState stateInfo;
 	Link link;
 };

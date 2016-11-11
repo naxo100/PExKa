@@ -6,6 +6,7 @@
  */
 
 #include "AlgebraicExpressions.h"
+#include "../../state/Variable.h"
 
 #include <limits>
 #include <type_traits>
@@ -27,7 +28,8 @@ bool Const::isConstant(){
 }
 
 BaseExpression* Const::eval(pattern::Environment& env,
-		const unordered_map<string,state::Variable*> &vars) const{
+		const VAR &vars,
+		const char flags) const{
 	BaseExpression* cons;
 	switch(type){
 	case FLOAT:
@@ -64,9 +66,10 @@ BoolBinaryOperation::BoolBinaryOperation(const location &l,const Expression *e1,
 		Expression(l),exp1(e1),exp2(e2),op(o){}
 
 BaseExpression* BoolBinaryOperation::eval(pattern::Environment& env,
-		const unordered_map<string,state::Variable*> &vars) const{
-	BaseExpression* ex1 = exp1->eval(env,vars);
-	BaseExpression* ex2 = exp2->eval(env,vars);
+		const VAR &vars,
+		const char flags) const{
+	BaseExpression* ex1 = exp1->eval(env,vars,flags);
+	BaseExpression* ex2 = exp2->eval(env,vars,flags);
 
 	return BaseExpression::makeBinaryExpression<true>(ex1,ex2,op);
 }
@@ -81,9 +84,10 @@ AlgBinaryOperation::AlgBinaryOperation(const location &l,const Expression *e1,
 		Expression(l),exp1(e1),exp2(e2),op(o){};
 
 BaseExpression* AlgBinaryOperation::eval(pattern::Environment& env,
-		const unordered_map<string,state::Variable*> &vars) const{
-	BaseExpression* ex1 = exp1->eval(env,vars);
-	BaseExpression* ex2 = exp2->eval(env,vars);
+		const VAR &vars,
+		const char flags) const{
+	BaseExpression* ex1 = exp1->eval(env,vars,flags);
+	BaseExpression* ex2 = exp2->eval(env,vars,flags);
 
 	return BaseExpression::makeBinaryExpression<false>(ex1,ex2,op);
 }
@@ -97,7 +101,8 @@ UnaryOperation::UnaryOperation(const location &l,const Expression *e,
 		const BaseExpression::Unary f):
 		Expression(l),exp(e),func(f){};
 BaseExpression* UnaryOperation::eval(pattern::Environment& env,
-		const unordered_map<string,state::Variable*> &vars) const{
+		const VAR &vars,
+		const char flags) const{
 	return new Constant<int>(0);
 }
 UnaryOperation* UnaryOperation::clone() const{
@@ -107,7 +112,8 @@ UnaryOperation* UnaryOperation::clone() const{
 
 /****** Class NullaryOperation ******/
 BaseExpression* NullaryOperation::eval(pattern::Environment& env,
-		const unordered_map<string,state::Variable*> &vars) const{
+		const VAR &vars,
+		const char flags) const{
 	return new Constant<int>(0);
 }
 NullaryOperation::NullaryOperation(const location &l,const BaseExpression::Nullary f):
@@ -118,20 +124,20 @@ NullaryOperation* NullaryOperation::clone() const{
 
 
 /****** Class Var ***/
-Var::Var(const location &l,const VarType &t,const std::string &label):
+Var::Var(const location &l,const VarType &t,const Id &label):
 	Expression(l),name(label),type(t){};
 
 BaseExpression* Var::eval(pattern::Environment& env,
-		const unordered_map<string,state::Variable*> &vars) const {
+		const Expression::VAR &vars,
+		const char flags) const {
 	BaseExpression* expr;
 	switch(type){
 	case VAR:
 		try {
-			//short id =
-			env.getVarId(name);
-			expr = new VarLabel<float>();
-
-		}catch(const SemanticError &err){
+			short id = env.getVarId(name.getString());
+			expr = vars[id];
+		}
+		catch(const SemanticError &err){
 
 		}
 		break;

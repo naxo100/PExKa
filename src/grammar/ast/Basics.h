@@ -48,15 +48,17 @@ public:
  *
  */
 class Expression : public Node {
-	enum FLAGS {FORCE,AUX,CONST};
 public:
+	typedef vector<state::Variable*> VAR;
+	enum FLAGS {FORCE=1,AUX=2,CONST=4};
 	Expression();
 	Expression(const location &l);
 	using Node::Node;
 	virtual ~Expression()=0;
 
 	virtual state::BaseExpression* eval(pattern::Environment& env,
-			const unordered_map<string,state::Variable*> &vars) const;
+			const VAR &vars,
+			const char flags = 0) const;
 	virtual bool isConstant();
 	virtual Expression* clone() const = 0;
 };
@@ -94,6 +96,20 @@ protected:
 	};
 	StringExpression* next;
 };
+
+/** \brief Direction of a Reaction or Channel
+ *
+ *	deprecated.
+ *//*
+class Arrow : public Node {
+public:
+	Arrow();
+	enum ArrType {RIGHT,LEFT,BI};
+	Arrow(const location &l,ArrType t);
+	ArrType getType();
+protected:
+	ArrType type;
+};*/
 
 /*
 class StringOrPrint {

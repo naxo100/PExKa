@@ -32,7 +32,8 @@ bool Expression::isConstant(){
 	return false;
 }
 state::BaseExpression* Expression::eval(pattern::Environment& env,
-		const unordered_map<string,state::Variable*> &vars) const{
+		const VAR &vars,
+		const char flags) const{
 	cout << "do not call this function" << endl;
 	throw;
 	return nullptr;
@@ -65,5 +66,14 @@ StringExpression::~StringExpression(){
 		delete next;
 }
 
+
+/****** Class Arrow **********//*
+Arrow::Arrow(): type(RIGHT){}
+Arrow::Arrow(const location &loc,ArrType t):
+		Node(loc), type(t) {};
+Arrow::ArrType Arrow::getType(){
+	return type;
+};
+*/
 
 } //namespace ast

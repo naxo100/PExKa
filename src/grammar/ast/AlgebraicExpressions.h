@@ -27,7 +27,8 @@ public:
 	Const (const location &loc,const int i);
 	Const (const location &loc,const bool b);
 	BaseExpression* eval(pattern::Environment& env,
-			const unordered_map<string,state::Variable*> &vars) const override;
+			const VAR &vars,
+			const char flags = 0) const override;
 	bool isConstant();
 	Const (const location &loc,const ConstType t);
 	Const* clone() const override;
@@ -44,7 +45,8 @@ public:
 	BoolBinaryOperation(const location &loc,const Expression *e1,const Expression *e2,
 			BaseExpression::BoolOp o);
 	BaseExpression* eval(pattern::Environment& env,
-			const unordered_map<string,state::Variable*> &vars) const override;
+			const VAR &vars,
+			const char flags = 0) const override;
 	BoolBinaryOperation* clone() const override;
 protected:
 	const Expression *exp1,*exp2;
@@ -59,7 +61,8 @@ public:
 	AlgBinaryOperation(const location &loc,const Expression *e1,
 			const Expression *e2,BaseExpression::AlgebraicOp o);
 	BaseExpression* eval(pattern::Environment& env,
-			const unordered_map<string,state::Variable*> &vars) const override;
+			const VAR &vars,
+			const char flags = 0) const override;
 	AlgBinaryOperation* clone() const override;
 protected:
 	const Expression *exp1;
@@ -75,7 +78,8 @@ public:
 	UnaryOperation(const location &loc,const Expression *e,
 			const BaseExpression::Unary f);
 	BaseExpression* eval(pattern::Environment& env,
-			const unordered_map<string,state::Variable*> &vars) const override;
+			const VAR &vars,
+			const char flags = 0) const override;
 	UnaryOperation* clone() const override;
 protected:
 	const Expression* exp;
@@ -89,7 +93,8 @@ class NullaryOperation: public Expression {
 public:
 	BaseExpression::Nullary func;
 	BaseExpression* eval(pattern::Environment& env,
-			const unordered_map<string,state::Variable*> &vars) const override;
+			const VAR &vars,
+			const char flags = 0) const override;
 	NullaryOperation* clone() const override;
 	NullaryOperation(const location &loc,const BaseExpression::Nullary f);
 };
@@ -100,12 +105,13 @@ public:
 class Var : public Expression {
 public:
 	enum VarType {VAR,TOKEN,AUX,TIME,EVENT,NULL_EVENT,PROD_EVENT,CPUTIME,ACTIVITY};
-	Var(const location &loc,const VarType &t,const std::string &label=std::string());
+	Var(const location &loc,const VarType &t,const Id &label=Id());
 	BaseExpression* eval(pattern::Environment& env,
-			const unordered_map<string,state::Variable*> &vars) const override;
+			const Expression::VAR &vars,
+			const char flags = 0) const override;
 	Var* clone() const override;
 protected:
-	std::string name;
+	Id name;
 	VarType type;
 };
 

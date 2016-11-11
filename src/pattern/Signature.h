@@ -21,12 +21,15 @@ public:
 	class Site;
 	class EmptySite;
 	class LabelSite;
-	class FloatRangeSite;
-	class IntRangeSite;
+	template <typename T>
+	class RangeSite;
+	//class IntRangeSite;
 	class Value;
 
-	Signature();
+	Signature(const string &name);
 	~Signature();
+
+	void setId(short id);
 
 	short addSite(const string &name);
 	short addSite(const string &name,const vector<string> &labels);
@@ -36,13 +39,14 @@ public:
 	const Site& getSite(const short id) const;
 	const Site& getSite(const string &name) const;
 private:
-	int id;
+	short id;
 	string name;
 	vector<Site*> sites;
-	unordered_map<string,short> site_ids;
+	unordered_map<string,short> siteMap;
 };
 
-class Value {
+class Signature::Value {
+public:
 	union {
 		const float f;
 		const int i;
@@ -56,28 +60,37 @@ class Signature::Site {
 	string name;
 
 public:
+	Site(const string &nme);
 	virtual bool isPossibleValue(const Value &val) = 0;
 	virtual ~Site();
 
 };
 
-class Signature::EmptySite : Site {
+class Signature::EmptySite : public Site {
 	virtual bool isPossibleValue(const Value &val) override;
+public:
+	EmptySite(const string &nme);
 };
-class Signature::LabelSite : Site {
+class Signature::LabelSite : public Site {
 	vector<string> labels;
 	unordered_map<string,short> label_ids;
 
 	virtual bool isPossibleValue(const Value &val) override;
+public:
+	LabelSite(const string &name,const vector<string> &labs);
 };
-class Signature::FloatRangeSite : Site {
-	float min,max;
+template <typename T>
+class Signature::RangeSite : Site {
+	T min,max,byDefault;
 	virtual bool isPossibleValue(const Value &val) override;
+public:
+	RangeSite(const string &nme,const T mn,const T mx);
+	RangeSite(const string &nme,const T mn,const T mx,const T df);
 };
-class Signature::IntRangeSite : Site {
+/*class Signature::IntRangeSite : Site {
 	int min,max;
 	virtual bool isPossibleValue(const Value &val) override;
-};
+};*/
 
 } /* namespace ast */
 

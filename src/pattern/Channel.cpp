@@ -23,4 +23,8 @@ Channel::~Channel() {
 	// TODO Auto-generated destructor stub
 }
 
+
+//TODO
+void Channel::setVarValues(std::map<std::string,int*> &var_values){}
+
 } /* namespace pattern */

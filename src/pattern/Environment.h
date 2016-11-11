@@ -35,8 +35,10 @@ class Environment {
 protected:
 	typedef unordered_map<string,short> IdMap;
 
-	IdMap algMap, kappaMap, tokenMap, comparmentMap, channelMap;
-	vector<string> algNames, kappaNames, tokenNames, compartmentNames;
+	//IdMap algMap, kappaMap;
+	IdMap varMap, tokenMap, compartmentMap, channelMap;
+	//vector<string> algNames, kappaNames;
+	vector<string> varNames, tokenNames, compartmentNames;
 	vector<Signature> signatures;
 	vector<Compartment> compartments;
 	vector<Channel> channels;
@@ -49,11 +51,13 @@ public:
 	short declareToken(const string &name);
 	short declareVariable(const string &name,bool isKappa);
 	short declareSignature(const Signature& sign);
+	short declareCompartment(const Compartment& comp);
 	short declareChannel(const string &name);
 	short idOfAlg(const string& name);
 
 	Signature& getSignature(short id) const;
 	const Channel& getChannel(short id) const;
+	const Compartment& getCompartment(short id) const;
 
 	short getVarId(const string &name) const;
 	short getChannelId(const string &name) const;

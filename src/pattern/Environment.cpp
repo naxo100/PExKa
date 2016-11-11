@@ -36,10 +36,11 @@ short Environment::declareToken(const string &name){
 }
 
 short Environment::declareVariable(const string &name,bool is_kappa){
-	if(this->exists(name,algMap) || this->exists(name,kappaMap))
+	//if(this->exists(name,algMap) || this->exists(name,kappaMap))
+	if(this->exists(name,varMap))
 		throw SemanticError("Label "+name+" already defined.");
 	short id;
-	if(is_kappa){
+	/*if(is_kappa){
 		id = kappaNames.size();
 		kappaMap[name] = id;
 		kappaNames.push_back(name);
@@ -48,8 +49,25 @@ short Environment::declareVariable(const string &name,bool is_kappa){
 		id = algNames.size();
 		algMap[name] = id;
 		algNames.push_back(name);
-	}
+	}*/
+	id = varNames.size();
+	varMap[name] = id;
+	varNames.push_back(name);
 	return id;
+}
+
+//TODO
+short Environment::getVarId(const string &s) const {
+	return 0;
+}//TODO
+short Environment::declareChannel(const string &s) {
+	return 0;
+}//TODO
+short Environment::getChannelId(const string &s) const {
+	return 0;
+}//TODO
+short Environment::declareSignature(const Signature &s) {
+	return 0;
 }
 
 } /* namespace pattern */

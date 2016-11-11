@@ -360,7 +360,7 @@ string_or_pr_expr:
 multiple:
  INT   {$$ = new Const(@$,$1);}
 | FLOAT	{$$ = new Const(@$,$1);}
-| LABEL {$$ = new ast::Var(@$,Var::VAR,$1); }
+| LABEL {$$ = new ast::Var(@$,Var::VAR,Id(@1,$1)); }
 ;
 
 constant:
@@ -445,11 +445,11 @@ arrow:
 
 variable:
  ID
-	{$$ = new Var(@$,Var::AUX,$1);}
+	{$$ = new Var(@$,Var::AUX,Id(@1,$1));}
 | PIPE ID PIPE 
-	{$$ = new Var(@$,Var::TOKEN,$2);}
+	{$$ = new Var(@$,Var::TOKEN,Id(@2,$2));}
 | LABEL 
-	{$$ = new Var(@$,Var::VAR,$1);}
+	{$$ = new Var(@$,Var::VAR,Id(@1,$1));}
 | TIME
 	{$$ = new Var(@$,Var::TIME);}
 | EVENT

@@ -34,7 +34,7 @@ int KappaDriver::parse(){
 			lexer.switch_streams( &f, NULL);
 			loc.initialize(&*fit,1,1);
 		    r = parser.parse();
-		    cout << "file parsed!" << endl;
+		    cout << "file parsed!!" << endl;
 		    f.close();
 		}
 	}

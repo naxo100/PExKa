@@ -27,6 +27,11 @@ bool Const::isConstant(){
 	return true;
 }
 
+void Const::show() const {
+	cout << "Const : ";
+	cout << "location: " << loc.begin << " " << loc.end;
+}
+
 BaseExpression* Const::eval(pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
@@ -93,6 +98,9 @@ BaseExpression* AlgBinaryOperation::eval(pattern::Environment& env,
 }
 AlgBinaryOperation* AlgBinaryOperation::clone() const{
 	return new AlgBinaryOperation(loc,exp1->clone(),exp2->clone(),op);
+}
+void AlgBinaryOperation::show() const {
+	cout << "algBioaryOperation"  ;
 }
 
 

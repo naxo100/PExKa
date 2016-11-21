@@ -41,6 +41,9 @@ public:
 			Expression::VAR &vars) const;
 	bool isKappa();
 
+
+	void show();
+
 	//Declaration():label(Id("",yy::location())){}
 protected:
 	Id name;

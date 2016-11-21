@@ -14,11 +14,18 @@ Node::Node() : loc(location()){}
 Node::Node(const yy::location& l)
 	:loc(l)	{/*cout << "construct Node at " << l << endl;*/}
 
+Node::~Node(){};
+void Node::show() const {
+	cout << "Node" << endl;
+}
+
 
 /****** Class Id *********************/
 Id::Id(){}
 Id::Id(const Node &t,const string &s): Node(t),id(s){};
 Id::Id(const location &l,const string &s): Node(l),id(s){};
+Id::~Id(){};
+
 string Id::getString() const {return id;};
 
 
@@ -38,13 +45,19 @@ state::BaseExpression* Expression::eval(pattern::Environment& env,
 	throw;
 	return nullptr;
 }
+void Expression::show() const {
+	cout << "Expression : ";
+	cout << "location: " << loc.begin << " " << loc.end;
+}
 
 
 /****** Class VarValue ***************/
 VarValue::VarValue() : value(nullptr){}
 VarValue::VarValue(const location &l,const Id &name,const Expression *exp) :
 	Node(l),var(name),value(exp) {}
-
+void VarValue::show() const{
+	cout << "VarValue : ";
+}
 
 /****** Class StringExpression *******/
 StringExpression::StringExpression() : t(STR),str(nullptr),next(nullptr){}

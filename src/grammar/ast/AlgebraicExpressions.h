@@ -32,6 +32,7 @@ public:
 	bool isConstant();
 	Const (const location &loc,const ConstType t);
 	Const* clone() const override;
+	virtual void show() const;
 protected:
 	ConstType type;
 	union {int n;float f;bool b;};
@@ -64,6 +65,7 @@ public:
 			const VAR &vars,
 			const char flags = 0) const override;
 	AlgBinaryOperation* clone() const override;
+	virtual void show() const;
 protected:
 	const Expression *exp1;
 	const Expression *exp2;

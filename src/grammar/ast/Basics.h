@@ -25,7 +25,9 @@ public:
 	typedef yy::location location;
 	Node();
 	Node(const yy::location& l);
+	virtual ~Node() = 0;
 	location loc;
+	virtual void show() const;
 };
 
 
@@ -39,6 +41,7 @@ public:
 	Id();
 	Id(const Node &l,const string &s);
 	Id(const location &l,const string &s);
+	~Id();
 
 	string getString() const;
 };
@@ -61,6 +64,7 @@ public:
 			const char flags = 0) const;
 	virtual bool isConstant();
 	virtual Expression* clone() const = 0;
+	virtual void show() const;
 };
 
 
@@ -72,6 +76,7 @@ class VarValue : public Node{
 public:
 	VarValue();
 	VarValue(const location &l,const Id &name,const Expression *exp);
+	virtual void show() const;
 };
 
 

@@ -111,6 +111,21 @@ bool Declaration::isKappa(){
 }
 
 
+void Declaration::show() {
+
+	string typeName[] = { "Var", "Kappa" };
+
+	cout << "Declaration var type: " << typeName[ type ] << " / ";
+	cout << "Name: " << name.getString() << " / ";
+
+	if(type)
+		cout << "Mixture / ";
+	else
+		expr->show();
+
+	cout << endl;
+}
+
 
 /****** Class Init ***********/
 Init::Init(){}

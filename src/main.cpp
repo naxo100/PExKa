@@ -67,11 +67,13 @@ int main(int argc, char* argv[]){
 	driver->parse();
 
 	ast::KappaAst &ast = driver->getAst();
+	ast.showDeclarations();
 
+/*
 	pattern::Environment env;
 	driver->getAst().evaluateSignatures(env);
 	driver->getAst().evaluateVariables(env);
-
+*/
 	/* TODO
 	 * Environment env = ast.evaluateGlobals();
 	 * MPI::Bcast((void*)&env,Nbytes,MPI::Datatype.PACKED, 0);

@@ -47,6 +47,10 @@ public:
 	void add(const Compartment &c);
 	//void add(Perturbation p);
 
+
+	//show declarations
+	void showDeclarations();
+
 	/** \brief Evaluate global properties from AST.
 	 *
 	 * Evaluate global properties (for all compartments) to been distributed among MPI processes.

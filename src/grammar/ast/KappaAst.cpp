@@ -50,4 +50,14 @@ void KappaAst::add(const Agent &a){
 	perts.push_back(p);
 }*/
 
+void KappaAst::showDeclarations(){
+	cout << endl <<"showing declarations:" << endl;
+	for(list<Declaration>::iterator it = decls.begin();it != decls.end(); it++){
+		//delete &(*it);
+
+		it->show();
+		//env.declareVariable(var->getName(),it->isKappa());
+	}
+}
+
 } /* namespace ast */

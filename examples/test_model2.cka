@@ -1,8 +1,11 @@
-
-
-
+%var: 'y' 3
 %var: 'x' 3/5.0 + 10*5 + 100^2 + (5 = 3)
 
+%transport: <move-join> 'L1' (A(x~1,y~2~3),B(x,f~a)) @ 2.0 
+
+
+%use: 'C1' [2*2][1] , 'C2' [3][5]
+%token: LALA
 
 
 

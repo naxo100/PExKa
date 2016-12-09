@@ -111,7 +111,7 @@ bool Declaration::isKappa(){
 }
 
 
-void Declaration::show() {
+void Declaration::show( string tabs ) {
 
 	string typeName[] = { "Var", "Kappa" };
 

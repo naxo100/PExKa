@@ -42,7 +42,7 @@ public:
 	bool isKappa();
 
 
-	void show();
+	void show( string tabs = "" );
 
 	//Declaration():label(Id("",yy::location())){}
 protected:

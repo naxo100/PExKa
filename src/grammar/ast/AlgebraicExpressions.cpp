@@ -27,9 +27,17 @@ bool Const::isConstant(){
 	return true;
 }
 
-void Const::show() const {
-	cout << "Const : ";
-	cout << "location: " << loc.begin << " " << loc.end;
+void Const::show( string tabs ) const {
+	string ar_types[] = {"FLOAT","INTEGER","BOOL","INF","INF_NEG","TMAX,EMAX"};
+
+	if( type == FLOAT )
+		cout << "\n" << tabs << "Const : (" << ar_types[type] << ", " << f << ")";
+	else if ( type == INTEGER )
+		cout << "\n" << tabs << "Const : (" << ar_types[type] << ", " << n << ")";
+	else if( type == BOOL )
+		cout << "\n" << tabs << "Const : (" << ar_types[type] << ", " << b << ")";
+	else
+		cout << "No constant type";
 }
 
 BaseExpression* Const::eval(pattern::Environment& env,
@@ -81,6 +89,16 @@ BaseExpression* BoolBinaryOperation::eval(pattern::Environment& env,
 BoolBinaryOperation* BoolBinaryOperation::clone() const{
 	return new BoolBinaryOperation(loc,exp1->clone(),exp2->clone(),op);
 }
+void BoolBinaryOperation::show( string tabs ) const {
+	string ar_types[] = {"AND","OR","GREATER","SMALLER","EQUAL","DIFF"};
+	tabs += "   ";
+
+	cout << "\n" << tabs << "boolBinaryOperation: (";
+	exp1->show( tabs );
+	cout << "\n" << tabs+"   " << "operator: " << ar_types[op];
+	exp2->show( tabs );
+	cout << "\n" << tabs << ")";
+}
 
 
 /****** Class AlgBinaryOperation ****/
@@ -99,8 +117,15 @@ BaseExpression* AlgBinaryOperation::eval(pattern::Environment& env,
 AlgBinaryOperation* AlgBinaryOperation::clone() const{
 	return new AlgBinaryOperation(loc,exp1->clone(),exp2->clone(),op);
 }
-void AlgBinaryOperation::show() const {
-	cout << "algBioaryOperation"  ;
+void AlgBinaryOperation::show( string tabs ) const {
+	string ar_types[] = {"SUM","MINUS","MULT","DIV","POW","MODULO","MAX","MIN"};
+	tabs += "   ";
+
+	cout << "\n" << tabs << "algBinaryOperation: (";
+	exp1->show( tabs );
+	cout << "\n" << tabs+"   " << "operator: " << ar_types[op];
+	exp2->show( tabs );
+	cout << "\n" << tabs << ")";
 }
 
 
@@ -116,6 +141,12 @@ BaseExpression* UnaryOperation::eval(pattern::Environment& env,
 UnaryOperation* UnaryOperation::clone() const{
 	return new UnaryOperation(loc,exp->clone(),func);
 }
+void UnaryOperation::show( string tabs ) const {
+	tabs += "   ";
+
+	cout << "\n" << tabs << "UnaryOperation: (";
+	cout << " ) ";
+}
 
 
 /****** Class NullaryOperation ******/
@@ -128,6 +159,13 @@ NullaryOperation::NullaryOperation(const location &l,const BaseExpression::Nulla
 		 Expression(l), func(f){};
 NullaryOperation* NullaryOperation::clone() const{
 	return new NullaryOperation(*this);
+}
+void NullaryOperation::show( string tabs ) const {
+	tabs += "   ";
+
+	cout << "\n" << tabs << "nullaryOperation: (";
+	//cout << func;
+	cout << " ) ";
 }
 
 
@@ -157,5 +195,10 @@ Var* Var::clone() const{
 	return new Var(*this);
 }
 
+void Var::show( string tabs ) const {
+	tabs += "   ";
+
+	cout << "var:" << " ";
+}
 
 } /* namespace ast */

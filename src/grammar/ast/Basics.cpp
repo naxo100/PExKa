@@ -15,7 +15,7 @@ Node::Node(const yy::location& l)
 	:loc(l)	{/*cout << "construct Node at " << l << endl;*/}
 
 Node::~Node(){};
-void Node::show() const {
+void Node::show( string tabs ) const {
 	cout << "Node" << endl;
 }
 
@@ -45,7 +45,7 @@ state::BaseExpression* Expression::eval(pattern::Environment& env,
 	throw;
 	return nullptr;
 }
-void Expression::show() const {
+void Expression::show( string tabs ) const {
 	cout << "Expression : ";
 	cout << "location: " << loc.begin << " " << loc.end;
 }
@@ -55,7 +55,7 @@ void Expression::show() const {
 VarValue::VarValue() : value(nullptr){}
 VarValue::VarValue(const location &l,const Id &name,const Expression *exp) :
 	Node(l),var(name),value(exp) {}
-void VarValue::show() const{
+void VarValue::show( string tabs ) const{
 	cout << "VarValue : ";
 }
 

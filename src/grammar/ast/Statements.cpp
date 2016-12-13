@@ -115,15 +115,13 @@ void Declaration::show( string tabs ) {
 
 	string typeName[] = { "Var", "Kappa" };
 
-	cout << "Declaration var type: " << typeName[ type ] << " / ";
-	cout << "Name: " << name.getString() << " / ";
+	cout << "Declaration " << typeName[ type ];
+	cout << ", Name: " << name.getString() << " {";
 
-	if(type)
-		cout << "Mixture / ";
-	else
-		expr->show();
+	if(type) cout << "Mixture / ";
+	else expr->show();
 
-	cout << endl;
+	cout << endl << "}" << endl << endl;
 }
 
 

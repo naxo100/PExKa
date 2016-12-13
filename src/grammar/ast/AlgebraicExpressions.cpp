@@ -29,15 +29,14 @@ bool Const::isConstant(){
 
 void Const::show( string tabs ) const {
 	string ar_types[] = {"FLOAT","INTEGER","BOOL","INF","INF_NEG","TMAX,EMAX"};
+	tabs += "   ";
 
-	if( type == FLOAT )
-		cout << "\n" << tabs << "Const : (" << ar_types[type] << ", " << f << ")";
-	else if ( type == INTEGER )
-		cout << "\n" << tabs << "Const : (" << ar_types[type] << ", " << n << ")";
-	else if( type == BOOL )
-		cout << "\n" << tabs << "Const : (" << ar_types[type] << ", " << b << ")";
-	else
-		cout << "No constant type";
+	cout << "\n" << tabs << "Constant : ( " << ar_types[type] << ", ";
+	if( type == FLOAT ) cout << f;
+	else if ( type == INTEGER ) cout << n;
+	else if( type == BOOL ) cout << b;
+	else cout << "No constant type";
+	cout << " )";
 }
 
 BaseExpression* Const::eval(pattern::Environment& env,

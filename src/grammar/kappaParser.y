@@ -49,7 +49,7 @@
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
 %token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
-%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
+%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET CONST DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
 %token EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
 %token <int> INT 
 %token <std::string> ID LABEL KAPPA_MRK NAME 
@@ -105,19 +105,19 @@
 %%
 statements:
 | statements statement newline
-	{std::cout << "statement" << endl;}
+	{}
 ;
 
 newline:
 NEWLINE {}
-| END {std::cout << "ending" << endl; return 0;}
+| END {return 0;}
 
 
 statement:
 | rule_expression
 	{}
 | instruction
-	{std::cout << "instruction" << endl;} 
+	{} 
 | error 
 	{}
 ;
@@ -125,9 +125,9 @@ statement:
 
 instruction:
  COMPARTMENT comp_expr alg_expr
- 	{}
-| CHANNEL LABEL comp_expr arrow comp_expr ATD constant
- 	{cout<<"Hola";}
+ 	{this->driver.getAst().add(Compartment(@$,$2,$3));}
+| CHANNEL LABEL comp_expr arrow comp_expr where_expr ATD alg_expr
+ 	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6,$8));}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
 | USE comp_list where_expr
@@ -144,6 +144,8 @@ instruction:
 	{}
 | LET variable_declaration 
 	{this->driver.getAst().add($2);}
+| CONST variable_declaration
+	{$2.setConstant(true); this->driver.getAst().add($2);}
 | OBS variable_declaration
 	{}
 | PLOT alg_expr 

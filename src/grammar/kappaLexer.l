@@ -40,6 +40,7 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
   loc.step ();
 %}
 
+"#"[^\n]*	loc.step();//return KappaParser::make_NEWLINE(loc);	
 [\t ]+		{loc.step();}
 \-?{digit}+	{
 				return KappaParser::make_INT(atoi(yytext),loc); 
@@ -54,6 +55,8 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 					return KappaParser::make_INIT(loc);
 				else if(!strcmp(yytext,"%var:"))
 					return KappaParser::make_LET(loc);
+				else if(!strcmp(yytext,"%const:"))
+					return KappaParser::make_CONST(loc);
 				else if(!strcmp(yytext,"%plot:"))
 					return KappaParser::make_PLOT(loc);
 				else if(!strcmp(yytext,"%mod:"))
@@ -146,7 +149,6 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 			return KappaParser::make_STRING(yytext,loc);
 [\n]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 [\r]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
-"#"[\n]^*	loc.step();//return KappaParser::make_NEWLINE(loc);	
 "'"[^']*"'"	return KappaParser::make_LABEL(yytext,loc);
 {id}		{
 				return KappaParser::make_ID(yytext,loc);

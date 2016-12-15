@@ -36,12 +36,12 @@ protected:
 	typedef unordered_map<string,short> IdMap;
 
 	//IdMap algMap, kappaMap;
-	IdMap varMap, tokenMap, compartmentMap, channelMap;
+	IdMap varMap, tokenMap, compartmentMap, channelMap, signatureMap;
 	//vector<string> algNames, kappaNames;
 	vector<string> varNames, tokenNames, compartmentNames;
 	vector<Signature> signatures;
 	vector<Compartment> compartments;
-	vector<Channel> channels;
+	vector<list<Channel> > channels;
 
 	bool exists(const string &name,const IdMap &map);
 public:
@@ -52,7 +52,7 @@ public:
 	short declareVariable(const string &name,bool isKappa);
 	short declareSignature(const Signature& sign);
 	short declareCompartment(const Compartment& comp);
-	short declareChannel(const string &name);
+	short declareChannel(const Channel &channel);
 	short idOfAlg(const string& name);
 
 	Signature& getSignature(short id) const;
@@ -61,7 +61,12 @@ public:
 
 	short getVarId(const string &name) const;
 	short getChannelId(const string &name) const;
+	short getCompartmentId(const string &name) const;
 	state::BaseExpression* getVarExpression(const string &name) const;
+
+
+	//DEBUG methods
+	void show() const;
 
 };
 

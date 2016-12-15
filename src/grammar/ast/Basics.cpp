@@ -28,6 +28,9 @@ Id::~Id(){};
 
 string Id::getString() const {return id;};
 
+void Id::show( string tabs ) const {
+	cout << "Id: " << id;
+}
 
 /****** Class Expression *************/
 Expression::Expression(){}
@@ -46,8 +49,7 @@ state::BaseExpression* Expression::eval(pattern::Environment& env,
 	return nullptr;
 }
 void Expression::show( string tabs ) const {
-	cout << "Expression : ";
-	cout << "location: " << loc.begin << " " << loc.end;
+	cout << "Expression : location: " << loc.begin << " " << loc.end;
 }
 
 

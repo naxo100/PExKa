@@ -44,6 +44,7 @@ public:
 	~Id();
 
 	string getString() const;
+	void show( string tabs = "" ) const;
 };
 
 

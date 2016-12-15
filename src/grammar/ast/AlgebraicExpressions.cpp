@@ -141,6 +141,9 @@ BaseExpression* Var::eval(pattern::Environment& env,
 
 		}
 		break;
+	case AUX:
+		expr = new state::Auxiliar(name.getString());
+		break;
 	default:break;
 	}
 	return expr;

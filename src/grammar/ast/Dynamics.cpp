@@ -96,6 +96,21 @@ bool SiteState::evalRange(pattern::Environment &env,
 		}
 	return isInt;
 }
+void SiteState::show( string tabs ) const {
+	cout << " ";
+	for(list<Id>::const_iterator it = labels.cbegin(); it != labels.cend(); it++) {
+		if( it == labels.cbegin() ) cout << "estados: ";
+
+		if( it != labels.cend() && it != labels.cbegin() ) cout << ", ";
+
+		it->show();
+	}
+
+	// que guardan los range's?
+	//range[0]->show();
+	//range[1]->show();
+	//range[2]->show();
+}
 
 
 /****** Class Site ***********/
@@ -123,6 +138,11 @@ void Site::eval(pattern::Environment &env,pattern::Signature &sign){
 		break;
 	}
 }
+void Site::show( string tabs ) const {
+	cout << tabs << "Site " << name.getString();
+
+	stateInfo.show( tabs );
+}
 
 //SiteState::~SiteState(){}
 
@@ -141,6 +161,17 @@ pattern::Signature* Agent::eval(pattern::Environment &env){
 		it->eval(env,*sign);
 	}
 	return sign;
+}
+void Agent::show( string tabs ) const {
+	tabs += "   ";
+	cout << "Agent " << name.getString() << " {";
+
+	for(list<Site>::const_iterator it = sites.cbegin(); it != sites.cend(); it++){
+		cout << endl;
+		it->show( tabs );
+	}
+
+	cout << endl << "}" << endl;
 }
 
 

@@ -23,12 +23,12 @@ namespace state {
  */
 class Variable : public virtual BaseExpression {
 	const short id;
-	const std::string &name;
+	const std::string name;//TODO &??
 	bool isObservable;
 	bool updated;
 
 public:
-	Variable(const short id, const std::string &nme,const bool is_obs);
+	Variable(const short id, const std::string &nme,const bool is_obs = false);
 	virtual ~Variable() = 0;
 
 	//template <typename T>
@@ -46,9 +46,19 @@ public:
 	AlgebraicVar(const short var_id, const std::string &nme,const bool is_obs,
 			const AlgExpression<T> *exp);
 
-	virtual int auxFactors(std::unordered_map<std::string,int> &factor) const override;
-	virtual T evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 
+};
+
+template <typename T>
+class ConstantVar : public Variable, public AlgExpression<T> {
+	const T val;
+public:
+	ConstantVar(const short var_id, const std::string &name, const AlgExpression<T> *exp);
+
+	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 };
 
 class KappaVar : public AlgExpression<int>, public Variable {
@@ -57,8 +67,8 @@ public:
 	KappaVar(const short var_id, const std::string &nme,const bool is_obs,
 			const pattern::Mixture &kappa);
 
-	virtual int auxFactors(std::unordered_map<std::string,int> &factor) const override;
-	virtual int evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	virtual int evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 
 };
 

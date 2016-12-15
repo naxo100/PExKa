@@ -39,11 +39,11 @@ AlgebraicVar<T>::AlgebraicVar(const short var_id, const std::string &nme,
 		const bool is_obs,const AlgExpression<T> *exp):
 		BaseExpression(), Variable(var_id,nme,is_obs),expression(exp) {}
 template <typename T>
-T AlgebraicVar<T>::evaluate(std::unordered_map<std::string,int> *aux_values) const{
+T AlgebraicVar<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
 	expression->evaluate(aux_values);
 }
 template <typename T>
-int AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,int> &aux_values) const{
+float AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,float> &aux_values) const{
 	expression->auxFactors(aux_values);
 }
 
@@ -64,6 +64,25 @@ template class AlgebraicVar<bool>;
 	return SomeValue(0);
 }*/
 
+/******* class ConstantVar *************/
+template <typename T>
+ConstantVar<T>::ConstantVar(const short var_id, const std::string &nme,const AlgExpression<T> *exp):
+		BaseExpression(), Variable(var_id,nme),val(exp->evaluate(nullptr)) {}
+template <typename T>
+T ConstantVar<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
+	return val;
+}
+template <typename T>
+float ConstantVar<T>::auxFactors(std::unordered_map<std::string,float> &aux_values) const{
+	return val;
+}
+
+template class ConstantVar<float>;
+template class ConstantVar<int>;
+template class ConstantVar<bool>;
+
+
+
 /******* class KappaVar ****************/
 KappaVar::KappaVar(const short id,const std::string &nme,const bool is_obs,
 		const pattern::Mixture &kappa) :
@@ -72,11 +91,11 @@ KappaVar::KappaVar(const short id,const std::string &nme,const bool is_obs,
 				mixture(kappa) {}
 
 //TODO
-int KappaVar::auxFactors(std::unordered_map<std::string,int> &factor) const {
+float KappaVar::auxFactors(std::unordered_map<std::string,float> &factor) const {
 	return 0;
 }
 //TODO
-int KappaVar::evaluate(std::unordered_map<std::string,int> *aux_values) const {
+int KappaVar::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
 	return 0;
 }
 

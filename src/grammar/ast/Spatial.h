@@ -27,9 +27,9 @@ public:
 			const unordered_map<string,state::Variable*> &vars,
 			bool allowAux);
 
-	list<int> evalDimensions(pattern::Environment &env,
+	vector<short> evalDimensions(pattern::Environment &env,
 			const vector<Variable*> &vars);
-	short evalName(pattern::Environment& env,bool declare=false);
+	string evalName(pattern::Environment& env,bool declare=false);
 
 	/** \brief Evaluate compExpression using auxiliars.
 	 *
@@ -39,14 +39,13 @@ public:
 	 * CompExpression (as a list).
 	 *
 	 */
-	list<state::BaseExpression*> evalExpression(const pattern::Environment &env,
-			const unordered_map<string,state::Variable*> &vars,
-			map<string,int*> *aux_values);
+	list<state::BaseExpression*> evalExpression(pattern::Environment &env,
+			const vector<state::Variable*> &vars);
 
 
 protected:
 	Id name;
-	list<const Expression*> index;
+	list<const Expression*> indexList;
 };
 
 class Compartment : public Node {
@@ -62,14 +61,14 @@ class Channel : public Node {
 	Id name;
 	CompExpression source,target;
 	bool bidirectional;
-	Expression* filter;//bool expr?
-	Expression* delay;
+	const Expression* filter;//bool expr?
+	const Expression* delay;
 public:
 	Channel(const location& l,const Id& nme, const CompExpression& src,
-			const CompExpression& trgt, const Expression* where,
+			const CompExpression& trgt, bool bckwrds, const Expression* where,
 			const Expression* delay);
 	pattern::Channel* eval(pattern::Environment &env,
-			const unordered_map<string,state::Variable*> &vars);
+			const vector<Variable*> &vars);
 
 };
 

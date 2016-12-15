@@ -112,16 +112,17 @@ bool Declaration::isKappa(){
 
 
 void Declaration::show( string tabs ) {
+	string typeName[] = { "Variable", "Kappa" };
 
-	string typeName[] = { "Var", "Kappa" };
-
-	cout << "Declaration " << typeName[ type ];
-	cout << ", Name: " << name.getString() << " {";
-
-	if(type) cout << "Mixture / ";
-	else expr->show();
-
+	if( type ) {
+		cout << "Mixture ";
+	} else {
+		cout << "Declaration ";
+	}
+	cout << typeName[ type ] << ", name: " << name.getString() << " {";
+	expr->show();
 	cout << endl << "}" << endl << endl;
+
 }
 
 

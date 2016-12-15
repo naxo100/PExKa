@@ -49,7 +49,7 @@ public:
 
 
 	//show declarations
-	void showDeclarations();
+	void show();
 
 	/** \brief Evaluate global properties from AST.
 	 *

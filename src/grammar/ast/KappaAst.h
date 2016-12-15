@@ -28,8 +28,10 @@ namespace ast {
 class KappaAst {
 
 	//AST structures
-	list<Declaration> decls;
+	list<Declaration> variables,constants;
 	list<Agent> signatures;
+	list<Compartment> compartments;
+	list<Channel> channels;
 	//list<Perturbation> perts;
 
 public:
@@ -38,13 +40,15 @@ public:
 
 	vector<float> evaluateTokens(pattern::Environment &env);
 	void evaluateSignatures(pattern::Environment &env);
-	pair< vector<KappaVar>, vector<Variable> >* evaluateVariables(pattern::Environment &env);
-	void evaluateCompartments(pattern::Environment &env);
+	vector<Variable*> evaluateDeclarations(pattern::Environment &env,vector<Variable*> &vars,bool is_const = false);
+	void evaluateCompartments(pattern::Environment &env,const vector<Variable*>& vars);
+	void evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars);
 
 	//ADD functions
 	void add(const Declaration &d);
 	void add(const Agent &a);
 	void add(const Compartment &c);
+	void add(const Channel &c);
 	//void add(Perturbation p);
 
 	/** \brief Evaluate global properties from AST.

@@ -12,18 +12,16 @@
 #include <string>
 #include "../grammar/location.hh"
 
-using namespace std;
 
-class SemanticError : public exception {
-	string msg;
+class SemanticError : public std::exception {
+	std::string msg;
 	yy::location loc;
 public:
-	SemanticError(const string &str,const yy::location &loc = yy::location());
+	SemanticError(const std::string &str,const yy::location &loc = yy::location());
 	//~SemanticError();
 
 	virtual const char* what() const _GLIBCXX_USE_NOEXCEPT override;
 	void setLocation(const yy::location &l);
 };
-
 
 #endif /* UTIL_EXCEPTIONS_H_ */

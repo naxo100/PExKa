@@ -102,7 +102,7 @@ pattern::Channel* Channel::eval(pattern::Environment &env,
 	if(bidirectional)
 		c_exp_trgt->setEquation();
 	pattern::Channel *channel =
-			new pattern::Channel(name.getString(),*c_exp_src,*c_exp_trgt);
+			new pattern::Channel(name.getString(),c_exp_src,c_exp_trgt);
 	if(filter)
 		channel->setFilter(filter->eval(env,vars));
 	env.declareChannel(*channel);

@@ -10,6 +10,7 @@
 #include <cmath>		//std::pow
 #include <algorithm>	//std::max,std::min
 #include <type_traits>	//std::conditional
+#include "../util/Exceptions.h" //semanticError
 
 namespace state {
 
@@ -22,6 +23,10 @@ template <> struct BaseExpression::EnumType<bool> {static const Type t = BOOL;};
 /****** BaseExpression *******/
 const BaseExpression::Type BaseExpression::getType() const{
 	return t;
+}
+
+std::set<std::string> BaseExpression::getAuxiliars() const {
+	return std::set<std::string>();
 }
 
 BaseExpression::~BaseExpression(){};
@@ -39,39 +44,39 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 	case BaseExpression::FLOAT:
 		switch(type2){
 		case BaseExpression::FLOAT:
-			bin_op = new BinaryOperation<BoolOrFloat,float,float>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrFloat,float,float>(ex1,ex2,op);
 			break;
 		case BaseExpression::INT:
-			bin_op = new BinaryOperation<BoolOrFloat,float,int>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrFloat,float,int>(ex1,ex2,op);
 			break;
 		case BaseExpression::BOOL:
-			bin_op = new BinaryOperation<BoolOrFloat,float,bool>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrFloat,float,bool>(ex1,ex2,op);
 			break;
 		}
 		break;
 	case BaseExpression::INT:
 		switch(type2){
 		case BaseExpression::FLOAT:
-			bin_op = new BinaryOperation<BoolOrFloat,int,float>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrFloat,int,float>(ex1,ex2,op);
 			break;
 		case BaseExpression::INT:
-			bin_op = new BinaryOperation<BoolOrInt,int,int>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrInt,int,int>(ex1,ex2,op);
 			break;
 		case BaseExpression::BOOL:
-			bin_op = new BinaryOperation<BoolOrInt,int,bool>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrInt,int,bool>(ex1,ex2,op);
 			break;
 		}
 		break;
 	case BaseExpression::BOOL:
 		switch(type2){
 		case BaseExpression::FLOAT:
-			bin_op = new BinaryOperation<BoolOrFloat,bool,float>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrFloat,bool,float>(ex1,ex2,op);
 			break;
 		case BaseExpression::INT:
-			bin_op = new BinaryOperation<BoolOrInt,bool,int>(ex1,ex1,op);
+			bin_op = new BinaryOperation<BoolOrInt,bool,int>(ex1,ex2,op);
 			break;
 		case BaseExpression::BOOL:
-			bin_op = new BinaryOperation<bool,bool,bool>(ex1,ex1,op);
+			bin_op = new BinaryOperation<bool,bool,bool>(ex1,ex2,op);
 			break;
 		}
 		break;
@@ -122,8 +127,8 @@ T AlgExpression<T>::evaluate(std::unordered_map<std::string,int> *aux_values) co
 }*/
 
 template <typename T>
-const SomeValue AlgExpression<T>::getValue() const{
-	return SomeValue(this->evaluate());
+const SomeValue AlgExpression<T>::getValue(const std::unordered_map<std::string,int> *aux_values) const{
+	return SomeValue(this->evaluate(aux_values));
 }
 
 
@@ -132,12 +137,12 @@ template <typename T >
 Constant<T>::Constant(T v) : val(v){}
 
 template <typename T>
-T Constant<T>::evaluate(std::unordered_map<std::string,int> *aux_values) const{
+T Constant<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
 	return val;
 }
 //TODO
 template <typename T>
-int Constant<T>::auxFactors(std::unordered_map<std::string,int> &aux_values) const{
+float Constant<T>::auxFactors(std::unordered_map<std::string,float> &aux_values) const{
 	return (int)val;
 }
 
@@ -174,8 +179,10 @@ R (*BinaryOperations<R,T1,T2>::funcs[10]) (T1,T2)={
 };
 
 template <typename R,typename T1,typename T2>
-R BinaryOperation< R, T1, T2>::evaluate(std::unordered_map<std::string,int> *aux_values) const {
-	return func(exp1->evaluate(aux_values),exp2->evaluate(aux_values));
+R BinaryOperation< R, T1, T2>::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
+	auto a = exp1->evaluate(aux_values);
+	auto b = exp2->evaluate(aux_values);
+	return func(a,b);
 }
 
 template <typename R,typename T1,typename T2>
@@ -195,11 +202,11 @@ BinaryOperation< R, T1, T2>::~BinaryOperation(){
 }
 
 template <typename R,typename T1,typename T2>
-int BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,int> &var_factors) const{
-	typedef std::unordered_map<std::string,int> var_map;
+float BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,float> &var_factors) const{
+	typedef std::unordered_map<std::string,float> var_map;
 	var_map vars1,vars2;
-	int val1 = exp1->auxFactors(vars1);
-	int val2 = exp2->auxFactors(vars2);
+	float val1 = exp1->auxFactors(vars1);
+	float val2 = exp2->auxFactors(vars2);
 	if(op < BaseExpression::MULT){// + or -
 		for(var_map::iterator it = vars1.begin();it != vars1.end();it++){
 			var_factors[it->first]=func(it->second,vars2[it->first]);
@@ -210,7 +217,7 @@ int BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,int> &va
 	}else if(op < BaseExpression::POW){// * or /
 		if(vars1.size() > 0)
 			if(vars2.size() > 0)
-				throw std::exception();
+				throw SemanticError("Only linear equations can be used for auxiliars in compartment expressions.");
 			else
 				for(var_map::iterator it = vars1.begin();it != vars1.end();it++)
 					var_factors[it->first]=func(it->second,val2);
@@ -222,14 +229,23 @@ int BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,int> &va
 	return func(val1,val2);
 }
 
+template <typename R,typename T1,typename T2>
+std::set<std::string> BinaryOperation<R,T1,T2>::getAuxiliars() const{
+	auto l1 = exp1->getAuxiliars();
+	auto l2 = exp2->getAuxiliars();
+	l1.insert(l2.begin(),l2.end());
+	return l1;
+}
+
 
 /*********** Class Auxiliar ***********/
 Auxiliar::Auxiliar(const std::string &nme) : name(nme){}
-int Auxiliar::evaluate(std::unordered_map<std::string,int> *aux_values) const{
+Auxiliar::~Auxiliar(){}
+int Auxiliar::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
 	try{
 		return aux_values->at(name);
 	}catch(std::out_of_range &e){
-		(*aux_values)[name] = 1;
+		//(*aux_values)[name] = 1;
 		throw e;
 	}catch(std::exception &e){
 		throw e;//TODO
@@ -237,9 +253,13 @@ int Auxiliar::evaluate(std::unordered_map<std::string,int> *aux_values) const{
 	return 0;
 }
 
-int Auxiliar::auxFactors(std::unordered_map<std::string,int> &var_factors) const{
+float Auxiliar::auxFactors(std::unordered_map<std::string,float> &var_factors) const{
 	var_factors[name] = 1;
 	return 0;
+}
+
+std::set<std::string> Auxiliar::getAuxiliars() const{
+	return std::set<std::string>(&name,&name+1);
 }
 
 } /* namespace ast */

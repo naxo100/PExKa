@@ -20,14 +20,14 @@ namespace pattern {
 
 class Channel {
 	std::string name;
-	const CompartmentExpr &source,&target;
+	const CompartmentExpr *source,*target;
 	const state::AlgExpression<bool> *filter;
 	std::map<std::string,int*> varValues;
 
 
 public:
 	Channel(const std::string &name,
-			const CompartmentExpr& src, const CompartmentExpr& trgt);
+			const CompartmentExpr* src, const CompartmentExpr* trgt);
 	~Channel();
 
 	const std::string& getName() const;

@@ -105,8 +105,6 @@ pattern::Channel* Channel::eval(pattern::Environment &env,
 			new pattern::Channel(name.getString(),*c_exp_src,*c_exp_trgt);
 	if(filter)
 		channel->setFilter(filter->eval(env,vars));
-	//delete c_exp_src;
-	//delete c_exp_trgt;
 	env.declareChannel(*channel);
 	return channel;
 }

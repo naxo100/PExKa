@@ -69,8 +69,15 @@ int main(int argc, char* argv[]){
 	ast::KappaAst &ast = driver->getAst();
 
 	pattern::Environment env;
-	driver->getAst().evaluateSignatures(env);
-	driver->getAst().evaluateVariables(env);
+	vector<Variable*> vars;
+	ast.evaluateDeclarations(env,vars,true);
+	//ast.evaluateSignatures(env);
+	ast.evaluateDeclarations(env,vars,false);
+	ast.evaluateCompartments(env,vars);
+	ast.evaluateChannels(env,vars);
+
+	env.show();
+
 
 	/* TODO
 	 * Environment env = ast.evaluateGlobals();

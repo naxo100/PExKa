@@ -29,6 +29,7 @@ public:
 	Signature(const string &name);
 	~Signature();
 
+	const string& getName() const;
 	void setId(short id);
 
 	short addSite(const string &name);

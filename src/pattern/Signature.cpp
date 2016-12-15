@@ -17,6 +17,9 @@ Signature::~Signature() {
 	// TODO Auto-generated destructor stub
 }
 
+const std::string& Signature::getName() const{
+	return name;
+}
 void Signature::setId(short i){
 	id = i;
 }

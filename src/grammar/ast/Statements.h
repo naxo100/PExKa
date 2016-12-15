@@ -25,7 +25,7 @@ class Statement {
 
 class Declaration: public Node, public Statement {
 public:
-	static int count;
+	//static int count;
 	enum VarType{ALG,KAPPA};
 	Declaration();
 	Declaration(const location &l,const Id &lab,const Expression *e);
@@ -37,14 +37,19 @@ public:
 */
 	~Declaration();
 
-	Variable* eval(pattern::Environment &env,
+	Variable* evalConst(pattern::Environment &env,
 			Expression::VAR &vars) const;
-	bool isKappa();
+	Variable* evalVar(pattern::Environment &env,
+				Expression::VAR &vars) const;
+	bool isKappa() const;
+	bool isConstant() const;
+	void setConstant(bool b);
 
 	//Declaration():label(Id("",yy::location())){}
 protected:
 	Id name;
 	VarType type;
+	bool constant;
 	union {
 		const Expression *expr;
 		const Mixture *mixture;

@@ -13,14 +13,15 @@ namespace ast {
 
 
 /****** Class Declaration *******/
-Declaration::Declaration() : type(ALG),expr(NULL){};
+Declaration::Declaration() : type(ALG),constant(false),expr(NULL){};
 Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
-	Node(loc),name(lab),type(ALG),expr(e) {};
+	Node(loc),name(lab),type(ALG),constant(false),expr(e) {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(loc),name(lab),type(KAPPA),mixture(new Mixture(m)) {};
+	Node(loc),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {};
 
-Declaration::Declaration(const Declaration &d) : name(d.name),type(d.type){
+Declaration::Declaration(const Declaration &d) :
+		name(d.name),type(d.type),constant(false){
 	if(type)
 		mixture = new Mixture(*(d.mixture));
 	else
@@ -32,6 +33,7 @@ Declaration& Declaration::operator=(const Declaration &d){
 	name = d.name;
 	loc = d.loc;
 	type = d.type;
+	constant = d.constant;
 	if(expr)
 		delete expr;
 
@@ -42,7 +44,7 @@ Declaration& Declaration::operator=(const Declaration &d){
 		else expr=NULL;
 	return *this;
 }
-int Declaration::count = 0;
+//int Declaration::count = 0;
 
 /*
 Declaration::Declaration(const Declaration &&d) : type(d.type){
@@ -75,7 +77,7 @@ Declaration::~Declaration(){
 		if (expr) delete expr;
 };
 
-Variable* Declaration::eval(pattern::Environment &env,
+Variable* Declaration::evalVar(pattern::Environment &env,
 		Expression::VAR &vars) const{
 	Variable* var;
 	short id = 0;
@@ -85,8 +87,11 @@ Variable* Declaration::eval(pattern::Environment &env,
 		ex.setLocation(this->loc);
 		throw ex;
 	}
-	if(type){
-		BaseExpression* b_expr = expr->eval(env,vars);
+	if(type)
+		var = new state::KappaVar(id,name.getString(),false,mixture->eval(env));
+	else {
+		char flag = constant ? Expression::CONST : 0;
+		BaseExpression* b_expr = expr->eval(env,vars,flag);
 		switch(b_expr->getType()){
 		case BaseExpression::FLOAT:
 			var = new state::AlgebraicVar<float>(id,name.getString(),false,
@@ -101,15 +106,51 @@ Variable* Declaration::eval(pattern::Environment &env,
 				dynamic_cast<AlgExpression<bool>*>(b_expr));
 			break;
 		}
-	}else
-		var = new state::KappaVar(id,name.getString(),false,mixture->eval(env));
+	}
+	return var;
+}
+Variable* Declaration::evalConst(pattern::Environment &env,
+		Expression::VAR &vars) const{
+	Variable* var;
+	short id = 0;
+	try {
+		id = env.declareVariable(name.getString(),type);
+	} catch(SemanticError &ex) {
+		ex.setLocation(this->loc);
+		throw ex;
+	}
+	if(type)
+		throw SemanticError("Constants can not depend on agent mixtures.",loc);
+	else {
+		char flag = constant ? Expression::CONST : 0;
+		BaseExpression* b_expr = expr->eval(env,vars,flag);
+		switch(b_expr->getType()){
+		case BaseExpression::FLOAT:
+			var = new state::ConstantVar<float>(id,name.getString(),
+				dynamic_cast<AlgExpression<float>*>(b_expr));
+			break;
+		case BaseExpression::INT:
+			var = new state::ConstantVar<int>(id,name.getString(),
+				dynamic_cast<AlgExpression<int>*>(b_expr));
+			break;
+		case BaseExpression::BOOL:
+			var = new state::ConstantVar<bool>(id,name.getString(),
+				dynamic_cast<AlgExpression<bool>*>(b_expr));
+			break;
+		}
+	}
 	return var;
 }
 
-bool Declaration::isKappa(){
+bool Declaration::isKappa() const{
 	return type;
 }
-
+bool Declaration::isConstant() const{
+	return constant;
+}
+void Declaration::setConstant(bool b){
+	constant = b;
+}
 
 
 /****** Class Init ***********/

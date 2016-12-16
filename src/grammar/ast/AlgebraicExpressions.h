@@ -32,6 +32,7 @@ public:
 	bool isConstant();
 	Const (const location &loc,const ConstType t);
 	Const* clone() const override;
+	void show( string tabs = "" ) const;
 protected:
 	ConstType type;
 	union {int n;float f;bool b;};
@@ -48,6 +49,7 @@ public:
 			const VAR &vars,
 			const char flags = 0) const override;
 	BoolBinaryOperation* clone() const override;
+	void show( string tabs = "" ) const;
 protected:
 	const Expression *exp1,*exp2;
 	BaseExpression::BoolOp op;
@@ -64,6 +66,8 @@ public:
 			const VAR &vars,
 			const char flags = 0) const override;
 	AlgBinaryOperation* clone() const override;
+	void show( string tabs = "" ) const;
+
 protected:
 	const Expression *exp1;
 	const Expression *exp2;
@@ -81,6 +85,7 @@ public:
 			const VAR &vars,
 			const char flags = 0) const override;
 	UnaryOperation* clone() const override;
+	void show( string tabs = "" ) const;
 protected:
 	const Expression* exp;
 	BaseExpression::Unary func;
@@ -97,6 +102,7 @@ public:
 			const char flags = 0) const override;
 	NullaryOperation* clone() const override;
 	NullaryOperation(const location &loc,const BaseExpression::Nullary f);
+	void show( string tabs = "" ) const;
 };
 
 /** \brief User variables
@@ -110,6 +116,7 @@ public:
 			const Expression::VAR &vars,
 			const char flags = 0) const override;
 	Var* clone() const override;
+	void show( string tabs = "" ) const;
 protected:
 	Id name;
 	VarType type;

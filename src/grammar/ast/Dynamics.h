@@ -70,6 +70,7 @@ public:
 	 */
 	bool evalRange(pattern::Environment &env,
 			BaseExpression** expr_values);
+	void show( string tabs = "" ) const;
 };
 
 class Site: public Node {
@@ -79,6 +80,7 @@ public:
 	void eval(pattern::Environment &env,pattern::Signature &agent);
 	void eval(pattern::Environment &env,pattern::Mixture::Agent &agent);
 	//const Link& getLink();
+	void show( string tabs = "" ) const;
 protected:
 	Id name;
 	SiteState stateInfo;
@@ -93,6 +95,9 @@ public:
 
 	pattern::Signature* eval(pattern::Environment &env);
 	pattern::Mixture::Agent* eval(pattern::Environment &env,bool is_pattern);
+
+	void show( string tabs = "" ) const;
+
 protected:
 	Id name;
 	list<Site> sites;

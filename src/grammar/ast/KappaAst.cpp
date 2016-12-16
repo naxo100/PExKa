@@ -72,4 +72,18 @@ void KappaAst::add(const Channel &c){
 	perts.push_back(p);
 }*/
 
+void KappaAst::show(){
+	cout << endl << "Showing declarations:" << endl;
+	for(list<Declaration>::iterator it = decls.begin();it != decls.end(); it++){
+		it->show();
+	}
+
+	cout << endl << "Showing agents:" << endl;
+	for(list<Agent>::iterator it = signatures.begin();it != signatures.end(); it++){
+		it->show();
+	}
+
+	cout << endl;
+}
+
 } /* namespace ast */

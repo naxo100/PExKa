@@ -27,7 +27,12 @@
 *.out
 *.app
 
+# myself ignore
+.gitignore
+
 /bin/
 /Debug/src
 /Debug/parser
 /Debug/
+/Doxyfile
+/doxs/

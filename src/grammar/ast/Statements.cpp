@@ -152,6 +152,20 @@ void Declaration::setConstant(bool b){
 	constant = b;
 }
 
+void Declaration::show( string tabs ) {
+	string typeName[] = { "Variable", "Kappa" };
+
+	if( type ) {
+		cout << "Mixture ";
+	} else {
+		cout << "Declaration ";
+	}
+	cout << typeName[ type ] << ", name: " << name.getString() << " {";
+	expr->show();
+	cout << endl << "}" << endl << endl;
+
+}
+
 
 /****** Class Init ***********/
 Init::Init(){}

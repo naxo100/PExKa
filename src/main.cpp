@@ -67,6 +67,7 @@ int main(int argc, char* argv[]){
 	driver->parse();
 
 	ast::KappaAst &ast = driver->getAst();
+	ast.show();
 
 	pattern::Environment env;
 	vector<Variable*> vars;

@@ -27,6 +27,18 @@ bool Const::isConstant(){
 	return true;
 }
 
+void Const::show( string tabs ) const {
+	string ar_types[] = {"FLOAT","INTEGER","BOOL","INF","INF_NEG","TMAX,EMAX"};
+	tabs += "   ";
+
+	cout << "\n" << tabs << "Constant : ( " << ar_types[type] << ", ";
+	if( type == FLOAT ) cout << f;
+	else if ( type == INTEGER ) cout << n;
+	else if( type == BOOL ) cout << b;
+	else cout << "No constant type";
+	cout << " )";
+}
+
 BaseExpression* Const::eval(pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
@@ -76,6 +88,16 @@ BaseExpression* BoolBinaryOperation::eval(pattern::Environment& env,
 BoolBinaryOperation* BoolBinaryOperation::clone() const{
 	return new BoolBinaryOperation(loc,exp1->clone(),exp2->clone(),op);
 }
+void BoolBinaryOperation::show( string tabs ) const {
+	string ar_types[] = {"AND","OR","GREATER","SMALLER","EQUAL","DIFF"};
+	tabs += "   ";
+
+	cout << "\n" << tabs << "boolBinaryOperation: (";
+	exp1->show( tabs );
+	cout << "\n" << tabs+"   " << "operator: " << ar_types[op];
+	exp2->show( tabs );
+	cout << "\n" << tabs << ")";
+}
 
 
 /****** Class AlgBinaryOperation ****/
@@ -94,6 +116,16 @@ BaseExpression* AlgBinaryOperation::eval(pattern::Environment& env,
 AlgBinaryOperation* AlgBinaryOperation::clone() const{
 	return new AlgBinaryOperation(loc,exp1->clone(),exp2->clone(),op);
 }
+void AlgBinaryOperation::show( string tabs ) const {
+	string ar_types[] = {"SUM","MINUS","MULT","DIV","POW","MODULO","MAX","MIN"};
+	tabs += "   ";
+
+	cout << "\n" << tabs << "algBinaryOperation: (";
+	exp1->show( tabs );
+	cout << "\n" << tabs+"   " << "operator: " << ar_types[op];
+	exp2->show( tabs );
+	cout << "\n" << tabs << ")";
+}
 
 
 /****** Class UnaryOperation ********/
@@ -108,6 +140,12 @@ BaseExpression* UnaryOperation::eval(pattern::Environment& env,
 UnaryOperation* UnaryOperation::clone() const{
 	return new UnaryOperation(loc,exp->clone(),func);
 }
+void UnaryOperation::show( string tabs ) const {
+	tabs += "   ";
+
+	cout << "\n" << tabs << "UnaryOperation: (";
+	cout << " ) ";
+}
 
 
 /****** Class NullaryOperation ******/
@@ -120,6 +158,13 @@ NullaryOperation::NullaryOperation(const location &l,const BaseExpression::Nulla
 		 Expression(l), func(f){};
 NullaryOperation* NullaryOperation::clone() const{
 	return new NullaryOperation(*this);
+}
+void NullaryOperation::show( string tabs ) const {
+	tabs += "   ";
+
+	cout << "\n" << tabs << "nullaryOperation: (";
+	//cout << func;
+	cout << " ) ";
 }
 
 
@@ -152,5 +197,10 @@ Var* Var::clone() const{
 	return new Var(*this);
 }
 
+void Var::show( string tabs ) const {
+	tabs += "   ";
+
+	cout << "var:" << " ";
+}
 
 } /* namespace ast */

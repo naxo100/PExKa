@@ -45,6 +45,9 @@ public:
 	bool isConstant() const;
 	void setConstant(bool b);
 
+
+	void show( string tabs = "" );
+
 	//Declaration():label(Id("",yy::location())){}
 protected:
 	Id name;

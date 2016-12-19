@@ -73,8 +73,14 @@ void KappaAst::add(const Channel &c){
 }*/
 
 void KappaAst::show(){
-	cout << endl << "Showing declarations:" << endl;
-	for(list<Declaration>::iterator it = decls.begin();it != decls.end(); it++){
+	cout << endl << "Showing variables:" << endl;
+	for(list<Declaration>::iterator it = variables.begin();it != variables.end(); it++){
+		it->show();
+	}
+
+	cout << endl << "Showing constants:" << endl;
+	cout << constants.size();
+	for(list<Declaration>::iterator it = constants.begin();it != constants.end(); it++){
 		it->show();
 	}
 

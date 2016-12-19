@@ -31,12 +31,12 @@ void Const::show( string tabs ) const {
 	string ar_types[] = {"FLOAT","INTEGER","BOOL","INF","INF_NEG","TMAX,EMAX"};
 	tabs += "   ";
 
-	cout << "\n" << tabs << "Constant : ( " << ar_types[type] << ", ";
+	cout << endl << tabs << "Constant : (" << ar_types[type] << ", ";
 	if( type == FLOAT ) cout << f;
 	else if ( type == INTEGER ) cout << n;
 	else if( type == BOOL ) cout << b;
 	else cout << "No constant type";
-	cout << " )";
+	cout << ")";
 }
 
 BaseExpression* Const::eval(pattern::Environment& env,
@@ -92,11 +92,11 @@ void BoolBinaryOperation::show( string tabs ) const {
 	string ar_types[] = {"AND","OR","GREATER","SMALLER","EQUAL","DIFF"};
 	tabs += "   ";
 
-	cout << "\n" << tabs << "boolBinaryOperation: (";
+	cout << endl << tabs << "boolBinaryOperation: (";
 	exp1->show( tabs );
-	cout << "\n" << tabs+"   " << "operator: " << ar_types[op];
+	cout << endl << tabs+"   " << "operator: " << ar_types[op];
 	exp2->show( tabs );
-	cout << "\n" << tabs << ")";
+	cout << endl << tabs << ")";
 }
 
 
@@ -120,11 +120,11 @@ void AlgBinaryOperation::show( string tabs ) const {
 	string ar_types[] = {"SUM","MINUS","MULT","DIV","POW","MODULO","MAX","MIN"};
 	tabs += "   ";
 
-	cout << "\n" << tabs << "algBinaryOperation: (";
+	cout << endl << tabs << "algBinaryOperation: (";
 	exp1->show( tabs );
-	cout << "\n" << tabs+"   " << "operator: " << ar_types[op];
+	cout << endl << tabs+"   " << "operator: " << ar_types[op];
 	exp2->show( tabs );
-	cout << "\n" << tabs << ")";
+	cout << endl << tabs << ")";
 }
 
 
@@ -141,10 +141,13 @@ UnaryOperation* UnaryOperation::clone() const{
 	return new UnaryOperation(loc,exp->clone(),func);
 }
 void UnaryOperation::show( string tabs ) const {
+	string ar_type[] = {"SQRT","EXPONENT","LOG","SINUS","COSINUS","TAN","ATAN","ABS","COIN","RAND_N","NOT"};
 	tabs += "   ";
 
-	cout << "\n" << tabs << "UnaryOperation: (";
-	cout << " ) ";
+	cout << endl << tabs << "UnaryOperation: (";
+	exp->show( tabs );
+	cout << endl << tabs+"   " << "operation: " << ar_type[func];
+	cout << endl << tabs << ")";
 }
 
 
@@ -160,11 +163,10 @@ NullaryOperation* NullaryOperation::clone() const{
 	return new NullaryOperation(*this);
 }
 void NullaryOperation::show( string tabs ) const {
+	string ar_type[] = {"TRUE","FALSE","RAND_1"};
 	tabs += "   ";
 
-	cout << "\n" << tabs << "nullaryOperation: (";
-	//cout << func;
-	cout << " ) ";
+	cout << endl << tabs << "NullaryOperation: (" << ar_type[func] << ")";
 }
 
 
@@ -198,9 +200,10 @@ Var* Var::clone() const{
 }
 
 void Var::show( string tabs ) const {
+	string ar_type[]= {"VAR","TOKEN","AUX","TIME","EVENT","NULL_EVENT","PROD_EVENT","CPUTIME","ACTIVITY"};
 	tabs += "   ";
 
-	cout << "var:" << " ";
+	cout << endl << tabs << "Variable: " << name.getString() << ", type: " << ar_type[type];
 }
 
 } /* namespace ast */

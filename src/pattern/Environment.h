@@ -15,11 +15,15 @@
 #include "Signature.h"
 #include "Compartment.h"
 #include "Channel.h"
-#include "../state/AlgExpression.h"
+//#include "../state/AlgExpression.h"
 //#include "../grammar/ast/Basics.h"
 #include "../util/Exceptions.h"
 
 using namespace std;
+
+namespace ast {
+class Id;
+}
 
 namespace pattern {
 
@@ -48,11 +52,11 @@ public:
 	Environment();
 	~Environment();
 
-	short declareToken(const string &name);
-	short declareVariable(const string &name,bool isKappa);
-	short declareSignature(const Signature& sign);
-	short declareCompartment(const Compartment& comp);
-	short declareChannel(const Channel &channel);
+	short declareToken(const ast::Id &name);
+	short declareVariable(const ast::Id &name,bool isKappa);
+	Signature& declareSignature(const ast::Id& sign);
+	Compartment& declareCompartment(const ast::Id& comp);
+	Channel& declareChannel(const ast::Id &channel);
 	short idOfAlg(const string& name);
 
 	Signature& getSignature(short id) const;

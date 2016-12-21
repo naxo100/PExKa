@@ -15,18 +15,30 @@ namespace pattern {
  *********** Class Compartment ***********
  ****************************************/
 int Compartment::TOTAL_CELLS = 0;
-//template <short dims>
-Compartment::Compartment(const std::string &nme,const std::vector<short> &dims,state::BaseExpression* vol)
-		:name(nme),dimensions(dims),volume(vol) {
+Compartment::Compartment(const std::string &nme)
+		:name(nme),dimensions(),volume(nullptr) {
 	firstCell = TOTAL_CELLS;
+	cellsCount = 1;
+	TOTAL_CELLS += 1;
+}
+
+Compartment::~Compartment() {
+	delete volume;
+}
+
+void Compartment::setDimensions(const std::vector<short> &dims){
+	//TODO first cell?
+	TOTAL_CELLS -= cellsCount;
+	dimensions = dims;
 	cellsCount = 1;
 	for(unsigned int i = 0; i < dimensions.size(); i++)
 		cellsCount *= dimensions[i];
 	TOTAL_CELLS += cellsCount;
 }
-
-//template <short dims>
-Compartment::~Compartment() {
+void Compartment::setVolume(const state::BaseExpression *vol){
+	if(volume)
+		delete(volume);
+	volume = vol;
 }
 
 const std::string& Compartment::getName() const {

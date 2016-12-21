@@ -10,14 +10,26 @@
 
 namespace pattern {
 
-Channel::Channel(const std::string &nme,const CompartmentExpr* src,
-		const CompartmentExpr* trgt)
-	: name(nme),source(src),target(trgt),filter(nullptr) {}
+Channel::Channel(const std::string &nme)
+	: name(nme),source(nullptr),target(nullptr),filter(nullptr) {}
 
 Channel::~Channel() {
-	// TODO Auto-generated destructor stub
+	if(source)
+		delete source;
+	if(target)
+		delete target;
+	if(filter)
+		delete filter;
 }
 
+void Channel::setCompExpressions(const CompartmentExpr* src, const CompartmentExpr* trgt){
+	if(source)
+		delete source;
+	if(target)
+		delete target;
+	source = src;
+	target = trgt;
+}
 
 const std::string& Channel::getName() const {
 	return name;

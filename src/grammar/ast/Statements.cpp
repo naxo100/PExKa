@@ -82,7 +82,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 	Variable* var;
 	short id = 0;
 	try {
-		id = env.declareVariable(name.getString(),type);
+		id = env.declareVariable(name,type);
 	} catch(SemanticError &ex) {
 		ex.setLocation(this->loc);
 		throw ex;
@@ -114,7 +114,7 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 	Variable* var;
 	short id = 0;
 	try {
-		id = env.declareVariable(name.getString(),type);
+		id = env.declareVariable(name,type);
 	} catch(SemanticError &ex) {
 		ex.setLocation(this->loc);
 		throw ex;

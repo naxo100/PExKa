@@ -24,13 +24,16 @@ class Compartment {
 	std::string name;
 	std::vector<short> dimensions;//[dims];
 	int cellsCount;
-	state::BaseExpression* volume;
+	const state::BaseExpression* volume;
 
 	int firstCell;
 
 public:
-	Compartment(const std::string &name,const std::vector<short> &dimensions,state::BaseExpression* volume);
+	Compartment(const std::string &name);
 	~Compartment();
+
+	void setDimensions(const std::vector<short> &dims);
+	void setVolume(const state::BaseExpression* vol);
 
 	const std::string& getName() const;
 

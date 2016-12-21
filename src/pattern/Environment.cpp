@@ -6,6 +6,7 @@
  */
 
 #include "Environment.h"
+#include "../grammar/ast/Basics.h"
 
 using namespace std;
 
@@ -26,18 +27,20 @@ bool Environment::exists(const string &name,const Environment::IdMap &map){
 }
 
 
-short Environment::declareToken(const string &name){
-	if(this->exists(name,tokenMap))
-		throw SemanticError("Token "+name+" already defined.");
+short Environment::declareToken(const ast::Id &name_loc){
+	const string& name = name_loc.getString();
+	if(tokenMap.count(name))
+		throw SemanticError("Token "+name+" already defined.",name_loc.loc);
 	short id = tokenNames.size();
 	tokenMap[name] = id;
 	tokenNames.push_back(name);
 	return id;
 }
-short Environment::declareVariable(const string &name,bool is_kappa){
+short Environment::declareVariable(const ast::Id &name_loc,bool is_kappa){
 	//if(this->exists(name,algMap) || this->exists(name,kappaMap))
+	const string& name = name_loc.getString();
 	if(this->exists(name,varMap))
-		throw SemanticError("Label "+name+" already defined.");
+		throw SemanticError("Label "+name+" already defined.",name_loc.loc);
 	short id;
 	/*if(is_kappa){
 		id = kappaNames.size();
@@ -54,33 +57,36 @@ short Environment::declareVariable(const string &name,bool is_kappa){
 	varNames.push_back(name);
 	return id;
 }
-short Environment::declareCompartment(const Compartment& comp){
-	if(compartmentMap.count(comp.getName()))
-		throw SemanticError("Compartment "+comp.getName()+" already defined.");
+Compartment& Environment::declareCompartment(const ast::Id &name_loc){
+	const string& name = name_loc.getString();
+	if(compartmentMap.count(name))
+		throw SemanticError("Compartment "+name+" already defined.");
 	short id = compartments.size();
-	compartments.push_back(comp);
-	compartmentMap[comp.getName()] = id;
-	return id;
+	compartments.emplace_back(name);
+	compartmentMap[name] = id;
+	return compartments[id];
 }
-short Environment::declareChannel(const Channel &c) {
+Channel& Environment::declareChannel(const ast::Id &name_loc) {
+	const string& name = name_loc.getString();
 	short id;
-	if(channelMap.count(c.getName()))
-		id = channelMap[c.getName()];
+	if(channelMap.count(name))
+		id = channelMap[name];
 	else{
 		id = channels.size();
 		channels.push_back(list<Channel>());
-		channelMap[c.getName()] = id;
+		channelMap[name] = id;
 	}
-	channels[id].push_back(c);
-	return id;
+	channels[id].emplace_back(name);
+	return channels[id].back();
 }
-short Environment::declareSignature(const Signature &s) {
-	if(signatureMap.count(s.getName()))
-		throw SemanticError("Signature "+s.getName()+" already defined.");
+Signature& Environment::declareSignature(const ast::Id &name_loc) {
+	const string& name = name_loc.getString();
+	if(signatureMap.count(name))
+		throw SemanticError("Signature "+name+" already defined.");
 	short id = signatures.size();
-	signatures.push_back(s);
-	signatureMap[s.getName()] = id;
-	return id;
+	signatures.emplace_back(name);
+	signatureMap[name] = id;
+	return signatures[id];
 }
 
 //TODO

@@ -7,7 +7,7 @@
 
 #include "Counter.h"
 
-namespace pattern {
+namespace simulation {
 
 Counter::Counter() {
 	// TODO Auto-generated constructor stub

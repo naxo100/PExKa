@@ -7,7 +7,7 @@
 
 #include "Simulation.h"
 
-namespace state {
+namespace simulation {
 
 Simulation::Simulation() {
 	// TODO Auto-generated constructor stub

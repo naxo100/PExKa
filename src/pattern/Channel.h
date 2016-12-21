@@ -22,13 +22,14 @@ class Channel {
 	std::string name;
 	const CompartmentExpr *source,*target;
 	const state::AlgExpression<bool> *filter;
-	std::map<std::string,int*> varValues;
+	//std::map<std::string,int*> varValues;
 
 
 public:
-	Channel(const std::string &name,
-			const CompartmentExpr* src, const CompartmentExpr* trgt);
+	Channel(const std::string &name);
 	~Channel();
+
+	void setCompExpressions(const CompartmentExpr* src, const CompartmentExpr* trgt);
 
 	const std::string& getName() const;
 	void setFilter(const state::BaseExpression *where);

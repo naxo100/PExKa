@@ -151,16 +151,15 @@ Agent::Agent(){}
 Agent::Agent(const location &l,const Id &id,const list<Site> s):
 	Node(l), name(id),sites(s) {};
 
-pattern::Signature* Agent::eval(pattern::Environment &env){
+void Agent::eval(pattern::Environment &env){
 	//using namespace pattern;
-	pattern::Signature* sign = new pattern::Signature(name.getString());
-	short id = env.declareSignature(*sign);
-	sign->setId(id);
+	pattern::Signature& sign = env.declareSignature(name);
+	//sign.setId(id);
 
 	for(list<Site>::iterator it = sites.begin(); it != sites.end(); it++){
-		it->eval(env,*sign);
+		it->eval(env,sign);
 	}
-	return sign;
+	return;
 }
 void Agent::show( string tabs ) const {
 	tabs += "   ";

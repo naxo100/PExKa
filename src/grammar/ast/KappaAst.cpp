@@ -22,7 +22,7 @@ KappaAst::~KappaAst() {
 void KappaAst::evaluateSignatures(pattern::Environment &env){
 
 	for(list<Agent>::iterator it = signatures.begin();it != signatures.end(); it++){
-		pattern::Signature* sig = it->eval(env);
+		it->eval(env);
 	}
 }
 

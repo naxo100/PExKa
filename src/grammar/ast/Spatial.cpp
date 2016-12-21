@@ -39,10 +39,16 @@ vector<short> CompExpression::evalDimensions(pattern::Environment &env,
 	return ret;
 }
 
-string CompExpression::evalName(pattern::Environment &env,bool declare){
-	if(!declare)
-		env.getCompartmentId(name.getString());
-	return name.getString();
+const Id& CompExpression::evalName(pattern::Environment &env,bool declare){
+	if(!declare){
+		try{
+			env.getCompartmentId(name.getString());
+		}
+		catch(const std::out_of_range &ex){
+			throw SemanticError("No compartment called "+name.getString(),loc);
+		}
+	}
+	return name;
 }
 list<state::BaseExpression*> CompExpression::evalExpression(pattern::Environment &env,
 			const vector<Variable*> &vars){
@@ -62,14 +68,14 @@ Compartment::Compartment(const location& l,const CompExpression& comp_exp,
 		Expression* exp) : Node(l), comp(comp_exp), volume(exp) {}
 
 //TODO
-short Compartment::eval(pattern::Environment &env,const vector<Variable*> &vars){
-	short id;
-	string name = comp.evalName(env,true);
+void Compartment::eval(pattern::Environment &env,const vector<Variable*> &vars){
+	const Id& name = comp.evalName(env,true);
+	pattern::Compartment& c = env.declareCompartment(name);
 	vector<short> dims = comp.evalDimensions(env,vars);
 	state::BaseExpression* vol = volume->eval(env,vars,Expression::CONST);
-	pattern::Compartment c(name,dims,vol);
-	id = env.declareCompartment(c);
-	return id;
+	c.setDimensions(dims);
+	c.setVolume(vol);
+	return;
 }
 
 
@@ -81,13 +87,14 @@ Channel::Channel(const location& l,const Id& nme, const CompExpression& src,
 		Node(l),name(nme),source(src),target(trgt),bidirectional(bckwrds),
 		filter(where),delay(wait) {}
 
-//TODO
-pattern::Channel* Channel::eval(pattern::Environment &env,
-		const vector<Variable*> &vars){
 
+void Channel::eval(pattern::Environment &env,
+		const vector<Variable*> &vars){
 	short src_id,trgt_id;
-	src_id = env.getCompartmentId(source.evalName(env,false));
-	trgt_id = env.getCompartmentId(target.evalName(env,false));
+	pattern::Channel& channel = env.declareChannel(name);
+
+	src_id = env.getCompartmentId(source.evalName(env,false).getString());
+	trgt_id = env.getCompartmentId(target.evalName(env,false).getString());
 
 	list<state::BaseExpression*> src_index,trgt_index;
 	src_index = source.evalExpression(env,vars);
@@ -101,12 +108,10 @@ pattern::Channel* Channel::eval(pattern::Environment &env,
 	c_exp_src->setEquation();
 	if(bidirectional)
 		c_exp_trgt->setEquation();
-	pattern::Channel *channel =
-			new pattern::Channel(name.getString(),c_exp_src,c_exp_trgt);
+	channel.setCompExpressions(c_exp_src,c_exp_trgt);
 	if(filter)
-		channel->setFilter(filter->eval(env,vars));
-	env.declareChannel(*channel);
-	return channel;
+		channel.setFilter(filter->eval(env,vars));
+	return;
 }
 
 

@@ -29,7 +29,7 @@ public:
 
 	vector<short> evalDimensions(pattern::Environment &env,
 			const vector<Variable*> &vars);
-	string evalName(pattern::Environment& env,bool declare=false);
+	const Id& evalName(pattern::Environment& env,bool declare=false);
 
 	/** \brief Evaluate compExpression using auxiliars.
 	 *
@@ -54,7 +54,7 @@ class Compartment : public Node {
 public:
 	Compartment(const location& l,const CompExpression& comp_exp,
 			Expression* exp);
-	short eval(pattern::Environment &env,const vector<Variable*> &vars);
+	void eval(pattern::Environment &env,const vector<Variable*> &vars);
 };
 
 class Channel : public Node {
@@ -67,7 +67,7 @@ public:
 	Channel(const location& l,const Id& nme, const CompExpression& src,
 			const CompExpression& trgt, bool bckwrds, const Expression* where,
 			const Expression* delay);
-	pattern::Channel* eval(pattern::Environment &env,
+	void eval(pattern::Environment &env,
 			const vector<Variable*> &vars);
 
 };

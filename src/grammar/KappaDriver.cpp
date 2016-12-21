@@ -14,7 +14,7 @@ KappaDriver::KappaDriver():
 		parser(*this), lexer (*this){}
 
 KappaDriver::KappaDriver(const vector<string> &fls):
-		parser(*this), lexer(*this), files(fls) {}
+		files(fls),parser(*this), lexer(*this) {}
 
 KappaDriver::~KappaDriver() {}
 

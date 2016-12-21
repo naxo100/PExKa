@@ -93,7 +93,7 @@ public:
 	Agent();
 	Agent(const location &l,const Id &id,const list<Site> s);
 
-	pattern::Signature* eval(pattern::Environment &env);
+	void eval(pattern::Environment &env);
 	pattern::Mixture::Agent* eval(pattern::Environment &env,bool is_pattern);
 
 	void show( string tabs = "" ) const;

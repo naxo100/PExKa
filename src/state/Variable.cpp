@@ -67,7 +67,9 @@ template class AlgebraicVar<bool>;
 /******* class ConstantVar *************/
 template <typename T>
 ConstantVar<T>::ConstantVar(const short var_id, const std::string &nme,const AlgExpression<T> *exp):
-		BaseExpression(), Variable(var_id,nme),val(exp->evaluate(nullptr)) {}
+		BaseExpression(), Variable(var_id,nme),val(exp->evaluate(nullptr)) {
+	delete exp;
+}
 template <typename T>
 T ConstantVar<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
 	return val;

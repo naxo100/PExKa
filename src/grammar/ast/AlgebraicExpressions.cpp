@@ -32,10 +32,31 @@ void Const::show( string tabs ) const {
 	tabs += "   ";
 
 	cout << endl << tabs << "Constant : (" << ar_types[type] << ", ";
-	if( type == FLOAT ) cout << f;
-	else if ( type == INTEGER ) cout << n;
-	else if( type == BOOL ) cout << b;
-	else cout << "No constant type";
+
+	switch(type){
+	case FLOAT:
+		cout << f;
+		break;
+	case INTEGER:
+		cout << n;
+		break;
+	case BOOL:
+		cout << b;
+		break;
+	case INF:
+		cout << "infinity";
+		break;
+	case INF_NEG:
+		cout << "negative infinity";
+		break;
+	case TMAX:
+		cout << "time max";
+		break;
+	case ConstType::EMAX:
+		cout << "event max";
+		break;
+	}
+
 	cout << ")";
 }
 

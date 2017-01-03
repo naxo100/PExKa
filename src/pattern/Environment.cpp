@@ -89,9 +89,8 @@ Signature& Environment::declareSignature(const ast::Id &name_loc) {
 	return signatures[id];
 }
 
-//TODO
 short Environment::getVarId(const string &s) const {
-	return 0;
+	return varMap.at(s);
 }//TODO
 short Environment::getChannelId(const string &s) const {
 	return 0;

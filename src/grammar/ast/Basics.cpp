@@ -26,7 +26,7 @@ Id::Id(const Node &t,const string &s): Node(t),id(s){};
 Id::Id(const location &l,const string &s): Node(l),id(s){};
 Id::~Id(){};
 
-string Id::getString() const {return id;};
+const string& Id::getString() const {return id;};
 
 void Id::show( string tabs ) const {
 	cout << "Id: " << id;

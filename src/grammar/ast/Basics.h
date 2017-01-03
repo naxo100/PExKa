@@ -43,7 +43,7 @@ public:
 	Id(const location &l,const string &s);
 	~Id();
 
-	string getString() const;
+	const string& getString() const;
 	void show( string tabs = "" ) const;
 };
 

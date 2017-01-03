@@ -39,7 +39,7 @@ public:
 	virtual ~KappaAst();
 
 	vector<float> evaluateTokens(pattern::Environment &env);
-	void evaluateSignatures(pattern::Environment &env);
+	void evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts);
 	vector<Variable*> evaluateDeclarations(pattern::Environment &env,vector<Variable*> &vars,bool is_const = false);
 	void evaluateCompartments(pattern::Environment &env,const vector<Variable*>& vars);
 	void evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars);

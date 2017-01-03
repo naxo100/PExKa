@@ -19,10 +19,10 @@ KappaAst::~KappaAst() {
 	// TODO Auto-generated destructor stub
 }
 
-void KappaAst::evaluateSignatures(pattern::Environment &env){
+void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts){
 
 	for(list<Agent>::iterator it = signatures.begin();it != signatures.end(); it++){
-		it->eval(env);
+		it->eval(env,consts);
 	}
 }
 

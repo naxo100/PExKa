@@ -61,22 +61,24 @@ SiteState::SiteState(const location& loc, const list<Id> &labs)
 
 SiteState::SiteState(const location& loc, const Expression* min,
 		const Expression* max,const Expression* def)
-	: Node(loc),type(RANGE),range{min,def,max}{}
+	: Node(loc),type(RANGE),range{min,def,max}{
+		if(!def)
+			range[1] = min;
+	}
 
-const vector<string>& SiteState::evalLabels(){
-	vector<string> *labs = new vector<string>(labels.size());
+void SiteState::evalLabels(pattern::Signature::LabelSite& site){
 	for(list<Id>::iterator it = labels.begin();it != labels.end(); it++)
-		labs->push_back(it->getString());
-	return *labs;
+		site.addLabel(*it);
+	return;
 }
 
-bool SiteState::evalRange(pattern::Environment &env,
+bool SiteState::evalRange(pattern::Environment &env,const vector<state::Variable*> &consts,
 		BaseExpression** expr_values){
 	//using ast::Expression::VAR;
 	//using ast::Expression::FLAGS;
-	expr_values[0] = range[0]->eval(env,Expression::VAR(),
+	expr_values[0] = range[0]->eval(env,consts,
 			Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
-	expr_values[2] = range[2]->eval(env,Expression::VAR(),
+	expr_values[2] = range[2]->eval(env,consts,
 			Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
 	if(range[1] != nullptr)
 		expr_values[1] = range[1]->eval(env,Expression::VAR(),
@@ -88,7 +90,7 @@ bool SiteState::evalRange(pattern::Environment &env,
 	for(int i = 0; i < 3; i++)
 		switch(expr_values[i]->getType()){
 		case BaseExpression::BOOL:
-			throw std::exception();
+			throw SemanticError("Not a valid value to define a range.",range[i]->loc);
 		case BaseExpression::FLOAT:
 			isInt = false;
 			break;
@@ -118,23 +120,35 @@ Site::Site(){}
 Site::Site(const location &l,const Id &id,const SiteState &s,const Link &lnk):
 	Node(l), name(id), stateInfo(s), link(lnk) {};
 
-void Site::eval(pattern::Environment &env,pattern::Signature &sign){
+void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Signature &sign){
 	if(link.getType())
-		throw std::exception();//TODO
+		throw SemanticError("Link status in a definition of signature.",link.loc);
 	//short id;
+	pattern::Signature::Site* site;
 	switch(stateInfo.type){
 	case SiteState::LABEL:
-		sign.addSite(name.getString(),stateInfo.evalLabels());
-
+		site = &sign.addSite<pattern::Signature::LabelSite>(name);
+		stateInfo.evalLabels(*static_cast<pattern::Signature::LabelSite*>(site));
 		break;
 	case SiteState::RANGE:
-		BaseExpression* range[3];
-		if(stateInfo.evalRange(env,range))
-			sign.addSite(name.getString(),range[0]->getValue().fVal,
-					range[2]->getValue().fVal);
-		else
-			sign.addSite(name.getString(),range[0]->getValue().iVal,
-					range[2]->getValue().iVal);
+		try{
+			BaseExpression* range[3];
+			if(!stateInfo.evalRange(env,consts,range)){
+				site = &sign.addSite<pattern::Signature::RangeSite<float> >(name);
+				static_cast<pattern::Signature::RangeSite<float>*>
+					(site)->setBoundaries(range[0]->getValue().valueAs<float>(),
+						range[2]->getValue().valueAs<float>(),range[1]->getValue().valueAs<float>());
+			}
+			else{
+				site = &sign.addSite<pattern::Signature::RangeSite<int> >(name);
+				static_cast<pattern::Signature::RangeSite<int>*>
+					(site)->setBoundaries(range[0]->getValue().valueAs<int>(),
+						range[2]->getValue().valueAs<int>(),range[1]->getValue().valueAs<int>());
+			}
+		}
+		catch(std::out_of_range &e){
+			throw SemanticError(e.what(),stateInfo.loc);
+		}
 		break;
 	}
 }
@@ -151,13 +165,13 @@ Agent::Agent(){}
 Agent::Agent(const location &l,const Id &id,const list<Site> s):
 	Node(l), name(id),sites(s) {};
 
-void Agent::eval(pattern::Environment &env){
+void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &consts){
 	//using namespace pattern;
 	pattern::Signature& sign = env.declareSignature(name);
 	//sign.setId(id);
 
 	for(list<Site>::iterator it = sites.begin(); it != sites.end(); it++){
-		it->eval(env,sign);
+		it->eval(env,consts,sign);
 	}
 	return;
 }

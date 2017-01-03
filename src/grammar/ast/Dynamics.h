@@ -23,7 +23,7 @@ using namespace std;
 //Link of an Agent
 class Link : public Node {
 public:
-	enum LinkType {VALUE,FREE,ANY,SOME,AG_SITE};
+	enum LinkType {FREE,VALUE,ANY,SOME,AG_SITE};
 	Link();
 	Link(const location &l,LinkType t);
 	Link(const location &l,LinkType t,int val);
@@ -61,14 +61,14 @@ public:
 	 * 	Do not test if there are duplicates.
 	 *
 	 */
-	const vector<string>& evalLabels();
+	void evalLabels(pattern::Signature::LabelSite& site);
 	/** \brief Set min and max pointers to the BaseExpression
 	 * of min and max values for range. (set default TODO).
 	 * return true if this is an int range, false if float and
 	 * raise an exception if other.
 	 *
 	 */
-	bool evalRange(pattern::Environment &env,
+	bool evalRange(pattern::Environment &env,const vector<state::Variable*> &consts,
 			BaseExpression** expr_values);
 	void show( string tabs = "" ) const;
 };
@@ -77,7 +77,7 @@ class Site: public Node {
 public:
 	Site();
 	Site(const location &l,const Id &id,const SiteState &s,const Link &lnk);
-	void eval(pattern::Environment &env,pattern::Signature &agent);
+	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Signature &agent);
 	void eval(pattern::Environment &env,pattern::Mixture::Agent &agent);
 	//const Link& getLink();
 	void show( string tabs = "" ) const;
@@ -93,7 +93,7 @@ public:
 	Agent();
 	Agent(const location &l,const Id &id,const list<Site> s);
 
-	void eval(pattern::Environment &env);
+	void eval(pattern::Environment &env,const vector<state::Variable*> &consts);
 	pattern::Mixture::Agent* eval(pattern::Environment &env,bool is_pattern);
 
 	void show( string tabs = "" ) const;

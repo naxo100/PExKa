@@ -96,8 +96,21 @@ SomeValue::SomeValue(float f) : fVal(f),t(BaseExpression::FLOAT){}
 SomeValue::SomeValue(int i) : iVal(i),t(BaseExpression::INT){}
 SomeValue::SomeValue(bool b) : bVal(b),t(BaseExpression::BOOL){}
 
-
-
+template <typename T>
+T SomeValue::valueAs() const {
+	switch(t){
+	case BaseExpression::FLOAT:
+		return static_cast<T>(fVal);
+	case BaseExpression::INT:
+		return static_cast<T>(iVal);
+	case BaseExpression::BOOL:
+		return static_cast<T>(bVal);
+	}
+	return 0;
+}
+template float SomeValue::valueAs<float>() const;
+template int SomeValue::valueAs<int>() const;
+template bool SomeValue::valueAs<bool>() const;
 
 
 /****** AlgExpression ********/

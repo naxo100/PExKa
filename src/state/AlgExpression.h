@@ -38,9 +38,6 @@ public:
 	struct EnumType {static const Type t = FLOAT;};
 
 	virtual const SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
-//	virtual void value(float &ret);
-//	virtual void value(int &ret);
-//	virtual void value(bool &ret);
 
 	/** \brief Return an int vector that represents this expression
 	 * as an equation on auxiliars.
@@ -93,6 +90,7 @@ struct SomeAlgExpression : public BaseExpression {
 };*/
 
 class SomeValue {
+private:
 public:
 	union {
 		float fVal;
@@ -104,6 +102,10 @@ public:
 	SomeValue(float f);
 	SomeValue(int i);
 	SomeValue(bool b);
+
+	template <typename T>
+	T valueAs() const;
+
 
 };
 

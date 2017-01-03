@@ -182,8 +182,9 @@ BaseExpression* Var::eval(pattern::Environment& env,
 			short id = env.getVarId(name.getString());
 			expr = vars[id];
 		}
-		catch(const SemanticError &err){
-
+		catch(const std::out_of_range &e){
+			throw SemanticError("Variable or constant '"+name.getString()+
+					"' is not yet defined.",loc);
 		}
 		break;
 	case AUX:

@@ -135,11 +135,11 @@ instruction:
 | SIGNATURE agent_expression  
 	{this->driver.getAst().add($2);}
 | TOKEN ID
-	{}
+	{this->driver.getAst().add(Id(@2,$2));}
 | SIGNATURE error
 	{}
 | INIT init_declaration 
-	{}
+	{this->driver.getAst().add($2);}
 | INIT error
 	{}
 | LET variable_declaration 
@@ -514,6 +514,8 @@ alg_expr:
 	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::RAND_N);}
 | RAND_1
 	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::RAND_1);}
+| MINUS alg_expr
+	{$$ = new AlgBinaryOperation(@$,new Const(location(),0),$2,BaseExpression::AlgebraicOp::MINUS);}
 ;
 
 rate:

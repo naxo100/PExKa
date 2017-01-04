@@ -42,7 +42,7 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 
 "#"[^\n]*	loc.step();//return KappaParser::make_NEWLINE(loc);	
 [\t ]+		{loc.step();}
-\-?{digit}+	{
+{digit}+	{
 				return KappaParser::make_INT(atoi(yytext),loc); 
 			}
 \-?{real}	{

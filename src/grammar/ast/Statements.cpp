@@ -88,7 +88,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		throw ex;
 	}
 	if(type)
-		var = new state::KappaVar(id,name.getString(),false,mixture->eval(env));
+		var = new state::KappaVar(id,name.getString(),false,mixture->eval(env,vars));
 	else {
 		char flag = constant ? Expression::CONST : 0;
 		BaseExpression* b_expr = expr->eval(env,vars,flag);

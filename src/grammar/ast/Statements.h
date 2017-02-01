@@ -60,7 +60,7 @@ protected:
 };
 
 //The Number of Agents and the Agents at the start
-class Init : public Node {
+class Init : public Node, public Statement {
 	enum InitType {MIXTURE,TOKEN} type;
 	const Expression *alg;
 	union {

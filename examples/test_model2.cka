@@ -1,13 +1,16 @@
 %var: 'y' 3
 %var: 'x' 3/5.0 + 10*5.1 + 100^2 + (5 = 3)
 
-%var: 'hola' 4[min]3
 
-%transport: <move-join> 'L1' (A(x~1,y~2~3),B(x,f~a)) @ 2.0 
+%const: 'a' 0.0
 
+%compartment: 'bottles'[3][3] 1.0
 
-%use: 'C1' [2*2][1] , 'C2' [3][5]
-%token: LALA
+%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $0.1
+%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
 
+%agent: A(s~1~2~3,t~1,v~[-1,1](-'a'),z)
+%agent: B(s,i~1~2)
+%token: a
 
-
+%var: 'some kappa' A(s~2,z!1),A(z!4),B(s!1,i~2!5),A(z!4,s~3),B(s!5)

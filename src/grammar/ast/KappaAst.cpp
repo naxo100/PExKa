@@ -24,6 +24,8 @@ void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variabl
 	for(list<Agent>::iterator it = signatures.begin();it != signatures.end(); it++){
 		it->eval(env,consts);
 	}
+	for(auto it = tokens.begin();it != tokens.end(); it++)
+		env.declareToken(*it);
 }
 
 void KappaAst::evaluateCompartments(pattern::Environment &env,const vector<Variable*> &vars){
@@ -66,6 +68,12 @@ void KappaAst::add(const Compartment &c){
 }
 void KappaAst::add(const Channel &c){
 	channels.push_back(c);
+}
+void KappaAst::add(const Id &t){
+	tokens.push_back(t);
+}
+void KappaAst::add(const Init &i){
+	inits.push_back(i);
 }
 
 /*void KappaAst::add(Perturbation p){

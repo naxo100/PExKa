@@ -71,11 +71,18 @@ int main(int argc, char* argv[]){
 
 	pattern::Environment env;
 	vector<Variable*> vars;
-	ast.evaluateDeclarations(env,vars,true);
-	//ast.evaluateSignatures(env);
-	ast.evaluateDeclarations(env,vars,false);
-	ast.evaluateCompartments(env,vars);
-	ast.evaluateChannels(env,vars);
+	try{
+		ast.evaluateDeclarations(env,vars,true);
+		ast.evaluateSignatures(env,vars);
+		ast.evaluateDeclarations(env,vars,false);
+		ast.evaluateCompartments(env,vars);
+		ast.evaluateChannels(env,vars);
+		//ast.evaluateInits(env,vars);
+	}
+	catch(const exception &e){
+		cerr << e.what() << endl;
+		exit(1);
+	}
 
 	env.show();
 

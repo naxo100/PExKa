@@ -51,6 +51,34 @@ const Link::LinkType& Link::getType() const{
 	return type;
 }
 
+void Link::eval(unordered_map<unsigned,list<pair<short,short> > > &links,
+		const pair<short,short> &mix_ag_site,bool allow_pattern) const {
+	int n;
+	switch(type){
+	case FREE:
+
+		break;
+	case VALUE:
+		n = links[value].size();
+		if(n > 1)
+			throw SemanticError("Edge identifier "+to_string(value)+
+					" used to many times.",loc);
+		else
+			links[value].push_back(mix_ag_site);
+		break;
+	default:
+		if(!allow_pattern)
+			throw SemanticError("Patterns are not allowed here.",loc);
+		break;
+	case ANY:
+		break;
+	case SOME:
+		break;
+	case AG_SITE:
+		break;
+	}
+}
+
 
 /****** Class SiteState ***********/
 
@@ -66,14 +94,14 @@ SiteState::SiteState(const location& loc, const Expression* min,
 			range[1] = min;
 	}
 
-void SiteState::evalLabels(pattern::Signature::LabelSite& site){
-	for(list<Id>::iterator it = labels.begin();it != labels.end(); it++)
-		site.addLabel(*it);
+void SiteState::evalLabels(pattern::Signature::LabelSite& site) const{
+	for(const auto& lab : labels)
+		site.addLabel(lab);
 	return;
 }
 
 bool SiteState::evalRange(pattern::Environment &env,const vector<state::Variable*> &consts,
-		BaseExpression** expr_values){
+		BaseExpression** expr_values) const{
 	//using ast::Expression::VAR;
 	//using ast::Expression::FLAGS;
 	expr_values[0] = range[0]->eval(env,consts,
@@ -81,7 +109,7 @@ bool SiteState::evalRange(pattern::Environment &env,const vector<state::Variable
 	expr_values[2] = range[2]->eval(env,consts,
 			Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
 	if(range[1] != nullptr)
-		expr_values[1] = range[1]->eval(env,Expression::VAR(),
+		expr_values[1] = range[1]->eval(env,consts,
 					Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
 	else
 		expr_values[1] = expr_values[0];
@@ -120,7 +148,8 @@ Site::Site(){}
 Site::Site(const location &l,const Id &id,const SiteState &s,const Link &lnk):
 	Node(l), name(id), stateInfo(s), link(lnk) {};
 
-void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Signature &sign){
+void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts,
+		pattern::Signature &sign) const{
 	if(link.getType())
 		throw SemanticError("Link status in a definition of signature.",link.loc);
 	//short id;
@@ -150,8 +179,64 @@ void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts
 			throw SemanticError(e.what(),stateInfo.loc);
 		}
 		break;
+	default:
+		throw SemanticError("Not a valid value for a site in agent's signature.",loc);
 	}
 }
+
+void Site::eval(pattern::Environment &env,const vector<Variable*> &consts,
+		pattern::Mixture::Agent &agent,unordered_map<unsigned,list<pair<short,short> > > &links) const{
+	const pattern::Signature* sign;
+	short site_id;
+	pattern::Mixture::Site* mix_site;
+	try{
+		sign = &env.getSignature(agent.getId());
+		site_id = sign->getSiteId(name.getString());
+		mix_site = &agent.addSite(site_id);
+	}
+	catch(std::out_of_range &ex){
+		throw SemanticError("Site "+name.getString()
+				+" is not declared in agent signature of "+
+				sign->getName()+"().",loc);
+	}
+	const state::SomeValue *v;
+	state::BaseExpression* num;
+	switch(stateInfo.type){
+	case SiteState::LABEL:
+		if(stateInfo.labels.size() > 1)
+			throw SemanticError("List of labels are only allowed in agent declaration.",loc);
+		/*pattern::Signature::Value v;
+		v.type = pattern::Signature::Value::STRING;
+		v.s = &stateInfo.labels.front().getString();*/
+		if(stateInfo.labels.size() == 1){
+			v = new state::SomeValue(stateInfo.labels.front().getString());
+			short lbl_id;
+			try{
+				lbl_id = sign->getSite(site_id).isPossibleValue(*v);
+			}
+			catch(std::out_of_range &e){
+				throw SemanticError("Label "+*v->sVal+" is not defined for site "+
+						name.getString()+" of agent "+sign->getName()+"().",loc);
+			}
+			agent.setSiteValue(site_id,lbl_id);
+		}
+		break;
+	case SiteState::RANGE:
+		throw SemanticError("Ranges for sites are only allowed in agent declaration.",loc);
+		break;
+	case SiteState::AUX:
+		//agent.setS
+		break;
+	case SiteState::EXPR:
+		num = stateInfo.val->eval(env,consts,Expression::CONST);
+		sign->getSite(site_id).isPossibleValue(num->getValue());
+		break;
+	}
+
+
+	link.eval(links,make_pair(site_id,site_id),true);
+}
+
 void Site::show( string tabs ) const {
 	cout << tabs << "Site " << name.getString();
 
@@ -165,16 +250,37 @@ Agent::Agent(){}
 Agent::Agent(const location &l,const Id &id,const list<Site> s):
 	Node(l), name(id),sites(s) {};
 
-void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &consts){
+void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &consts) const{
 	//using namespace pattern;
 	pattern::Signature& sign = env.declareSignature(name);
 	//sign.setId(id);
 
-	for(list<Site>::iterator it = sites.begin(); it != sites.end(); it++){
-		it->eval(env,consts,sign);
+	for(const auto& site : sites){
+		site.eval(env,consts,sign);
 	}
 	return;
 }
+
+void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Mixture &mix,
+		unordered_map<unsigned,list<pair<short,short> > > &lnks,bool is_pattern) const {
+	short sign_id;
+	try{
+		sign_id = env.getSignatureId(name.getString());
+	}
+	catch(std::out_of_range &e){
+		throw SemanticError("Agent "+name.getString()+"() has not been declared.",loc);
+	}
+
+	pattern::Mixture::Agent a_buff(sign_id);
+
+	for(auto &site : sites){
+		site.eval(env,consts,a_buff,lnks);
+	}
+
+	auto &a = env.declareAgentPattern(a_buff);
+	mix.addAgent(&a);
+}
+
 void Agent::show( string tabs ) const {
 	tabs += "   ";
 	cout << "Agent " << name.getString() << " {";
@@ -189,21 +295,28 @@ void Agent::show( string tabs ) const {
 
 
 /****** Class Mixture ************/
-//TODO
 Mixture::Mixture(){}
 
 Mixture::Mixture(const location &l,const list<Agent> &m):
-	Node(l), mix(m) {};
+	Node(l), agents(m) {};
 
-//TODO
 Mixture::~Mixture(){};
-/*TODO*/
-pattern::Mixture Mixture::eval(pattern::Environment &env) const{
 
-	for(list<Agent>::const_iterator it = mix.cbegin();it != mix.cend();it++){
-		//it->;
+pattern::Mixture Mixture::eval(pattern::Environment &env,
+		const vector<Variable*> &vars,bool is_pattern) const{
+	pattern::Mixture &mix(env.declareMixture(agents.size()));
+	unordered_map<unsigned,list<pair<short,short> > > links;
+	for(list<Agent>::const_iterator it = agents.cbegin();it != agents.cend();it++){
+		it->eval(env,vars,mix,links,is_pattern);
 	}
-	return pattern::Mixture();
+	for(auto &n_link : links){
+		if(n_link.second.size() == 1)
+			throw SemanticError("Edge identifier "+to_string(n_link.first)+
+					" is not paired in mixture.",loc);
+		mix.addLink(n_link.second.front(),*(++n_link.second.begin()));
+	}
+	mix.setComponents(env);
+	return mix;
 }
 
 
@@ -220,10 +333,10 @@ MultipleMixture::~MultipleMixture(){
 /*TODO*/
 pattern::Mixture MultipleMixture::eval(pattern::Environment &env) const{
 
-	for(list<Agent>::const_iterator it = mix.cbegin();it != mix.cend();it++){
+	for(list<Agent>::const_iterator it = agents.cbegin();it != agents.cend();it++){
 		//it->;
 	}
-	return pattern::Mixture();
+	return pattern::Mixture(0);
 }
 
 
@@ -341,7 +454,7 @@ Rate::~Rate(){
 }
 
 /****** Class Token **************/
-Token::Token(){}
+Token::Token() : exp(nullptr) {}
 Token::Token(const location &l,const Expression *e,const Id &id):
 	Node(l), exp(e), id(id) {};
 

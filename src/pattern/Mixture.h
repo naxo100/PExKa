@@ -44,7 +44,7 @@ public:
 	void setComponents(Environment &env);
 
 
-	string toString() const;
+	string toString(const Environment &env) const;
 
 
 private:

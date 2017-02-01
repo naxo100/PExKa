@@ -166,7 +166,7 @@ void Environment::show() const {
 	cout << "\tMixtures[" << mixtures.size() << "]" << endl;
 	for(size_t i = 0; i < mixtures.size(); i++){
 		cout << (i+1) << ") ";
-		cout << mixtures[i].toString() << endl;
+		cout << mixtures[i].toString(*this) << endl;
 	}
 	}
 	catch(exception &e){

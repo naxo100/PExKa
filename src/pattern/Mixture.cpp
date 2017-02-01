@@ -91,7 +91,7 @@ void Mixture::setComponents(Environment &env){
 	//return this->comps;
 }
 
-string Mixture::toString() const {
+string Mixture::toString(const Environment& env) const {
 	return "agents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount);
 }
 

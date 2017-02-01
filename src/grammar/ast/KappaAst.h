@@ -13,6 +13,7 @@
 #include <utility>  //std::pair
 
 #include "Statements.h"
+#include "../../state/State.h"
 
 using namespace std;
 
@@ -30,8 +31,10 @@ class KappaAst {
 	//AST structures
 	list<Declaration> variables,constants;
 	list<Agent> signatures;
+	list<Id> tokens;
 	list<Compartment> compartments;
 	list<Channel> channels;
+	list<Init> inits;
 	//list<Perturbation> perts;
 
 public:
@@ -39,16 +42,19 @@ public:
 	virtual ~KappaAst();
 
 	vector<float> evaluateTokens(pattern::Environment &env);
-	void evaluateSignatures(pattern::Environment &env);
+	void evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts);
 	vector<Variable*> evaluateDeclarations(pattern::Environment &env,vector<Variable*> &vars,bool is_const = false);
 	void evaluateCompartments(pattern::Environment &env,const vector<Variable*>& vars);
 	void evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars);
+	void evaluateInits(const pattern::Environment &env,const vector<Variable*>,state::State &state);
 
 	//ADD functions
 	void add(const Declaration &d);
 	void add(const Agent &a);
 	void add(const Compartment &c);
 	void add(const Channel &c);
+	void add(const Id &t);
+	void add(const Init &i);
 	//void add(Perturbation p);
 
 

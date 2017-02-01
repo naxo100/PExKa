@@ -14,7 +14,7 @@
 
 
 class SemanticError : public std::exception {
-	std::string msg;
+	char msg[50];
 	yy::location loc;
 public:
 	SemanticError(const std::string &str,const yy::location &loc = yy::location());

@@ -29,8 +29,8 @@ bool Environment::exists(const string &name,const Environment::IdMap &map){
 
 short Environment::declareToken(const ast::Id &name_loc){
 	const string& name = name_loc.getString();
-	if(tokenMap.count(name))
-		throw SemanticError("Token "+name+" already defined.",name_loc.loc);
+	if(tokenMap.count(name) || signatureMap.count(name) )
+		throw SemanticError("Name "+name+" already defined for agent or token.",name_loc.loc);
 	short id = tokenNames.size();
 	tokenMap[name] = id;
 	tokenNames.push_back(name);
@@ -81,27 +81,62 @@ Channel& Environment::declareChannel(const ast::Id &name_loc) {
 }
 Signature& Environment::declareSignature(const ast::Id &name_loc) {
 	const string& name = name_loc.getString();
-	if(signatureMap.count(name))
-		throw SemanticError("Signature "+name+" already defined.");
+	if(tokenMap.count(name) || signatureMap.count(name) )
+		throw SemanticError("Name "+name+" already defined for agent or token.",name_loc.loc);
 	short id = signatures.size();
 	signatures.emplace_back(name);
 	signatureMap[name] = id;
 	return signatures[id];
 }
 
-//TODO
+Mixture& Environment::declareMixture(unsigned agent_count) {
+	mixtures.emplace_back(agent_count);
+	return mixtures.back();
+}
+
+const Mixture::Component& Environment::declareComponent(const Mixture::Component& new_comp){
+	for(const auto &comp : components ){
+		if( comp == new_comp){
+			return comp;
+		}
+	}
+	components.emplace_back(new_comp);
+	return components.back();
+}
+
+const Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent& new_ag){
+	for(auto &ag : agentPatterns ){
+		if( ag == new_ag){
+			return ag;
+		}
+	}
+	agentPatterns.emplace_back(new_ag);
+	return agentPatterns.back();
+}
+
 short Environment::getVarId(const string &s) const {
-	return 0;
-}//TODO
+	return varMap.at(s);
+}
 short Environment::getChannelId(const string &s) const {
-	return 0;
-}//TODO
+	return channelMap.at(s);
+}
 short Environment::getCompartmentId(const string &s) const {
 	return compartmentMap.at(s);
 }
+short Environment::getSignatureId(const string &s) const {
+	return signatureMap.at(s);
+}
+
 
 const Compartment& Environment::getCompartment(short id) const{
 	return compartments[id];
+}
+
+const Signature& Environment::getSignature(short id) const {
+	return signatures[id];
+}
+const vector<pattern::Signature>& Environment::getSignatures() const{
+	return signatures;
 }
 
 
@@ -127,6 +162,11 @@ void Environment::show() const {
 			list< list<int> > l = it->getConnections();
 			it->printConnections(l);
 		}
+	}
+	cout << "\tMixtures[" << mixtures.size() << "]" << endl;
+	for(size_t i = 0; i < mixtures.size(); i++){
+		cout << (i+1) << ") ";
+		cout << mixtures[i].toString(*this) << endl;
 	}
 	}
 	catch(exception &e){

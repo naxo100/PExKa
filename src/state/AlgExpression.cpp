@@ -95,9 +95,25 @@ template BaseExpression* BaseExpression::makeBinaryExpression<false>
 SomeValue::SomeValue(float f) : fVal(f),t(BaseExpression::FLOAT){}
 SomeValue::SomeValue(int i) : iVal(i),t(BaseExpression::INT){}
 SomeValue::SomeValue(bool b) : bVal(b),t(BaseExpression::BOOL){}
+SomeValue::SomeValue(const std::string &s) : sVal(new std::string(s)),t(BaseExpression::STR){}
 
-
-
+template <typename T>
+T SomeValue::valueAs() const {
+	switch(t){
+	case BaseExpression::FLOAT:
+		return static_cast<T>(fVal);
+	case BaseExpression::INT:
+		return static_cast<T>(iVal);
+	case BaseExpression::BOOL:
+		return static_cast<T>(bVal);
+	case BaseExpression::STR:
+		return std::stof(*sVal);
+	}
+	return 0;
+}
+template float SomeValue::valueAs<float>() const;
+template int SomeValue::valueAs<int>() const;
+template bool SomeValue::valueAs<bool>() const;
 
 
 /****** AlgExpression ********/

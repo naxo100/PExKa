@@ -135,11 +135,11 @@ instruction:
 | SIGNATURE agent_expression  
 	{this->driver.getAst().add($2);}
 | TOKEN ID
-	{}
+	{this->driver.getAst().add(Id(@2,$2));}
 | SIGNATURE error
 	{}
 | INIT init_declaration 
-	{}
+	{this->driver.getAst().add($2);}
 | INIT error
 	{}
 | LET variable_declaration 
@@ -514,6 +514,8 @@ alg_expr:
 	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::RAND_N);}
 | RAND_1
 	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::RAND_1);}
+| MINUS alg_expr
+	{$$ = new AlgBinaryOperation(@$,new Const(location(),0),$2,BaseExpression::AlgebraicOp::MINUS);}
 ;
 
 rate:
@@ -582,8 +584,12 @@ port_expression:
 internal_state:
  state_enum 
 	{$$ = SiteState(@$,$1);}
-| KAPPA_INTER constant MINUS constant CL_BRA
+| KAPPA_INTER alg_expr COMMA alg_expr CL_BRA
 	{$$ = SiteState(@$,$2,$4);}
+| KAPPA_INTER alg_expr COMMA alg_expr CL_BRA OP_PAR alg_expr CL_PAR
+	{$$ = SiteState(@$,$2,$4,$7);}
+| error
+	{yy::KappaParser::error(@1,"Invalid internal state");}
 
 state_enum:
 /*empty*/ 
@@ -615,10 +621,8 @@ link_state:
 %%
 
 void yy::KappaParser::error(const location &loc , const std::string &message) {
-        
-        // Location should be initialized inside scanner action, but is not in this example.
-        // Let's grab location directly from driver class.
+	// Location should be initialized inside scanner action, but is not in this example.
+	// Let's grab location directly from driver class.
 	// cout << "Error: " << message << endl << "Location: " << loc << endl;
-	
-        cout << "Error: " << message << endl << "Error location: " << loc << endl;
+	cout << "Error: " << message << endl << "Error location: " << loc << endl;
 }

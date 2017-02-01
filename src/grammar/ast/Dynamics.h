@@ -22,8 +22,8 @@ using namespace std;
 
 //Link of an Agent
 class Link : public Node {
-public:
-	enum LinkType {VALUE,FREE,ANY,SOME,AG_SITE};
+public:			//       !1    !?  !_   !A.s
+	enum LinkType {FREE,VALUE,ANY,SOME,AG_SITE};
 	Link();
 	Link(const location &l,LinkType t);
 	Link(const location &l,LinkType t,int val);
@@ -33,10 +33,13 @@ public:
 	~Link();
 	const LinkType& getType() const;
 
+	void eval(unordered_map<unsigned,list<pair<short,short> > > &,
+			const pair<short,short> &mix_ag_site,bool allow_pattern) const;
+
 protected:
 	LinkType type;
 	union {
-		int value;
+		unsigned int value;
 		struct {
 			Id agent;
 			Id site;
@@ -46,30 +49,34 @@ protected:
 
 class SiteState : public Node{
 public:
-	enum {LABEL,RANGE} type;
+	enum {LABEL,RANGE,AUX,EXPR} type;
 	//union {
 		list<Id> labels;
+		Id aux;
+		const Expression* val;
 		const Expression* range[3];//{min,default,max}
 	//};
 	SiteState();
 	SiteState(const location& loc, const list<Id> &labs);
 	SiteState(const location& loc, const Expression* min,
 			const Expression* max,const Expression* def=nullptr);
+	SiteState(const location& loc,const Id &aux);
 	~SiteState();
 
 	/** \brief return a vector of the site labels.
 	 * 	Do not test if there are duplicates.
 	 *
 	 */
-	const vector<string>& evalLabels();
+	void evalLabels(pattern::Signature::LabelSite& site) const;
 	/** \brief Set min and max pointers to the BaseExpression
 	 * of min and max values for range. (set default TODO).
 	 * return true if this is an int range, false if float and
 	 * raise an exception if other.
 	 *
 	 */
-	bool evalRange(pattern::Environment &env,
-			BaseExpression** expr_values);
+	bool evalRange(pattern::Environment &env,const vector<state::Variable*> &consts,
+			BaseExpression** expr_values) const;
+
 	void show( string tabs = "" ) const;
 };
 
@@ -77,8 +84,9 @@ class Site: public Node {
 public:
 	Site();
 	Site(const location &l,const Id &id,const SiteState &s,const Link &lnk);
-	void eval(pattern::Environment &env,pattern::Signature &agent);
-	void eval(pattern::Environment &env,pattern::Mixture::Agent &agent);
+	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Signature &agent) const;
+	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,
+			pattern::Mixture::Agent &agent,unordered_map<unsigned,list<pair<short,short> > > &m) const;
 	//const Link& getLink();
 	void show( string tabs = "" ) const;
 protected:
@@ -93,8 +101,9 @@ public:
 	Agent();
 	Agent(const location &l,const Id &id,const list<Site> s);
 
-	void eval(pattern::Environment &env);
-	pattern::Mixture::Agent* eval(pattern::Environment &env,bool is_pattern);
+	void eval(pattern::Environment &env,const vector<state::Variable*> &consts) const;
+	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Mixture &mix,
+			unordered_map<unsigned,list <pair<short,short> > > &lnks, bool is_pattern) const;
 
 	void show( string tabs = "" ) const;
 
@@ -106,11 +115,12 @@ protected:
 
 class Mixture : public Node {
 protected:
-	list<Agent>  mix;
+	list<Agent>  agents;
 public:
 	Mixture();
 	Mixture(const location &l,const list<Agent> &m);
-	virtual pattern::Mixture eval(pattern::Environment &env) const;
+	virtual pattern::Mixture eval(pattern::Environment &env,
+			const vector<Variable*> &vars,bool is_pattern = true) const;
 	virtual ~Mixture();
 };
 

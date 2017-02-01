@@ -24,7 +24,7 @@ class SomeValue;
  */
 class BaseExpression {
 public:
-	enum Type {FLOAT,INT,BOOL};
+	enum Type {FLOAT,INT,BOOL,ID,STR};
 	enum AlgebraicOp {SUM,MINUS,MULT,DIV,POW,MODULO,MAX,MIN};
 	enum BoolOp {AND,OR,GREATER,SMALLER,EQUAL,DIFF};
 	enum Unary {SQRT,EXPONENT,LOG,SINUS,COSINUS,TAN,ATAN,ABS,
@@ -38,9 +38,6 @@ public:
 	struct EnumType {static const Type t = FLOAT;};
 
 	virtual const SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
-//	virtual void value(float &ret);
-//	virtual void value(int &ret);
-//	virtual void value(bool &ret);
 
 	/** \brief Return an int vector that represents this expression
 	 * as an equation on auxiliars.
@@ -93,17 +90,26 @@ struct SomeAlgExpression : public BaseExpression {
 };*/
 
 class SomeValue {
+private:
 public:
 	union {
 		float fVal;
 		int iVal;
+		short idVal;
 		bool bVal;
+		std::string* sVal;
 	};
 	BaseExpression::Type t;
 
 	SomeValue(float f);
 	SomeValue(int i);
 	SomeValue(bool b);
+	SomeValue(const std::string &s);
+	//SomeValue(const std::string *s);
+
+	template <typename T>
+	T valueAs() const;
+
 
 };
 

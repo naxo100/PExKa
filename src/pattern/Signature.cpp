@@ -22,8 +22,12 @@ Signature::~Signature() {
 const std::string& Signature::getName() const{
 	return name;
 }
-void Signature::setId(short i){
+/*void Signature::setId(short i){
 	id = i;
+}*/
+
+short Signature::getSiteId(const string &name) const{
+	return siteMap.at(name);
 }
 
 template <typename T>
@@ -44,7 +48,7 @@ template Signature::Site& Signature::addSite<Signature::RangeSite<float> >(const
 short Signature::addSite(const ast::Id &name_loc,const vector<string> &labels){
 	const string& nme(name_loc.getString());
 	if(siteMap.count(nme))
-		throw SemanticError("Site "+nme+" declared twice!");
+		throw SemanticError("Site "+nme+" declared twice!",name_loc.loc);
 	short id = sites.size();
 	siteMap[nme] = id;
 	sites.push_back(new LabelSite(nme));
@@ -59,14 +63,16 @@ short Signature::addSite(const ast::Id &name_loc,float min,float max){
 	return 0;
 }
 
-
+const Signature::Site& Signature::getSite(short id) const{
+	return *sites[id];
+}
 
 
 /***************** classes Site *********************/
 
 Signature::Site::Site(const string& nme) : name(nme){}
 Signature::EmptySite::EmptySite(const string& nme) : Site(nme){}
-bool Signature::EmptySite::isPossibleValue(const Value &val){
+short Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
 	return false;
 }
 Signature::Site::~Site(){}
@@ -86,8 +92,10 @@ void Signature::LabelSite::addLabel(const ast::Id& name_loc){
 	label_ids[lbl] = labels.size();
 	labels.push_back(lbl);
 }
-bool Signature::LabelSite::isPossibleValue(const Value &val){
-	return label_ids.count(*val.s);
+short Signature::LabelSite::isPossibleValue(const state::SomeValue &val) const {
+	if(val.t != state::BaseExpression::STR)
+		throw std::invalid_argument("Not a string value.");
+	return label_ids.at(*val.sVal);
 }
 
 template <typename T>
@@ -105,12 +113,12 @@ void Signature::RangeSite<T>::setBoundaries(T mn, T mx, T def){
 
 
 template <>
-bool Signature::RangeSite<float>::isPossibleValue(const Value &val){
-	return val.f >= min && val.f <= max;
+short Signature::RangeSite<float>::isPossibleValue(const state::SomeValue &val) const {
+	return val.t == state::BaseExpression::FLOAT && val.fVal >= min && val.fVal <= max;
 }
 template <>
-bool Signature::RangeSite<int>::isPossibleValue(const Value &val){
-	return val.i >= min && val.i <= max;
+short Signature::RangeSite<int>::isPossibleValue(const state::SomeValue &val) const {
+	return val.t == state::BaseExpression::INT && val.iVal >= min && val.iVal <= max;
 }
 
 template void Signature::RangeSite<float>::setBoundaries(float,float,float);

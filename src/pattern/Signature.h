@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "../state/AlgExpression.h"
 
 namespace ast {
 class Id;
@@ -34,7 +35,7 @@ public:
 	~Signature();
 
 	const string& getName() const;
-	void setId(short id);
+	//void setId(short id);
 	template <typename T>
 	Site& addSite(const ast::Id &name);
 	short addSite(const ast::Id &name,const vector<string> &labels);
@@ -43,8 +44,9 @@ public:
 
 	const Site& getSite(const short id) const;
 	const Site& getSite(const string &name) const;
+	short getSiteId(const string &name) const;
 private:
-	short id;
+	//short id;
 	string name;
 	vector<Site*> sites;
 	unordered_map<string,short> siteMap;
@@ -67,13 +69,16 @@ protected:
 
 public:
 	Site(const string &nme);
-	virtual bool isPossibleValue(const Value &val) = 0;
+	/** \brief Test whether @val is a valid value for this site and
+	 * returns id for labeled sites.
+	 */
+	virtual short isPossibleValue(const state::SomeValue &val) const = 0;
 	virtual ~Site();
 
 };
 
 class Signature::EmptySite : public Site {
-	virtual bool isPossibleValue(const Value &val) override;
+	virtual short isPossibleValue(const state::SomeValue &val) const override;
 public:
 	EmptySite(const string &nme);
 };
@@ -81,7 +86,7 @@ class Signature::LabelSite : public Site {
 	vector<string> labels;
 	unordered_map<string,short> label_ids;
 
-	virtual bool isPossibleValue(const Value &val) override;
+	virtual short isPossibleValue(const state::SomeValue &val) const override;
 public:
 	LabelSite(const string &name);
 	void addLabel(const ast::Id& name_loc);
@@ -89,7 +94,7 @@ public:
 template <typename T>
 class Signature::RangeSite : public Site {
 	T min,max,byDefault;
-	virtual bool isPossibleValue(const Value &val) override;
+	virtual short isPossibleValue(const state::SomeValue &val) const override;
 public:
 	RangeSite(const string &nme);
 	void setBoundaries(T mn,T mx, T def);

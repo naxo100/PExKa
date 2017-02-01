@@ -24,7 +24,7 @@ class SomeValue;
  */
 class BaseExpression {
 public:
-	enum Type {FLOAT,INT,BOOL};
+	enum Type {FLOAT,INT,BOOL,ID,STR};
 	enum AlgebraicOp {SUM,MINUS,MULT,DIV,POW,MODULO,MAX,MIN};
 	enum BoolOp {AND,OR,GREATER,SMALLER,EQUAL,DIFF};
 	enum Unary {SQRT,EXPONENT,LOG,SINUS,COSINUS,TAN,ATAN,ABS,
@@ -95,13 +95,17 @@ public:
 	union {
 		float fVal;
 		int iVal;
+		short idVal;
 		bool bVal;
+		std::string* sVal;
 	};
 	BaseExpression::Type t;
 
 	SomeValue(float f);
 	SomeValue(int i);
 	SomeValue(bool b);
+	SomeValue(const std::string &s);
+	//SomeValue(const std::string *s);
 
 	template <typename T>
 	T valueAs() const;

@@ -15,6 +15,7 @@
 #include "Signature.h"
 #include "Compartment.h"
 #include "Channel.h"
+#include "Mixture.h"
 //#include "../state/AlgExpression.h"
 //#include "../grammar/ast/Basics.h"
 #include "../util/Exceptions.h"
@@ -46,6 +47,9 @@ protected:
 	vector<Signature> signatures;
 	vector<Compartment> compartments;
 	vector<list<Channel> > channels;
+	vector<Mixture> mixtures;
+	vector<Mixture::Component> components;
+	vector<Mixture::Agent> agentPatterns;
 
 	bool exists(const string &name,const IdMap &map);
 public:
@@ -57,15 +61,20 @@ public:
 	Signature& declareSignature(const ast::Id& sign);
 	Compartment& declareCompartment(const ast::Id& comp);
 	Channel& declareChannel(const ast::Id &channel);
+	Mixture& declareMixture(unsigned agent_count);
+	const Mixture::Component& declareComponent(const Mixture::Component& c);
+	const Mixture::Agent& declareAgentPattern(const Mixture::Agent& a);
 	short idOfAlg(const string& name);
 
-	Signature& getSignature(short id) const;
+	const Signature& getSignature(short id) const;
+	const vector<Signature>& getSignatures() const;
 	const Channel& getChannel(short id) const;
 	const Compartment& getCompartment(short id) const;
 
 	short getVarId(const string &name) const;
 	short getChannelId(const string &name) const;
 	short getCompartmentId(const string &name) const;
+	short getSignatureId(const string &name) const;
 	state::BaseExpression* getVarExpression(const string &name) const;
 
 

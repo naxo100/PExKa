@@ -8,6 +8,7 @@
 #include "Mixture.h"
 #include "Environment.h"
 
+
 namespace pattern {
 
 
@@ -22,53 +23,55 @@ Mixture::~Mixture() {
 	//delete[] agents;
 }
 
-short Mixture::addAgent(const Mixture::Agent *a){
+void Mixture::addAgent(const Mixture::Agent *a){
 	agents[agentCount] = a;
 	agentCount++;
-	return agentCount-1;
+	//return agentCount-1;
 }
 
-void Mixture::addLink(const id_pair &first,const id_pair &second){
-	graph.emplace(first,second);
-	graph.emplace(second,first);
+void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
+	links.emplace_back(p1.first,p1.second);
+	links.emplace_back(p2.first,p2.second);
 }
 
 void Mixture::setComponents(Environment &env){
 	//Component c;
 	//map<id_pair,id_pair,CompareIdPair> m(graph);
+	//sort(agents->begin(),agents->end());
 	list<pair<Component*,map<short,short> > > comps;
-	for(const auto& lnk : graph){
+	for(auto l_it = links.cbegin();l_it != links.cend(); advance(l_it,2)){
+		auto p1 = *l_it,p2 = *next(l_it,1);
 		auto c_it = comps.begin();
 		for(;c_it != comps.end(); c_it++){
 			Component &comp = *get<0>(*c_it);
 			//set<short> &content = get<1>(*c_it);
 			map<short,short> &mask = get<1>(*c_it);//ag_mix -> ag_comp
-			if(mask.find(lnk.first.first) != mask.end()){
-				comp.addAgent(agents[lnk.second.first]);
-				mask.insert(make_pair(lnk.second.first,comp.size()-1));
+			if(mask.find(p1.first) != mask.end()){
+				comp.addAgent(agents[p2.first]);
+				mask.insert(make_pair(p2.first,comp.size()-1));
 				//content.insert(lnk.second.first);
-				comp.addLink(lnk,mask);
+				comp.addLink(make_pair(p1,p2),mask);
 				break;
 			}
-			else if(mask.find(lnk.second.first) != mask.end()){
-				comp.addAgent(agents[lnk.first.first]);
-				mask.insert(make_pair(lnk.first.first,comp.size()-1));
+			else if(mask.find(p2.first) != mask.end()){
+				comp.addAgent(agents[p1.first]);
+				mask.insert(make_pair(p1.first,comp.size()-1));
 				//content.insert(lnk.first.first);
-				comp.addLink(lnk,mask);
+				comp.addLink(make_pair(p1,p2),mask);
 				break;
 			}
 		}
-		if(c_it != comps.end()){
+		if(c_it == comps.end()){
 			comps.emplace_back(new Component(),map<short,short>());
-			comps.back().second.emplace(lnk.first.first,0);
-			comps.back().first->addAgent(agents[lnk.first.first]);
-			comps.back().second.emplace(lnk.second.first,1);
-			comps.back().first->addAgent(agents[lnk.second.first]);
-			comps.back().first->addLink(lnk,comps.back().second);
+			comps.back().second.emplace(p1.first,0);
+			comps.back().first->addAgent(agents[p1.first]);
+			comps.back().second.emplace(p2.first,1);
+			comps.back().first->addAgent(agents[p2.first]);
+			comps.back().first->addLink(make_pair(p1,p2),comps.back().second);
 		}
 
 	}
-	for(int i = 0; i < agentCount ; i++){
+	for(size_t i = 0; i < agentCount ; i++){
 		auto c_it = comps.begin();
 		for(;c_it != comps.end(); c_it++){
 			if(c_it->second.find(i) != c_it->second.end())
@@ -80,15 +83,21 @@ void Mixture::setComponents(Environment &env){
 		}
 	}
 	compCount = comps.size();
-	this->comps = new const Component*[compCount];
+	delete[] agents;
+	this->comps = new vector<const Component*>(compCount);
 	int i=0;
 	for(const auto& c : comps){
+		c.first->setGraph();
 		auto comp = env.declareComponent(*c.first);
 		delete c.first;
-		this->comps[i] = &comp;
+		(*this->comps)[i] = &comp;
 		i++;
 	}
 	//return this->comps;
+}
+
+size_t Mixture::size() const {
+	return agentCount;
 }
 
 string Mixture::toString(const Environment& env) const {
@@ -116,7 +125,7 @@ short Mixture::Agent::getId() const {
 bool Mixture::Agent::operator ==(const Agent &a) const {
 	if(this == &a)
 		return true;
-	if(signId == a.signId){
+	if(signId == a.signId && interface.size() == a.interface.size()){
 		for(const pair<int,Site> &id_site : interface){
 			try{
 				if(! (id_site.second == a.getSite(id_site.first)) )
@@ -168,7 +177,7 @@ bool Mixture::Site::operator ==(const Site &s) const{
 
 /************** class Component ****************/
 
-Mixture::Component::Component() {};
+Mixture::Component::Component() : links(new list<ag_st_id>()){};
 Mixture::Component::Component(const Component& comp) : agents(comp.size(),nullptr),graph(comp.graph) {
 	for(size_t i = 0; i < agents.size() ; i++)
 		agents[i] = comp.agents[i];
@@ -184,17 +193,17 @@ short Mixture::Component::addAgent(const Mixture::Agent* a){
 	return agents.size()-1;
 }
 
-void Mixture::Component::addLink(const pair<id_pair,id_pair> &lnk,const map<short,short> &mask){
-	id_pair first(mask.at(lnk.first.first),lnk.first.second);
-	id_pair second(mask.at(lnk.second.first),lnk.second.second);
-	graph.emplace(first,second);
-	graph.emplace(second,first);
+void Mixture::Component::addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<short,short> &mask){
+	ag_st_id first(mask.at(lnk.first.first),lnk.first.second);
+	ag_st_id second(mask.at(lnk.second.first),lnk.second.second);
+	links->emplace_back(first);
+	links->emplace_back(second);
 }
 
 bool Mixture::Component::operator ==(const Component &c) const{
 	if(this == &c)
 		return true;
-	if(c.graph != graph)
+	if(*c.graph != *graph)
 		return false;
 	if(size() == c.size()){
 		for(size_t i = 0; i< size(); i++){
@@ -202,13 +211,40 @@ bool Mixture::Component::operator ==(const Component &c) const{
 				return false;
 		}
 	}
+	else
+		return false;
 	return true;
+}
+
+void Mixture::Component::setGraph() {
+	list<pair<const Agent*,short> > reorder;
+	for(size_t i = 0; i < agents.size(); i++ )
+		reorder.emplace_back(agents[i],(short)i);
+	reorder.sort();
+	size_t i = 0;
+	map<short,short> mask;
+	for(auto aptr_id : reorder){
+		agents[i] = aptr_id.first;
+		mask.emplace(aptr_id.second,(short)i);
+		i++;
+	}
+
+	auto graph_ptr = new map<ag_st_id,ag_st_id>();
+	for(auto l_it = links->begin(); l_it != links->end(); advance(l_it,2)){
+		auto p1 = *l_it, p2 = *next(l_it,1);
+		graph_ptr->emplace(make_pair(mask[p1.first],p1.second),
+				make_pair(mask[p2.first],p2.second));
+		graph_ptr->emplace(make_pair(mask[p2.first],p2.second),
+				make_pair(mask[p1.first],p1.second));
+	}
+	delete links;
+	graph = graph_ptr;
 }
 
 /*****************************************/
 
-
-bool CompareIdPair::operator()(id_pair p1,id_pair p2){
+template <typename T1,typename T2>
+bool ComparePair<T1,T2>::operator()(pair<T1,T2> p1,pair<T1,T2> p2){
 	return p1.first < p2.first ? true : (p1.second < p2.second ? true : false );
 }
 

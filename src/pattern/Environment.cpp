@@ -168,6 +168,9 @@ void Environment::show() const {
 		cout << (i+1) << ") ";
 		cout << mixtures[i].toString(*this) << endl;
 	}
+	cout << "\tComponents[" << components.size() << "]" << endl;
+	cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
+
 	}
 	catch(exception &e){
 		cout << "error: " << e.what() << endl;

@@ -35,7 +35,12 @@ struct ComparePair{
 
 
 /** \brief Representation of a set of agent complexes.
- *
+ * The class Mixture must be initialized with the quantity of agents it will contain.
+ * Using the addAgent() and addLink() methods the class is filled until it's complete.
+ * Then setComponents(env) must be called to end initialization and declare components
+ * in the environment. After that, the mixture is ready to be declare in the environment.
+ * TODO Any attempt to add links or agents to the mixture after setComponents() will
+ * throw exceptions.
  */
 class Mixture {
 public:
@@ -50,6 +55,7 @@ public:
 	 * @param agent_count total agents of this mixture.
 	 */
 	Mixture(short agent_count);
+	Mixture(const Mixture& m);
 	~Mixture();
 
 	/** \brief Add a new agent to the mixture.
@@ -70,10 +76,13 @@ public:
 	 * Using the links and agents in this mixture, this method identifies
 	 * all connected components and declare them in the environment. Agent
 	 * pointers contained in this mixture are removed and moved to components.
-	 * Also the graph is cleared and moved to the components.
+	 * Also the graph is cleared and moved to the components. declaredComps
+	 * is set to true.
 	 * @param env the environment of simulation.
 	 */
 	void setComponents(Environment &env);
+
+	bool operator==(const Mixture& m) const;
 
 	size_t size() const;
 
@@ -85,6 +94,8 @@ public:
 
 
 private:
+	//true for valis comps; false for valid agents.
+	bool declaredComps;
 	union {
 		const Agent** agents;
 		vector<const Component*>* comps;
@@ -102,6 +113,7 @@ private:
 
 
 struct Mixture::Site {
+	//valid type of the site state
 	ValueType val_type;
 	union {
 		int int_value;
@@ -109,8 +121,9 @@ struct Mixture::Site {
 		short id_value;
 		string* lbl;
 	} state;
-	//short path_id;
+
 	LinkType link_type;
+	//only valid if type is BIND_TO
 	std::pair<short,short> lnk;//agent,site
 
 	bool operator==(const Site &s) const;

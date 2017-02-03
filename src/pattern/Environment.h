@@ -61,7 +61,7 @@ public:
 	Signature& declareSignature(const ast::Id& sign);
 	Compartment& declareCompartment(const ast::Id& comp);
 	Channel& declareChannel(const ast::Id &channel);
-	Mixture& declareMixture(unsigned agent_count);
+	const Mixture& declareMixture(const Mixture& m);
 	const Mixture::Component& declareComponent(const Mixture::Component& c);
 	const Mixture::Agent& declareAgentPattern(const Mixture::Agent& a);
 	short idOfAlg(const string& name);

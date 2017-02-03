@@ -28,13 +28,25 @@ public:
 	Simulation();
 	~Simulation();
 
-	/** \brief Return a way to allocate cells among cpus.
+	/** \brief Return a way to allocate cells among cpu's.
 	 *
 	 * @param n_cpus Number of machines or comm_world.size()
 	 * @param w_vertex Weights for every cell (total reactivity).
 	 * @param w_edges Weights for every channel (sum of transport reactivity).
+	 * @param tol Tolerance in the number of processors to be assigned
+	 * @return a vector with the compartments indexed by ID processor
 	 */
-	vector<list<int> > allocCells(int n_cpus,const float w_vertex[],const map<pair<int,int>,float> &w_edges);
+	vector<list<int> > allocCells(int n_cpus, const vector<double> &w_vertex, const map<pair<int,int>,double> &w_edges, int tol);
+
+private:
+	/** \brief Sort edges by weight from lowest to highest
+	 *  @param w_edges edges with weight
+	 */
+	vector<pair<pair<int,int>,double>> sortEdgesByWeidht( const map<pair<int,int>,double> &w_edges );
+
+	unsigned minP( vector<list<int>> P );
+
+	int searchCompartment( vector<list<int>> assigned, unsigned c );
 
 };
 

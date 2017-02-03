@@ -14,5 +14,11 @@
 %token: a
 
 %var: 'some kappa' A(s~2,z!1),A(z!4),B(s!1,i~2!5),A(z!4,s~3),B(s!5)
+<<<<<<< HEAD
 %var: 'other kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
 %var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
+=======
+%var: 'other kappa' A(s~1!1),A(z!1)
+%var: 'other more kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
+
+>>>>>>> refs/remotes/origin/Develop

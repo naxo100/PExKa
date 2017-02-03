@@ -87,7 +87,6 @@ void KappaAst::show(){
 	}
 
 	cout << endl << "Showing constants:" << endl;
-	cout << constants.size();
 	for(list<Declaration>::iterator it = constants.begin();it != constants.end(); it++){
 		it->show();
 	}

@@ -152,27 +152,28 @@ const vector<pattern::Signature>& Environment::getSignatures() const{
 
 void Environment::show() const {
 	try{
-	cout << "This is the environment content" << endl;
-	cout << "\tCompartments[" << compartments.size() << "]" << endl;
-	for(unsigned int i = 0; i < compartments.size() ; i++)
-		cout << (i+1) << ") " << compartments[i].toString() << endl;
+		cout << "This is the environment content" << endl;
+		cout << "\tCompartments[" << compartments.size() << "]" << endl;
+		for(unsigned int i = 0; i < compartments.size() ; i++)
+			cout << (i+1) << ") " << compartments[i].toString() << endl;
 
-	cout << "\tChannels[" << channels.size() << "]" << endl;
-	for(unsigned int i = 0; i < channels.size() ; i++){
-		cout << (i+1) << ") ";
-		for(list<Channel>::const_iterator it = channels[i].cbegin();it != channels[i].cend();it++){
-			cout << it->toString() << endl;
-			list< list<int> > l = it->getConnections();
-			it->printConnections(l);
+		cout << "\tChannels[" << channels.size() << "]" << endl;
+		for(unsigned int i = 0; i < channels.size() ; i++){
+			cout << (i+1) << ") ";
+			for(list<Channel>::const_iterator it = channels[i].cbegin();it != channels[i].cend();it++){
+				cout << it->toString() << endl;
+				list< list<int> > l = it->getConnections();
+				it->printConnections(l);
+			}
 		}
-	}
-	cout << "\tMixtures[" << mixtures.size() << "]" << endl;
-	for(size_t i = 0; i < mixtures.size(); i++){
-		cout << (i+1) << ") ";
-		cout << mixtures[i].toString(*this) << endl;
-	}
-	cout << "\tComponents[" << components.size() << "]" << endl;
-	cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
+
+		cout << "\tMixtures[" << mixtures.size() << "]" << endl;
+		for(size_t i = 0; i < mixtures.size(); i++){
+			cout << (i+1) << ") ";
+			cout << mixtures[i].toString(*this) << endl;
+		}
+		cout << "\tComponents[" << components.size() << "]" << endl;
+		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
 
 	}
 	catch(exception &e){

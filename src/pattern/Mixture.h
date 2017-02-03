@@ -160,6 +160,7 @@ class Mixture::Component {
 	vector<const Agent*> agents;
 	union {
 		list<ag_st_id> *links;
+		//(comp_ag_id,site_id) -> (comp_ag_id,site_id)
 		map<ag_st_id,ag_st_id> *graph;
 	};
 

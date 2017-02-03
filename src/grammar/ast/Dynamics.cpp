@@ -307,7 +307,7 @@ Mixture::~Mixture(){};
 
 pattern::Mixture Mixture::eval(pattern::Environment &env,
 		const vector<Variable*> &vars,bool is_pattern) const{
-	pattern::Mixture &mix(env.declareMixture(agents.size()));
+	pattern::Mixture mix(agents.size());
 	unordered_map<unsigned,list<pair<short,short> > > links;
 	for(list<Agent>::const_iterator it = agents.cbegin();it != agents.cend();it++){
 		it->eval(env,vars,mix,links,is_pattern);
@@ -319,7 +319,7 @@ pattern::Mixture Mixture::eval(pattern::Environment &env,
 		mix.addLink(n_link.second.front(),*(++n_link.second.begin()));
 	}
 	mix.setComponents(env);
-	return mix;
+	return env.declareMixture(mix);
 }
 
 

@@ -89,8 +89,11 @@ Signature& Environment::declareSignature(const ast::Id &name_loc) {
 	return signatures[id];
 }
 
-Mixture& Environment::declareMixture(unsigned agent_count) {
-	mixtures.emplace_back(agent_count);
+const Mixture& Environment::declareMixture(const Mixture& new_mix) {
+	for(const auto &mix : mixtures)
+		if( mix == new_mix )
+			return mix;
+	mixtures.emplace_back(new_mix);
 	return mixtures.back();
 }
 

@@ -14,22 +14,44 @@ namespace pattern {
 
 /***************** class Mixture ************************/
 
-Mixture::Mixture(short agent_count) : agentCount(0),siteCount(0),compCount(0){
+Mixture::Mixture(short agent_count) : declaredComps(false),agentCount(0),siteCount(0),compCount(0){
 	agents = new const Agent*[agent_count];
+}
+
+Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),
+		agentCount(m.agentCount),siteCount(m.siteCount),compCount(m.compCount){
+	if(m.declaredComps){
+		comps = new vector<const Component*>(m.compCount);
+		for(size_t i = 0; i < compCount; i++)
+			(*comps)[i] = (*m.comps)[i];
+	}
+	else {
+		agents = new const Agent*[m.compCount];
+		for(size_t i = 0; i < agentCount; i++)
+			agents[i] = m.agents[i];
+	}
 }
 
 //TODO
 Mixture::~Mixture() {
-	//delete[] agents;
+	links.clear();
+	if(declaredComps)
+		delete comps;
+	else
+		delete[] agents;
 }
 
 void Mixture::addAgent(const Mixture::Agent *a){
+	if(declaredComps)
+		throw std::invalid_argument("Cannot call addAgent() on a initialized Mixture");;
 	agents[agentCount] = a;
 	agentCount++;
 	//return agentCount-1;
 }
 
 void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
+	if(declaredComps)
+		throw std::invalid_argument("Cannot call addLink() on a initialized Mixture");;
 	links.emplace_back(p1.first,p1.second);
 	links.emplace_back(p2.first,p2.second);
 }
@@ -38,6 +60,8 @@ void Mixture::setComponents(Environment &env){
 	//Component c;
 	//map<id_pair,id_pair,CompareIdPair> m(graph);
 	//sort(agents->begin(),agents->end());
+	if(declaredComps)
+		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");;
 	list<pair<Component*,map<short,short> > > comps;
 	for(auto l_it = links.cbegin();l_it != links.cend(); advance(l_it,2)){
 		auto p1 = *l_it,p2 = *next(l_it,1);
@@ -93,7 +117,28 @@ void Mixture::setComponents(Environment &env){
 		(*this->comps)[i] = &comp;
 		i++;
 	}
+	sort(this->comps->begin(),this->comps->end());
+	//delete?
+	links.clear();
+	declaredComps = true;
 	//return this->comps;
+}
+
+bool Mixture::operator==(const Mixture& m) const{
+	if(this == &m)
+		return true;
+	if(agentCount != m.agentCount || compCount != m.compCount ||
+			siteCount!= m.siteCount || declaredComps != m.declaredComps)
+		return false;
+	if(declaredComps){
+		for(size_t i = 0; i < compCount; i++)
+			if(!((*comps)[i] == (*m.comps)[i]))
+				return false;
+	} else
+		for(size_t i = 0; i < compCount; i++)
+			if(!(agents[i] == m.agents[i]))
+				return false;
+	return true;
 }
 
 size_t Mixture::size() const {

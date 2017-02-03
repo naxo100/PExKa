@@ -379,6 +379,7 @@ Effect::Effect(const Effect &eff) : Node(eff.loc),action(eff.action){
 		break;
 	case PRINTF:
 		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		break;
 	}
 }
 
@@ -400,6 +401,7 @@ Effect& Effect::operator=(const Effect& eff){
 		break;
 	case PRINTF:
 		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		break;
 	}
 	return *this;
 }

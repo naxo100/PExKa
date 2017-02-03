@@ -185,9 +185,12 @@ void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts
 }
 
 void Site::eval(pattern::Environment &env,const vector<Variable*> &consts,
-		pattern::Mixture::Agent &agent,unordered_map<unsigned,list<pair<short,short> > > &links) const{
+		pair<short,pattern::Mixture::Agent&> id_agent,
+		unordered_map<unsigned,list<pair<short,short> > > &links) const{
 	const pattern::Signature* sign;
 	short site_id;
+	short ag_id = id_agent.first;
+	pattern::Mixture::Agent& agent = id_agent.second;
 	pattern::Mixture::Site* mix_site;
 	try{
 		sign = &env.getSignature(agent.getId());
@@ -234,7 +237,7 @@ void Site::eval(pattern::Environment &env,const vector<Variable*> &consts,
 	}
 
 
-	link.eval(links,make_pair(site_id,site_id),true);
+	link.eval(links,make_pair(ag_id,site_id),true);
 }
 
 void Site::show( string tabs ) const {
@@ -272,12 +275,12 @@ void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &const
 	}
 
 	pattern::Mixture::Agent a_buff(sign_id);
-
+	pair<short,pattern::Mixture::Agent&> id_ag(mix.size(),a_buff);
 	for(auto &site : sites){
-		site.eval(env,consts,a_buff,lnks);
+		site.eval(env,consts,id_ag,lnks);
 	}
 
-	auto &a = env.declareAgentPattern(a_buff);
+	auto a = env.declareAgentPattern(a_buff);
 	mix.addAgent(&a);
 }
 

@@ -86,7 +86,8 @@ public:
 	Site(const location &l,const Id &id,const SiteState &s,const Link &lnk);
 	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Signature &agent) const;
 	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,
-			pattern::Mixture::Agent &agent,unordered_map<unsigned,list<pair<short,short> > > &m) const;
+			pair<short,pattern::Mixture::Agent&> id_agent,
+			unordered_map<unsigned,list<pair<short,short> > > &m) const;
 	//const Link& getLink();
 	void show( string tabs = "" ) const;
 protected:

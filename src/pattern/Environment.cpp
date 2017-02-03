@@ -163,11 +163,15 @@ void Environment::show() const {
 				it->printConnections(l);
 			}
 		}
+
 		cout << "\tMixtures[" << mixtures.size() << "]" << endl;
 		for(size_t i = 0; i < mixtures.size(); i++){
 			cout << (i+1) << ") ";
 			cout << mixtures[i].toString(*this) << endl;
 		}
+		cout << "\tComponents[" << components.size() << "]" << endl;
+		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
+
 	}
 	catch(exception &e){
 		cout << "error: " << e.what() << endl;

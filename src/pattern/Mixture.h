@@ -39,7 +39,7 @@ struct ComparePair{
  * Using the addAgent() and addLink() methods the class is filled until it's complete.
  * Then setComponents(env) must be called to end initialization and declare components
  * in the environment. After that, the mixture is ready to be declare in the environment.
- * TODO Any attempt to add links or agents to the mixture after setComponents() will
+ * Any attempt to add links or agents to the mixture after setComponents() will
  * throw exceptions.
  */
 class Mixture {
@@ -150,6 +150,12 @@ public:
 	bool operator==(const Agent& a) const;
 };
 
+/** \brief Defines a set of agents that are explicitly connected by sites.
+ * Class Mixture is initialized empty and then filled with agents and links.
+ * After that, setGraph() must be called to reorder agents and produce graph,
+ * making the mixture comparable and ready to be declared in the environment.
+ *
+ */
 class Mixture::Component {
 	vector<const Agent*> agents;
 	union {

@@ -43,7 +43,7 @@ Mixture::~Mixture() {
 
 void Mixture::addAgent(const Mixture::Agent *a){
 	if(declaredComps)
-		throw std::bad_function_call("Cannot call addAgent() on a initialized Mixture");;
+		throw std::invalid_argument("Cannot call addAgent() on a initialized Mixture");;
 	agents[agentCount] = a;
 	agentCount++;
 	//return agentCount-1;
@@ -51,7 +51,7 @@ void Mixture::addAgent(const Mixture::Agent *a){
 
 void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
 	if(declaredComps)
-		throw std::bad_function_call("Cannot call addLink() on a initialized Mixture");;
+		throw std::invalid_argument("Cannot call addLink() on a initialized Mixture");;
 	links.emplace_back(p1.first,p1.second);
 	links.emplace_back(p2.first,p2.second);
 }
@@ -61,7 +61,7 @@ void Mixture::setComponents(Environment &env){
 	//map<id_pair,id_pair,CompareIdPair> m(graph);
 	//sort(agents->begin(),agents->end());
 	if(declaredComps)
-		throw std::bad_function_call("Cannot call setComponents() on a initialized Mixture");;
+		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");;
 	list<pair<Component*,map<short,short> > > comps;
 	for(auto l_it = links.cbegin();l_it != links.cend(); advance(l_it,2)){
 		auto p1 = *l_it,p2 = *next(l_it,1);

@@ -146,6 +146,13 @@ size_t Mixture::size() const {
 }
 
 string Mixture::toString(const Environment& env) const {
+
+	for( auto &c : *comps ) {
+
+		cout <<  "comp-size:  " << c->size() << " / ";
+	}
+	cout << endl;
+
 	return "agents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount);
 }
 

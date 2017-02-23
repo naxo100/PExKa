@@ -48,6 +48,7 @@ int main(int argc, char* argv[]){
 	    ("help,h", "produce help message")
 	;
 
+	// parser kappa file
 	positional_options_description pos;
 	pos.add("input-file",-1);
 	variables_map vm;
@@ -67,6 +68,7 @@ int main(int argc, char* argv[]){
 
 	driver->parse();
 
+	// make AST
 	ast::KappaAst &ast = driver->getAst();
 	//ast.show();
 
@@ -74,9 +76,9 @@ int main(int argc, char* argv[]){
 	pattern::Environment env;
 	vector<Variable*> vars;
 	try{
-		ast.evaluateDeclarations(env,vars,true);
+		ast.evaluateDeclarations(env,vars,true); // evaluate constants
 		ast.evaluateSignatures(env,vars);
-		ast.evaluateDeclarations(env,vars,false);
+		ast.evaluateDeclarations(env,vars,false); // evaluate variables
 		ast.evaluateCompartments(env,vars);
 		ast.evaluateChannels(env,vars);
 		//ast.evaluateInits(env,vars);

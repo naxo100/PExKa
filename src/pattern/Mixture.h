@@ -167,6 +167,7 @@ class Mixture::Component {
 public:
 	Component();
 	Component(const Component& comp);
+	~Component();
 	bool contains(const Mixture::Agent* a);
 	short addAgent(const Mixture::Agent* a);
 	void addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<short,short> &mask);

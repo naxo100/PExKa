@@ -47,9 +47,9 @@ protected:
 	vector<Signature> signatures;
 	vector<Compartment> compartments;
 	vector<list<Channel> > channels;
-	vector<Mixture> mixtures;
-	vector<Mixture::Component> components;
-	vector<Mixture::Agent> agentPatterns;
+	list<Mixture> mixtures;
+	list<Mixture::Component> components;
+	list<Mixture::Agent> agentPatterns;
 
 	bool exists(const string &name,const IdMap &map);
 public:

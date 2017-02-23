@@ -112,7 +112,7 @@ void Mixture::setComponents(Environment &env){
 	int i=0;
 	for(const auto& c : comps){
 		c.first->setGraph();
-		auto comp = env.declareComponent(*c.first);
+		const Component &comp = env.declareComponent(*c.first);
 		delete c.first;
 		(*this->comps)[i] = &comp;
 		i++;
@@ -223,9 +223,13 @@ bool Mixture::Site::operator ==(const Site &s) const{
 /************** class Component ****************/
 
 Mixture::Component::Component() : links(new list<ag_st_id>()){};
-Mixture::Component::Component(const Component& comp) : agents(comp.size(),nullptr),graph(comp.graph) {
+Mixture::Component::Component(const Component& comp) : agents(comp.size(),nullptr) {
 	for(size_t i = 0; i < agents.size() ; i++)
 		agents[i] = comp.agents[i];
+	graph = new map<ag_st_id,ag_st_id>(*comp.graph);
+}
+Mixture::Component::~Component(){
+	delete graph;
 }
 
 size_t Mixture::Component::size() const{

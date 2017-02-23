@@ -104,6 +104,7 @@ const Mixture::Component& Environment::declareComponent(const Mixture::Component
 		}
 	}
 	components.emplace_back(new_comp);
+	//Mixture::Component& co =
 	return components.back();
 }
 
@@ -168,9 +169,11 @@ void Environment::show() const {
 		}
 
 		cout << "\tMixtures[" << mixtures.size() << "]" << endl;
-		for(size_t i = 0; i < mixtures.size(); i++){
+		int i = 0;
+		for(auto& mix : mixtures){
 			cout << (i+1) << ") ";
-			cout << mixtures[i].toString(*this) << endl;
+			cout << mix.toString(*this) << endl;
+			i++;
 		}
 		cout << "\tComponents[" << components.size() << "]" << endl;
 		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;

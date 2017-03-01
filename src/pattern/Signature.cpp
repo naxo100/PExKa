@@ -77,6 +77,10 @@ short Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
 }
 Signature::Site::~Site(){}
 
+const std::string& Signature::Site::getName() const {
+	return this->name;
+}
+
 Signature::LabelSite::LabelSite(const string& nme) : Site(nme),labels(){
 	for(unsigned short i = 0;i < labels.size(); i++){
 		cout << "site: " << nme << "\t lab: " << labels[i] << endl;

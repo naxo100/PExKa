@@ -280,7 +280,7 @@ void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &const
 		site.eval(env,consts,id_ag,lnks);
 	}
 
-	auto a = env.declareAgentPattern(a_buff);
+	auto& a = env.declareAgentPattern(a_buff);
 	mix.addAgent(&a);
 }
 

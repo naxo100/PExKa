@@ -75,6 +75,8 @@ public:
 	virtual short isPossibleValue(const state::SomeValue &val) const = 0;
 	virtual ~Site();
 
+	const string& getName() const;
+
 };
 
 class Signature::EmptySite : public Site {
@@ -82,6 +84,7 @@ class Signature::EmptySite : public Site {
 public:
 	EmptySite(const string &nme);
 };
+
 class Signature::LabelSite : public Site {
 	vector<string> labels;
 	unordered_map<string,short> label_ids;
@@ -91,6 +94,7 @@ public:
 	LabelSite(const string &name);
 	void addLabel(const ast::Id& name_loc);
 };
+
 template <typename T>
 class Signature::RangeSite : public Site {
 	T min,max,byDefault;
@@ -99,6 +103,7 @@ public:
 	RangeSite(const string &nme);
 	void setBoundaries(T mn,T mx, T def);
 };
+
 /*class Signature::IntRangeSite : Site {
 	int min,max;
 	virtual bool isPossibleValue(const Value &val) override;

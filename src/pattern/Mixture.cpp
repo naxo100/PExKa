@@ -146,14 +146,15 @@ size_t Mixture::size() const {
 }
 
 string Mixture::toString(const Environment& env) const {
+	string out = "";
+	short i = 1;
 
 	for( auto &c : *comps ) {
-
-		cout <<  "comp-size:  " << c->size() << " / ";
+		out += "Component " + to_string(i) + " : " + c->toString(env) + "\n";
+		i++;
 	}
-	cout << endl;
 
-	return "agents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount);
+	return out + "\nAgents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount) + "\n";
 }
 
 
@@ -196,6 +197,24 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 void Mixture::Agent::setSiteValue(short site_id,short lbl_id){
 	interface[site_id].val_type = ValueType::LABEL;
 	interface[site_id].state.id_value = lbl_id;
+}
+
+const string Mixture::Agent::toString(const Environment& env) const {
+	string out = "";
+
+	// inspect interface
+	const Signature& sign = env.getSignature(signId);
+	out += sign.getName() + "(";
+
+	for( auto it = interface.begin(); it != interface.end(); ++it ) {
+		// it.first = id of site
+		out += sign.getSite( it->first ).getName() + ", ";
+	}
+
+	// remove last 2 characters
+	out += ")";
+
+	return out;
 }
 
 /************** class Site *********************/
@@ -296,6 +315,19 @@ void Mixture::Component::setGraph() {
 	delete links;
 	graph = graph_ptr;
 }
+
+string Mixture::Component::toString(const Environment& env) const {
+	string out;
+
+	for(auto ag : agents) {
+		out += ag->toString(env) + ",";
+	}
+
+	// remove the last character
+
+	return out;
+}
+
 
 /*****************************************/
 

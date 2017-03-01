@@ -109,6 +109,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 	}
 	return var;
 }
+
 Variable* Declaration::evalConst(pattern::Environment &env,
 		Expression::VAR &vars) const{
 	Variable* var;
@@ -145,9 +146,11 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 bool Declaration::isKappa() const{
 	return type;
 }
+
 bool Declaration::isConstant() const{
 	return constant;
 }
+
 void Declaration::setConstant(bool b){
 	constant = b;
 }
@@ -158,7 +161,7 @@ void Declaration::show( string tabs ) {
 	if( type ) {
 		cout << "Mixture ";
 	} else {
-		cout << "Declaration ";
+		cout << "Variable/Constant  ";
 	}
 	cout << typeName[ type ] << ", name: " << name.getString() << " {";
 	expr->show();
@@ -169,8 +172,12 @@ void Declaration::show( string tabs ) {
 
 /****** Class Init ***********/
 Init::Init(){}
+
+Init::~Init(){};
+
 Init::Init(const location &l,const Expression *e, const Mixture &mix):
 		Node(l),type(MIXTURE),alg(e),mixture(mix) {};
+
 Init::Init(const location &l,const Expression *e, const Id &tok):
 		Node(l),type(TOKEN),alg(e),token(tok) {};
 
@@ -181,6 +188,7 @@ Init::Init(const Init &init) :
 	else
 		mixture = init.mixture;
 }
+
 Init& Init::operator=(const Init &init) {
 	loc = init.loc;
 	type = init.type;
@@ -190,6 +198,5 @@ Init& Init::operator=(const Init &init) {
 		mixture = init.mixture;
 	return *this;
 }
-Init::~Init(){};
 
 } /* namespace ast */

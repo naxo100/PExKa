@@ -72,13 +72,13 @@ int main(int argc, char* argv[]){
 	ast::KappaAst &ast = driver->getAst();
 	//ast.show();
 
-
+	// initialize states
 	pattern::Environment env;
 	vector<Variable*> vars;
 	try{
-		ast.evaluateDeclarations(env,vars,true); // evaluate constants
-		ast.evaluateSignatures(env,vars);
-		ast.evaluateDeclarations(env,vars,false); // evaluate variables
+		ast.evaluateDeclarations(env,vars,true); // initialize constants
+		ast.evaluateSignatures(env,vars); // initialize agents & tokens
+		ast.evaluateDeclarations(env,vars,false); // initialize variables
 		ast.evaluateCompartments(env,vars);
 		ast.evaluateChannels(env,vars);
 		//ast.evaluateInits(env,vars);

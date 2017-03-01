@@ -33,7 +33,8 @@ public:			//       !1    !?  !_   !A.s
 	~Link();
 	const LinkType& getType() const;
 
-	void eval(unordered_map<unsigned,list<pair<short,short> > > &,
+	void eval(pattern::Mixture::Site& mix_site,
+			unordered_map<unsigned,list<pair<short,short> > > &,
 			const pair<short,short> &mix_ag_site,bool allow_pattern) const;
 
 protected:

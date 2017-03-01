@@ -51,14 +51,16 @@ const Link::LinkType& Link::getType() const{
 	return type;
 }
 
-void Link::eval(unordered_map<unsigned,list<pair<short,short> > > &links,
+void Link::eval(pattern::Mixture::Site& mix_site,
+		unordered_map<unsigned,list<pair<short,short> > > &links,
 		const pair<short,short> &mix_ag_site,bool allow_pattern) const {
 	int n;
 	switch(type){
 	case FREE:
-
+		mix_site.link_type = pattern::Mixture::FREE;
 		break;
 	case VALUE:
+		mix_site.link_type = pattern::Mixture::BIND;
 		n = links[value].size();
 		if(n > 1)
 			throw SemanticError("Edge identifier "+to_string(value)+
@@ -69,12 +71,18 @@ void Link::eval(unordered_map<unsigned,list<pair<short,short> > > &links,
 	default:
 		if(!allow_pattern)
 			throw SemanticError("Patterns are not allowed here.",loc);
-		break;
+		//break;
 	case ANY:
+		mix_site.link_type = pattern::Mixture::WILD;
 		break;
 	case SOME:
+		mix_site.link_type = pattern::Mixture::BIND;
 		break;
 	case AG_SITE:
+		mix_site.link_type = pattern::Mixture::BIND_TO;
+		//TODO add env
+		//mix_site.lnk.first = this->ag_site.agent;
+		//mix_site.lnk.second = this->ag_site.site;
 		break;
 	}
 }
@@ -237,7 +245,7 @@ void Site::eval(pattern::Environment &env,const vector<Variable*> &consts,
 	}
 
 
-	link.eval(links,make_pair(ag_id,site_id),true);
+	link.eval(*mix_site,links,make_pair(ag_id,site_id),true);
 }
 
 void Site::show( string tabs ) const {

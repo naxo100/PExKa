@@ -93,6 +93,7 @@ class Signature::LabelSite : public Site {
 public:
 	LabelSite(const string &name);
 	void addLabel(const ast::Id& name_loc);
+	const string getLabel( short id ) const;
 };
 
 template <typename T>

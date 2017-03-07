@@ -150,7 +150,7 @@ string Mixture::toString(const Environment& env) const {
 	short i = 1;
 
 	for( auto &c : *comps ) {
-		out += "Component " + to_string(i) + " : " + c->toString(env) + "\n";
+		out += "Component[" + to_string(i) + "] = " + c->toString(env) + "\n";
 		i++;
 	}
 
@@ -200,18 +200,57 @@ void Mixture::Agent::setSiteValue(short site_id,short lbl_id){
 }
 
 const string Mixture::Agent::toString(const Environment& env) const {
-	string out = "";
+	string out = "", glue = ",";
 
-	// inspect interface
 	const Signature& sign = env.getSignature(signId);
 	out += sign.getName() + "(";
 
+	// inspect interface
 	for( auto it = interface.begin(); it != interface.end(); ++it ) {
-		// it.first = id of site
-		out += sign.getSite( it->first ).getName() + ", ";
+		// it.first = site ID
+		const Signature::Site& site = sign.getSite( it->first );
+		const Signature::LabelSite* labelSite;
+
+		out += site.getName(); //site name
+
+		switch(it->second.val_type) {
+			case ValueType::LABEL :
+				labelSite = static_cast<const Signature::LabelSite*>(& site);
+				out += "~" + labelSite->getLabel(it->second.state.id_value); //value of site
+				break;
+			case ValueType::INT_VAL :
+				break;
+			case ValueType::FLOAT_VAL :
+				break;
+			case ValueType::VOID :
+				break;
+		}
+
+		switch(it->second.link_type) {
+			case LinkType::BIND :
+				out += "bind";
+				break;
+			case LinkType::BIND_TO :
+				out += "bind_to";
+				break;
+			case LinkType::FREE :
+				out += "free";
+				break;
+			case LinkType::PATH :
+				out += "path";
+				break;
+			case LinkType::WILD :
+				out += "wild";
+				break;
+		}
+
+		out += glue;
 	}
 
 	// remove last 2 characters
+	if( out.substr(out.size()-glue.size(), out.size()) == glue )
+		out = out.substr(0, out.size()-glue.size());
+
 	out += ")";
 
 	return out;
@@ -317,13 +356,15 @@ void Mixture::Component::setGraph() {
 }
 
 string Mixture::Component::toString(const Environment& env) const {
-	string out;
+	string out, glue = ",";
 
 	for(auto ag : agents) {
-		out += ag->toString(env) + ",";
+		out += ag->toString(env) + glue;
 	}
 
 	// remove the last character
+	if( out.substr(out.size()-glue.size(), out.size()) == glue )
+		out = out.substr(0, out.size()-glue.size());
 
 	return out;
 }

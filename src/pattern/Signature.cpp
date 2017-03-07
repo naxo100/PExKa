@@ -101,6 +101,9 @@ short Signature::LabelSite::isPossibleValue(const state::SomeValue &val) const {
 		throw std::invalid_argument("Not a string value.");
 	return label_ids.at(*val.sVal);
 }
+const string Signature::LabelSite::getLabel( short id ) const {
+	return labels[id];
+}
 
 template <typename T>
 Signature::RangeSite<T>::RangeSite(const string &nme) : Site(nme){};

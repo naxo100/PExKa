@@ -199,7 +199,7 @@ void Mixture::Agent::setSiteValue(short site_id,short lbl_id){
 	interface[site_id].state.id_value = lbl_id;
 }
 
-const string Mixture::Agent::toString(const Environment& env) const {
+const string Mixture::Agent::toString(short mixAgId, const Environment& env, map<ag_st_id,short>& bindLabels ) const {
 	string out = "", glue = ",";
 
 	const Signature& sign = env.getSignature(signId);
@@ -207,11 +207,11 @@ const string Mixture::Agent::toString(const Environment& env) const {
 
 	// inspect interface
 	for( auto it = interface.begin(); it != interface.end(); ++it ) {
-		// it.first = site ID
+		// it.first = site ID , it.second = Mixture::Site type
 		const Signature::Site& site = sign.getSite( it->first );
 		const Signature::LabelSite* labelSite;
 
-		out += site.getName(); //site name
+		out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
 
 		switch(it->second.val_type) {
 			case ValueType::LABEL :
@@ -228,19 +228,22 @@ const string Mixture::Agent::toString(const Environment& env) const {
 
 		switch(it->second.link_type) {
 			case LinkType::BIND :
-				out += "bind";
+				if ( bindLabels[ag_st_id(mixAgId, it->first)] )
+					out += "!" + to_string( bindLabels[ag_st_id(mixAgId, it->first)] );
+				else
+					out += "!_";
 				break;
 			case LinkType::BIND_TO :
-				out += "bind_to";
+				//out += "bind_to";
 				break;
 			case LinkType::FREE :
-				out += "free";
+				//out += "free";
 				break;
 			case LinkType::PATH :
-				out += "path";
+				//out += "path";
 				break;
 			case LinkType::WILD :
-				out += "wild";
+				//out += "wild";
 				break;
 		}
 
@@ -357,12 +360,49 @@ void Mixture::Component::setGraph() {
 
 string Mixture::Component::toString(const Environment& env) const {
 	string out, glue = ",";
+	map<ag_st_id,short> bindLabels;
+	short bindLabel = 1;
 
-	for(auto ag : agents) {
-		out += ag->toString(env) + glue;
+
+	//put labels to bindings
+	for(auto lnk = graph->begin() ; lnk != graph->end() ; ++lnk ) {
+		//[ag_id,site_id],[ag_id,site_id]
+		//[lnk->first.first,lnk->first.second],[lnk->second.first,lnk->second.second]
+
+		if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
+				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {
+			bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] = bindLabel;
+			bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] = bindLabel;
+
+			bindLabel++;
+		}
+		else if( bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
+				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {
+			// not_added = added
+			bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] = bindLabels[ag_st_id(lnk->first.first, lnk->first.second)];
+		}
+		else if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
+				bindLabels[ag_st_id(lnk->second.first, lnk->second.second)]) {
+			bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] = bindLabels[ag_st_id(lnk->second.first, lnk->second.second)];
+		}
+
 	}
 
-	// remove the last character
+	cout << "cmpnt" <<endl;
+	for(auto b : bindLabels){
+		cout << "<"<< b.first.first << "," << b.first.second << "> =" << b.second << endl;
+	}
+
+	for( unsigned mixAgId = 0; mixAgId < agents.size(); mixAgId++ ) {
+
+		out += agents[mixAgId]->toString(mixAgId, env, bindLabels ) + glue;
+		bindLabel++;
+	}
+
+	//
+
+
+	// remove the last glue
 	if( out.substr(out.size()-glue.size(), out.size()) == glue )
 		out = out.substr(0, out.size()-glue.size());
 

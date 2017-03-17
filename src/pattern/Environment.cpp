@@ -60,11 +60,17 @@ short Environment::declareVariable(const ast::Id &name_loc,bool is_kappa){
 Compartment& Environment::declareCompartment(const ast::Id &name_loc){
 	const string& name = name_loc.getString();
 	if(compartmentMap.count(name))
-		throw SemanticError("Compartment "+name+" already defined.");
+		throw SemanticError("Compartment "+name+" already defined.",name_loc.loc);
 	short id = compartments.size();
 	compartments.emplace_back(name);
 	compartmentMap[name] = id;
 	return compartments[id];
+}
+UseExpression& Environment::declareUseExpression(unsigned short id,size_t n){
+	if(useExpressions.size() != id)
+		throw std::invalid_argument("UseExpression id doesn't match.");
+	useExpressions.emplace_back(n);
+	return useExpressions[id];
 }
 Channel& Environment::declareChannel(const ast::Id &name_loc) {
 	const string& name = name_loc.getString();
@@ -130,12 +136,17 @@ short Environment::getCompartmentId(const string &s) const {
 short Environment::getSignatureId(const string &s) const {
 	return signatureMap.at(s);
 }
+short Environment::getTokenId(const string &s) const {
+	return tokenMap.at(s);
+}
 
 
 const Compartment& Environment::getCompartment(short id) const{
 	return compartments[id];
 }
-
+const UseExpression& Environment::getUseExpression(short id) const {
+	return useExpressions[id];
+}
 const Signature& Environment::getSignature(short id) const {
 	return signatures[id];
 }
@@ -157,6 +168,14 @@ void Environment::show() const {
 		cout << "\tCompartments[" << compartments.size() << "]" << endl;
 		for(unsigned int i = 0; i < compartments.size() ; i++)
 			cout << (i+1) << ") " << compartments[i].toString() << endl;
+
+		cout << "\tUseExpressions[" << useExpressions.size() << "]" << endl;
+		for(auto& use_expr : useExpressions){
+			cout << "list of cells: " ;
+			for(auto& cell_id : use_expr.getCells())
+				cout << cell_id << ", ";
+			cout << endl;
+		}
 
 		cout << "\tChannels[" << channels.size() << "]" << endl;
 		for(unsigned int i = 0; i < channels.size() ; i++){

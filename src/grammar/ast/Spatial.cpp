@@ -23,23 +23,15 @@ pattern::CompartmentExpr* CompExpression::eval
 	return nullptr;
 }
 
-
-vector<short> CompExpression::evalDimensions(pattern::Environment &env,
-		const vector<Variable*> &vars){
+vector<short> CompExpression::evalDimensions(const pattern::Environment &env,
+		const vector<Variable*> &vars) const {
 	vector<short> ret;
-	for(list<const Expression*>::iterator it = indexList.begin();
-			it != indexList.end(); it++){
-		try{
-			ret.push_back(((*it)->eval(env,vars))->getValue().iVal);
-		}catch(exception &e){
-
-			cout << "fail" << endl;
-		}
-	}
+	for(auto& index : indexList)
+		ret.push_back((index->eval(env,vars))->getValue().iVal);
 	return ret;
 }
 
-const Id& CompExpression::evalName(pattern::Environment &env,bool declare){
+const Id& CompExpression::evalName(const pattern::Environment &env,bool declare) const {
 	if(!declare){
 		try{
 			env.getCompartmentId(name.getString());
@@ -50,9 +42,9 @@ const Id& CompExpression::evalName(pattern::Environment &env,bool declare){
 	}
 	return name;
 }
-list<state::BaseExpression*> CompExpression::evalExpression(pattern::Environment &env,
-			const vector<Variable*> &vars){
-	list<state::BaseExpression*> ret;
+list<const state::BaseExpression*> CompExpression::evalExpression(const pattern::Environment &env,
+			const vector<Variable*> &vars) const {
+	list<const state::BaseExpression*> ret;
 	for(auto index : indexList){
 		ret.push_back(index->eval(env,vars,char(Expression::AUX)));
 	}
@@ -96,18 +88,28 @@ void Channel::eval(pattern::Environment &env,
 	src_id = env.getCompartmentId(source.evalName(env,false).getString());
 	trgt_id = env.getCompartmentId(target.evalName(env,false).getString());
 
-	list<state::BaseExpression*> src_index,trgt_index;
+	list<const state::BaseExpression*> src_index,trgt_index;
 	src_index = source.evalExpression(env,vars);
 	trgt_index = target.evalExpression(env,vars);
 
-	pattern::CompartmentExpr* c_exp_src =
-			new pattern::CompartmentExpr(env.getCompartment(src_id),src_index);
-	pattern::CompartmentExpr* c_exp_trgt =
-			new pattern::CompartmentExpr(env.getCompartment(trgt_id),trgt_index);
-
-	c_exp_src->setEquation();
-	if(bidirectional)
-		c_exp_trgt->setEquation();
+	pattern::CompartmentExpr *c_exp_src,*c_exp_trgt;
+	try{
+		c_exp_src = new pattern::CompartmentExpr(env.getCompartment(src_id),src_index);
+	}catch(std::invalid_argument &e){
+		throw SemanticError(e.what(),source.loc);
+	}
+	try{
+		c_exp_trgt = new pattern::CompartmentExpr(env.getCompartment(trgt_id),trgt_index);
+	}catch(std::invalid_argument &e){
+		throw SemanticError(e.what(),target.loc);
+	}
+	try{
+		c_exp_src->setEquation();
+		if(bidirectional)
+			c_exp_trgt->setEquation();
+	}catch(std::invalid_argument &e){
+		throw SemanticError(e.what(),loc);
+	}
 	channel.setCompExpressions(c_exp_src,c_exp_trgt);
 	if(filter)
 		channel.setFilter(filter->eval(env,vars));
@@ -116,10 +118,45 @@ void Channel::eval(pattern::Environment &env,
 
 
 
-
-
-
-
+/*********** class Use ***********/
 unsigned short Use::count = 0;
+unsigned short Use::getCount(){
+	return count;
+}
+
+Use::Use(const location &l, const list<CompExpression> &comps,
+		const Expression* where) :
+	Node(l),id(count),compartments(comps),filter(where){
+	count++;
+}
+Use::Use(const Use &u) : Node(u.loc),id(u.id),
+		compartments(u.compartments),filter(u.filter->clone()) {}
+Use::~Use(){
+	if(filter) delete filter;
+}
+
+
+void Use::eval(pattern::Environment &env, const Expression::VAR &consts) const {
+	list<pattern::CompartmentExpr> comp_exprs;
+	auto& use_expr = env.declareUseExpression(id,compartments.size());
+	for(auto& comp : compartments){
+		short comp_id = env.getCompartmentId(comp.evalName(env,false).getString());
+		list<const state::BaseExpression*> index_list = comp.evalExpression(env,consts);
+		try{
+			use_expr.emplace_back(env.getCompartment(comp_id),index_list);
+		}catch(std::invalid_argument &e){
+			throw SemanticError(e.what(),comp.loc);
+		}
+	}
+	try{
+		use_expr.evaluateCells();
+	}
+	catch(std::invalid_argument& e){
+		throw SemanticError(e.what(),loc);
+	}
+}
+
+
+
 
 } /* namespace ast */

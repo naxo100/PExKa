@@ -33,6 +33,11 @@ void KappaAst::evaluateCompartments(pattern::Environment &env,const vector<Varia
 		it->eval(env,vars);
 	}
 }
+void KappaAst::evaluateUseExpressions(pattern::Environment &env,const vector<Variable*> &consts){
+	for(auto use : useExpressions){
+		use->eval(env,consts);
+	}
+}
 void KappaAst::evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars){
 	for(list<Channel>::iterator it = channels.begin();it != channels.end(); it++){
 		it->eval(env,vars);
@@ -52,6 +57,13 @@ vector<Variable*> KappaAst::evaluateDeclarations(pattern::Environment &env,vecto
 		//env.declareVariable(var->getName(),it->isKappa());
 	}
 	return var_vector;
+}
+
+
+void KappaAst::evaluateInits(const pattern::Environment &env,const vector<Variable*> vars,state::State &state){
+	for(auto& init : inits){
+		init.eval(env,vars,state);
+	}
 }
 
 void KappaAst::add(const Declaration &d){
@@ -74,6 +86,9 @@ void KappaAst::add(const Id &t){
 }
 void KappaAst::add(const Init &i){
 	inits.push_back(i);
+}
+void KappaAst::add(const Use *u){
+	useExpressions.push_back(u);
 }
 
 /*void KappaAst::add(Perturbation p){

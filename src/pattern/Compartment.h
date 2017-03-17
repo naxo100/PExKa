@@ -15,6 +15,7 @@
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include "../state/AlgExpression.h"
+#include "../state/Variable.h"
 
 namespace pattern {
 
@@ -66,15 +67,15 @@ struct Cell {
 
 class CompartmentExpr {
 	const Compartment& comp;
-	const std::list<state::BaseExpression*> cellExpr;
+	const std::list<const state::BaseExpression*> cellExpr;
 	std::vector<std::string> varOrder;
-	boost::numeric::ublas::matrix<float> inverseA,transA;
+	boost::numeric::ublas::matrix<float> A,inverseA,transA;
 	boost::numeric::ublas::vector<float> b;
 
 	void cellIds(std::list<int>& cell_list,
 			std::list<short> *cell_values,std::vector<short> &cell_index,unsigned int dim) const;
 public:
-	CompartmentExpr(const Compartment& c,const std::list<state::BaseExpression*> &expr);
+	CompartmentExpr(const Compartment& c,const std::list<const state::BaseExpression*> &expr);
 
 
 	//bool nextCell(std::vector<short>& cell) const;
@@ -89,13 +90,41 @@ public:
 	/** \brief Solve the implicit system for auxiliars in this expression
 	 * and return a map with the values for the auxiliars.
 	 *
+	 * @param cell_index values for indexes of compartment. Will be used to fill
+	 * the vector b.
+	 * @param aux_values a map of var_name -> var_value. The values of auxiliars
+	 * that solve the system will be set here. If an auxliar value was set before
+	 * and is not equal to the solution of the system, an exception is thrown.
 	 */
-	void solve(const std::vector<short> &cell_index,std::unordered_map<std::string,int> & vars) const;
+	void solve(const std::vector<short> &cell_index,std::unordered_map<std::string,int> & aux_values) const;
 
 	void setEquation();
 
 
 	std::string toString() const;
+};
+
+class UseExpression : std::vector<CompartmentExpr> {
+	//short id;
+	//std::list<CompartmentExpr> comps;
+	//const state::BaseExpression* filter;
+	const state::AlgExpression<bool> *filter;
+	std::set<int> cells;
+	bool isComplete;
+public:
+	UseExpression(size_t comps_count,const state::BaseExpression* where = nullptr);
+
+
+	void evaluateCells(UseExpression::iterator it = UseExpression::iterator(),
+			std::unordered_map<std::string,int> var_values = std::unordered_map<std::string,int>()
+		);
+	//void emplaceCompExpression(const CompartmentExpr &c);
+	using std::vector<CompartmentExpr>::emplace_back;
+	using std::vector<CompartmentExpr>::begin;
+	//void emplace_back(const pattern::Compartment&,const list<const state::BaseExpression*>&);
+
+	const std::set<int>& getCells() const;
+
 };
 
 } /* namespace pattern */

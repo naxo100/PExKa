@@ -41,7 +41,7 @@ Expression::~Expression(){};
 bool Expression::isConstant(){
 	return false;
 }
-state::BaseExpression* Expression::eval(pattern::Environment& env,
+state::BaseExpression* Expression::eval(const pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
 	cout << "do not call this function" << endl;

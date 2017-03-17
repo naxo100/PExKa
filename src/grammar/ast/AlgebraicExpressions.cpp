@@ -60,7 +60,7 @@ void Const::show( string tabs ) const {
 	cout << ")";
 }
 
-BaseExpression* Const::eval(pattern::Environment& env,
+BaseExpression* Const::eval(const pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
 	BaseExpression* cons;
@@ -98,7 +98,7 @@ BoolBinaryOperation::BoolBinaryOperation(const location &l,const Expression *e1,
 		const Expression *e2,BaseExpression::BoolOp o):
 		Expression(l),exp1(e1),exp2(e2),op(o){}
 
-BaseExpression* BoolBinaryOperation::eval(pattern::Environment& env,
+BaseExpression* BoolBinaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
 	BaseExpression* ex1 = exp1->eval(env,vars,flags);
@@ -126,7 +126,7 @@ AlgBinaryOperation::AlgBinaryOperation(const location &l,const Expression *e1,
 		const Expression *e2,BaseExpression::AlgebraicOp o):
 		Expression(l),exp1(e1),exp2(e2),op(o){};
 
-BaseExpression* AlgBinaryOperation::eval(pattern::Environment& env,
+BaseExpression* AlgBinaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
 	BaseExpression* ex1 = exp1->eval(env,vars,flags);
@@ -153,7 +153,7 @@ void AlgBinaryOperation::show( string tabs ) const {
 UnaryOperation::UnaryOperation(const location &l,const Expression *e,
 		const BaseExpression::Unary f):
 		Expression(l),exp(e),func(f){};
-BaseExpression* UnaryOperation::eval(pattern::Environment& env,
+BaseExpression* UnaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
 	return new Constant<int>(0);
@@ -173,7 +173,7 @@ void UnaryOperation::show( string tabs ) const {
 
 
 /****** Class NullaryOperation ******/
-BaseExpression* NullaryOperation::eval(pattern::Environment& env,
+BaseExpression* NullaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,
 		const char flags) const{
 	return new Constant<int>(0);
@@ -195,7 +195,7 @@ void NullaryOperation::show( string tabs ) const {
 Var::Var(const location &l,const VarType &t,const Id &label):
 	Expression(l),name(label),type(t){};
 
-BaseExpression* Var::eval(pattern::Environment& env,
+BaseExpression* Var::eval(const pattern::Environment& env,
 		const Expression::VAR &vars,
 		const char flags) const {
 	BaseExpression* expr;

@@ -130,8 +130,10 @@ instruction:
  	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6,$8));}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
+| USE MULT
+	{this->driver.getAst().add(new Use(@$));}
 | USE comp_list where_expr
- 	{}
+ 	{this->driver.getAst().add(new Use(@$,$2,$3));}
 | SIGNATURE agent_expression  
 	{this->driver.getAst().add($2);}
 | TOKEN ID
@@ -239,10 +241,7 @@ value_list:
 ;
 
 comp_list:
-	{$$=std::list<ast::CompExpression>(); }
-| "$ALL"
-	{$$=std::list<ast::CompExpression>(); }
-| comp_expr
+  comp_expr
 	{$$=std::list<ast::CompExpression>(1,$1); }
 | comp_expr comp_list
 	{ 

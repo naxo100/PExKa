@@ -18,4 +18,9 @@ State::~State() {
 	// TODO Auto-generated destructor stub
 }
 
+
+void State::addTokens(short comp_id, short tok_id, float n){
+	//TODO
+}
+
 } /* namespace ast */

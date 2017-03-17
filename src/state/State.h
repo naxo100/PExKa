@@ -35,6 +35,11 @@ class State {
 public:
 	State();
 	~State();
+
+	void addTokens(short comp_id,short tok_id,float n);
+	void addNodes(short comp_id,int n);
+
+
 };
 
 } /* namespace state */

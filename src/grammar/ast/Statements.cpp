@@ -10,7 +10,12 @@
 
 namespace ast {
 
+/****** Class Statement *********/
+Statement::Statement() : useId(Use::getCount()) {}
 
+short Statement::getUseId() const {
+	return useId;
+}
 
 /****** Class Declaration *******/
 Declaration::Declaration() : type(ALG),constant(false),expr(NULL){};
@@ -198,5 +203,41 @@ Init& Init::operator=(const Init &init) {
 		mixture = init.mixture;
 	return *this;
 }
+
+void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
+		state::State &state){
+	try {
+		auto& use_expr = env.getUseExpression(this->getUseId());
+		auto &cells = use_expr.getCells();
+		if(type){ //TOKEN
+			float n;
+			short tok_id;
+			if(alg == nullptr)
+				throw std::invalid_argument("Null value for token init.");
+			else
+				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<float>();
+			tok_id = env.getTokenId(token.getString());
+			state.addTokens(this->getUseId(),tok_id,n);
+		}
+		else { //MIX
+			int n;
+			if(alg == nullptr)
+				throw std::invalid_argument("Null value for mix init.");
+			else
+				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
+		}
+	}
+	catch(exception &e){
+		//TODO
+	}
+}
+
+
+
+
+
+
+
+
 
 } /* namespace ast */

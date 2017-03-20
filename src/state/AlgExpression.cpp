@@ -233,7 +233,7 @@ float BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,float>
 	}else if(op < BaseExpression::POW){// * or /
 		if(vars1.size() > 0)
 			if(vars2.size() > 0)
-				throw SemanticError("Only linear equations can be used for auxiliars in compartment expressions.");
+				throw std::invalid_argument("Only linear equations can be used for auxiliars in compartment expressions.");
 			else
 				for(var_map::iterator it = vars1.begin();it != vars1.end();it++)
 					var_factors[it->first]=func(it->second,val2);

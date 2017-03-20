@@ -76,15 +76,16 @@ int main(int argc, char* argv[]){
 	pattern::Environment env;
 	vector<Variable*> vars;
 	try{
-		ast.evaluateDeclarations(env,vars,true); // initialize constants
-		ast.evaluateSignatures(env,vars); // initialize agents & tokens
-		ast.evaluateDeclarations(env,vars,false); // initialize variables
+		ast.evaluateDeclarations(env,vars,true);//constants
 		ast.evaluateCompartments(env,vars);
+		ast.evaluateUseExpressions(env,vars);
+		ast.evaluateSignatures(env,vars);
+		ast.evaluateDeclarations(env,vars,false);//vars
 		ast.evaluateChannels(env,vars);
 		//ast.evaluateInits(env,vars);
 	}
 	catch(const exception &e){
-		cerr << e.what() << endl;
+		cerr << "An exception found: " << e.what() << endl;
 		exit(1);
 	}
 

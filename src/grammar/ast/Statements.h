@@ -13,6 +13,8 @@
 #include "Dynamics.h"
 #include "Spatial.h"
 
+#include "../../state/State.h"
+
 namespace ast {
 
 /** \brief Base class for statements that have %use context.
@@ -20,7 +22,10 @@ namespace ast {
  * Statements that depends on %use are rules, %var, %obs & %mod.
  */
 class Statement {
-	short use_id;
+	short useId;
+public:
+	Statement();
+	short getUseId() const;
 };
 
 class Declaration: public Node, public Statement {
@@ -75,6 +80,9 @@ public:
 	Init(const Init &init);
 	Init& operator=(const Init &init);
 	~Init();
+
+	void eval(const pattern::Environment &env,
+			const Expression::VAR &vars,state::State &state);
 
 };
 

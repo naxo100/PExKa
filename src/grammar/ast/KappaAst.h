@@ -35,6 +35,7 @@ class KappaAst {
 	list<Compartment> compartments;
 	list<Channel> channels;
 	list<Init> inits;
+	list<const Use*> useExpressions;
 	//list<Perturbation> perts;
 
 public:
@@ -45,6 +46,7 @@ public:
 	void evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts);
 	vector<Variable*> evaluateDeclarations(pattern::Environment &env,vector<Variable*> &vars,bool is_const = false);
 	void evaluateCompartments(pattern::Environment &env,const vector<Variable*>& vars);
+	void evaluateUseExpressions(pattern::Environment &env,const vector<Variable*>& consts);
 	void evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars);
 	void evaluateInits(const pattern::Environment &env,const vector<Variable*>,state::State &state);
 
@@ -55,6 +57,7 @@ public:
 	void add(const Channel &c);
 	void add(const Id &t);
 	void add(const Init &i);
+	void add(const Use *u);
 	//void add(Perturbation p);
 
 

@@ -18,29 +18,61 @@ namespace ast {
 using namespace std;
 
 
+/** \brief Representation of a compartment expression.
+ *
+ * Stores the data of a compartment expression. It includes the name
+ * and a list of integer alg. expressions and can represent a compartment
+ * declaration or an expression of a set of cells using auxiliars.
+ */
 class CompExpression: public Node {
 public:
+	/** \brief Empty constructor.
+	 * Just needed by the parser.
+	 */
 	CompExpression();
-	CompExpression(const location &l,const Id &id,const list<const Expression*> &dim);
+	/** \brief CompExpression constructor.
+	 * @param l location of whole expression
+	 * @param id Id of the compartment
+	 * @param indexlist set of index expressions of the compartment.
+	 */
+	CompExpression(const location &l,const Id &id,const list<const Expression*> &indexlist);
 
 	pattern::CompartmentExpr* eval(pattern::Environment& env,
 			const unordered_map<string,state::Variable*> &vars,
 			bool allowAux);
 
-	vector<short> evalDimensions(pattern::Environment &env,
-			const vector<Variable*> &vars);
-	const Id& evalName(pattern::Environment& env,bool declare=false);
-
-	/** \brief Evaluate compExpression using auxiliars.
+	/** \brief Evaluate this expression as if every index expression is a
+	 * constant int.
 	 *
-	 * Evaluate this CompExpression //using the values for auxiliars defined
-	 * in aux_values. If the auxiliar name is not in aux_values, it is added.
-	 * An evaluated expression is returned for every dimension in
-	 * CompExpression (as a list).
-	 *
+	 * Force alg. expression of each index to have int values and return
+	 * a vector of short ints representing the index list.
+	 * @param env the environment of the simulation.
+	 * @param consts the variable vector (only constant values can be used).
+	 * @return a short int for every index as a vector.
 	 */
-	list<state::BaseExpression*> evalExpression(pattern::Environment &env,
-			const vector<state::Variable*> &vars);
+	vector<short> evalDimensions(const pattern::Environment &env,
+			const vector<Variable*> &consts) const;
+
+	/** \brief Tests if this compartment is declared and returns its Id.
+	 *
+	 * Tests if this compartment is declared only if 'declare' is false.
+	 * then returns the Id.
+	 * @param env the environment of the simulation.
+	 * @param declare true if this compartment has not ben declared.
+	 * @returns The Id of this compExpression.
+	 */
+	const Id& evalName(const pattern::Environment& env,bool declare=false) const;
+
+	/** \brief Evaluate this expression as it can represent several cells.
+	 *
+	 *	Evaluate alg. expressions for each index of compartment and returns
+	 * a list of BaseExpression* for index.
+	 * @param env the environment of the simulation.
+	 * @param consts the variable vector (only constants vars can be accessed).
+	 * @return a list of BaseExpression* for each index of compExpression by copy.
+	 */
+	list<const state::BaseExpression*> evalExpression(const pattern::Environment &env,
+			const vector<state::Variable*> &consts) const;
 
 
 protected:
@@ -76,11 +108,17 @@ class Use : public Node {
 	static unsigned short count;
 	const unsigned short id;
 	list<CompExpression> compartments;
-	Expression* filter;
+	const Expression* filter;
 
 public:
-	//static unsigned short getCount();
-	Use(const location &l,const list<CompExpression> &comps);
+	static unsigned short getCount();
+	Use(const location &l,
+		const list<CompExpression> &comps = list<CompExpression>(),
+		const Expression* where = nullptr);
+	Use(const Use& u);
+	~Use();
+
+	void eval(pattern::Environment &env,const Expression::VAR &consts) const;
 };
 
 

@@ -41,12 +41,14 @@ std::list< std::list< int > > Channel::getConnections() const{
 	std::unordered_map<std::string,int> var_map;
 	std::list< std::list<int> > ret;
 	do{
+		var_map.clear();
 		//std::cout << Compartment::cellToString(cell_index) << source.getCompartment().getCellId(cell_index) << std::endl;
 		std::list<int> l;
 		l.push_back(source->getCompartment().getCellId(cell_index));
 		try{
 			source->solve(cell_index,var_map);
 		}catch(std::exception &e){
+			//cannot solve the system for this cell
 			continue;
 		}
 		//for(auto &elem : var_map)

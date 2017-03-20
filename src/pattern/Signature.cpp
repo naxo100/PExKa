@@ -22,9 +22,6 @@ Signature::~Signature() {
 const std::string& Signature::getName() const{
 	return name;
 }
-/*void Signature::setId(short i){
-	id = i;
-}*/
 
 short Signature::getSiteId(const string &name) const{
 	return siteMap.at(name);
@@ -34,7 +31,7 @@ template <typename T>
 Signature::Site& Signature::addSite(const ast::Id &name_loc){
 	const string& nme(name_loc.getString());
 	if(siteMap.count(nme))
-		throw SemanticError("Site "+nme+" declared twice!");
+		throw SemanticError("Site "+nme+" declared twice!",name_loc.loc);
 	short id = sites.size();
 	siteMap[nme] = id;
 	sites.push_back(new T(nme));
@@ -45,15 +42,6 @@ template Signature::Site& Signature::addSite<Signature::LabelSite>(const ast::Id
 template Signature::Site& Signature::addSite<Signature::RangeSite<int> >(const ast::Id &name_loc);
 template Signature::Site& Signature::addSite<Signature::RangeSite<float> >(const ast::Id &name_loc);
 
-short Signature::addSite(const ast::Id &name_loc,const vector<string> &labels){
-	const string& nme(name_loc.getString());
-	if(siteMap.count(nme))
-		throw SemanticError("Site "+nme+" declared twice!",name_loc.loc);
-	short id = sites.size();
-	siteMap[nme] = id;
-	sites.push_back(new LabelSite(nme));
-	return id;
-}
 short Signature::addSite(const ast::Id &name_loc,int min,int max){
 	//const string& nme(name_loc.getString());
 	return 0;
@@ -77,22 +65,12 @@ short Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
 }
 Signature::Site::~Site(){}
 
-const std::string& Signature::Site::getName() const {
-	return this->name;
-}
+Signature::LabelSite::LabelSite(const string& nme) : Site(nme),labels(){ }
 
-Signature::LabelSite::LabelSite(const string& nme) : Site(nme),labels(){
-	for(unsigned short i = 0;i < labels.size(); i++){
-		cout << "site: " << nme << "\t lab: " << labels[i] << endl;
-		if(label_ids.count(labels[i]))
-			throw SemanticError("Label "+labels[i]+" of site "+nme+" declared twice!");
-		label_ids[labels[i]] = i;
-	}
-}
 void Signature::LabelSite::addLabel(const ast::Id& name_loc){
 	const string& lbl = name_loc.getString();
 	if(label_ids.count(lbl))
-		throw SemanticError("Label "+lbl+" of site "+name+" declared twice!");
+		throw SemanticError("Label "+lbl+" of site "+name+" declared twice!",name_loc.loc);
 	label_ids[lbl] = labels.size();
 	labels.push_back(lbl);
 }

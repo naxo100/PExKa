@@ -212,6 +212,7 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 		const Signature::LabelSite* labelSite;
 
 		out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
+		//out += site.getName(); //site name
 
 		switch(it->second.val_type) {
 			case ValueType::LABEL :
@@ -368,6 +369,8 @@ string Mixture::Component::toString(const Environment& env) const {
 	for(auto lnk = graph->begin() ; lnk != graph->end() ; ++lnk ) {
 		//[ag_id,site_id],[ag_id,site_id]
 		//[lnk->first.first,lnk->first.second],[lnk->second.first,lnk->second.second]
+
+		cout << "<" << lnk->first.first << "," << lnk->first.second<< ">,<" << lnk->second.first << ","<< lnk->second.second<< ">" << endl;
 
 		if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
 				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {

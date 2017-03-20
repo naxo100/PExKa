@@ -65,6 +65,10 @@ short Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
 }
 Signature::Site::~Site(){}
 
+const std::string& Signature::Site::getName() const {
+	return this->name;
+}
+
 Signature::LabelSite::LabelSite(const string& nme) : Site(nme),labels(){ }
 
 void Signature::LabelSite::addLabel(const ast::Id& name_loc){
@@ -78,6 +82,9 @@ short Signature::LabelSite::isPossibleValue(const state::SomeValue &val) const {
 	if(val.t != state::BaseExpression::STR)
 		throw std::invalid_argument("Not a string value.");
 	return label_ids.at(*val.sVal);
+}
+const string Signature::LabelSite::getLabel( short id ) const {
+	return labels[id];
 }
 
 template <typename T>

@@ -288,7 +288,7 @@ void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &const
 		site.eval(env,consts,id_ag,lnks);
 	}
 
-	auto a = env.declareAgentPattern(a_buff);
+	auto& a = env.declareAgentPattern(a_buff);
 	mix.addAgent(&a);
 }
 
@@ -387,6 +387,7 @@ Effect::Effect(const Effect &eff) : Node(eff.loc),action(eff.action){
 		break;
 	case PRINTF:
 		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		break;
 	}
 }
 
@@ -408,6 +409,7 @@ Effect& Effect::operator=(const Effect& eff){
 		break;
 	case PRINTF:
 		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		break;
 	}
 	return *this;
 }

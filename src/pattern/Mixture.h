@@ -119,7 +119,7 @@ struct Mixture::Site {
 		int int_value;
 		float float_value;
 		short id_value;
-		string* lbl;
+		string* lbl; // NO USED
 	} state;
 
 	LinkType link_type;
@@ -132,7 +132,8 @@ struct Mixture::Site {
 };
 
 class Mixture::Agent {
-	short signId;
+	short signId; //signature ID
+	// int = site id
 	std::unordered_map<int,Site> interface;
 
 public:
@@ -148,6 +149,8 @@ public:
 
 	const Site& getSite(short id) const;
 	bool operator==(const Agent& a) const;
+
+	const string toString( short mixAgId, const Environment& env, map<ag_st_id,short>& bindLabels ) const;
 };
 
 /** \brief Defines a set of agents that are explicitly connected by sites.
@@ -174,6 +177,7 @@ public:
 
 	size_t size() const;
 	void setGraph();
+	string toString(const Environment& env) const;
 
 	bool operator==(const Mixture::Component &m) const;
 };

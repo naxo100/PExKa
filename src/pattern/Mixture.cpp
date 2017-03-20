@@ -145,7 +145,15 @@ size_t Mixture::size() const {
 }
 
 string Mixture::toString(const Environment& env) const {
-	return "agents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount);
+	string out = "";
+	short i = 1;
+
+	for( auto &c : *comps ) {
+		out += "Component[" + to_string(i) + "] = " + c->toString(env) + "\n";
+		i++;
+	}
+
+	return out + "\nAgents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount) + "\n";
 }
 
 
@@ -188,6 +196,67 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 void Mixture::Agent::setSiteValue(short site_id,short lbl_id){
 	interface[site_id].val_type = ValueType::LABEL;
 	interface[site_id].state.id_value = lbl_id;
+}
+
+const string Mixture::Agent::toString(short mixAgId, const Environment& env, map<ag_st_id,short>& bindLabels ) const {
+	string out = "", glue = ",";
+
+	const Signature& sign = env.getSignature(signId);
+	out += sign.getName() + "(";
+
+	// inspect interface
+	for( auto it = interface.begin(); it != interface.end(); ++it ) {
+		// it.first = site ID , it.second = Mixture::Site type
+		const Signature::Site& site = sign.getSite( it->first );
+		const Signature::LabelSite* labelSite;
+
+		out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
+		//out += site.getName(); //site name
+
+		switch(it->second.val_type) {
+			case ValueType::LABEL :
+				labelSite = static_cast<const Signature::LabelSite*>(& site);
+				out += "~" + labelSite->getLabel(it->second.state.id_value); //value of site
+				break;
+			case ValueType::INT_VAL :
+				break;
+			case ValueType::FLOAT_VAL :
+				break;
+			case ValueType::VOID :
+				break;
+		}
+
+		switch(it->second.link_type) {
+			case LinkType::BIND :
+				if ( bindLabels[ag_st_id(mixAgId, it->first)] )
+					out += "!" + to_string( bindLabels[ag_st_id(mixAgId, it->first)] );
+				else
+					out += "!_";
+				break;
+			case LinkType::BIND_TO :
+				//out += "bind_to";
+				break;
+			case LinkType::FREE :
+				//out += "free";
+				break;
+			case LinkType::PATH :
+				//out += "path";
+				break;
+			case LinkType::WILD :
+				//out += "wild";
+				break;
+		}
+
+		out += glue;
+	}
+
+	// remove last 2 characters
+	if( out.substr(out.size()-glue.size(), out.size()) == glue )
+		out = out.substr(0, out.size()-glue.size());
+
+	out += ")";
+
+	return out;
 }
 
 /************** class Site *********************/
@@ -288,6 +357,60 @@ void Mixture::Component::setGraph() {
 	delete links;
 	graph = graph_ptr;
 }
+
+string Mixture::Component::toString(const Environment& env) const {
+	string out, glue = ",";
+	map<ag_st_id,short> bindLabels;
+	short bindLabel = 1;
+
+
+	//put labels to bindings
+	for(auto lnk = graph->begin() ; lnk != graph->end() ; ++lnk ) {
+		//[ag_id,site_id],[ag_id,site_id]
+		//[lnk->first.first,lnk->first.second],[lnk->second.first,lnk->second.second]
+
+		cout << "<" << lnk->first.first << "," << lnk->first.second<< ">,<" << lnk->second.first << ","<< lnk->second.second<< ">" << endl;
+
+		if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
+				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {
+			bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] = bindLabel;
+			bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] = bindLabel;
+
+			bindLabel++;
+		}
+		else if( bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
+				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {
+			// not_added = added
+			bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] = bindLabels[ag_st_id(lnk->first.first, lnk->first.second)];
+		}
+		else if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
+				bindLabels[ag_st_id(lnk->second.first, lnk->second.second)]) {
+			bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] = bindLabels[ag_st_id(lnk->second.first, lnk->second.second)];
+		}
+
+	}
+
+	cout << "cmpnt" <<endl;
+	for(auto b : bindLabels){
+		cout << "<"<< b.first.first << "," << b.first.second << "> =" << b.second << endl;
+	}
+
+	for( unsigned mixAgId = 0; mixAgId < agents.size(); mixAgId++ ) {
+
+		out += agents[mixAgId]->toString(mixAgId, env, bindLabels ) + glue;
+		bindLabel++;
+	}
+
+	//
+
+
+	// remove the last glue
+	if( out.substr(out.size()-glue.size(), out.size()) == glue )
+		out = out.substr(0, out.size()-glue.size());
+
+	return out;
+}
+
 
 /*****************************************/
 

@@ -71,8 +71,10 @@ void Mixture::setComponents(Environment &env){
 			Component &comp = *(c_it->first);
 			map<short,short> &mask = c_it->second;//ag_mix -> ag_comp
 			if(mask.find(p1.first) != mask.end()){
-				comp.addAgent(agents[p2.first]);
-				mask.insert(make_pair(p2.first,comp.size()-1));
+				if(mask.find(p2.first) == mask.end()){
+					comp.addAgent(agents[p2.first]);
+					mask.insert(make_pair(p2.first,comp.size()-1));
+				}
 				comp.addLink(make_pair(p1,p2),mask);
 				break;
 			}

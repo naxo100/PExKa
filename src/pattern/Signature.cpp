@@ -65,6 +65,10 @@ short Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
 }
 Signature::Site::~Site(){}
 
+const std::string& Signature::Site::getName() const {
+	return this->name;
+}
+
 Signature::LabelSite::LabelSite(const string& nme) : Site(nme),labels(){ }
 
 void Signature::LabelSite::addLabel(const ast::Id& name_loc){

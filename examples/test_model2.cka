@@ -5,6 +5,7 @@
 %const: 'a' 0.0
 
 %compartment: 'bottles'[3][3] 1.0
+%compartment: 'cities'[10] 'a'
 
 %channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $0.1
 %channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
@@ -14,15 +15,17 @@
 %agent: S(s,t,u,v,w,x)
 %token: a
 
-
-
-%var: 'other kappa fix' S(x!6,s!1),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
-
-#%var: 'other kappa wrong' S(s!1,x!6),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
-
-#%var: 'other kappa fine' S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6),S(x!6,s!1)
-
-
-#%var: 'some kappa' A(z!1,s~2),B(i~2!5,s!1),B(s!5), A(z!4),A(s~3,z!4)
-#%var: 'loop kappa' A(v!6,t!1),A(s!1,t!2),A(s!2,v!3),A(z!3,t!4),A(z!4,v!5),A(s!5,z!6)
+#%var: 'some kappa' A(s~2,z!1),A(z!4),B(s!1,i~2!5),A(z!4,s~3),B(s!5)
+#%var: 'other kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
 #%var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
+
+#%var: 'other kappa' S(s!1,x!6),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
+%var: 'loop kappa' A(v!6,t!1),A(s!2,v!3),A(z!4,v!5),A(s!1,t!2),A(z!3,t!4),A(s!5,z!6)
+
+
+%use: 'bottles'[2*x][x],'cities'[3*x]
+#%init: 5 A()
+#%use: *
+#%init: 100 B()
+
+

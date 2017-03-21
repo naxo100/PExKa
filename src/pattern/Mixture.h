@@ -104,8 +104,8 @@ private:
 	size_t siteCount;
 	size_t compCount;
 	//typedef pair<const Agent*,short> ag_st_pntr;
-	//two consecutive pairs are a link
-	list< ag_st_id > links;
+	//link (agent<,site)->(agent>,site)
+	map< ag_st_id , ag_st_id> links;
 
 };
 

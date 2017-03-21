@@ -43,7 +43,7 @@ Mixture::~Mixture() {
 
 void Mixture::addAgent(const Mixture::Agent *a){
 	if(declaredComps)
-		throw std::invalid_argument("Cannot call addAgent() on a initialized Mixture");;
+		throw std::invalid_argument("Cannot call addAgent() on an initialized Mixture");
 	agents[agentCount] = a;
 	agentCount++;
 	//return agentCount-1;
@@ -51,40 +51,41 @@ void Mixture::addAgent(const Mixture::Agent *a){
 
 void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
 	if(declaredComps)
-		throw std::invalid_argument("Cannot call addLink() on a initialized Mixture");;
-	links.emplace_back(p1.first,p1.second);
-	links.emplace_back(p2.first,p2.second);
+		throw std::invalid_argument("Cannot call addLink() on an initialized Mixture");
+	if(p1.first < p2.first)
+		links.emplace(p1,p2);
+	else
+		links.emplace(p2,p1);
 }
 
 void Mixture::setComponents(Environment &env){
-	//Component c;
-	//map<id_pair,id_pair,CompareIdPair> m(graph);
-	//sort(agents->begin(),agents->end());
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");;
 	list<pair<Component*,map<short,short> > > comps;
-	for(auto l_it = links.cbegin();l_it != links.cend(); advance(l_it,2)){
-		auto p1 = *l_it,p2 = *next(l_it,1);
+	//iterate link map ordered by agent_id, one copy per non directed link
+	for(auto l_it = links.cbegin();l_it != links.cend(); l_it++){
+		auto p1 = l_it->first,p2 = l_it->second;
 		auto c_it = comps.begin();
+		//iterate on local components, test if ag(p1) or ag(p2) \in comp
 		for(;c_it != comps.end(); c_it++){
-			Component &comp = *get<0>(*c_it);
-			//set<short> &content = get<1>(*c_it);
-			map<short,short> &mask = get<1>(*c_it);//ag_mix -> ag_comp
+			Component &comp = *(c_it->first);
+			map<short,short> &mask = c_it->second;//ag_mix -> ag_comp
 			if(mask.find(p1.first) != mask.end()){
-				comp.addAgent(agents[p2.first]);
-				mask.insert(make_pair(p2.first,comp.size()-1));
-				//content.insert(lnk.second.first);
+				if(mask.find(p2.first) == mask.end()){
+					comp.addAgent(agents[p2.first]);
+					mask.insert(make_pair(p2.first,comp.size()-1));
+				}
 				comp.addLink(make_pair(p1,p2),mask);
 				break;
 			}
 			else if(mask.find(p2.first) != mask.end()){
 				comp.addAgent(agents[p1.first]);
 				mask.insert(make_pair(p1.first,comp.size()-1));
-				//content.insert(lnk.first.first);
 				comp.addLink(make_pair(p1,p2),mask);
 				break;
 			}
 		}
+		//add a new component if ag(p1) and ag(p2) are not in any defined component
 		if(c_it == comps.end()){
 			comps.emplace_back(new Component(),map<short,short>());
 			comps.back().second.emplace(p1.first,0);
@@ -95,6 +96,7 @@ void Mixture::setComponents(Environment &env){
 		}
 
 	}
+	//add not connected agents as not connected components
 	for(size_t i = 0; i < agentCount ; i++){
 		auto c_it = comps.begin();
 		for(;c_it != comps.end(); c_it++){
@@ -110,6 +112,7 @@ void Mixture::setComponents(Environment &env){
 	delete[] agents;
 	this->comps = new vector<const Component*>(compCount);
 	int i=0;
+	//set comps.graph and declare comps in env
 	for(const auto& c : comps){
 		c.first->setGraph();
 		const Component &comp = env.declareComponent(*c.first);
@@ -118,10 +121,8 @@ void Mixture::setComponents(Environment &env){
 		i++;
 	}
 	sort(this->comps->begin(),this->comps->end());
-	//delete?
 	links.clear();
 	declaredComps = true;
-	//return this->comps;
 }
 
 bool Mixture::operator==(const Mixture& m) const{

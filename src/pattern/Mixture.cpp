@@ -366,43 +366,35 @@ string Mixture::Component::toString(const Environment& env) const {
 
 
 	//put labels to bindings
+	cout << "cmpnt" << endl;
 	for(auto lnk = graph->begin() ; lnk != graph->end() ; ++lnk ) {
 		//[ag_id,site_id],[ag_id,site_id]
 		//[lnk->first.first,lnk->first.second],[lnk->second.first,lnk->second.second]
 
-		cout << "<" << lnk->first.first << "," << lnk->first.second<< ">,<" << lnk->second.first << ","<< lnk->second.second<< ">" << endl;
-
+		//cout << "<" << lnk->first.first << "," << lnk->first.second << ">,<" << lnk->second.first << "," << lnk->second.second << ">" << "  >>>>>>>  ";
 		if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
 				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {
 			bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] = bindLabel;
 			bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] = bindLabel;
-
 			bindLabel++;
-		}
-		else if( bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
-				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {
-			// not_added = added
-			bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] = bindLabels[ag_st_id(lnk->first.first, lnk->first.second)];
-		}
-		else if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
-				bindLabels[ag_st_id(lnk->second.first, lnk->second.second)]) {
-			bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] = bindLabels[ag_st_id(lnk->second.first, lnk->second.second)];
+
+			//cout << "add <" << lnk->first.first << "," << lnk->first.second << "> = "<< bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] << "  ";
+			//cout << "add <" << lnk->second.first << "," << lnk->second.second << "> = "<< bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] << endl;
+		//} else {
+			//cout << "no add <" << lnk->first.first << "," << lnk->first.second << ">" << ",";
+			//cout << "<" << lnk->second.first << "," << lnk->second.second << ">" << endl;
 		}
 
 	}
 
-	cout << "cmpnt" <<endl;
 	for(auto b : bindLabels){
-		cout << "<"<< b.first.first << "," << b.first.second << "> =" << b.second << endl;
+		cout << "<"<< b.first.first << "," << b.first.second << "> = " << b.second << endl;
 	}
 
 	for( unsigned mixAgId = 0; mixAgId < agents.size(); mixAgId++ ) {
-
 		out += agents[mixAgId]->toString(mixAgId, env, bindLabels ) + glue;
 		bindLabel++;
 	}
-
-	//
 
 
 	// remove the last glue

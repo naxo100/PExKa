@@ -33,19 +33,17 @@ public:			//       !1    !?  !_   !A.s
 	~Link();
 	const LinkType& getType() const;
 
-	void eval(pattern::Mixture::Site& mix_site,
+	void eval(const pattern::Environment &env,
+			pattern::Mixture::Site& mix_site,
 			unordered_map<unsigned,list<pair<short,short> > > &,
 			const pair<short,short> &mix_ag_site,bool allow_pattern) const;
 
 protected:
 	LinkType type;
-	union {
+	//union { TODO: BUG when try to write ag_site
 		unsigned int value;
-		struct {
-			Id agent;
-			Id site;
-		} ag_site;
-	};
+		pair<Id,Id> ag_site;
+	//};
 };
 
 class SiteState : public Node{

@@ -11,7 +11,7 @@ namespace ast {
 
 
 /****** Class Link ***********/
-Link::Link() : type(FREE){}
+Link::Link() : type(FREE),value(0){}
 Link::Link(const location &l,LinkType t):
 	Node(l), type(t)  {};
 Link::Link(const location &l,LinkType t,int val):
@@ -51,7 +51,8 @@ const Link::LinkType& Link::getType() const{
 	return type;
 }
 
-void Link::eval(pattern::Mixture::Site& mix_site,
+void Link::eval(const pattern::Environment &env,
+		pattern::Mixture::Site& mix_site,
 		unordered_map<unsigned,list<pair<short,short> > > &links,
 		const pair<short,short> &mix_ag_site,bool allow_pattern) const {
 	int n;
@@ -80,9 +81,16 @@ void Link::eval(pattern::Mixture::Site& mix_site,
 		break;
 	case AG_SITE:
 		mix_site.link_type = pattern::Mixture::BIND_TO;
-		//TODO add env
-		//mix_site.lnk.first = this->ag_site.agent;
-		//mix_site.lnk.second = this->ag_site.site;
+		try{
+			short bind_to_ag(env.getSignatureId(ag_site.first.getString()));
+			short bind_to_site(env.getSignature(bind_to_ag).getSiteId(ag_site.second.getString()));
+			mix_site.lnk_ptrn.first = bind_to_ag;
+			mix_site.lnk_ptrn.second = bind_to_site;
+		}catch(std::out_of_range &e){
+			throw SemanticError("Link pattern '"+ag_site.second.getString()+
+					"."+ag_site.first.getString()+"' is not defined.",
+					ag_site.second.loc+ag_site.first.loc);
+		}
 		break;
 	}
 }
@@ -245,7 +253,7 @@ void Site::eval(pattern::Environment &env,const vector<Variable*> &consts,
 	}
 
 
-	link.eval(*mix_site,links,make_pair(ag_id,site_id),true);
+	link.eval(env,*mix_site,links,make_pair(ag_id,site_id),true);
 }
 
 void Site::show( string tabs ) const {

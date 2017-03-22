@@ -124,7 +124,7 @@ struct Mixture::Site {
 
 	LinkType link_type;
 	//only valid if type is BIND_TO
-	std::pair<short,short> lnk;//agent,site
+	std::pair<short,short> lnk_ptrn;//agent,site
 
 	bool operator==(const Site &s) const;
 

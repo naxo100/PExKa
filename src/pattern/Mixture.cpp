@@ -285,7 +285,7 @@ bool Mixture::Site::operator ==(const Site &s) const{
 	else
 		return false;
 	if(s.link_type == link_type){
-		if(link_type == LinkType::BIND_TO && s.lnk != lnk)
+		if(link_type == LinkType::BIND_TO && s.lnk_ptrn != lnk_ptrn)
 			return false;
 	}
 	return true;

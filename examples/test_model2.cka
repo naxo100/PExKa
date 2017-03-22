@@ -8,7 +8,7 @@
 %compartment: 'cities'[10] 'a'
 
 %channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $0.1
-#%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
+%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
 
 %agent: A(s~1~2~3,t~1,v~[-1,1](-'a'),z)
 %agent: B(s,i~1~2)

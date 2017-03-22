@@ -208,12 +208,13 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 
 	// inspect interface
 	for( auto it = interface.begin(); it != interface.end(); ++it ) {
-		// it.first = site ID , it.second = Mixture::Site type
+		/* it.first = site ID , it.second = Mixture::Site type
+		 */
 		const Signature::Site& site = sign.getSite( it->first );
 		const Signature::LabelSite* labelSite;
 
-		out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
-		//out += site.getName(); //site name
+		//out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
+		out += site.getName(); //site name
 
 		switch(it->second.val_type) {
 			case ValueType::LABEL :
@@ -252,7 +253,7 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 		out += glue;
 	}
 
-	// remove last 2 characters
+	// remove last glue
 	if( out.substr(out.size()-glue.size(), out.size()) == glue )
 		out = out.substr(0, out.size()-glue.size());
 
@@ -362,41 +363,31 @@ void Mixture::Component::setGraph() {
 
 string Mixture::Component::toString(const Environment& env) const {
 	string out, glue = ",";
+
+	// put labels to bindings
 	map<ag_st_id,short> bindLabels;
 	short bindLabel = 1;
-
-
-	//put labels to bindings
-	cout << "cmpnt" << endl;
 	for(auto lnk = graph->begin() ; lnk != graph->end() ; ++lnk ) {
-		//[ag_id,site_id],[ag_id,site_id]
-		//[lnk->first.first,lnk->first.second],[lnk->second.first,lnk->second.second]
+		/* Logic structure: [ag_id,site_id],[ag_id',site_id'] that means [Agent,Site] is conected with [Agent',Site']
+		 * C++ structure:   [lnk->first.first,lnk->first.second],[lnk->second.first,lnk->second.second]
+		 * the graph is bidirectional because the links are symmetrical, that means exist [ag_id,site_id],[ag_id',site_id'0]
+		 * and [ag_id',site_id'],[ag_id,site_id]
+		 */
 
-		//cout << "<" << lnk->first.first << "," << lnk->first.second << ">,<" << lnk->second.first << "," << lnk->second.second << ">" << "  >>>>>>>  ";
 		if( ! bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] &&
 				! bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] ) {
 			bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] = bindLabel;
 			bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] = bindLabel;
 			bindLabel++;
 
-			//cout << "add <" << lnk->first.first << "," << lnk->first.second << "> = "<< bindLabels[ag_st_id(lnk->first.first, lnk->first.second)] << "  ";
-			//cout << "add <" << lnk->second.first << "," << lnk->second.second << "> = "<< bindLabels[ag_st_id(lnk->second.first, lnk->second.second)] << endl;
-		//} else {
-			//cout << "no add <" << lnk->first.first << "," << lnk->first.second << ">" << ",";
-			//cout << "<" << lnk->second.first << "," << lnk->second.second << ">" << endl;
 		}
 
-	}
-
-	for(auto b : bindLabels){
-		cout << "<"<< b.first.first << "," << b.first.second << "> = " << b.second << endl;
 	}
 
 	for( unsigned mixAgId = 0; mixAgId < agents.size(); mixAgId++ ) {
 		out += agents[mixAgId]->toString(mixAgId, env, bindLabels ) + glue;
 		bindLabel++;
 	}
-
 
 	// remove the last glue
 	if( out.substr(out.size()-glue.size(), out.size()) == glue )

@@ -213,6 +213,12 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 		const Signature::Site& site = sign.getSite( it->first );
 		const Signature::LabelSite* labelSite;
 
+		// vars nedded to LinkType::BINTO_TO
+		const Signature* signature2bind;
+		const Signature::Site* site2bind;
+		const Mixture::Site* mixtureSite2bind;
+		const Signature::LabelSite* labelSite2bind;
+
 		//out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
 		out += site.getName(); //site name
 
@@ -237,16 +243,23 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 					out += "!_";
 				break;
 			case LinkType::BIND_TO :
-				//out += "bind_to";
+				signature2bind = & env.getSignature( it->second.lnk_ptrn.first );
+				site2bind = & signature2bind->getSite( it->second.lnk_ptrn.second );
+
+				labelSite2bind = static_cast<const Signature::LabelSite*>(site2bind);
+
+				//labelSite2bind->getLabel(it->second.state.id_value);
+
+				out += "!"+ site2bind->getName() + "." + signature2bind->getName();
 				break;
 			case LinkType::FREE :
-				//out += "free";
+				out += ""; // no noted
 				break;
 			case LinkType::PATH :
-				//out += "path";
+				out += "PATH";
 				break;
 			case LinkType::WILD :
-				//out += "wild";
+				out += "?";
 				break;
 		}
 

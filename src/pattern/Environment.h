@@ -65,7 +65,7 @@ public:
 	Channel& declareChannel(const ast::Id &channel);
 	const Mixture& declareMixture(const Mixture& m);
 	const Mixture::Component& declareComponent(const Mixture::Component& c);
-	const Mixture::Agent& declareAgentPattern(const Mixture::Agent& a);
+	const Mixture::Agent& declareAgentPattern(const Mixture::Agent* a);
 	short idOfAlg(const string& name);
 
 	const Signature& getSignature(short id) const;

@@ -58,9 +58,17 @@ void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
 		links.emplace(p2,p1);
 }
 
+void Mixture::declareAgents(Environment &env){
+	if(declaredComps)
+		throw std::invalid_argument("Cannot call declareAgents() on a initialized Mixture");
+	for(size_t i = 0; i < agentCount ; i++){
+		agents[i] = &env.declareAgentPattern(agents[i]);
+	}
+}
+
 void Mixture::setComponents(Environment &env){
 	if(declaredComps)
-		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");;
+		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");
 	list<pair<Component*,map<short,short> > > comps;
 	//iterate link map ordered by agent_id, one copy per non directed link
 	for(auto l_it = links.cbegin();l_it != links.cend(); l_it++){

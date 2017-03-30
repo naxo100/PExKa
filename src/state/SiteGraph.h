@@ -20,6 +20,10 @@ public:
 	struct Internal;
 	SiteGraph();
 	~SiteGraph();
+
+	Node& addNode(short sign_id);
+	Node& getNode(size_t address);
+
 };
 
 
@@ -29,14 +33,26 @@ struct SiteGraph::Internal {
 		int iVal;
 		float fVal;
 	};
+	//link(node,site_id)
+	pair<Node*,short> link;
+	//link(node_address,site_id) - for marshalize?
+	//pair<unsigned,short> fLink;
 
-	pair<short,short> link;
 };
 
 class SiteGraph::Node {
 	short name;
 	long address;
 	Internal *interface;
+public:
+	Node(short sign_id,short intf_size);
+	void setAddress(size_t addr);
+
+	template<typename T>
+	void setState(short site_id,T value);
+	void setLink(short site_src,Node* lnk,short site_trgt);
+
+
 };
 
 

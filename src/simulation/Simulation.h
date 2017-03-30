@@ -11,6 +11,7 @@
 #include <map>
 #include <list>
 #include <vector>
+#include <unordered_map>
 #include "../state/State.h"
 #include "../pattern/Environment.h"
 #include "../pattern/RuleSet.h"
@@ -24,9 +25,22 @@ class Simulation {
 	pattern::RuleSet rules;
 	Counter counter;
 
+	unordered_map<int,state::State> cells;
+
+	template <typename T>
+	list<T> allocParticles(unsigned cells,T count,const list<T>* vol_ratios = nullptr);
+
 public:
 	Simulation();
 	~Simulation();
+
+	template <template <typename,typename...> class Range,typename... Args>
+	void addTokens(const Range<int,Args...> &cell_ids,float count,short token_id);
+
+	template <template <typename,typename...> class Range,typename... Args>
+	void addAgents(const Range<int,Args...> &cell_ids,unsigned count,pattern::Mixture& mix);
+
+
 
 	/** \brief Return a way to allocate cells among cpu's.
 	 *

@@ -15,17 +15,17 @@
 %agent: S(s,t,u,v,w,x)
 %token: a
 
-#%var: 'some kappa' A(s~2,z!1),A(z!4),B(s!1,i~2!5),A(z!4,s~3),B(s!5)
-#%var: 'other kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
-#%var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
+%var: 'some kappa' A(s~2,z!1),A(z!4),B(s!1,i~2!5),A(z!4,s~3),B(s!5)
+%var: 'other kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
+%var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
 
-#%var: 'other kappa' S(s!1,x!6),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
-#%var: 'loop kappa' A(v!6,t!1),A(s!2,v!3),A(z!4,v!5),A(s!1,t!2),A(z!3,t!4),A(s!5,z!6)
+%var: 'other kappa2' S(s!1,x!6),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
+%var: 'loop kappa' A(v!6,t!1),A(s!2,v!3),A(z!4,v!5),A(s!1,t!2),A(z!3,t!4),A(s!5,z!6)
 %var: 'kappa site.agent' A(v!v.A)
 
 %use: 'bottles'[2*x][x],'cities'[3*x]
 #%init: 5 A()
-#%use: *
+%use: *
 #%init: 100 B()
 
 

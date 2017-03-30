@@ -9,18 +9,20 @@
 
 namespace state {
 
-State::State() {
-	// TODO Auto-generated constructor stub
-
-}
+State::State(size_t tok_count,const std::vector<Variable*>& _vars,const state::BaseExpression& vol) :
+	volume(vol),vars(_vars),tokens (new float[tok_count]){}
 
 State::~State() {
-	// TODO Auto-generated destructor stub
+	delete[] tokens;
 }
 
 
-void State::addTokens(short comp_id, short tok_id, float n){
-	//TODO
+void State::addTokens(float n,short tok_id){
+	tokens[tok_id] += n;
+}
+
+void State::addNodes(int n,pattern::Mixture& mix){
+
 }
 
 } /* namespace ast */

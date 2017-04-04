@@ -47,12 +47,12 @@ template void Simulation::addTokens(const std::set<int> &cell_ids,float count,sh
 
 
 template <template<typename,typename...> class Range,typename... Args>
-void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,pattern::Mixture &mix){
-	list<int> per_cell = allocParticles(cell_ids.size(),count);
+void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,const pattern::Mixture &mix){
+	list<unsigned> per_cell = allocParticles(cell_ids.size(),count);
 	auto ids_it = cell_ids.begin();
 	for(auto n : per_cell){
 		try{
-			cells.at(*ids_it).addAgents(mix,n);
+			cells.at(*ids_it).addNodes(n,mix);
 		}
 		catch(std::out_of_range &e){
 			//other mpi_process will add this tokens.
@@ -60,7 +60,7 @@ void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,pat
 		ids_it++;
 	}
 }
-
+template void Simulation::addAgents(const std::set<int> &cell_ids,unsigned count,const pattern::Mixture &mix);
 
 vector<list<int>> Simulation::allocCells(
 		int n_cpus,

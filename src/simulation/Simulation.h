@@ -38,7 +38,7 @@ public:
 	void addTokens(const Range<int,Args...> &cell_ids,float count,short token_id);
 
 	template <template <typename,typename...> class Range,typename... Args>
-	void addAgents(const Range<int,Args...> &cell_ids,unsigned count,pattern::Mixture& mix);
+	void addAgents(const Range<int,Args...> &cell_ids,unsigned count,const pattern::Mixture& mix);
 
 
 

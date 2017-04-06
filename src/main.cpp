@@ -52,8 +52,14 @@ int main(int argc, char* argv[]){
 	positional_options_description pos;
 	pos.add("input-file",-1);
 	variables_map vm;
-	store(command_line_parser(argc,argv).options(desc).positional(pos).run(), vm);
-	notify(vm);
+	try {
+		store(command_line_parser(argc,argv).options(desc).positional(pos).run(), vm);
+		notify(vm);
+	} catch(boost::program_options::error_with_option_name &e){
+		cerr << e.what() << endl;
+		cout << "Try PExKa --help for the list of valid program options." << endl;
+		return 1;
+	}
 
 	if (vm.count("help")) {
 	    cout << desc << "\n";
@@ -63,8 +69,10 @@ int main(int argc, char* argv[]){
 	grammar::KappaDriver *driver;
 	if (vm.count("input-file"))
 		driver = new grammar::KappaDriver(vm["input-file"].as<vector<string> >());
-	else
-		driver = new grammar::KappaDriver();
+	else {
+		cout << "Try PExKa --help for the list of valid program options." << endl;
+		return 1;
+	}
 
 	driver->parse();
 

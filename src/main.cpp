@@ -66,8 +66,13 @@ int main(int argc, char* argv[]){
 	else
 		driver = new grammar::KappaDriver();
 
-	driver->parse();
-
+	//parser Kappa file
+	try{
+		driver->parse();
+	} catch(const exception &e) {
+		cerr << "A parser error found: " << e.what() << endl;
+		exit(1);
+	}
 	// make AST
 	ast::KappaAst &ast = driver->getAst();
 	//ast.show();

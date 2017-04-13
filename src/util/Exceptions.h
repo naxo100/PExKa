@@ -14,7 +14,7 @@
 
 
 class SemanticError : public std::exception {
-	char msg[100];
+	char msg[150];
 	yy::location loc;
 public:
 	SemanticError(const std::string &str,const yy::location& loc);
@@ -22,6 +22,21 @@ public:
 	//~SemanticError();
 
 	virtual const char* what() const _GLIBCXX_USE_NOEXCEPT override;
+
+	void setLocation(const yy::location &l);
+};
+
+
+class SyntaxError : public std::exception {
+	char msg[150];
+	yy::location loc;
+public:
+	SyntaxError(const std::string &str,const yy::location& loc);
+
+	//~SyntaxError();
+
+	virtual const char* what() const _GLIBCXX_USE_NOEXCEPT override;
+
 	void setLocation(const yy::location &l);
 };
 

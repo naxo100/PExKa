@@ -4,12 +4,24 @@
 	#include "KappaParser.hpp"
 	#include "KappaDriver.h"
 	#include "location.hh"
+	#include "../util/Exceptions.h"
 	
 	#define loc (*(driver.getLocation()))
 	#define yyterminate() KappaParser::make_END(loc) 
 	
 	using namespace yy;
 	
+	/**
+	 * \brief Message control to syntax errors
+	*/		    
+	void MakeMsg(char* msg, const char* str) {
+		strcpy(msg, "\"");
+		strcat(msg, str);
+		strcat(msg, "\"");
+		strcat(msg, " No such perturbation in expanded Kappa");
+	}
+
+
 	// Code run each time a pattern is matched.
 	# define YY_USER_ACTION  loc.columns (yyleng);
 	// The location of the current token.
@@ -25,7 +37,7 @@
 %option 8bit warn nodefault
 %option yyclass="KappaLexer"
 %option prefix="kappa_"
-
+/*%option debug*/
 
 
 blank		[\t ]
@@ -49,38 +61,40 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 				return KappaParser::make_FLOAT(atof(yytext),loc);
 			}
 "%"{id}":"	{
-				if(!strcmp(yytext,"%agent:"))
-					return KappaParser::make_SIGNATURE(loc);
-				else if(!strcmp(yytext,"%init:"))
-					return KappaParser::make_INIT(loc);
-				else if(!strcmp(yytext,"%var:"))
-					return KappaParser::make_LET(loc);
-				else if(!strcmp(yytext,"%const:"))
-					return KappaParser::make_CONST(loc);
-				else if(!strcmp(yytext,"%plot:"))
-					return KappaParser::make_PLOT(loc);
-				else if(!strcmp(yytext,"%mod:"))
-					return KappaParser::make_PERT(loc);
-				else if(!strcmp(yytext,"%obs:"))
-					return KappaParser::make_OBS(loc);
-				else if(!strcmp(yytext,"%def:"))
-					return KappaParser::make_CONFIG(loc);
-				else if(!strcmp(yytext,"%token:"))
-					return KappaParser::make_TOKEN(loc);
-				else if(!strcmp(yytext,"%compartment:"))
-					return KappaParser::make_COMPARTMENT(loc);
-				else if(!strcmp(yytext,"%channel:"))
-					return KappaParser::make_CHANNEL(loc);
-				else if(!strcmp(yytext,"%transport:"))
-					return KappaParser::make_TRANSPORT(loc);
-				else if(!strcmp(yytext,"%use:"))
-					return KappaParser::make_USE(loc);
-				else{
-					cout << "Error at\n" << loc << ": " << yytext << endl;
-					cout << "No such instruction in expanded Kappa" << endl;
-					return KappaParser::make_NEWLINE(loc);
-				}
+			if(!strcmp(yytext,"%agent:"))
+				return KappaParser::make_SIGNATURE(loc);
+			else if(!strcmp(yytext,"%init:"))
+				return KappaParser::make_INIT(loc);
+			else if(!strcmp(yytext,"%var:"))
+				return KappaParser::make_LET(loc);
+			else if(!strcmp(yytext,"%const:"))
+				return KappaParser::make_CONST(loc);
+			else if(!strcmp(yytext,"%plot:"))
+				return KappaParser::make_PLOT(loc);
+			else if(!strcmp(yytext,"%mod:"))
+				return KappaParser::make_PERT(loc);
+			else if(!strcmp(yytext,"%obs:"))
+				return KappaParser::make_OBS(loc);
+			else if(!strcmp(yytext,"%def:"))
+				return KappaParser::make_CONFIG(loc);
+			else if(!strcmp(yytext,"%token:"))
+				return KappaParser::make_TOKEN(loc);
+			else if(!strcmp(yytext,"%compartment:"))
+				return KappaParser::make_COMPARTMENT(loc);
+			else if(!strcmp(yytext,"%channel:"))
+				return KappaParser::make_CHANNEL(loc);
+			else if(!strcmp(yytext,"%transport:"))
+				return KappaParser::make_TRANSPORT(loc);
+			else if(!strcmp(yytext,"%use:"))
+				return KappaParser::make_USE(loc);
+			else{
+				char msg[150];
+				MakeMsg(msg, yytext);
+
+				throw SyntaxError(msg, loc);
+				return KappaParser::make_NEWLINE(loc);
 			}
+		}
 "do"		return KappaParser::make_DO(loc);
 "set"		return KappaParser::make_SET(loc);
 "repeat"	return KappaParser::make_REPEAT(loc);
@@ -93,30 +107,32 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 ":="		return KappaParser::make_ASSIGN(loc);
 "<>"		return KappaParser::make_DIFF(loc);
 \${letter}+	{
-				if(!strcmp(yytext,"$DEL"))
-					return KappaParser::make_DELETE(loc);
-				else if(!strcmp(yytext,"$ADD"))
-					return KappaParser::make_INTRO(loc);
-				else if(!strcmp(yytext,"$SNAPSHOT"))
-					return KappaParser::make_SNAPSHOT(loc);
-				else if(!strcmp(yytext,"$STOP"))
-					return KappaParser::make_STOP(loc);
-				else if(!strcmp(yytext,"$FLUX"))
-					return KappaParser::make_FLUX(loc);
-				else if(!strcmp(yytext,"$TRACK"))
-					return KappaParser::make_TRACK(loc);
-				else if(!strcmp(yytext,"$UPDATE"))
-					return KappaParser::make_ASSIGN2(loc);
-				else if(!strcmp(yytext,"$PRINT"))
-					return KappaParser::make_PRINT(loc);
-				else if(!strcmp(yytext,"$PRINTF"))
-					return KappaParser::make_PRINTF(loc);
-				else{					
-					cout << "Error at\n" << loc << ": " << yytext << endl;
-					cout << "No such perturbation in expanded Kappa" << endl;
-					return KappaParser::make_NEWLINE(loc);
-				}
+			if(!strcmp(yytext,"$DEL"))
+				return KappaParser::make_DELETE(loc);
+			else if(!strcmp(yytext,"$ADD"))
+				return KappaParser::make_INTRO(loc);
+			else if(!strcmp(yytext,"$SNAPSHOT"))
+				return KappaParser::make_SNAPSHOT(loc);
+			else if(!strcmp(yytext,"$STOP"))
+				return KappaParser::make_STOP(loc);
+			else if(!strcmp(yytext,"$FLUX"))
+				return KappaParser::make_FLUX(loc);
+			else if(!strcmp(yytext,"$TRACK"))
+				return KappaParser::make_TRACK(loc);
+			else if(!strcmp(yytext,"$UPDATE"))
+				return KappaParser::make_ASSIGN2(loc);
+			else if(!strcmp(yytext,"$PRINT"))
+				return KappaParser::make_PRINT(loc);
+			else if(!strcmp(yytext,"$PRINTF"))
+				return KappaParser::make_PRINTF(loc);
+			else{					
+				char msg[150];
+				MakeMsg(msg, yytext);
+
+				throw SyntaxError(msg, loc);
+				return KappaParser::make_NEWLINE(loc);
 			}
+		}
 "[A]"		return KappaParser::make_ACTIVITY(loc);
 "[E]"		return KappaParser::make_EVENT(loc);
 "[E+]"		return KappaParser::make_PROD_EVENT(loc);
@@ -145,8 +161,9 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "[rand1]"	return KappaParser::make_RAND_1(loc);
 ":"			return KappaParser::make_TYPE(loc);
 ";"			return KappaParser::make_SEMICOLON(loc);
-\"[\"\n]^*\"
-			return KappaParser::make_STRING(yytext,loc);
+"\""[^\"]*"\""	{ 
+	return KappaParser::make_STRING(yytext,loc); }
+
 [\n]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 [\r]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 "'"[^']*"'"	return KappaParser::make_LABEL(yytext,loc);
@@ -184,5 +201,4 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 <<EOF>> { return yyterminate(); }
 
 %%
-		    
 		    

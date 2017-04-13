@@ -12,7 +12,7 @@
 {
 	// Initialize the initial location.
 	//@$.initialize(driver.getCurrentFileName(),1,1);
-	//yydebug_ = 1;
+	yydebug_ = 1;
 };
 
 %code requires{
@@ -20,9 +20,10 @@
 	#include <string>
 	#include "ast/Statements.h"
 	#include "location.hh"
+	#include "../util/Exceptions.h"
 	
 	using namespace std;
-    using namespace ast;
+	using namespace ast;
 	
 	namespace yy {
 		class KappaLexer;
@@ -106,11 +107,15 @@
 statements:
 | statements statement newline
 	{}
+| error
+	{}
 ;
+
 
 newline:
 NEWLINE {}
 | END {return 0;}
+;
 
 
 statement:
@@ -146,6 +151,8 @@ instruction:
 	{}
 | LET variable_declaration 
 	{this->driver.getAst().add($2);}
+| LET error
+	{yy::KappaParser::error(@2, "Bad LABEL declaration");}
 | CONST variable_declaration
 	{$2.setConstant(true); this->driver.getAst().add($2);}
 | OBS variable_declaration
@@ -287,6 +294,8 @@ effect:
 	{}
 | STOP string_or_pr_expr
 	{ $$ = Effect(@$,Effect::STOP,$2); }
+| STOP error 
+	{ yy::KappaParser::error(@2, "Malformed perturbation"); }
 | FLUX string_or_pr_expr boolean 
 	{ $$ = Effect(@$,$3 ? Effect::FLUX : Effect::FLUX_OFF,$2); }
 | TRACK LABEL boolean 
@@ -375,6 +384,7 @@ constant:
 	{$$ = new Const(@$,Const::EMAX);}
 | TMAX
 	{$$ = new Const(@$,Const::TMAX);}
+;
 
 rule_label: 
 /*empty */
@@ -407,6 +417,7 @@ sum_token:
 		$5.push_front(Token(@1+@2+@3,$1,Id(@3,$3)));
 		$$=$5;
 	}
+;
 
 mixture:
 /*empty*/ 
@@ -470,6 +481,7 @@ alg_expr:
 	{$$ = $2;}
 | constant 
 	{$$ = $1;}
+/**************************/
 | variable
 	{$$ = $1;}
 | bool_expr
@@ -589,7 +601,7 @@ internal_state:
 	{$$ = SiteState(@$,$2,$4,$7);}
 | error
 	{yy::KappaParser::error(@1,"Invalid internal state");}
-
+;
 state_enum:
 /*empty*/ 
 	{$$=std::list<Id>(); }
@@ -619,9 +631,13 @@ link_state:
 
 %%
 
+
+
 void yy::KappaParser::error(const location &loc , const std::string &message) {
 	// Location should be initialized inside scanner action, but is not in this example.
 	// Let's grab location directly from driver class.
 	// cout << "Error: " << message << endl << "Location: " << loc << endl;
-	cout << "Error: " << message << endl << "Error location: " << loc << endl;
+	//cout << "Error in " << loc << " : " << message << "." << endl;
+
+	throw SyntaxError( message, loc );
 }

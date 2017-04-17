@@ -1,13 +1,14 @@
 #%var: 'a' 3.5*2
 
-%var: 'age' "aaaa"
+#%var: 'age' "aaaa"
 #%agent: S(i~1~2)
 
 #%var: 'y' 3
 #%var: 'x' 3/5.0 + 10*5.1 + 100^2 + (5 = 3)
 
-
-#%const: 'ab' 2
+# the variable of location is lost when It eval the constant
+%agent: E(s~1~2)
+%const: 'ab' E(s~1)
 
 #botellas con valor alphanumeric: segmentation fault
 #botellas con nombre numerico: Segmentation fault

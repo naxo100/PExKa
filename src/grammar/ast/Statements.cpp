@@ -20,13 +20,14 @@ short Statement::getUseId() const {
 /****** Class Declaration *******/
 Declaration::Declaration() : type(ALG),constant(false),expr(NULL){};
 Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
-	Node(loc),name(lab),type(ALG),constant(false),expr(e) {};
+	Node(l),name(lab),type(ALG),constant(false),expr(e) {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(loc),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {};
+	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {
+};
 
 Declaration::Declaration(const Declaration &d) :
-		name(d.name),type(d.type),constant(false){
+		Node(d.loc),name(d.name),type(d.type),constant(false){
 	if(type)
 		mixture = new Mixture(*(d.mixture));
 	else
@@ -67,11 +68,12 @@ Declaration& Declaration::operator =(const Declaration &&d){
 	//count++;
 	loc = d.loc;
 	type = d.type;
-	if(type)
-		mixture = new list<Agent>(*(d.mixture));
-	else
+	if(type) {
+		//mixture = new list<Agent>(*(d.mixture));
+	} else {
 		if(d.expr) expr = d.expr->clone();
 		else expr=NULL;
+	}
 	return *this;
 }*/
 
@@ -86,12 +88,8 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		Expression::VAR &vars) const{
 	Variable* var;
 	short id = 0;
-	try {
-		id = env.declareVariable(name,type);
-	} catch(SemanticError &ex) {
-		ex.setLocation(this->loc);
-		throw ex;
-	}
+	id = env.declareVariable(name,type);
+
 	if(type)
 		var = new state::KappaVar(id,name.getString(),false,mixture->eval(env,vars));
 	else {
@@ -119,18 +117,15 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 		Expression::VAR &vars) const{
 	Variable* var;
 	short id = 0;
-	try {
-		id = env.declareVariable(name,type);
-	} catch(SemanticError &ex) {
-		ex.setLocation(this->loc);
-		throw ex;
-	}
+
+	id = env.declareVariable(name,type);
+
 	if(type)
 		throw SemanticError("Constants can not depend on agent mixtures.",loc);
 	else {
 		char flag = constant ? Expression::CONST : 0;
 		BaseExpression* b_expr = expr->eval(env,vars,flag);
-		switch(b_expr->getType()){
+		switch(b_expr->getType()) {
 		case BaseExpression::FLOAT:
 			var = new state::ConstantVar<float>(id,name.getString(),
 				dynamic_cast<AlgExpression<float>*>(b_expr));
@@ -231,13 +226,6 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		//TODO
 	}
 }
-
-
-
-
-
-
-
 
 
 } /* namespace ast */

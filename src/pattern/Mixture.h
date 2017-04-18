@@ -72,12 +72,19 @@ public:
 	 */
 	void addLink(const ag_st_id &first,const ag_st_id &second);
 
+	/** \brief Declare Agents in the environment.
+	 *
+	 * Need to call this method before setComponents(env).
+	 * @param env the environment of simulation.
+	 */
+	void declareAgents(Environment &env);
+
 	/** \brief Identify and declare connected components in this mixture.
 	 * Using the links and agents in this mixture, this method identifies
 	 * all connected components and declare them in the environment. Agent
 	 * pointers contained in this mixture are removed and moved to components.
-	 * Also the graph is cleared and moved to the components. declaredComps
-	 * is set to true.
+	 * Also the graph is cleared and moved to the components. After call this
+	 * method declaredComps is set to true.
 	 * @param env the environment of simulation.
 	 */
 	void setComponents(Environment &env);

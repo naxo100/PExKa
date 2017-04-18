@@ -13,7 +13,7 @@
 #include <utility>  //std::pair
 
 #include "Statements.h"
-#include "../../state/State.h"
+#include "../../simulation/Simulation.h"
 
 using namespace std;
 
@@ -48,7 +48,7 @@ public:
 	void evaluateCompartments(pattern::Environment &env,const vector<Variable*>& vars);
 	void evaluateUseExpressions(pattern::Environment &env,const vector<Variable*>& consts);
 	void evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars);
-	void evaluateInits(const pattern::Environment &env,const vector<Variable*>,state::State &state);
+	void evaluateInits(const pattern::Environment &env,const vector<Variable*>,simulation::Simulation &sim);
 
 	//ADD functions
 	void add(const Declaration &d);

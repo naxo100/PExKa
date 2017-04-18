@@ -68,12 +68,11 @@ Declaration& Declaration::operator =(const Declaration &&d){
 	//count++;
 	loc = d.loc;
 	type = d.type;
-	if(type) {
-		//mixture = new list<Agent>(*(d.mixture));
-	} else {
+	if(type)
+		mixture = new list<Agent>(*(d.mixture));
+	else
 		if(d.expr) expr = d.expr->clone();
 		else expr=NULL;
-	}
 	return *this;
 }*/
 
@@ -88,10 +87,11 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		Expression::VAR &vars) const{
 	Variable* var;
 	short id = 0;
+
 	id = env.declareVariable(name,type);
 
 	if(type)
-		var = new state::KappaVar(id,name.getString(),false,mixture->eval(env,vars));
+		var = new state::KappaVar(id,name.getString(),false,mix);
 	else {
 		char flag = constant ? Expression::CONST : 0;
 		BaseExpression* b_expr = expr->eval(env,vars,flag);

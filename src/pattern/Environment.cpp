@@ -97,8 +97,9 @@ Signature& Environment::declareSignature(const ast::Id &name_loc) {
 
 const Mixture& Environment::declareMixture(const Mixture& new_mix) {
 	for(const auto &mix : mixtures)
-		if( mix == new_mix )
+		if( mix == new_mix ){
 			return mix;
+		}
 	mixtures.emplace_back(new_mix);
 	return mixtures.back();
 }
@@ -114,13 +115,15 @@ const Mixture::Component& Environment::declareComponent(const Mixture::Component
 	return components.back();
 }
 
-const Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent& new_ag){
+const Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag){
 	for(auto &ag : agentPatterns ){
-		if( ag == new_ag){
+		if( ag == *new_ag){
+			delete new_ag;
 			return ag;
 		}
 	}
-	agentPatterns.emplace_back(new_ag);
+	agentPatterns.emplace_back(*new_ag);
+	delete new_ag;
 	return agentPatterns.back();
 }
 

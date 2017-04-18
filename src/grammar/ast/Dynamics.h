@@ -84,7 +84,7 @@ public:
 	Site();
 	Site(const location &l,const Id &id,const SiteState &s,const Link &lnk);
 	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Signature &agent) const;
-	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,
+	void eval(const pattern::Environment &env,const vector<state::Variable*> &consts,
 			pair<short,pattern::Mixture::Agent&> id_agent,
 			unordered_map<unsigned,list<pair<short,short> > > &m) const;
 	//const Link& getLink();
@@ -102,7 +102,7 @@ public:
 	Agent(const location &l,const Id &id,const list<Site> s);
 
 	void eval(pattern::Environment &env,const vector<state::Variable*> &consts) const;
-	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Mixture &mix,
+	void eval(const pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Mixture &mix,
 			unordered_map<unsigned,list <pair<short,short> > > &lnks, bool is_pattern) const;
 
 	void show( string tabs = "" ) const;
@@ -119,7 +119,7 @@ protected:
 public:
 	Mixture();
 	Mixture(const location &l,const list<Agent> &m);
-	virtual pattern::Mixture eval(pattern::Environment &env,
+	virtual pattern::Mixture* eval(const pattern::Environment &env,
 			const vector<Variable*> &vars,bool is_pattern = true) const;
 	virtual ~Mixture();
 };
@@ -131,7 +131,7 @@ public:
 	MultipleMixture(const location &l,const list<Agent> &m,
 			const Expression *e);
 
-	pattern::Mixture eval(pattern::Environment &env) const;
+	pattern::Mixture& eval(pattern::Environment &env) const;
 	~MultipleMixture();
 };
 

@@ -13,7 +13,7 @@
 #include "Dynamics.h"
 #include "Spatial.h"
 
-#include "../../state/State.h"
+#include "../../simulation/Simulation.h"
 
 namespace ast {
 
@@ -82,7 +82,7 @@ public:
 	~Init();
 
 	void eval(const pattern::Environment &env,
-			const Expression::VAR &vars,state::State &state);
+			const Expression::VAR &vars,simulation::Simulation &state);
 
 };
 

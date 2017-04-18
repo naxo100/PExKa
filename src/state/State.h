@@ -11,7 +11,7 @@
 #include <vector>
 #include <ctime>
 #include "Variable.h"
-//#include "SiteGraph.h"
+#include "SiteGraph.h"
 #include "../simulation/Counter.h"
 
 namespace state {
@@ -25,19 +25,20 @@ namespace state {
  * Kappa.
  */
 class State {
-	//std::vector<SiteGraph> graph;
-	std::vector<Variable> alg_vars;
-	std::vector<float> tokens;
+	SiteGraph graph;
+	const state::BaseExpression& volume;
+	std::vector<Variable*> vars;
+	float* tokens;
 	//simulation::Counter counter;
-	time_t program_t0;
+	//time_t program_t0;
 
 
 public:
-	State();
+	State(size_t tok_count,const std::vector<Variable*>& _vars,const state::BaseExpression& vol);
 	~State();
 
-	void addTokens(short comp_id,short tok_id,float n);
-	void addNodes(short comp_id,int n);
+	void addTokens(float n,short tok_id);
+	void addNodes(int n,pattern::Mixture& mix);
 
 
 };

@@ -6,7 +6,7 @@
  */
 
 #include "Simulation.h"
-
+#include <set>
 namespace simulation {
 
 Simulation::Simulation() {
@@ -17,6 +17,50 @@ Simulation::Simulation() {
 Simulation::~Simulation() {
 	// TODO Auto-generated destructor stub
 }
+
+
+//TODO
+template <typename T>
+list<T> Simulation::allocParticles(unsigned cells,T count,const list<T>* vol_ratios){
+	//TODO ....
+	return list<T>();
+}
+template list<float> Simulation::allocParticles<float>(unsigned cells,float count,const list<float>* vol_ratios);
+
+
+
+template <template<typename,typename...> class Range,typename... Args>
+void Simulation::addTokens(const Range<int,Args...> &cell_ids,float count,short token_id){
+	list<float> per_cell = allocParticles(cell_ids.size(),count);
+	auto ids_it = cell_ids.begin();
+	for(auto n : per_cell){
+		try{
+			cells.at(*ids_it).addTokens(token_id,n);
+		}
+		catch(std::out_of_range &e){
+			//other mpi_process will add this tokens.
+		}
+		ids_it++;
+	}
+}
+template void Simulation::addTokens(const std::set<int> &cell_ids,float count,short token_id);
+
+
+template <template<typename,typename...> class Range,typename... Args>
+void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,const pattern::Mixture &mix){
+	list<unsigned> per_cell = allocParticles(cell_ids.size(),count);
+	auto ids_it = cell_ids.begin();
+	for(auto n : per_cell){
+		try{
+			cells.at(*ids_it).addNodes(n,mix);
+		}
+		catch(std::out_of_range &e){
+			//other mpi_process will add this tokens.
+		}
+		ids_it++;
+	}
+}
+template void Simulation::addAgents(const std::set<int> &cell_ids,unsigned count,const pattern::Mixture &mix);
 
 vector<list<int>> Simulation::allocCells(
 		int n_cpus,

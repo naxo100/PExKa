@@ -60,9 +60,9 @@ vector<Variable*> KappaAst::evaluateDeclarations(pattern::Environment &env,vecto
 }
 
 
-void KappaAst::evaluateInits(const pattern::Environment &env,const vector<Variable*> vars,state::State &state){
+void KappaAst::evaluateInits(const pattern::Environment &env,const vector<Variable*> vars,simulation::Simulation &sim){
 	for(auto& init : inits){
-		init.eval(env,vars,state);
+		init.eval(env,vars,sim);
 	}
 }
 

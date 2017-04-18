@@ -295,7 +295,10 @@ std::string CompartmentExpr::toString() const {
 
 UseExpression::UseExpression(size_t comps_count,const state::BaseExpression* where):
 		filter(dynamic_cast<const state::AlgExpression<bool>* >(where) ),isComplete(false) {
-	reserve(comps_count);
+	if(comps_count > 0)
+		reserve(comps_count);
+	else
+		isComplete = true;
 }
 
 void UseExpression::evaluateCells(

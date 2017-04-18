@@ -200,7 +200,7 @@ void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts
 	}
 }
 
-void Site::eval(pattern::Environment &env,const vector<Variable*> &consts,
+void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 		pair<short,pattern::Mixture::Agent&> id_agent,
 		unordered_map<unsigned,list<pair<short,short> > > &links) const{
 	const pattern::Signature* sign;
@@ -280,7 +280,7 @@ void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &const
 	return;
 }
 
-void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Mixture &mix,
+void Agent::eval(const pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Mixture &mix,
 		unordered_map<unsigned,list<pair<short,short> > > &lnks,bool is_pattern) const {
 	short sign_id;
 	try{
@@ -290,14 +290,14 @@ void Agent::eval(pattern::Environment &env,const vector<state::Variable*> &const
 		throw SemanticError("Agent "+name.getString()+"() has not been declared.",loc);
 	}
 
-	pattern::Mixture::Agent a_buff(sign_id);
-	pair<short,pattern::Mixture::Agent&> id_ag(mix.size(),a_buff);
+	pattern::Mixture::Agent* a_buff = new pattern::Mixture::Agent(sign_id);
+	pair<short,pattern::Mixture::Agent&> id_ag(mix.size(),*a_buff);
 	for(auto &site : sites){
 		site.eval(env,consts,id_ag,lnks);
 	}
 
-	auto& a = env.declareAgentPattern(a_buff);
-	mix.addAgent(&a);
+	//auto& a = env.declareAgentPattern(a_buff);
+	mix.addAgent(a_buff);
 }
 
 void Agent::show( string tabs ) const {
@@ -321,21 +321,21 @@ Mixture::Mixture(const location &l,const list<Agent> &m):
 
 Mixture::~Mixture(){};
 
-pattern::Mixture Mixture::eval(pattern::Environment &env,
+pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 		const vector<Variable*> &vars,bool is_pattern) const{
-	pattern::Mixture mix(agents.size());
+	pattern::Mixture* mix = new pattern::Mixture(agents.size());
 	unordered_map<unsigned,list<pair<short,short> > > links;
 	for(list<Agent>::const_iterator it = agents.cbegin();it != agents.cend();it++){
-		it->eval(env,vars,mix,links,is_pattern);
+		it->eval(env,vars,*mix,links,is_pattern);
 	}
 	for(auto &n_link : links){
 		if(n_link.second.size() == 1)
 			throw SemanticError("Edge identifier "+to_string(n_link.first)+
 					" is not paired in mixture.",loc);
-		mix.addLink(n_link.second.front(),*(++n_link.second.begin()));
+		mix->addLink(n_link.second.front(),*(++n_link.second.begin()));
 	}
-	mix.setComponents(env);
-	return env.declareMixture(mix);
+	//mix.setComponents(env);
+	return mix;
 }
 
 
@@ -350,12 +350,12 @@ MultipleMixture::~MultipleMixture(){
 }
 
 /*TODO*/
-pattern::Mixture MultipleMixture::eval(pattern::Environment &env) const{
+pattern::Mixture& MultipleMixture::eval(pattern::Environment &env) const{
 
 	for(list<Agent>::const_iterator it = agents.cbegin();it != agents.cend();it++){
 		//it->;
 	}
-	return pattern::Mixture(0);
+	return *new pattern::Mixture(0);
 }
 
 

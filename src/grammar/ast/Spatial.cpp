@@ -46,7 +46,7 @@ list<const state::BaseExpression*> CompExpression::evalExpression(const pattern:
 			const vector<Variable*> &vars) const {
 	list<const state::BaseExpression*> ret;
 	for(auto index : indexList){
-		ret.push_back(index->eval(env,vars,char(Expression::AUX)));
+		ret.push_back(index->eval(env,vars,char(Expression::AUX_ALLOW)));
 	}
 	return ret;
 }

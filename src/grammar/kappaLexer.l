@@ -31,6 +31,7 @@
 %}
 
 %option nounput batch debug noinput
+%option yylineno
 %option nodefault
 %option noyywrap
 %option c++
@@ -43,7 +44,7 @@
 blank		[\t ]
 digit		[0-9]
 letter		[a-zA-Z]
-id			[a-zA-Z][a-zA-Z0-9_]*
+id		[a-zA-Z][a-zA-Z0-9_]*
 real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 %%
 
@@ -52,7 +53,7 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
   loc.step ();
 %}
 
-"#"[^\n]*	loc.step();//return KappaParser::make_NEWLINE(loc);	
+"#"+[.]*[^\n]*	loc.step();//return KappaParser::make_NEWLINE(loc);	
 [\t ]+		{loc.step();}
 {digit}+	{
 				return KappaParser::make_INT(atoi(yytext),loc); 
@@ -197,6 +198,12 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "~["			return KappaParser::make_KAPPA_INTER(loc);
 "?"				return KappaParser::make_KAPPA_WLD(loc);
 "_"				return KappaParser::make_KAPPA_SEMI(loc);
+.	{ 
+	char buffer[150];
+	sprintf(buffer, "The token \"%s\" is not recognized", yytext);
+	throw SyntaxError(buffer, loc);
+	//LexerError(buffer);
+}
 
 <<EOF>> { return yyterminate(); }
 

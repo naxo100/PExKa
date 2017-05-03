@@ -95,7 +95,10 @@ template BaseExpression* BaseExpression::makeBinaryExpression<false>
 SomeValue::SomeValue(float f) : fVal(f),t(BaseExpression::FLOAT){}
 SomeValue::SomeValue(int i) : iVal(i),t(BaseExpression::INT){}
 SomeValue::SomeValue(bool b) : bVal(b),t(BaseExpression::BOOL){}
-SomeValue::SomeValue(const std::string &s) : sVal(new std::string(s)),t(BaseExpression::STR){}
+SomeValue::SomeValue(small_id i) : smallVal(i),t(BaseExpression::SMALL_ID){}
+SomeValue::SomeValue(short_id i) : shortVal(i),t(BaseExpression::SHORT_ID){}
+
+//SomeValue::SomeValue(const std::string &s) : sVal(new std::string(s)),t(BaseExpression::STR){}
 
 template <typename T>
 T SomeValue::valueAs() const {
@@ -106,14 +109,26 @@ T SomeValue::valueAs() const {
 		return static_cast<T>(iVal);
 	case BaseExpression::BOOL:
 		return static_cast<T>(bVal);
-	case BaseExpression::STR:
-		return std::stof(*sVal);
+	default:
+		throw std::invalid_argument("SomeValue::valueAs(): not sense in convert id-like values.");
+	/*case BaseExpression::STR:
+		return std::stof(*sVal);*/
 	}
 	return 0;
 }
 template float SomeValue::valueAs<float>() const;
 template int SomeValue::valueAs<int>() const;
 template bool SomeValue::valueAs<bool>() const;
+
+template <> void SomeValue::set(float f){fVal = f;}
+template <> void SomeValue::set(int i){iVal = i;}
+template <> void SomeValue::set(bool b){bVal = b;}
+template <> void SomeValue::set(small_id i){smallVal = i;}
+template <> void SomeValue::set(short_id i){shortVal = i;}
+
+bool SomeValue::operator !=(const SomeValue& val) const {
+	return val.fVal != fVal && val.t != t;
+}
 
 
 /****** AlgExpression ********/

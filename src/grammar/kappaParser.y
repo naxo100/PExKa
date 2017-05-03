@@ -493,9 +493,9 @@ alg_expr:
 | EXPONENT alg_expr 
 	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::EXPONENT);}
 | SINE alg_expr
-	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::SINUS);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::SINE);}
 | COSINE alg_expr
-	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::COSINUS);}
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::COSINE);}
 | TAN alg_expr 
 	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::TAN);}
 | ABS alg_expr

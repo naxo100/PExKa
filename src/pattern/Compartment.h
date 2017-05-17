@@ -21,7 +21,7 @@ namespace pattern {
 
 //template <short dims>
 class Compartment {
-	static int TOTAL_CELLS;
+	static unsigned int TOTAL_CELLS;
 	std::string name;
 	std::vector<short> dimensions;//[dims];
 	int cellsCount;
@@ -37,15 +37,18 @@ public:
 	void setVolume(const state::BaseExpression* vol);
 
 	const std::string& getName() const;
+	const state::BaseExpression& getVolume() const;
 
 	void getCellIndex(int cell_id,std::vector<short> &index) const;
 	int getCellId(const std::vector<short> &cell_index) const;
 
-	int getFirstCellId();
-	int getLastCellId();
+	int getFirstCellId() const;
+	int getLastCellId() const;
 
 	bool nextCell(std::vector<short>& cell) const;
 	const std::vector<short>& getDimensions() const;
+
+	static unsigned int getTotalCells();
 
 
 	//DEBUG methods
@@ -109,10 +112,12 @@ class UseExpression : std::vector<CompartmentExpr> {
 	//std::list<CompartmentExpr> comps;
 	//const state::BaseExpression* filter;
 	const state::AlgExpression<bool> *filter;
-	std::set<int> cells;
+	std::set<int> *cells;
 	bool isComplete;
+	static std::set<int> ALL_CELLS;
 public:
 	UseExpression(size_t comps_count,const state::BaseExpression* where = nullptr);
+	~UseExpression();
 
 
 	void evaluateCells(UseExpression::iterator it = UseExpression::iterator(),

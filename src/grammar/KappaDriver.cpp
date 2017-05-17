@@ -23,18 +23,20 @@ int KappaDriver::parse(){
 	if(files.empty()){
 		// = stdin;
 		r = parser.parse();
-	}
-	else{
-		for(fit = files.begin();fit != files.end() ; fit++){
+	} else {
+		for(fit = files.begin();fit != files.end() ; fit++) {
 			ifstream f(fit->c_str());
+
 			if (f.fail()) {
 		      cerr << "Cannot open file " << fit->c_str() << endl;
 		      exit (EXIT_FAILURE);
 		    }
+
 			lexer.switch_streams( &f, NULL);
 			loc.initialize(&*fit,1,1);
+
 		    r = parser.parse();
-		    cout << "file parsed!!" << endl;
+
 		    f.close();
 		}
 	}

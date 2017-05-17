@@ -20,9 +20,10 @@
 	#include <string>
 	#include "ast/Statements.h"
 	#include "location.hh"
+	#include "../util/Exceptions.h"
 	
 	using namespace std;
-    using namespace ast;
+	using namespace ast;
 	
 	namespace yy {
 		class KappaLexer;
@@ -106,11 +107,15 @@
 statements:
 | statements statement newline
 	{}
+| statements error
+	{yy::KappaParser::error(@$ , "Statement not recognized");}
 ;
+
 
 newline:
 NEWLINE {}
 | END {return 0;}
+;
 
 
 statement:
@@ -119,7 +124,7 @@ statement:
 | instruction
 	{} 
 | error 
-	{}
+	{yy::KappaParser::error(@$ , "Rule expression or instruction not recognized");}
 ;
 
 
@@ -140,6 +145,8 @@ instruction:
 	{this->driver.getAst().add($2);}
 | TOKEN ID
 	{this->driver.getAst().add(Id(@2,$2));}
+| TOKEN error
+	{}
 | SIGNATURE error
 	{}
 | INIT init_declaration 
@@ -148,8 +155,12 @@ instruction:
 	{}
 | LET variable_declaration 
 	{this->driver.getAst().add($2);}
+| LET error
+	{yy::KappaParser::error(@2, "Bad variable declaration");}
 | CONST variable_declaration
 	{$2.setConstant(true); this->driver.getAst().add($2);}
+| CONST error
+	{}
 | OBS variable_declaration
 	{}
 | PLOT alg_expr 
@@ -163,6 +174,7 @@ instruction:
 | CONFIG STRING value_list 
 	{}
 ;
+
 
 init_declaration:
  multiple non_empty_mixture 
@@ -189,10 +201,12 @@ join:
 	{$$=false;}
 ;
 
+
 comp_expr:
  LABEL dimension
 	{ $$ = CompExpression(@$,Id(@1,$1),$2); }
 ;
+
 
 dimension: 
 /*empty*/
@@ -204,12 +218,14 @@ dimension:
 	}
 ;
 
+
 where_expr:
 /*empty*/
 	{$$ = nullptr;}
 | OP_CUR bool_expr CL_CUR
 	{$$=$2;}
 ;
+
 
 /*index_expr:
 INT
@@ -242,6 +258,7 @@ value_list:
 	 }
 ;
 
+
 comp_list:
   comp_expr
 	{$$=std::list<ast::CompExpression>(1,$1); }
@@ -258,7 +275,6 @@ comp_list:
 ;
 
 
-
 perturbation_declaration:
  bool_expr DO effect_list 
 	{ $$ = Perturbation(@$,$1,$3); }
@@ -267,6 +283,7 @@ perturbation_declaration:
 | REPEAT OP_PAR bool_expr DO effect_list CL_PAR UNTIL bool_expr
 	{ $$ = Perturbation(@$,$3,$5,$8); }
 ;
+
 
 effect_list:
  OP_PAR effect_list CL_PAR {$$=$2;}
@@ -277,6 +294,7 @@ effect_list:
 		$$=$3;
 	}
 ;
+
 
 effect:
  INTRO multiple_mixture 
@@ -289,6 +307,8 @@ effect:
 	{}
 | STOP string_or_pr_expr
 	{ $$ = Effect(@$,Effect::STOP,$2); }
+| STOP error 
+	{ yy::KappaParser::error(@2, "Malformed perturbation"); }
 | FLUX string_or_pr_expr boolean 
 	{ $$ = Effect(@$,$3 ? Effect::FLUX : Effect::FLUX_OFF,$2); }
 | TRACK LABEL boolean 
@@ -319,10 +339,12 @@ print_expr:
 	{ $$ = StringExpression(@$,$1,&$3); }
 ;
 
+
 boolean:
  TRUE {$$=true;}
 | FALSE {$$=false;}
 ;
+
 
 variable_declaration:
  LABEL non_empty_mixture 
@@ -330,7 +352,7 @@ variable_declaration:
 | LABEL alg_expr 
 	{$$ = Declaration(@$,Id(@1,$1),$2);}
 | LABEL error 
-	{}
+	{yy::KappaParser::error(@2 , "error in LABEL error");}
 ;
 
 bool_expr:
@@ -366,6 +388,7 @@ multiple:
 | LABEL {$$ = new ast::Var(@$,Var::VAR,Id(@1,$1)); }
 ;
 
+
 constant:
  INF
 	{$$ = new Const(@$,Const::INF);}
@@ -377,6 +400,8 @@ constant:
 	{$$ = new Const(@$,Const::EMAX);}
 | TMAX
 	{$$ = new Const(@$,Const::TMAX);}
+;
+
 
 rule_label: 
 /*empty */
@@ -385,10 +410,12 @@ rule_label:
 	{$$=Id(@$,$1);}
 ;
 
+
 lhs_rhs:
 mixture token_expr 
 	{ $$ = RuleSide(@$,$1,$2); }
 ;
+
 
 token_expr:
 /*empty*/
@@ -398,6 +425,7 @@ token_expr:
 | PIPE error 
 	{}
 ;
+
 
 sum_token:
  OP_PAR sum_token CL_PAR 
@@ -409,6 +437,8 @@ sum_token:
 		$5.push_front(Token(@1+@2+@3,$1,Id(@3,$3)));
 		$$=$5;
 	}
+;
+
 
 mixture:
 /*empty*/ 
@@ -417,12 +447,14 @@ mixture:
 	{ $$ = Mixture(@1,$1); }
 ;
 
+
 rate_sep:
  AT {$$=false;}
 | FIX {$$=true;}
 
 /*(**  **)*/
 /*{$$=ast::Rule($1,$2.agents,$4.agents,$2.tokens,$4.tokens,$3,$6.);}*/
+;
 
 rule_expression:
  rule_label lhs_rhs arrow lhs_rhs where_expr rate 
@@ -438,13 +470,13 @@ rule_expression:
 ;
 
 
-
 arrow:
  KAPPA_RAR 
 	{$$=false;/*ast::Arrow(@$,ast::Arrow::RIGHT);*/}
 | KAPPA_LRAR
 	{$$=true;/*ast::Arrow(@$,ast::Arrow::BI);*/}
 ;
+
 
 variable:
  ID
@@ -467,11 +499,13 @@ variable:
 	{$$ = new Const(@$,Var::CPUTIME);}
 ;
 
+
 alg_expr:
  OP_PAR alg_expr CL_PAR 
 	{$$ = $2;}
 | constant 
 	{$$ = $1;}
+/**************************/
 | variable
 	{$$ = $1;}
 | bool_expr
@@ -517,7 +551,10 @@ alg_expr:
 	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::RAND_1);}
 | MINUS alg_expr
 	{$$ = new AlgBinaryOperation(@$,new Const(location(),0),$2,BaseExpression::AlgebraicOp::MINUS);}
+| error
+	{}
 ;
+
 
 rate:
  rate_sep alg_expr OP_PAR alg_with_radius CL_PAR 
@@ -528,10 +565,12 @@ rate:
 	{$$=ast::Rate(@$,$2,$1,$4);}
 ;
 
+
 alg_with_radius:
  alg_expr {$$=ast::Radius(@$,$1);}
 | alg_expr TYPE alg_expr {$$=ast::Radius(@$,$1,$3);}
 ;
+
 
 multiple_mixture:
  alg_expr non_empty_mixture /*conflict here because ID (blah) could be token non_empty mixture or mixture...*/
@@ -539,6 +578,7 @@ multiple_mixture:
 | non_empty_mixture 
 	{$$=ast::MultipleMixture(@$,$1,new Const(yy::location(),1));}
 ;
+
 
 non_empty_mixture:
  OP_PAR non_empty_mixture CL_PAR
@@ -551,6 +591,8 @@ non_empty_mixture:
 | agent_expression 
 	{ $$ = std::list<Agent>(1,$1); }
 ;
+
+
 /*Make a list for interface_expression*/
 agent_expression:
  ID OP_PAR interface_expression CL_PAR 
@@ -559,12 +601,14 @@ agent_expression:
 	{yy::KappaParser::error(@1,std::string("Malformed agent ")+$1);}
 ;
 
+
 interface_expression:
 /* empty */
 	{$$=std::list<ast::Site>();}
 | ne_interface_expression 
 	{$$ = $1;}
 ;
+
 
 ne_interface_expression:
 | port_expression COMMA ne_interface_expression 
@@ -582,6 +626,7 @@ port_expression:
 	{$$=Site(@$,Id(@1,$1),$2,$3);}
 ;
 
+
 internal_state:
  state_enum 
 	{$$ = SiteState(@$,$1);}
@@ -591,6 +636,8 @@ internal_state:
 	{$$ = SiteState(@$,$2,$4,$7);}
 | error
 	{yy::KappaParser::error(@1,"Invalid internal state");}
+;
+
 
 state_enum:
 /*empty*/ 
@@ -603,6 +650,7 @@ state_enum:
 | error 
 	{yy::KappaParser::error(@1,"Invalid internal state");}
 ;
+
 
 link_state:
 /*empty*/ 
@@ -621,9 +669,12 @@ link_state:
 
 %%
 
+
 void yy::KappaParser::error(const location &loc , const std::string &message) {
 	// Location should be initialized inside scanner action, but is not in this example.
 	// Let's grab location directly from driver class.
 	// cout << "Error: " << message << endl << "Location: " << loc << endl;
-	cout << "Error: " << message << endl << "Error location: " << loc << endl;
+	//cout << "Error in " << loc << " : " << message << "." << endl;
+
+	throw SyntaxError( message, loc );
 }

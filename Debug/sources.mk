@@ -27,6 +27,7 @@ src/util \
 src/state \
 src/simulation \
 src/pattern \
+src/matching \
 src \
 src/grammar/ast \
 src/grammar \

@@ -20,13 +20,14 @@ short Statement::getUseId() const {
 /****** Class Declaration *******/
 Declaration::Declaration() : type(ALG),constant(false),expr(NULL){};
 Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
-	Node(loc),name(lab),type(ALG),constant(false),expr(e) {};
+	Node(l),name(lab),type(ALG),constant(false),expr(e) {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(loc),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {};
+	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {
+};
 
 Declaration::Declaration(const Declaration &d) :
-		name(d.name),type(d.type),constant(false){
+		Node(d.loc),name(d.name),type(d.type),constant(false){
 	if(type)
 		mixture = new Mixture(*(d.mixture));
 	else

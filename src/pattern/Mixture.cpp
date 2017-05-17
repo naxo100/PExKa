@@ -65,8 +65,73 @@ void Mixture::declareAgents(Environment &env){
 		agents[i] = &env.declareAgentPattern(agents[i]);
 	}
 }
+void Mixture::setComponents(){
+	if(declaredComps)
+		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");
+	list<pair<Component*,map<short,short> > > comps;
+	//iterate link map ordered by agent_id, one copy per non directed link
+	for(auto l_it = links.cbegin();l_it != links.cend(); l_it++){
+		auto p1 = l_it->first,p2 = l_it->second;
+		auto c_it = comps.begin();
+		//iterate on local components, test if ag(p1) or ag(p2) \in comp
+		for(;c_it != comps.end(); c_it++){
+			Component &comp = *(c_it->first);
+			map<short,short> &mask = c_it->second;//ag_mix -> ag_comp
+			if(mask.find(p1.first) != mask.end()){
+				if(mask.find(p2.first) == mask.end()){
+					comp.addAgent(agents[p2.first]);
+					mask.insert(make_pair(p2.first,comp.size()-1));
+				}
+				comp.addLink(make_pair(p1,p2),mask);
+				break;
+			}
+			else if(mask.find(p2.first) != mask.end()){
+				comp.addAgent(agents[p1.first]);
+				mask.insert(make_pair(p1.first,comp.size()-1));
+				comp.addLink(make_pair(p1,p2),mask);
+				break;
+			}
+		}
+		//add a new component if ag(p1) and ag(p2) are not in any defined component
+		if(c_it == comps.end()){
+			comps.emplace_back(new Component(),map<short,short>());
+			comps.back().second.emplace(p1.first,0);
+			comps.back().first->addAgent(agents[p1.first]);
+			comps.back().second.emplace(p2.first,1);
+			comps.back().first->addAgent(agents[p2.first]);
+			comps.back().first->addLink(make_pair(p1,p2),comps.back().second);
+		}
 
-void Mixture::setComponents(Environment &env){
+	}
+	//add not connected agents as not connected components
+	for(size_t i = 0; i < agentCount ; i++){
+		auto c_it = comps.begin();
+		for(;c_it != comps.end(); c_it++){
+			if(c_it->second.find(i) != c_it->second.end())
+				break;
+		}
+		if(c_it == comps.end()){
+			comps.emplace_back(new Component(),map<short,short>());
+			comps.back().first->addAgent(agents[i]);
+		}
+	}
+	compCount = comps.size();
+	delete[] agents;
+	this->comps = new vector<const Component*>(compCount);
+	int i=0;
+	//set comps.graph and declare comps in env
+	for(const auto& c : comps){
+		c.first->setGraph();
+		//const Component &comp = env.declareComponent(*c.first);
+		//delete c.first;
+		(*this->comps)[i] = c.first;
+		i++;
+	}
+	//sort(this->comps->begin(),this->comps->end());
+	links.clear();
+	//declaredComps = true;
+}
+void Mixture::setAndDeclareComponents(Environment &env){
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");
 	list<pair<Component*,map<short,short> > > comps;
@@ -154,6 +219,13 @@ size_t Mixture::size() const {
 	return agentCount;
 }
 
+const vector<const Mixture::Component*>::iterator Mixture::begin() const {
+	return comps->begin();
+}
+const vector<const Mixture::Component*>::iterator Mixture::end() const {
+	return comps->end();
+}
+
 string Mixture::toString(const Environment& env) const {
 	string out = "";
 	short i = 1;
@@ -184,6 +256,14 @@ short Mixture::Agent::getId() const {
 	return signId;
 }
 
+
+const unordered_map<small_id,Mixture::Site>::const_iterator Mixture::Agent::begin() const{
+	return interface.begin();
+}
+const unordered_map<small_id,Mixture::Site>::const_iterator Mixture::Agent::end() const{
+	return interface.end();
+}
+
 bool Mixture::Agent::operator ==(const Agent &a) const {
 	if(this == &a)
 		return true;
@@ -203,9 +283,9 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 	return true;
 }
 
-void Mixture::Agent::setSiteValue(short site_id,short lbl_id){
-	interface[site_id].val_type = ValueType::LABEL;
-	interface[site_id].state.id_value = lbl_id;
+void Mixture::Agent::setSiteValue(small_id site_id,small_id lbl_id){
+	//interface[site_id].val_type = ValueType::LABEL;
+	interface[site_id].state.set(lbl_id);
 }
 
 const string Mixture::Agent::toString(short mixAgId, const Environment& env, map<ag_st_id,short>& bindLabels ) const {
@@ -228,17 +308,18 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 		//out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
 		out += site.getName(); //site name
 
-		switch(it->second.val_type) {
-			case ValueType::LABEL :
-				labelSite = static_cast<const Signature::LabelSite*>(& site);
-				out += "~" + labelSite->getLabel(it->second.state.id_value); //value of site
+		switch(it->second.state.t) {
+			case state::BaseExpression::SMALL_ID:
+				labelSite = dynamic_cast<const Signature::LabelSite*>(& site);
+				if(labelSite)//is not an empty site
+					out += "~" + labelSite->getLabel(it->second.state.smallVal); //value of site
 				break;
-			case ValueType::INT_VAL :
+			case state::BaseExpression::INT :
 				break;
-			case ValueType::FLOAT_VAL :
+			case state::BaseExpression::FLOAT :
 				break;
-			case ValueType::VOID :
-				break;
+			default:
+				throw std::invalid_argument("Mixture::Agent::toString(): not a valid state type.");
 		}
 
 		switch(it->second.link_type) {
@@ -277,8 +358,10 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 }
 
 /************** class Site *********************/
+Mixture::Site::Site() : state((small_id)0),link_type() {}
+
 bool Mixture::Site::operator ==(const Site &s) const{
-	if(val_type == s.val_type){
+	/*if(val_type == s.val_type){
 		switch(val_type){
 		case VOID:
 			break;
@@ -295,13 +378,14 @@ bool Mixture::Site::operator ==(const Site &s) const{
 				return false;
 			break;
 		}
-	}
-	else
+	}*/
+	if(state != s.state)
 		return false;
 	if(s.link_type == link_type){
 		if(link_type == LinkType::BIND_TO && s.lnk_ptrn != lnk_ptrn)
 			return false;
 	}
+	else return false;
 	return true;
 }
 
@@ -319,6 +403,14 @@ Mixture::Component::~Component(){
 
 size_t Mixture::Component::size() const{
 	return agents.size();
+}
+
+const vector<const Mixture::Agent*>::const_iterator Mixture::Component::begin() const{
+	agents.begin();
+	return agents.begin();
+}
+const vector<const Mixture::Agent*>::const_iterator Mixture::Component::end() const{
+	return agents.end();
 }
 
 
@@ -348,6 +440,11 @@ bool Mixture::Component::operator ==(const Component &c) const{
 	else
 		return false;
 	return true;
+}
+
+
+const map<ag_st_id,ag_st_id>& Mixture::Component::getGraph() const{
+	return *graph;
 }
 
 void Mixture::Component::setGraph() {

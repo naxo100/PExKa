@@ -95,7 +95,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 	if(type){
 		auto p_mix = mixture->eval(env,vars);
 		p_mix->declareAgents(env);
-		p_mix->setComponents(env);
+		p_mix->setAndDeclareComponents(env);
 		auto& mix = env.declareMixture(*p_mix);
 		delete p_mix;
 		var = new state::KappaVar(id,name.getString(),false,mix);
@@ -182,7 +182,7 @@ void Declaration::show( string tabs ) {
 
 
 /****** Class Init ***********/
-Init::Init(){}
+Init::Init() : type(),alg(nullptr){}
 
 Init::~Init(){};
 
@@ -194,6 +194,8 @@ Init::Init(const location &l,const Expression *e, const Id &tok):
 
 Init::Init(const Init &init) :
 		Node(init.loc),type(init.type),alg(init.alg) {
+	if(init.alg)
+		alg = init.alg->clone();
 	if(type)
 		token = init.token;
 	else
@@ -203,6 +205,8 @@ Init::Init(const Init &init) :
 Init& Init::operator=(const Init &init) {
 	loc = init.loc;
 	type = init.type;
+	if(init.alg)
+		alg = init.alg->clone();
 	if(type)
 		token = init.token;
 	else
@@ -212,31 +216,28 @@ Init& Init::operator=(const Init &init) {
 
 void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		simulation::Simulation &sim){
-	try {
-		auto& use_expr = env.getUseExpression(this->getUseId());
-		auto &cells = use_expr.getCells();
-		if(type){ //TOKEN
-			float n;
-			short tok_id;
-			if(alg == nullptr)
-				throw std::invalid_argument("Null value for token init.");
-			else
-				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<float>();
-			tok_id = env.getTokenId(token.getString());
-			sim.addTokens(cells,tok_id,n);
-		}
-		else { //MIX
-			int n;
-			if(alg == nullptr)
-				throw std::invalid_argument("Null value for mix init.");
-			else
-				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
-			//auto& mix = mixture.eval(env,vars,false);
-		}
+	auto& use_expr = env.getUseExpression(this->getUseId());
+	auto &cells = use_expr.getCells();
+	if(type){ //TOKEN
+		float n;
+		short tok_id;
+		if(alg == nullptr)
+			throw std::invalid_argument("Null value for token init.");
+		else
+			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<float>();
+		tok_id = env.getTokenId(token.getString());
+		sim.addTokens(cells,tok_id,n);
 	}
-	catch(exception &e){
-		//TODO
-		throw std::invalid_argument("TODO exception at init::eval().");
+	else { //MIX
+		int n;
+		if(alg == nullptr)
+			throw std::invalid_argument("Null value for mix init.");
+		else
+			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
+		auto mix = mixture.eval(env,vars,false);
+		mix->setComponents();
+		sim.addAgents(cells,n,*mix);
+		delete mix;
 	}
 }
 

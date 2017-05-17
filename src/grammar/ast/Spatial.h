@@ -97,8 +97,8 @@ class Channel : public Node {
 	const Expression* delay;
 public:
 	Channel(const location& l,const Id& nme, const CompExpression& src,
-			const CompExpression& trgt, bool bckwrds, const Expression* where,
-			const Expression* delay);
+			const CompExpression& trgt, bool bckwrds, const Expression* where=nullptr,
+			const Expression* delay=nullptr);
 	void eval(pattern::Environment &env,
 			const vector<Variable*> &vars);
 

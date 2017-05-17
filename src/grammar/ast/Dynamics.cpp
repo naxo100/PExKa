@@ -72,7 +72,7 @@ void Link::eval(const pattern::Environment &env,
 	default:
 		if(!allow_pattern)
 			throw SemanticError("Patterns are not allowed here.",loc);
-		//break;
+		break;
 	case ANY:
 		mix_site.link_type = pattern::Mixture::WILD;
 		break;
@@ -98,14 +98,14 @@ void Link::eval(const pattern::Environment &env,
 
 /****** Class SiteState ***********/
 
-SiteState::SiteState() :Node(),type(LABEL) {}
+SiteState::SiteState() :Node(),type(EMPTY),val(nullptr) {}
 SiteState::~SiteState(){};
 SiteState::SiteState(const location& loc, const list<Id> &labs)
-		: Node(loc),type(LABEL),labels(labs){}
+		: Node(loc),type(labs.size()>0?LABEL:EMPTY),labels(labs),val(nullptr){}
 
 SiteState::SiteState(const location& loc, const Expression* min,
 		const Expression* max,const Expression* def)
-	: Node(loc),type(RANGE),range{min,def,max}{
+	: Node(loc),type(RANGE),val(nullptr),range{min,def,max}{
 		if(!def)
 			range[1] = min;
 	}
@@ -171,6 +171,9 @@ void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts
 	//short id;
 	pattern::Signature::Site* site;
 	switch(stateInfo.type){
+	case SiteState::EMPTY:
+		sign.addSite<pattern::Signature::EmptySite>(name);
+		break;
 	case SiteState::LABEL:
 		site = &sign.addSite<pattern::Signature::LabelSite>(name);
 		stateInfo.evalLabels(*static_cast<pattern::Signature::LabelSite*>(site));
@@ -204,7 +207,7 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 		pair<short,pattern::Mixture::Agent&> id_agent,
 		unordered_map<unsigned,list<pair<short,short> > > &links) const{
 	const pattern::Signature* sign;
-	short site_id;
+	small_id site_id;
 	short ag_id = id_agent.first;
 	pattern::Mixture::Agent& agent = id_agent.second;
 	pattern::Mixture::Site* mix_site;
@@ -228,14 +231,19 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 		v.type = pattern::Signature::Value::STRING;
 		v.s = &stateInfo.labels.front().getString();*/
 		if(stateInfo.labels.size() == 1){
-			v = new state::SomeValue(stateInfo.labels.front().getString());
-			short lbl_id;
+			//v = new state::SomeValue(stateInfo.labels.front().getString());
+			small_id lbl_id;
 			try{
-				lbl_id = sign->getSite(site_id).isPossibleValue(*v);
+				lbl_id = dynamic_cast<const pattern::Signature::LabelSite&>(sign->getSite(site_id))
+						.getLabelId(stateInfo.labels.front().getString());
 			}
 			catch(std::out_of_range &e){
-				throw SemanticError("Label "+*v->sVal+" is not defined for site "+
-						name.getString()+" of agent "+sign->getName()+"().",loc);
+				throw SemanticError("Label "+stateInfo.labels.front().getString()+
+						" is not defined for site "+name.getString()+
+						" of agent "+sign->getName()+"().",loc);
+			}
+			catch(std::bad_cast &e){
+				throw SemanticError("Site "+name.getString()+" is not defined as a labeled site.",loc);
 			}
 			agent.setSiteValue(site_id,lbl_id);
 		}
@@ -334,7 +342,7 @@ pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 					" is not paired in mixture.",loc);
 		mix->addLink(n_link.second.front(),*(++n_link.second.begin()));
 	}
-	//mix.setComponents(env);
+	//mix->setComponents();
 	return mix;
 }
 
@@ -495,7 +503,28 @@ Rule::Rule(	const location &l,
 		const Expression* where,
 		const Rate 		  &rate):
 	Node(l), label(label), lhs(lhs), rhs(rhs),
-	bidirectional(arrow),filter(where),rate(rate) {};
+	bi(arrow),filter(where),rate(rate) {};
 Rule::~Rule() {};
 
+Rule::Rule(const Rule& r) : Node(r.loc),label(r.label),lhs(r.lhs),rhs(r.rhs),
+		bi(r.bi),filter(r.filter ? r.filter->clone() : nullptr){}
+
+Rule& Rule::operator=(const Rule& r){
+	loc = r.loc;
+	label = r.label;
+	lhs = r.lhs;
+	rhs = r.rhs;
+	bi = r.bi;
+	if(r.filter)
+		filter = r.filter->clone();
+	else
+		filter = nullptr;
+	return *this;
+}
+
+
+
 } /* namespace ast */
+
+
+

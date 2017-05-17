@@ -13,7 +13,7 @@ namespace pattern {
 
 /************** class Signature *******************/
 
-Signature::Signature(const string &nme) : name(nme) {}
+Signature::Signature(const string &nme) : id((short_id)-1),name(nme) {}
 
 Signature::~Signature() {
 	// TODO Auto-generated destructor stub
@@ -21,6 +21,15 @@ Signature::~Signature() {
 
 const std::string& Signature::getName() const{
 	return name;
+}
+short_id Signature::getId() const {
+	return id;
+}
+void Signature::setId(short_id i){
+	id=i;
+}
+small_id Signature::getSiteCount() const {
+	return sites.size();
 }
 
 short Signature::getSiteId(const string &name) const{
@@ -42,16 +51,16 @@ template Signature::Site& Signature::addSite<Signature::LabelSite>(const ast::Id
 template Signature::Site& Signature::addSite<Signature::RangeSite<int> >(const ast::Id &name_loc);
 template Signature::Site& Signature::addSite<Signature::RangeSite<float> >(const ast::Id &name_loc);
 
-short Signature::addSite(const ast::Id &name_loc,int min,int max){
+small_id Signature::addSite(const ast::Id &name_loc,int min,int max){
 	//const string& nme(name_loc.getString());
 	return 0;
 }
-short Signature::addSite(const ast::Id &name_loc,float min,float max){
+small_id Signature::addSite(const ast::Id &name_loc,float min,float max){
 	//const string& nme(name_loc.getString());
 	return 0;
 }
 
-const Signature::Site& Signature::getSite(short id) const{
+const Signature::Site& Signature::getSite(small_id id) const{
 	return *sites[id];
 }
 
@@ -59,16 +68,24 @@ const Signature::Site& Signature::getSite(short id) const{
 /***************** classes Site *********************/
 
 Signature::Site::Site(const string& nme) : name(nme){}
-Signature::EmptySite::EmptySite(const string& nme) : Site(nme){}
-short Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
-	return false;
-}
 Signature::Site::~Site(){}
-
 const std::string& Signature::Site::getName() const {
 	return this->name;
 }
 
+///EmptySite
+Signature::EmptySite::EmptySite(const string& nme) : Site(nme){}
+bool Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
+	return false;
+}
+state::SomeValue Signature::EmptySite::getDefaultValue() const {
+	//no default value
+	//throw std::invalid_argument("Signature::EmptySite::getDefaultValue(): no default value for empty site.");
+	return state::SomeValue(0);
+}
+
+
+///LabelSite
 Signature::LabelSite::LabelSite(const string& nme) : Site(nme),labels(){ }
 
 void Signature::LabelSite::addLabel(const ast::Id& name_loc){
@@ -78,15 +95,27 @@ void Signature::LabelSite::addLabel(const ast::Id& name_loc){
 	label_ids[lbl] = labels.size();
 	labels.push_back(lbl);
 }
-short Signature::LabelSite::isPossibleValue(const state::SomeValue &val) const {
+/*short Signature::LabelSite::isPossibleValue(const state::SomeValue &val) const {
 	if(val.t != state::BaseExpression::STR)
 		throw std::invalid_argument("Not a string value.");
 	return label_ids.at(*val.sVal);
-}
-const string Signature::LabelSite::getLabel( short id ) const {
+}*/
+const string& Signature::LabelSite::getLabel( small_id id ) const {
 	return labels[id];
 }
+small_id Signature::LabelSite::getLabelId(const string& s) const {
+	return label_ids.at(s);
+}
+state::SomeValue Signature::LabelSite::getDefaultValue() const {
+	return state::SomeValue(small_id(0));
+}
 
+bool Signature::LabelSite::isPossibleValue(const state::SomeValue &val) const {
+	return val.t == state::BaseExpression::SMALL_ID && val.smallVal < labels.size();
+}
+
+
+///RangeSite
 template <typename T>
 Signature::RangeSite<T>::RangeSite(const string &nme) : Site(nme){};
 
@@ -100,13 +129,18 @@ void Signature::RangeSite<T>::setBoundaries(T mn, T mx, T def){
 	//std::cout << "min: " << min << "\tmax: " << max << "\tdef: " << byDefault << std::endl;
 }
 
+template <typename T>
+state::SomeValue Signature::RangeSite<T>::getDefaultValue() const {
+	return state::SomeValue(byDefault);
+}
+
 
 template <>
-short Signature::RangeSite<float>::isPossibleValue(const state::SomeValue &val) const {
+bool Signature::RangeSite<float>::isPossibleValue(const state::SomeValue &val) const {
 	return val.t == state::BaseExpression::FLOAT && val.fVal >= min && val.fVal <= max;
 }
 template <>
-short Signature::RangeSite<int>::isPossibleValue(const state::SomeValue &val) const {
+bool Signature::RangeSite<int>::isPossibleValue(const state::SomeValue &val) const {
 	return val.t == state::BaseExpression::INT && val.iVal >= min && val.iVal <= max;
 }
 

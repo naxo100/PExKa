@@ -126,6 +126,8 @@ statement:
 instruction:
  COMPARTMENT comp_expr alg_expr
  	{this->driver.getAst().add(Compartment(@$,$2,$3));}
+| CHANNEL LABEL comp_expr arrow comp_expr where_expr 
+ 	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6));}
 | CHANNEL LABEL comp_expr arrow comp_expr where_expr ATD alg_expr
  	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6,$8));}
 | TRANSPORT join LABEL mixture AT alg_expr

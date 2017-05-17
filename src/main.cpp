@@ -90,7 +90,6 @@ int main(int argc, char* argv[]){
 		ast.evaluateSignatures(env,vars);
 		ast.evaluateDeclarations(env,vars,false);//vars
 		ast.evaluateChannels(env,vars);
-		//ast.evaluateInits(env,vars);
 	}
 	catch(const exception &e){
 		cerr << "An exception found: " << e.what() << endl;
@@ -98,8 +97,37 @@ int main(int argc, char* argv[]){
 	}
 
 	env.show();
+	map<pair<int,int>,double> edges;
+	for(size_t i = 0; i < env.size<pattern::Channel>(); i++ ){
+		for(auto& channel : env.getChannels(i)){
+			for(auto cells : channel.getConnections()){
+				int src_id = cells.front();
+				cells.pop_front();
+				for(auto trgt_id : cells){
+					edges[pair<int,int>(src_id,trgt_id)] = 1.0;
+				}
+			}
+		}
+	}
+	cout << "total cells: " << pattern::Compartment::getTotalCells() << endl;
+	for(auto edge : edges)
+		cout << edge.first.first << "->" << edge.first.second << ": " << edge.second << endl;
+	auto cells = simulation::Simulation::allocCells(1,vector<double>(pattern::Compartment::getTotalCells(),1.0),edges,-1);
+	simulation::Simulation sim(env,vars);
+	for(auto i : cells[0])
+		cout << i << ", ";
+	cout << endl;
+	sim.setCells(cells[0]);
+	try{
+		ast.evaluateInits(env,vars,sim);
+	}
+	catch(const exception &e){
+		cerr << "An exception found: " << e.what() << endl;
+		exit(1);
+	}
+	sim.print();
 
-	simulation::Simulation sim;
+	cout << "finished!" << endl;
 
 	// 5 vertices, 6 aristas
 	map<pair<int,int>,double> w_edges;

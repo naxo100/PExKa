@@ -9,30 +9,44 @@
 #define SIMULATION_SIMULATION_H_
 
 #include <map>
+#include <set>
 #include <list>
 #include <vector>
 #include <unordered_map>
 #include "../state/State.h"
 #include "../pattern/Environment.h"
 #include "../pattern/RuleSet.h"
+#include "../matching/Injection.h"
 
 namespace simulation {
 using namespace std;
 
 class Simulation {
 	//state::State state;//vector?
-	pattern::Environment env;
+	pattern::Environment& env;
 	pattern::RuleSet rules;
+	const vector<state::Variable*>& vars;
 	Counter counter;
 
-	unordered_map<int,state::State> cells;
+	set<matching::Injection> *ccInjections;//[cc_env_id].at(node_id)
+	set<matching::Injection*> *mixInjections;//[mix_id].at(node_id)[cc_mix_id]
+
+
+	unordered_map<unsigned int,state::State> cells;
 
 	template <typename T>
 	list<T> allocParticles(unsigned cells,T count,const list<T>* vol_ratios = nullptr);
 
+	//deterministic
+	vector<unsigned> allocAgents1(unsigned cells,unsigned ag_count,const list<float>* vol_ratios = nullptr);
+
 public:
-	Simulation();
+	Simulation(pattern::Environment& env,const std::vector<state::Variable*>& vars);
 	~Simulation();
+
+	void setCells(list<unsigned int>& cells);
+
+	void run();
 
 	template <template <typename,typename...> class Range,typename... Args>
 	void addTokens(const Range<int,Args...> &cell_ids,float count,short token_id);
@@ -50,17 +64,20 @@ public:
 	 * @param tol Tolerance in the number of processors to be assigned
 	 * @return a vector with the compartments indexed by ID processor
 	 */
-	vector<list<int> > allocCells(int n_cpus, const vector<double> &w_vertex, const map<pair<int,int>,double> &w_edges, int tol);
+	static vector<list<unsigned int> > allocCells(int n_cpus, const vector<double> &w_vertex,
+			const map<pair<int,int>,double> &w_edges, int tol);
+
+	void print() const;
 
 private:
 	/** \brief Sort edges by weight from lowest to highest
 	 *  @param w_edges edges with weight
 	 */
-	vector<pair<pair<int,int>,double>> sortEdgesByWeidht( const map<pair<int,int>,double> &w_edges );
+	static vector<pair<pair<int,int>,double>> sortEdgesByWeidht( const map<pair<int,int>,double> &w_edges );
 
-	unsigned minP( vector<list<int>> P );
+	static unsigned minP( vector<list<unsigned int>> P );
 
-	int searchCompartment( vector<list<int>> assigned, unsigned c );
+	static int searchCompartment( vector<list<unsigned int>> assigned, unsigned c );
 
 };
 

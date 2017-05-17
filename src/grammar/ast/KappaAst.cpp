@@ -29,11 +29,13 @@ void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variabl
 }
 
 void KappaAst::evaluateCompartments(pattern::Environment &env,const vector<Variable*> &vars){
+	env.reserve<pattern::Compartment>(compartments.size());
 	for(list<Compartment>::iterator it = compartments.begin();it != compartments.end(); it++){
 		it->eval(env,vars);
 	}
 }
 void KappaAst::evaluateUseExpressions(pattern::Environment &env,const vector<Variable*> &consts){
+	env.reserve<pattern::UseExpression>(useExpressions.size()+1);
 	for(auto use : useExpressions){
 		use->eval(env,consts);
 	}

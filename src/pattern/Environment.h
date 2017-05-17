@@ -66,23 +66,32 @@ public:
 	const Mixture& declareMixture(const Mixture& m);
 	const Mixture::Component& declareComponent(const Mixture::Component& c);
 	const Mixture::Agent& declareAgentPattern(const Mixture::Agent* a);
-	short idOfAlg(const string& name);
 
 	const Signature& getSignature(short id) const;
 	const vector<Signature>& getSignatures() const;
-	const Channel& getChannel(short id) const;
+	const list<Channel>& getChannels(short id) const;
 	const Compartment& getCompartment(short id) const;
 	const UseExpression& getUseExpression(short id) const;
 
+	const Compartment& getCompartmentByCellId(unsigned id) const;
+
+	short idOfAlg(const string& name) const;
 	short getVarId(const string &name) const;
 	short getChannelId(const string &name) const;
 	short getCompartmentId(const string &name) const;
 	short getSignatureId(const string &name) const;
 	short getTokenId(const string &name) const;
+
 	state::BaseExpression* getVarExpression(const string &name) const;
+
+	template <typename T>
+	size_t size() const;
+	template <typename T>
+	void reserve(size_t count);
 
 
 	//DEBUG methods
+	std::string cellIdToString(unsigned int cell_id) const;
 	void show() const;
 
 };

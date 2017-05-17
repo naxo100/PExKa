@@ -12,6 +12,7 @@
 #include <ctime>
 #include "Variable.h"
 #include "SiteGraph.h"
+#include "../pattern/Mixture.h"
 #include "../simulation/Counter.h"
 
 namespace state {
@@ -38,9 +39,10 @@ public:
 	~State();
 
 	void addTokens(float n,short tok_id);
-	void addNodes(int n,pattern::Mixture& mix);
+	void addNodes(unsigned n,const pattern::Mixture& mix,const pattern::Environment& env);
 
 
+	void print() const;
 };
 
 } /* namespace state */

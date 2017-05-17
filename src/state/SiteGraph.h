@@ -9,6 +9,11 @@
 #define STATE_SITEGRAPH_H_
 
 #include <utility> //pair
+#include <list>
+#include <vector>
+#include "../util/params.h"
+#include "../state/AlgExpression.h"
+#include "../pattern/Signature.h"
 
 namespace state {
 
@@ -21,36 +26,48 @@ public:
 	SiteGraph();
 	~SiteGraph();
 
+	void allocate(Node* n);
+	size_t getNodeCount() const;
+
+protected:
 	Node& addNode(short sign_id);
 	Node& getNode(size_t address);
+	vector<Node*> container;
+	size_t fresh;
+	size_t nodeCount;
+	list<size_t> free;
+
 
 };
 
 
 struct SiteGraph::Internal {
-	union {
-		short lVal;
-		int iVal;
-		float fVal;
-	};
+	SomeValue val;
 	//link(node,site_id)
-	pair<Node*,short> link;
+	pair<Node*,small_id> link;
 	//link(node_address,site_id) - for marshalize?
 	//pair<unsigned,short> fLink;
+	Internal();
 
 };
 
 class SiteGraph::Node {
-	short name;
-	long address;
+	pop_size n;
+	short_id signId;
+	big_id address;
 	Internal *interface;
 public:
 	Node(short sign_id,short intf_size);
-	void setAddress(size_t addr);
+	Node(const pattern::Signature& sign);
+	~Node();
+	void alloc(big_id addr);
 
 	template<typename T>
-	void setState(short site_id,T value);
-	void setLink(short site_src,Node* lnk,short site_trgt);
+	void setState(small_id  site_id,T value);
+	void setLink(small_id site_src,Node* lnk,small_id site_trgt);
+
+	void setCount(pop_size q);
+	pop_size getCount() const;
 
 
 };

@@ -43,10 +43,21 @@ const Id& CompExpression::evalName(const pattern::Environment &env,bool declare)
 	return name;
 }
 list<const state::BaseExpression*> CompExpression::evalExpression(const pattern::Environment &env,
-			const vector<Variable*> &vars) const {
+			small_id comp_id,const vector<Variable*> &vars) const {
 	list<const state::BaseExpression*> ret;
+	auto& dims = env.getCompartment(comp_id).getDimensions();
+	int i = 0;
 	for(auto index : indexList){
-		ret.push_back(index->eval(env,vars,char(Expression::AUX_ALLOW)));
+		auto expr = index->eval(env,vars,Expression::AUX_ALLOW);
+		try{
+			int d = expr->getValue().valueAs<int>();
+			if(d < 0 || d >= dims[i])
+				throw SemanticError("Index out of limits for compartments expression.",index->loc);
+		}
+		catch(std::out_of_range &e){
+			//DO NOTHING
+		}
+		ret.push_back(expr);
 	}
 	return ret;
 }
@@ -89,8 +100,8 @@ void Channel::eval(pattern::Environment &env,
 	trgt_id = env.getCompartmentId(target.evalName(env,false).getString());
 
 	list<const state::BaseExpression*> src_index,trgt_index;
-	src_index = source.evalExpression(env,vars);
-	trgt_index = target.evalExpression(env,vars);
+	src_index = source.evalExpression(env,src_id,vars);
+	trgt_index = target.evalExpression(env,trgt_id,vars);
 
 	pattern::CompartmentExpr *c_exp_src,*c_exp_trgt;
 	try{
@@ -139,7 +150,7 @@ void Use::eval(pattern::Environment &env, const Expression::VAR &consts) const {
 	auto& use_expr = env.declareUseExpression(id,compartments.size());
 	for(auto& comp : compartments){
 		short comp_id = env.getCompartmentId(comp.evalName(env,false).getString());
-		list<const state::BaseExpression*> index_list = comp.evalExpression(env,consts);
+		list<const state::BaseExpression*> index_list = comp.evalExpression(env,comp_id,consts);
 		try{
 			use_expr.emplace_back(env.getCompartment(comp_id),index_list);
 		}catch(std::invalid_argument &e){

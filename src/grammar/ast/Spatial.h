@@ -72,7 +72,7 @@ public:
 	 * @return a list of BaseExpression* for each index of compExpression by copy.
 	 */
 	list<const state::BaseExpression*> evalExpression(const pattern::Environment &env,
-			const vector<state::Variable*> &consts) const;
+			small_id comp_id,const vector<state::Variable*> &consts) const;
 
 
 protected:

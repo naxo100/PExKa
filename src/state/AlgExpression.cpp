@@ -274,7 +274,10 @@ Auxiliar::Auxiliar(const std::string &nme) : name(nme){}
 Auxiliar::~Auxiliar(){}
 int Auxiliar::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
 	try{
-		return aux_values->at(name);
+		if(aux_values)
+			return aux_values->at(name);
+		else
+			throw std::out_of_range("No given auxiliar map for Auxiliar::evaluate().");
 	}catch(std::out_of_range &e){
 		//(*aux_values)[name] = 1;
 		throw e;

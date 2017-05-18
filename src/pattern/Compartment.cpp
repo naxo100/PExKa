@@ -325,6 +325,8 @@ UseExpression::UseExpression(size_t comps_count,const state::BaseExpression* whe
 UseExpression::~UseExpression(){
 	if(size())
 		delete cells;
+	if(filter)
+		delete filter;
 }
 
 void UseExpression::evaluateCells(

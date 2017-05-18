@@ -40,6 +40,7 @@ std::list< std::list< int > > Channel::getConnections() const{
 	std::vector<short> cell_index(source->getCompartment().getDimensions().size());
 	std::unordered_map<std::string,int> var_map;
 	std::list< std::list<int> > ret;
+	//TODO optimize when source is just a cell.
 	do{
 		var_map.clear();
 		//std::cout << Compartment::cellToString(cell_index) << source.getCompartment().getCellId(cell_index) << std::endl;

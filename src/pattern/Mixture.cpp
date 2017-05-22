@@ -65,7 +65,8 @@ void Mixture::declareAgents(Environment &env){
 		agents[i] = &env.declareAgentPattern(agents[i]);
 	}
 }
-void Mixture::setComponents(){
+vector<ag_st_id> Mixture::setComponents(){
+	vector<ag_st_id> order_mask(agentCount);//ag_id(mix)-> (comp_id,ag_id(comp))
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");
 	list<pair<Component*,map<short,short> > > comps;
@@ -74,12 +75,14 @@ void Mixture::setComponents(){
 		auto p1 = l_it->first,p2 = l_it->second;
 		auto c_it = comps.begin();
 		//iterate on local components, test if ag(p1) or ag(p2) \in comp
-		for(;c_it != comps.end(); c_it++){
+		unsigned c_id = 0;
+		for(;c_it != comps.end(); c_it++,c_id++){
 			Component &comp = *(c_it->first);
 			map<short,short> &mask = c_it->second;//ag_mix -> ag_comp
 			if(mask.find(p1.first) != mask.end()){
 				if(mask.find(p2.first) == mask.end()){
 					comp.addAgent(agents[p2.first]);
+					order_mask[p2.first] = make_pair(c_id,comp.size()-1);
 					mask.insert(make_pair(p2.first,comp.size()-1));
 				}
 				comp.addLink(make_pair(p1,p2),mask);
@@ -87,6 +90,7 @@ void Mixture::setComponents(){
 			}
 			else if(mask.find(p2.first) != mask.end()){
 				comp.addAgent(agents[p1.first]);
+				order_mask[p1.first] = make_pair(c_id,comp.size()-1);
 				mask.insert(make_pair(p1.first,comp.size()-1));
 				comp.addLink(make_pair(p1,p2),mask);
 				break;
@@ -97,8 +101,10 @@ void Mixture::setComponents(){
 			comps.emplace_back(new Component(),map<short,short>());
 			comps.back().second.emplace(p1.first,0);
 			comps.back().first->addAgent(agents[p1.first]);
+			order_mask[p1.first] = make_pair(c_id,0);
 			comps.back().second.emplace(p2.first,1);
 			comps.back().first->addAgent(agents[p2.first]);
+			order_mask[p2.first] = make_pair(c_id,0);
 			comps.back().first->addLink(make_pair(p1,p2),comps.back().second);
 		}
 
@@ -113,15 +119,18 @@ void Mixture::setComponents(){
 		if(c_it == comps.end()){
 			comps.emplace_back(new Component(),map<short,short>());
 			comps.back().first->addAgent(agents[i]);
+			order_mask[i] = make_pair(comps.size()-1,0);
 		}
 	}
 	compCount = comps.size();
-	delete[] agents;
+	//delete[] agents; //we need to preserve mixture order.
 	this->comps = new vector<const Component*>(compCount);
 	int i=0;
 	//set comps.graph and declare comps in env
 	for(const auto& c : comps){
-		c.first->setGraph();
+		auto mask = c.first->setGraph();
+		for(auto mix_mask : c.second)
+			order_mask[mix_mask.first].second = mask[mix_mask.second];
 		//const Component &comp = env.declareComponent(*c.first);
 		//delete c.first;
 		(*this->comps)[i] = c.first;
@@ -130,8 +139,10 @@ void Mixture::setComponents(){
 	//sort(this->comps->begin(),this->comps->end());
 	links.clear();
 	//declaredComps = true;
+	return order_mask;
 }
-void Mixture::setAndDeclareComponents(Environment &env){
+vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
+	vector<ag_st_id> order_mask(agentCount);//ag_id(mix)-> (comp_id,ag_id(comp))
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");
 	list<pair<Component*,map<short,short> > > comps;
@@ -140,12 +151,14 @@ void Mixture::setAndDeclareComponents(Environment &env){
 		auto p1 = l_it->first,p2 = l_it->second;
 		auto c_it = comps.begin();
 		//iterate on local components, test if ag(p1) or ag(p2) \in comp
-		for(;c_it != comps.end(); c_it++){
+		unsigned c_id = 0;
+		for(;c_it != comps.end(); c_it++,c_id++){
 			Component &comp = *(c_it->first);
 			map<short,short> &mask = c_it->second;//ag_mix -> ag_comp
 			if(mask.find(p1.first) != mask.end()){
 				if(mask.find(p2.first) == mask.end()){
 					comp.addAgent(agents[p2.first]);
+					order_mask[p2.first] = make_pair(c_id,comp.size()-1);
 					mask.insert(make_pair(p2.first,comp.size()-1));
 				}
 				comp.addLink(make_pair(p1,p2),mask);
@@ -153,6 +166,7 @@ void Mixture::setAndDeclareComponents(Environment &env){
 			}
 			else if(mask.find(p2.first) != mask.end()){
 				comp.addAgent(agents[p1.first]);
+				order_mask[p1.first] = make_pair(c_id,comp.size()-1);
 				mask.insert(make_pair(p1.first,comp.size()-1));
 				comp.addLink(make_pair(p1,p2),mask);
 				break;
@@ -163,8 +177,10 @@ void Mixture::setAndDeclareComponents(Environment &env){
 			comps.emplace_back(new Component(),map<short,short>());
 			comps.back().second.emplace(p1.first,0);
 			comps.back().first->addAgent(agents[p1.first]);
+			order_mask[p1.first] = make_pair(c_id,0);
 			comps.back().second.emplace(p2.first,1);
 			comps.back().first->addAgent(agents[p2.first]);
+			order_mask[p2.first] = make_pair(c_id,0);
 			comps.back().first->addLink(make_pair(p1,p2),comps.back().second);
 		}
 
@@ -179,6 +195,7 @@ void Mixture::setAndDeclareComponents(Environment &env){
 		if(c_it == comps.end()){
 			comps.emplace_back(new Component(),map<short,short>());
 			comps.back().first->addAgent(agents[i]);
+			order_mask[i] = make_pair(comps.size()-1,0);
 		}
 	}
 	compCount = comps.size();
@@ -196,6 +213,7 @@ void Mixture::setAndDeclareComponents(Environment &env){
 	sort(this->comps->begin(),this->comps->end());
 	links.clear();
 	declaredComps = true;
+	return order_mask;
 }
 
 bool Mixture::operator==(const Mixture& m) const{
@@ -217,6 +235,10 @@ bool Mixture::operator==(const Mixture& m) const{
 
 size_t Mixture::size() const {
 	return agentCount;
+}
+
+const Mixture::Agent& Mixture::getAgent(small_id cc,small_id ag) const{
+	return (*comps)[cc]->getAgent(ag);
 }
 
 const vector<const Mixture::Component*>::iterator Mixture::begin() const {
@@ -405,6 +427,10 @@ size_t Mixture::Component::size() const{
 	return agents.size();
 }
 
+const Mixture::Agent& Mixture::Component::getAgent(small_id ag) const {
+	return *(agents[ag]);
+}
+
 const vector<const Mixture::Agent*>::const_iterator Mixture::Component::begin() const{
 	agents.begin();
 	return agents.begin();
@@ -447,16 +473,16 @@ const map<ag_st_id,ag_st_id>& Mixture::Component::getGraph() const{
 	return *graph;
 }
 
-void Mixture::Component::setGraph() {
+vector<small_id> Mixture::Component::setGraph() {
 	list<pair<const Agent*,short> > reorder;
 	for(size_t i = 0; i < agents.size(); i++ )
 		reorder.emplace_back(agents[i],(short)i);
 	reorder.sort();
 	size_t i = 0;
-	map<short,short> mask;
+	vector<small_id> mask(agents.size());
 	for(auto aptr_id : reorder){
 		agents[i] = aptr_id.first;
-		mask.emplace(aptr_id.second,(short)i);
+		mask[aptr_id.second] = i;
 		i++;
 	}
 
@@ -470,6 +496,7 @@ void Mixture::Component::setGraph() {
 	}
 	delete links;
 	graph = graph_ptr;
+	return mask;
 }
 
 string Mixture::Component::toString(const Environment& env) const {

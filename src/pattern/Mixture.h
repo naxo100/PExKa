@@ -89,10 +89,12 @@ public:
 	 * method declaredComps is set to true.
 	 * @param env the environment of simulation.
 	 */
-	void setComponents();
-	void setAndDeclareComponents(Environment& env);
+	vector<ag_st_id> setComponents();
+	vector<ag_st_id> setAndDeclareComponents(Environment& env);
 
 	bool operator==(const Mixture& m) const;
+
+	const Agent& getAgent(small_id cc,small_id ag) const;
 
 	/** \brief returns the agent counter.
 	 *
@@ -112,10 +114,11 @@ public:
 private:
 	//true for valid comps; false for valid agents.
 	bool declaredComps;
-	union {
+	union {//we need to preserve mixture order!!!
 		const Agent** agents;
 		vector<const Component*>* comps;
 	};
+
 	size_t agentCount;
 	size_t siteCount;
 	size_t compCount;
@@ -124,6 +127,8 @@ private:
 	map< ag_st_id , ag_st_id> links;
 
 };
+
+typedef pair<Mixture,vector<ag_st_id> >OrderedMixture;
 
 //bool (*f)(pair<short,short>,pair<short,short>) = [](pair<short,short>& p1,pair<short,short>& p2) {return p1.first < p2.first ? p1 : (p1.second < p2.second ? p1 : p2 );};
 
@@ -200,9 +205,11 @@ public:
 	const vector<const Agent*>::const_iterator begin() const;
 	const vector<const Agent*>::const_iterator end() const;
 
-	void setGraph();
+	vector<small_id> setGraph();
 	const map<ag_st_id,ag_st_id>& getGraph() const;
 	string toString(const Environment& env) const;
+
+	const Mixture::Agent& getAgent(small_id ag) const;
 
 	bool operator==(const Mixture::Component &m) const;
 };

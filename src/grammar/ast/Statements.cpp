@@ -23,8 +23,7 @@ Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
 	Node(l),name(lab),type(ALG),constant(false),expr(e) {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {
-};
+	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {};
 
 Declaration::Declaration(const Declaration &d) :
 		Node(d.loc),name(d.name),type(d.type),constant(false){
@@ -90,8 +89,14 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 
 	id = env.declareVariable(name,type);
 
-	if(type)
+	if(type){
+		auto p_mix = mixture->eval(env,vars);
+		p_mix->declareAgents(env);
+		p_mix->setComponents(env);
+		auto& mix = env.declareMixture(*p_mix);
+		delete p_mix;
 		var = new state::KappaVar(id,name.getString(),false,mix);
+	}
 	else {
 		char flag = constant ? Expression::CONST : 0;
 		BaseExpression* b_expr = expr->eval(env,vars,flag);
@@ -200,7 +205,7 @@ Init& Init::operator=(const Init &init) {
 }
 
 void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
-		state::State &state){
+		simulation::Simulation &sim){
 	try {
 		auto& use_expr = env.getUseExpression(this->getUseId());
 		auto &cells = use_expr.getCells();
@@ -212,7 +217,7 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 			else
 				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<float>();
 			tok_id = env.getTokenId(token.getString());
-			state.addTokens(this->getUseId(),tok_id,n);
+			sim.addTokens(cells,tok_id,n);
 		}
 		else { //MIX
 			int n;
@@ -220,10 +225,12 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 				throw std::invalid_argument("Null value for mix init.");
 			else
 				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
+			//auto& mix = mixture.eval(env,vars,false);
 		}
 	}
 	catch(exception &e){
 		//TODO
+		throw std::invalid_argument("TODO exception at init::eval().");
 	}
 }
 

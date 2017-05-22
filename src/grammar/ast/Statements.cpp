@@ -96,11 +96,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 	if(type){
 		auto p_mix = mixture->eval(env,vars);
 		p_mix->declareAgents(env);
-<<<<<<< HEAD
-		p_mix->setComponents(env);
-=======
 		p_mix->setAndDeclareComponents(env);
->>>>>>> refs/remotes/origin/Develop
 		auto& mix = env.declareMixture(*p_mix);
 		delete p_mix;
 		var = new state::KappaVar(id,name.getString(),false,mix);

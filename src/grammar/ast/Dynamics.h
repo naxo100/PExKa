@@ -218,6 +218,7 @@ public:
 //Agents: list of Agents
 //Tokens: list of Tokens used
 class RuleSide : Node{
+public:
 	Mixture agents;
 	list<Token> tokens;
 public:
@@ -242,6 +243,8 @@ public:
 
 	Rule(const Rule& rule);
 	Rule& operator=(const Rule& rule);
+
+	void eval(pattern::Environment& env,const vector<state::Variable*>& vars) const;
 
 
 

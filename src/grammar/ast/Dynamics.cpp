@@ -522,9 +522,23 @@ Rule& Rule::operator=(const Rule& r){
 	return *this;
 }
 
+void Rule::eval(pattern::Environment& env,
+		const vector<state::Variable*> &vars) const{
+	//TODO eval name...
+	auto lhs_mix = lhs.agents.eval(env,vars,true);
+	lhs_mix->declareAgents(env);
+	auto lhs_mask = lhs_mix->setAndDeclareComponents(env);
+	auto rhs_mix = rhs.agents.eval(env,vars,true);
+	auto rhs_mask = rhs_mix->setComponents();
+}
+
+
 
 
 } /* namespace ast */
+
+
+
 
 
 

@@ -14,7 +14,10 @@ namespace pattern {
 /*****************************************
  *********** Class Compartment ***********
  ****************************************/
-int Compartment::TOTAL_CELLS = 0;
+unsigned int Compartment::TOTAL_CELLS = 0;
+unsigned int Compartment::getTotalCells(){
+	return TOTAL_CELLS;
+}
 Compartment::Compartment(const std::string &nme)
 		:name(nme),dimensions(),volume(nullptr) {
 	firstCell = TOTAL_CELLS;
@@ -43,6 +46,9 @@ void Compartment::setVolume(const state::BaseExpression *vol){
 
 const std::string& Compartment::getName() const {
 	return name;
+}
+const state::BaseExpression& Compartment::getVolume() const{
+	return *volume;
 }
 
 void Compartment::getCellIndex(int cell_id,std::vector<short>& index) const{
@@ -84,6 +90,13 @@ bool Compartment::nextCell(std::vector<short>& cell) const {
 			cell[i] = 0;
 		}
 	return false;
+}
+
+int Compartment::getLastCellId() const {
+	return firstCell+cellsCount;
+}
+int Compartment::getFirstCellId() const {
+	return firstCell;
 }
 
 
@@ -279,7 +292,7 @@ std::string Compartment::cellToString(const std::vector<short>& cell){
 std::string Compartment::cellIdToString(int cell_id) const{
 	std::vector<short> cell;
 	getCellIndex(cell_id,cell);
-	return cellToString(cell);
+	return name+cellToString(cell);
 }
 
 std::string CompartmentExpr::toString() const {
@@ -292,13 +305,26 @@ std::string CompartmentExpr::toString() const {
 
 /************ class UseExpr *****************/
 
-
+std::set<int> UseExpression::ALL_CELLS;
+//TODO filter
 UseExpression::UseExpression(size_t comps_count,const state::BaseExpression* where):
 		filter(dynamic_cast<const state::AlgExpression<bool>* >(where) ),isComplete(false) {
-	if(comps_count > 0)
+	if(comps_count > 0){
 		reserve(comps_count);
-	else
+		cells = new std::set<int>();
+	}
+	else{
+		if(ALL_CELLS.size() == 0)
+			for(unsigned i = 0; i < Compartment::getTotalCells(); i++)
+				ALL_CELLS.insert(i);
+		cells = &ALL_CELLS;
 		isComplete = true;
+	}
+}
+//TODO filter
+UseExpression::~UseExpression(){
+	if(size())
+		delete cells;
 }
 
 void UseExpression::evaluateCells(
@@ -312,7 +338,7 @@ void UseExpression::evaluateCells(
 	expr.setEquation();
 	std::vector<short> cell_index(expr.getCompartment().getDimensions().size());
 	for(auto cell_id : expr.getCells(aux_values)){
-		if(cells.find(cell_id)!= cells.end())
+		if(cells->find(cell_id)!= cells->end())
 			continue;
 		auto aux_buff(aux_values);
 		expr.getCompartment().getCellIndex(cell_id,cell_index);
@@ -324,18 +350,19 @@ void UseExpression::evaluateCells(
 			continue;
 		}
 		evaluateCells(expr_it+1,aux_buff);
-		cells.insert(cell_id);
+		cells->insert(cell_id);
 	}
 
-	if(expr_it == begin())
+	if(expr_it == begin()){
 		isComplete = true;
+	}
 }
 
 
 const std::set<int>& UseExpression::getCells() const {
 	if(!isComplete)
 		throw std::invalid_argument("Cannot call getCells() in a not evaluated use expression.");
-	return cells;
+	return *cells;
 }
 
 } /* namespace pattern */

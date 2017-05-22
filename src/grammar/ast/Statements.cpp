@@ -24,7 +24,7 @@ Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
 	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {
-	};
+};
 
 Declaration::Declaration(const Declaration &d) :
 		Node(d.loc),name(d.name),type(d.type),constant(false){
@@ -96,7 +96,11 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 	if(type){
 		auto p_mix = mixture->eval(env,vars);
 		p_mix->declareAgents(env);
+<<<<<<< HEAD
 		p_mix->setComponents(env);
+=======
+		p_mix->setAndDeclareComponents(env);
+>>>>>>> refs/remotes/origin/Develop
 		auto& mix = env.declareMixture(*p_mix);
 		delete p_mix;
 		var = new state::KappaVar(id,name.getString(),false,mix);

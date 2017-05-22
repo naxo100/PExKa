@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include "../util/params.h"
 
 namespace state {
 
@@ -24,10 +25,10 @@ class SomeValue;
  */
 class BaseExpression {
 public:
-	enum Type {FLOAT,INT,BOOL,ID,STR};
+	enum Type {FLOAT,INT,BOOL,SMALL_ID,SHORT_ID,STR};
 	enum AlgebraicOp {SUM,MINUS,MULT,DIV,POW,MODULO,MAX,MIN};
 	enum BoolOp {AND,OR,GREATER,SMALLER,EQUAL,DIFF};
-	enum Unary {SQRT,EXPONENT,LOG,SINUS,COSINUS,TAN,ATAN,ABS,
+	enum Unary {SQRT,EXPONENT,LOG,SINE,COSINE,TAN,ATAN,ABS,
 			COIN,RAND_N,NOT};
 	enum Nullary {TRUE,FALSE,RAND_1};
 
@@ -95,20 +96,31 @@ public:
 	union {
 		float fVal;
 		int iVal;
-		short idVal;
+		small_id smallVal;
+		short_id shortVal;
 		bool bVal;
-		std::string* sVal;
+		//std::string* sVal;
 	};
 	BaseExpression::Type t;
 
 	SomeValue(float f);
 	SomeValue(int i);
+	SomeValue(short_id id);
+	SomeValue(small_id id);
 	SomeValue(bool b);
-	SomeValue(const std::string &s);
+	//SomeValue(const std::string &s);
 	//SomeValue(const std::string *s);
 
 	template <typename T>
+	void set(T val);
+
+	template <typename T>
+	void safeSet(T val);
+
+	template <typename T>
 	T valueAs() const;
+
+	bool operator!=(const SomeValue&) const;
 
 
 };

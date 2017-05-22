@@ -13,8 +13,9 @@ using namespace std;
 namespace pattern {
 
 Environment::Environment() {
-	// TODO Auto-generated constructor stub
-
+//TODO
+	useExpressions.emplace_back(0);
+	useExpressions[0].evaluateCells();
 }
 
 Environment::~Environment() {
@@ -92,6 +93,7 @@ Signature& Environment::declareSignature(const ast::Id &name_loc) {
 	short id = signatures.size();
 	signatures.emplace_back(name);
 	signatureMap[name] = id;
+	signatures[id].setId(id);
 	return signatures[id];
 }
 
@@ -147,6 +149,9 @@ short Environment::getTokenId(const string &s) const {
 const Compartment& Environment::getCompartment(short id) const{
 	return compartments[id];
 }
+const list<Channel>& Environment::getChannels(short id) const{
+	return channels[id];
+}
 const UseExpression& Environment::getUseExpression(short id) const {
 	return useExpressions[id];
 }
@@ -158,12 +163,61 @@ const vector<pattern::Signature>& Environment::getSignatures() const{
 }
 
 
+const Compartment& Environment::getCompartmentByCellId(unsigned cell_id) const{
+	for(auto &comp : compartments){
+		if(cell_id < comp.getLastCellId())
+			return comp;
+	}
+	throw std::out_of_range("Compartment of cell-id "+to_string(cell_id)+" not found.");
+}
 
 
+template <>
+size_t Environment::size<Mixture>() const {
+	return mixtures.size();
+}
+template <>
+size_t Environment::size<Mixture::Component>() const {
+	return components.size();
+}
+template <>
+size_t Environment::size<Channel>() const {
+	return channels.size();
+}
+template <>
+size_t Environment::size<Token>() const {
+	return tokenNames.size();
+}
 
+
+template <>
+void Environment::reserve<Compartment>(size_t count) {
+	compartments.reserve(count);
+}
+template <>
+void Environment::reserve<Signature>(size_t count) {
+	signatures.reserve(count);
+}
+template <>
+void Environment::reserve<Channel>(size_t count) {
+	channels.reserve(count);
+}
+template <>
+void Environment::reserve<Token>(size_t count) {
+	tokenNames.reserve(count);
+}
+template <>
+void Environment::reserve<UseExpression>(size_t count) {
+	useExpressions.reserve(count);
+}
 
 
 //DEBUG methods
+
+std::string Environment::cellIdToString(unsigned int cell_id) const {
+	return this->getCompartmentByCellId(cell_id).cellIdToString(cell_id);
+
+}
 
 void Environment::show() const {
 	try{
@@ -175,8 +229,8 @@ void Environment::show() const {
 		cout << "\tUseExpressions[" << useExpressions.size() << "]" << endl;
 		for(auto& use_expr : useExpressions){
 			cout << "list of cells: " ;
-			for(auto& cell_id : use_expr.getCells())
-				cout << cell_id << ", ";
+			for(auto cell_id : use_expr.getCells())
+				cout << cellIdToString(cell_id) << ", ";
 			cout << endl;
 		}
 

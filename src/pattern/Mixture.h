@@ -14,6 +14,8 @@
 #include <list>
 #include <utility> //pair
 #include <string>
+#include "../util/params.h"
+#include "../state/AlgExpression.h"
 
 
 using namespace std;
@@ -87,11 +89,18 @@ public:
 	 * method declaredComps is set to true.
 	 * @param env the environment of simulation.
 	 */
-	void setComponents(Environment &env);
+	void setComponents();
+	void setAndDeclareComponents(Environment& env);
 
 	bool operator==(const Mixture& m) const;
 
+	/** \brief returns the agent counter.
+	 *
+	 */
 	size_t size() const;
+
+	const vector<const Component*>::iterator begin() const;
+	const vector<const Component*>::iterator end() const;
 
 	/** \brief returns a string representation of this mixture.
 	 *
@@ -101,7 +110,7 @@ public:
 
 
 private:
-	//true for valis comps; false for valid agents.
+	//true for valid comps; false for valid agents.
 	bool declaredComps;
 	union {
 		const Agent** agents;
@@ -121,13 +130,14 @@ private:
 
 struct Mixture::Site {
 	//valid type of the site state
-	ValueType val_type;
+	/*ValueType val_type;
 	union {
 		int int_value;
 		float float_value;
 		short id_value;
 		string* lbl; // NO USED
-	} state;
+	} state;*/
+	state::SomeValue state;
 
 	LinkType link_type;
 	//only valid if type is BIND_TO
@@ -135,27 +145,30 @@ struct Mixture::Site {
 
 	bool operator==(const Site &s) const;
 
-	//Site();
+	Site();
 };
 
 class Mixture::Agent {
 	short signId; //signature ID
 	// int = site id
-	std::unordered_map<int,Site> interface;
+	std::unordered_map<small_id,Site> interface;
 
 public:
 	Agent(short name_id);
 
 	short getId() const;
 	Site& addSite(short name_id);
-	void setSiteValue(short mix_site,short label);
-	void setSiteValue(short mix_site,int val);
-	void setSiteValue(short mix_site,float val);
+	void setSiteValue(small_id mix_site,small_id label);
+	void setSiteValue(small_id mix_site,int val);
+	void setSiteValue(small_id mix_site,float val);
 
 	void setSiteLink(short mix_site,LinkType l);
 
 	const Site& getSite(short id) const;
 	bool operator==(const Agent& a) const;
+
+	const unordered_map<small_id,Site>::const_iterator begin() const;
+	const unordered_map<small_id,Site>::const_iterator end() const;
 
 	const string toString( short mixAgId, const Environment& env, map<ag_st_id,short>& bindLabels ) const;
 };
@@ -183,7 +196,12 @@ public:
 	void addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<short,short> &mask);
 
 	size_t size() const;
+
+	const vector<const Agent*>::const_iterator begin() const;
+	const vector<const Agent*>::const_iterator end() const;
+
 	void setGraph();
+	const map<ag_st_id,ag_st_id>& getGraph() const;
 	string toString(const Environment& env) const;
 
 	bool operator==(const Mixture::Component &m) const;

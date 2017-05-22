@@ -50,7 +50,7 @@
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
 %token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
-%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET CONST DIV PLOT SINUS COSINUS TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
+%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET CONST DIV PLOT SINE COSINE TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
 %token EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
 %token <int> INT 
 %token <std::string> ID LABEL KAPPA_MRK NAME 
@@ -131,6 +131,8 @@ statement:
 instruction:
  COMPARTMENT comp_expr alg_expr
  	{this->driver.getAst().add(Compartment(@$,$2,$3));}
+| CHANNEL LABEL comp_expr arrow comp_expr where_expr 
+ 	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6));}
 | CHANNEL LABEL comp_expr arrow comp_expr where_expr ATD alg_expr
  	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6,$8));}
 | TRANSPORT join LABEL mixture AT alg_expr
@@ -526,10 +528,10 @@ alg_expr:
 	{$$ = new AlgBinaryOperation(@$,$2,$3,BaseExpression::AlgebraicOp::MIN);}
 | EXPONENT alg_expr 
 	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::EXPONENT);}
-| SINUS alg_expr
-	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::SINUS);}
-| COSINUS alg_expr
-	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::COSINUS);}
+| SINE alg_expr
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::SINE);}
+| COSINE alg_expr
+	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::COSINE);}
 | TAN alg_expr 
 	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::TAN);}
 | ABS alg_expr

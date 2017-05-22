@@ -12,6 +12,7 @@
 #include <vector>
 #include <unordered_map>
 #include "../state/AlgExpression.h"
+#include "../util/params.h"
 
 namespace ast {
 class Id;
@@ -38,18 +39,22 @@ public:
 	//void setId(short id);
 	template <typename T>
 	Site& addSite(const ast::Id &name);
-	short addSite(const ast::Id &name,const vector<string> &labels);
-	short addSite(const ast::Id &name,int min,int max);
-	short addSite(const ast::Id &name,float min,float max);
+	small_id addSite(const ast::Id &name,const vector<string> &labels);
+	small_id addSite(const ast::Id &name,int min,int max);
+	small_id addSite(const ast::Id &name,float min,float max);
 
-	const Site& getSite(const short id) const;
+	const Site& getSite(const small_id id) const;
 	const Site& getSite(const string &name) const;
 	short getSiteId(const string &name) const;
+
+	short_id getId() const;
+	small_id getSiteCount() const;
+	void setId(short_id id);
 private:
-	//short id;
+	short_id id;
 	string name;
 	vector<Site*> sites;
-	unordered_map<string,short> siteMap;
+	unordered_map<string,small_id> siteMap;
 };
 
 class Signature::Value {
@@ -72,7 +77,8 @@ public:
 	/** \brief Test whether @val is a valid value for this site and
 	 * returns id for labeled sites.
 	 */
-	virtual short isPossibleValue(const state::SomeValue &val) const = 0;
+	virtual bool isPossibleValue(const state::SomeValue &val) const = 0;
+	virtual state::SomeValue getDefaultValue() const = 0;
 	virtual ~Site();
 
 	const string& getName() const;
@@ -80,30 +86,36 @@ public:
 };
 
 class Signature::EmptySite : public Site {
-	virtual short isPossibleValue(const state::SomeValue &val) const override;
+	virtual bool isPossibleValue(const state::SomeValue &val) const override;
 public:
 	EmptySite(const string &nme);
+	state::SomeValue getDefaultValue() const override;
 };
 
 class Signature::LabelSite : public Site {
 	vector<string> labels;
-	unordered_map<string,short> label_ids;
+	unordered_map<string,small_id> label_ids;
 
-	virtual short isPossibleValue(const state::SomeValue &val) const override;
+	virtual bool isPossibleValue(const state::SomeValue &val) const override;
 public:
 	LabelSite(const string &name);
 	void addLabel(const ast::Id& name_loc);
-	const string getLabel( short id ) const;
+	const string& getLabel( small_id id ) const;
+	small_id getLabelId(const string& s) const;
+	state::SomeValue getDefaultValue() const override;
 };
 
 template <typename T>
 class Signature::RangeSite : public Site {
 	T min,max,byDefault;
-	virtual short isPossibleValue(const state::SomeValue &val) const override;
+	virtual bool isPossibleValue(const state::SomeValue &val) const override;
 public:
 	RangeSite(const string &nme);
 	void setBoundaries(T mn,T mx, T def);
+	state::SomeValue getDefaultValue() const override;
 };
+
+class Token {};
 
 /*class Signature::IntRangeSite : Site {
 	int min,max;

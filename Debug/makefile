@@ -12,6 +12,7 @@ RM := rm -rf
 -include src/state/subdir.mk
 -include src/simulation/subdir.mk
 -include src/pattern/subdir.mk
+-include src/matching/subdir.mk
 -include src/grammar/ast/subdir.mk
 -include src/grammar/subdir.mk
 -include src/subdir.mk

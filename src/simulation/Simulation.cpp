@@ -9,15 +9,25 @@
 #include <set>
 namespace simulation {
 
-Simulation::Simulation() {
-	// TODO Auto-generated constructor stub
-
+Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars) {
+	ccInjections = new set<matching::Injection>[env.size<pattern::Mixture::Component>()];
+	mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
 }
 
 Simulation::~Simulation() {
 	// TODO Auto-generated destructor stub
 }
 
+void Simulation::setCells(list<unsigned int>& _cells){
+	for(auto cell_id : _cells){
+		cells.emplace(piecewise_construct,forward_as_tuple(cell_id),
+				forward_as_tuple(env.size<pattern::Token>(),vars,env.getCompartmentByCellId(cell_id).getVolume()));
+	}
+}
+
+void Simulation::run(){
+	//TODO
+}
 
 //TODO
 template <typename T>
@@ -27,6 +37,17 @@ list<T> Simulation::allocParticles(unsigned cells,T count,const list<T>* vol_rat
 }
 template list<float> Simulation::allocParticles<float>(unsigned cells,float count,const list<float>* vol_ratios);
 
+
+vector<unsigned> Simulation::allocAgents1(unsigned cells,unsigned ag_count,const list<float>* vol_ratios){
+	vector<unsigned> allocs(cells,0);
+	unsigned div = ag_count/cells;
+	unsigned r = ag_count%cells;
+	for(unsigned i = 0; i < cells; i++)
+		allocs[i] = div;
+	for(unsigned i = 0; i < r; i++)
+		allocs[i] += 1;
+	return allocs;
+}
 
 
 template <template<typename,typename...> class Range,typename... Args>
@@ -48,11 +69,11 @@ template void Simulation::addTokens(const std::set<int> &cell_ids,float count,sh
 
 template <template<typename,typename...> class Range,typename... Args>
 void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,const pattern::Mixture &mix){
-	list<unsigned> per_cell = allocParticles(cell_ids.size(),count);
+	auto per_cell = allocAgents1(cell_ids.size(),count);
 	auto ids_it = cell_ids.begin();
 	for(auto n : per_cell){
 		try{
-			cells.at(*ids_it).addNodes(n,mix);
+			cells.at(*ids_it).addNodes(n,mix,env);
 		}
 		catch(std::out_of_range &e){
 			//other mpi_process will add this tokens.
@@ -62,16 +83,16 @@ void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,con
 }
 template void Simulation::addAgents(const std::set<int> &cell_ids,unsigned count,const pattern::Mixture &mix);
 
-vector<list<int>> Simulation::allocCells(
+vector<list<unsigned int> > Simulation::allocCells(
 		int n_cpus,
 		const vector<double> &w_vertex,
 		const map<pair<int,int>,double> &w_edges,
 		int tol
 ) {
 
-	vector<list<int>> P (n_cpus);      // array of indexed compartments by cpu's
+	vector<list<unsigned int>> P (n_cpus);      // array of indexed compartments by cpu's
 	// initialize P
-	for( int i = 0 ; i < n_cpus ; i++ ) P[i] = list<int>();
+	for( int i = 0 ; i < n_cpus ; i++ ) P[i] = list<unsigned int>();
 	vector<pair<pair<int,int>,double>> ordered_edges = sortEdgesByWeidht(w_edges);
 	vector<double> assigned (n_cpus, 0); // assigned and saved edges
 	double totalWeight = 0;
@@ -151,7 +172,7 @@ vector< pair< pair<int,int>, double > > Simulation::sortEdgesByWeidht( const map
 }
 
 
-unsigned Simulation::minP( vector<list<int>> P ) {
+unsigned Simulation::minP( vector<list<unsigned int>> P ) {
 	unsigned k = 0;
 	for ( unsigned i = 0; i < P.size() ; i++ ) {
 		for ( unsigned j = 0 ; j < P.size() ; j++ ) {
@@ -162,7 +183,7 @@ unsigned Simulation::minP( vector<list<int>> P ) {
 }
 
 
-int Simulation::searchCompartment(vector<list<int>> assigned, unsigned c ) {
+int Simulation::searchCompartment(vector<list<unsigned int>> assigned, unsigned c ) {
 	for( int i = 0 ; i < (int)assigned.size() ; i++ ) {
 		for ( auto p : assigned[i] ) {
 			if( p == (int)c ) return i;
@@ -170,6 +191,14 @@ int Simulation::searchCompartment(vector<list<int>> assigned, unsigned c ) {
 	}
 
 	return -1;
+}
+
+void Simulation::print() const {
+	cout << cells.size() << " cells in this simulation object." << endl;
+	for(auto& id_state : cells){
+		cout << env.cellIdToString(id_state.first) << endl;
+		id_state.second.print();
+	}
 }
 
 } /* namespace state */

@@ -3,12 +3,15 @@
 
 
 %const: 'a' 0.0
+%var: 'a2' 1.1
 
 %compartment: 'bottles'[3][3] 1.0
-%compartment: 'cities'[10] 'a'
+%compartment: 'cities'[10] 5.0
 
 %channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $0.1
-%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
+%channel: 'tube2' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
+%channel: 'tube3' 'bottles'[0][0] -> 'bottles'[3][3] 
+%channel: 'highway' 'cities'[x] -> 'cities'[x+1] $5
 
 %agent: A(s~1~2~3,t~1,v~[-1,1](-'a'),z)
 %agent: B(s,i~1~2)
@@ -24,8 +27,8 @@
 %var: 'kappa site.agent' A(v!v.A)
 
 %use: 'bottles'[2*x][x],'cities'[3*x]
-#%init: 5 A()
+%init: 5 A()
 %use: *
-#%init: 100 B()
+%init: 100 B()
 
 

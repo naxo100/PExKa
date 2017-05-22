@@ -68,10 +68,10 @@ protected:
 class Init : public Node, public Statement {
 	enum InitType {MIXTURE,TOKEN} type;
 	const Expression *alg;
-	union {
+	//union {
 		Mixture mixture;
 		Id token;
-	};
+	//};
 public:
 	Init();
 	Init(const location &l,const Expression *e, const Mixture &mix);

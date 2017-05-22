@@ -48,7 +48,7 @@ protected:
 
 class SiteState : public Node{
 public:
-	enum {LABEL,RANGE,AUX,EXPR} type;
+	enum {EMPTY,LABEL,RANGE,AUX,EXPR} type;
 	//union {
 		list<Id> labels;
 		Id aux;
@@ -232,13 +232,19 @@ class Rule : public Node {
 protected:
 	Id label;
 	RuleSide lhs,rhs;
-	bool bidirectional;
+	bool bi;
 	const Expression* filter;
 	Rate rate;
 public:
 	Rule();
 	Rule(const location &l,const Id &label,const RuleSide &lhs,
 		const RuleSide &rhs,const bool arrow,const Expression* where,const Rate &rate);
+
+	Rule(const Rule& rule);
+	Rule& operator=(const Rule& rule);
+
+
+
 	~Rule();
 };
 

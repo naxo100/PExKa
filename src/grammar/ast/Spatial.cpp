@@ -146,9 +146,7 @@ unsigned short Use::getCount(){
 
 Use::Use(const location &l, const list<CompExpression> &comps,
 		const Expression* where) :
-	Node(l),id(count),compartments(comps),filter(where){
-	count++;
-}
+	Node(l),id(++count),compartments(comps),filter(where){}
 Use::Use(const Use &u) : Node(u.loc),id(u.id),
 		compartments(u.compartments),filter(u.filter->clone()) {}
 Use::~Use(){

@@ -460,18 +460,21 @@ Radius::~Radius(){
 
 
 /****** Class Rate ***************/
-Rate::Rate(){}
+Rate::Rate():
+	Node(), def(nullptr), fixed(nullptr), un(nullptr), op(nullptr) {};
 Rate::Rate(const location &l,const Expression *def,const bool &fix):
-	Node(l), def(def), fixed(fix), un(NULL), op(NULL) {};
+	Node(l), def(def), fixed(fix), un(nullptr), op(nullptr) {};
 Rate::Rate(const location &l,const Expression *def,const bool &fix,const Radius *un):
-	Node(l), def(def), fixed(fix), un(new Radius(*un)), op(NULL) {};
+	Node(l), def(def), fixed(fix), un(new Radius(*un)), op(nullptr) {};
 Rate::Rate(const location &l,const Expression *def,const bool &fix,const Expression *ope):
-	Node(l), def(def), fixed(fix), un(NULL), op(ope) {};
+	Node(l), def(def), fixed(fix), un(nullptr), op(ope) {};
 Rate::~Rate(){
+	/*if(def)
+		delete def;
 	if(un)
 		delete un;
 	if(op)
-		delete op;
+		delete op;*/
 }
 
 /****** Class Token **************/

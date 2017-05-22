@@ -15,8 +15,8 @@
 
 #### AGENTS AND MIXTURES
 # SOLVED: Mixtures, binds between differents agent types
-%agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
-%agent: B(s,i~1~2)
+#%agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
+#%agent: B(s,i~1~2)
 #%agent: S(s,t,u,v,w,x)
 #%var: 'other kappa fix' S(x!6,s!1),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
 #%var: 'sintax_1' A(s~2!i.B),B(i!s.A)
@@ -39,8 +39,8 @@
 #%token: sasas
 
 #### RULES
-%var: 'on_rate' 1.0
-%const: 'ab' 1
+#%var: 'on_rate' 1.0
+#%const: 'ab' 0.5
 
 # SOLVED: rules can't be defined by error on rates
 #'a.b' A(s~1) -> B(i~2) @ 0.3
@@ -66,6 +66,9 @@
 
 
 #### COMPARTMENTS
+#%var: 'on_rate' 1.0
+#%const: 'ab' 0.5
+
 # SOLVED: bottles with alphanumeric rate value assigned: segmentation fault
 # SOLVED: bottles with numeric name: Segmentation fault
 #%compartment: 'bottles' [3][3][3] 1.0
@@ -74,16 +77,31 @@
 #%compartment: '' [3][3][3] 1.0
 #%compartment: [3][3][3] 1.0
 
-# ERROR: we can't assign float to a bottle. piska assume dimension 0
-%compartment: 'bottles' [1.5] 'ab'
+# SOLVED: we can't assign float to a bottle. piska assume dimension 0
+#%compartment: 'bottles' [2.5][5] 'ab'
+
 
 
 #### CHANNELS
-#%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
-#%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
+#%var: 'a' 3.5*2
+%compartment: 'bottles' [3][3] 1
+%compartment: 'bottles2' [2][2] 1
 
+# ERROR: don't recognize constant 'a'
+#%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
+
+# ERROR: repeat channel name
+#%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
+
+# SOLVE: No compartment name
+#%channel: 'tube2' ''[x][y] <-> 'bottles'[x+1][y] $'a'
+# SOLVE: ID insted of LABEL
+#%channel: 'tube2' bottles[x][y] <-> 'bottles'[x+1][y] $1
+
+%channel: 'tube2' 'bottles'[1][1] -> 'bottles2'[2][1] $1
 
 #### PERTURBATIONS
+
 # ERROR: fail to assign string on $STOP: double free or corruption (fasttop)
 #%mod: [false] do $STOP "test_model.cka"
 #%mod: [false] do $FLUX "string_exp" [true] 

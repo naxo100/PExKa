@@ -461,7 +461,7 @@ rule_expression:
 	}
 | rule_label lhs_rhs arrow lhs_rhs where_expr
 	{
-		cerr<<"Warning: Rule has no kinetics. Default rate of 0.0 is assumed."<<endl;
+		cout << "Warning: Rule has no kinetics. Default rate of 0.0 is assumed.\n" << endl;
 		Rate rate(yy::location(),new Const(yy::location(),0.0f),false);
 		$$=ast::Rule(@$,$1,$2,$4,$3,$5,rate);;
 	}

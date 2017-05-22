@@ -202,7 +202,6 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 	char buffer[150];
 	sprintf(buffer, "The token \"%s\" is not recognized", yytext);
 	throw SyntaxError(buffer, loc);
-	//LexerError(buffer);
 }
 
 <<EOF>> { return yyterminate(); }

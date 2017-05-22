@@ -26,8 +26,24 @@ pattern::CompartmentExpr* CompExpression::eval
 vector<short> CompExpression::evalDimensions(const pattern::Environment &env,
 		const vector<Variable*> &vars) const {
 	vector<short> ret;
-	for(auto& index : indexList)
-		ret.push_back((index->eval(env,vars))->getValue().iVal);
+
+	for(auto& index : indexList) {
+		int tmp = 0;
+
+		switch( (index->eval(env,vars))->getType() ) {
+		case state::BaseExpression::FLOAT:
+			tmp = (index->eval(env,vars))->getValue().fVal;
+			break;
+		case state::BaseExpression::INT:
+			tmp = (index->eval(env,vars))->getValue().iVal;
+			break;
+		default:break;
+		}
+
+		//tmp = (index->eval(env,vars))->getValue().iVal;
+		ret.push_back(tmp);
+	}
+
 	return ret;
 }
 

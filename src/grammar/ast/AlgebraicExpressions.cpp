@@ -214,7 +214,7 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 		if(flags & AUX_ALLOW)
 			expr = new state::Auxiliar(name.getString());
 		else
-			throw SemanticError("Can't assign a AUX in a variable or constant", loc);
+			throw SemanticError("You can not assign a AUX in a variable or constant", loc);
 		break;
 	default:break;
 	}

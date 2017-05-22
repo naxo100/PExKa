@@ -20,8 +20,8 @@ Rule::~Rule() {
 
 
 
-list<Rule::Action> Rule::difference(const Mixture& lhs,const Mixture& rhs){
-	//for(auto)
+list<Rule::Action> Rule::difference(const Environment& env, const OrderedMixture& lhs,const OrderedMixture& rhs){
+
 }
 
 } /* namespace simulation */

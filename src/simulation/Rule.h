@@ -34,6 +34,7 @@ class Rule {
 
 	const Mixture &lhs;
 	const Mixture rhs;
+	vector<ag_st_id> lhsMask,rhsMask;//[order] -> (comp_id,ag_id)
 	const state::BaseExpression* rate;//basic rate
 	pair<const state::BaseExpression*,const state::BaseExpression*> unaryRate;//rate,radius
 	list<Action> script;
@@ -43,7 +44,7 @@ public:
 
 
 
-	static list<Action> difference(const Mixture& lhs,const Mixture& rhs);
+	static list<Action> difference(const Environment& env,const OrderedMixture& lhs,const OrderedMixture& rhs);
 };
 
 } /* namespace simulation */

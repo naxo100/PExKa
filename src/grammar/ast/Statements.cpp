@@ -23,7 +23,8 @@ Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
 	Node(l),name(lab),type(ALG),constant(false),expr(e) {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {};
+	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {
+	};
 
 Declaration::Declaration(const Declaration &d) :
 		Node(d.loc),name(d.name),type(d.type),constant(false){
@@ -86,9 +87,12 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		Expression::VAR &vars) const{
 	Variable* var;
 	short id = 0;
-
-	id = env.declareVariable(name,type);
-
+	try {
+		id = env.declareVariable(name,type);
+	} catch(SemanticError &ex) {
+		ex.setLocation(this->loc);
+		throw ex;
+	}
 	if(type){
 		auto p_mix = mixture->eval(env,vars);
 		p_mix->declareAgents(env);
@@ -122,15 +126,18 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 		Expression::VAR &vars) const{
 	Variable* var;
 	short id = 0;
-
-	id = env.declareVariable(name,type);
-
+	try {
+		id = env.declareVariable(name,type);
+	} catch(SemanticError &ex) {
+		ex.setLocation(this->loc);
+		throw ex;
+	}
 	if(type)
 		throw SemanticError("Constants can not depend on agent mixtures.",loc);
 	else {
 		char flag = constant ? Expression::CONST : 0;
 		BaseExpression* b_expr = expr->eval(env,vars,flag);
-		switch(b_expr->getType()) {
+		switch(b_expr->getType()){
 		case BaseExpression::FLOAT:
 			var = new state::ConstantVar<float>(id,name.getString(),
 				dynamic_cast<AlgExpression<float>*>(b_expr));
@@ -176,7 +183,7 @@ void Declaration::show( string tabs ) {
 
 
 /****** Class Init ***********/
-Init::Init(){}
+Init::Init() : type(),alg(nullptr){}
 
 Init::~Init(){};
 
@@ -188,6 +195,8 @@ Init::Init(const location &l,const Expression *e, const Id &tok):
 
 Init::Init(const Init &init) :
 		Node(init.loc),type(init.type),alg(init.alg) {
+	if(init.alg)
+		alg = init.alg->clone();
 	if(type)
 		token = init.token;
 	else
@@ -197,6 +206,8 @@ Init::Init(const Init &init) :
 Init& Init::operator=(const Init &init) {
 	loc = init.loc;
 	type = init.type;
+	if(init.alg)
+		alg = init.alg->clone();
 	if(type)
 		token = init.token;
 	else
@@ -206,33 +217,37 @@ Init& Init::operator=(const Init &init) {
 
 void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		simulation::Simulation &sim){
-	try {
-		auto& use_expr = env.getUseExpression(this->getUseId());
-		auto &cells = use_expr.getCells();
-		if(type){ //TOKEN
-			float n;
-			short tok_id;
-			if(alg == nullptr)
-				throw std::invalid_argument("Null value for token init.");
-			else
-				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<float>();
-			tok_id = env.getTokenId(token.getString());
-			sim.addTokens(cells,tok_id,n);
-		}
-		else { //MIX
-			int n;
-			if(alg == nullptr)
-				throw std::invalid_argument("Null value for mix init.");
-			else
-				n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
-			//auto& mix = mixture.eval(env,vars,false);
-		}
+	auto& use_expr = env.getUseExpression(this->getUseId());
+	auto &cells = use_expr.getCells();
+	if(type){ //TOKEN
+		float n;
+		short tok_id;
+		if(alg == nullptr)
+			throw std::invalid_argument("Null value for token init.");
+		else
+			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<float>();
+		tok_id = env.getTokenId(token.getString());
+		sim.addTokens(cells,tok_id,n);
 	}
-	catch(exception &e){
-		//TODO
-		throw std::invalid_argument("TODO exception at init::eval().");
+	else { //MIX
+		int n;
+		if(alg == nullptr)
+			throw std::invalid_argument("Null value for mix init.");
+		else
+			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
+		auto mix = mixture.eval(env,vars,false);
+		mix->setComponents();
+		sim.addAgents(cells,n,*mix);
+		delete mix;
 	}
 }
+
+
+
+
+
+
+
 
 
 } /* namespace ast */

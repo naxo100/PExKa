@@ -26,8 +26,24 @@ pattern::CompartmentExpr* CompExpression::eval
 vector<short> CompExpression::evalDimensions(const pattern::Environment &env,
 		const vector<Variable*> &vars) const {
 	vector<short> ret;
-	for(auto& index : indexList)
-		ret.push_back((index->eval(env,vars))->getValue().iVal);
+
+	for(auto& index : indexList) {
+		int tmp = 0;
+
+		switch( (index->eval(env,vars))->getType() ) {
+		case state::BaseExpression::FLOAT:
+			tmp = (index->eval(env,vars))->getValue().fVal;
+			break;
+		case state::BaseExpression::INT:
+			tmp = (index->eval(env,vars))->getValue().iVal;
+			break;
+		default:break;
+		}
+
+		//tmp = (index->eval(env,vars))->getValue().iVal;
+		ret.push_back(tmp);
+	}
+
 	return ret;
 }
 
@@ -42,12 +58,14 @@ const Id& CompExpression::evalName(const pattern::Environment &env,bool declare)
 	}
 	return name;
 }
+
 list<const state::BaseExpression*> CompExpression::evalExpression(const pattern::Environment &env,
 			const vector<Variable*> &vars) const {
 	list<const state::BaseExpression*> ret;
 	for(auto index : indexList){
 		ret.push_back(index->eval(env,vars,char(Expression::AUX_ALLOW)));
 	}
+
 	return ret;
 }
 
@@ -84,11 +102,13 @@ void Channel::eval(pattern::Environment &env,
 		const vector<Variable*> &vars){
 	short src_id,trgt_id;
 	pattern::Channel& channel = env.declareChannel(name);
-
+	
 	src_id = env.getCompartmentId(source.evalName(env,false).getString());
 	trgt_id = env.getCompartmentId(target.evalName(env,false).getString());
 
 	list<const state::BaseExpression*> src_index,trgt_index;
+
+	// to evaluate source & targets of the channel
 	src_index = source.evalExpression(env,vars);
 	trgt_index = target.evalExpression(env,vars);
 

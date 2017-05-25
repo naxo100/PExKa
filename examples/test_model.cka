@@ -35,8 +35,10 @@
 #%agent: "asdasd"(x~1)
 #%agent: STR"asdasd"
 
+
 #### TOKENS
 #%token: sasas
+
 
 #### RULES
 #%var: 'on_rate' 1.0
@@ -60,7 +62,8 @@
 #'a.b' 'lalalla' -> "lalalal" @ 1
 #'a.b' A(s~3) -> B(i~1) @ 1
 
-# ERROR: this syntax is accepted, but should send a semantic error "least one mixture/signature should exist"
+# ERROR: this syntax is accepted, but should send a semantic error "at least one mixture/signature should exist"
+# waiting for evaluate rules method
 #->
 #<->
 
@@ -81,11 +84,10 @@
 #%compartment: 'bottles' [2.5][5] 'ab'
 
 
-
 #### CHANNELS
-#%var: 'a' 3.5*2
-%compartment: 'bottles' [3][3] 1
-%compartment: 'bottles2' [2][2] 1
+#%var: 'a' 1
+#%compartment: 'bottles' [3][3] 1
+#%compartment: 'bottles2' [2][2] 1
 
 # ERROR: don't recognize constant 'a'
 #%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
@@ -97,11 +99,32 @@
 #%channel: 'tube2' ''[x][y] <-> 'bottles'[x+1][y] $'a'
 # SOLVE: ID insted of LABEL
 #%channel: 'tube2' bottles[x][y] <-> 'bottles'[x+1][y] $1
+# SOLVE: declare in channel an unexisting dimension
+#%channel: 'tube2' 'bottles'[1][1] -> 'bottles2'[1][1] $1
 
-%channel: 'tube2' 'bottles'[1][1] -> 'bottles2'[2][1] $1
+
+#### USES & INITS
+%agent: A(s~1~2)
+%agent: B(t~1~2)
+%var: 'cantA' 1000
+%var: 'cantB' 987
+%compartment: 'bottles' [3][3] 0.7
+%channel: 'tube2' 'bottles'[x][y] -> 'bottles'[x][y] $1
+
+# ERROR: bottles without dimension: maybe the solution is: if you don't declare dimension, the simulation will crush
+#%use: 'bottles'
+
+%use: 'bottles'[x][y]
+
+# SOLVE: not accept mixtures
+%init: 'cantA' A(s!1),B(t!1)
+
+#%init: 'cantA' A(s~1)
+#%init: 'cantB' B()
+
+
 
 #### PERTURBATIONS
-
 # ERROR: fail to assign string on $STOP: double free or corruption (fasttop)
 #%mod: [false] do $STOP "test_model.cka"
 #%mod: [false] do $FLUX "string_exp" [true] 
@@ -118,3 +141,4 @@
 #### COMMON ERRORS
 #-
 #
+

@@ -134,24 +134,6 @@ int main(int argc, char* argv[]){
 
 	cout << "finished!" << endl;
 
-	// 5 vertices, 6 aristas
-	map<pair<int,int>,double> w_edges;
-	w_edges[ make_pair(1,3) ] = 1;
-	w_edges[ make_pair(3,1) ] = 0.3;
-	w_edges[ make_pair(3,4) ] = 0.7;
-	w_edges[ make_pair(4,2) ] = 0.1;
-	w_edges[ make_pair(4,5) ] = 0.5;
-	w_edges[ make_pair(5,3) ] = 0.4;
-
-	// 5 vertices
-	vector<double> w_vertex(5,0.5);
-	w_vertex[0] = 1;
-
-	int n_cpus = 2;
-
-	sim.allocCells(n_cpus, w_vertex, w_edges, 0);
-
-
 	/* TODO
 	 * Environment env = ast.evaluateGlobals();
 	 * MPI::Bcast((void*)&env,Nbytes,MPI::Datatype.PACKED, 0);
@@ -164,4 +146,3 @@ int main(int argc, char* argv[]){
 	delete driver;
 	return 0;
 }
-

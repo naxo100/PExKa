@@ -83,73 +83,103 @@ void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,con
 }
 template void Simulation::addAgents(const std::set<int> &cell_ids,unsigned count,const pattern::Mixture &mix);
 
-vector<list<unsigned int> > Simulation::allocCells(
-		int n_cpus,
+
+/** \brief Return a way to allocate cells among cpu's.
+ *
+ * @param n_cpus Number of machines or comm_world.size()
+ * @param w_vertex Weights for every cell (total reactivity).
+ * @param w_edges Weights for every channel (sum of transport reactivity).
+ * @param tol Tolerance in the number of processors to be assigned
+ * @return a vector with the compartments indexed by ID processor
+ */
+vector<list<unsigned int>> Simulation::allocCells( int n_cpus,
 		const vector<double> &w_vertex,
 		const map<pair<int,int>,double> &w_edges,
-		int tol
-) {
+		int tol) {
 
-	vector<list<unsigned int>> P (n_cpus);      // array of indexed compartments by cpu's
+	vector<list<unsigned int>> P (n_cpus); //array of indexed compartments by cpu; P[ core ] = { compartments }
 	// initialize P
-	for( int i = 0 ; i < n_cpus ; i++ ) P[i] = list<unsigned int>();
+	for( int i = 0 ; i < n_cpus ; i++ )
+		P[i] = list<unsigned int>();
+
 	vector<pair<pair<int,int>,double>> ordered_edges = sortEdgesByWeidht(w_edges);
 	vector<double> assigned (n_cpus, 0); // assigned and saved edges
 	double totalWeight = 0;
-	// initialize totalWeight
-	for( auto weight : w_vertex ) totalWeight += weight;
 
+	// initialize totalWeight
+	for( auto weight : w_vertex )
+		totalWeight += weight;
 
 	// assign cores to compartments
 	for( auto edge : ordered_edges ) {
-		//cout << "viewing " << edge.first.first << "," << edge.first.second << " -> " << edge.second << endl;
+		//cout << "viewing " << edge.first.first << " -> " << edge.first.second << " -> " << edge.second << endl;
 
-		int kFirst = searchCompartment(P, edge.first.first);
-		int kSecond = searchCompartment(P, edge.first.second);
+		int core1 = searchCompartment(P, edge.first.first);
+		int core2 = searchCompartment(P, edge.first.second);
+		//cout << "edge " << edge.first.first << "," << edge.first.first << endl ;
 
-		if( searchCompartment(P, edge.first.first) == -1 && searchCompartment(P, edge.first.second) == -1 ) {
-			unsigned k = minP(P);
-			//cout << "k = " << k << endl;
+		if( core1 == -1 && core2 == -1 ) { // if the compartments edge.first.first & edge.first.second don't has assigned core
+			unsigned core = minP(P);
+			//cout << "core = " << core << endl;
 
-			P[k].push_back( edge.first.first );
-			P[k].push_back( edge.first.second );
-			assigned[k] += w_vertex[ edge.first.first ] + w_vertex[ edge.first.second ];
-
-		} else if( kFirst == -1 ) {
-			//cout << "k = " << kSecond << endl;
-
-			if( assigned[kSecond] < (double)totalWeight / n_cpus + tol ) {
-				P[kSecond].push_back( edge.first.first );
-				assigned[kSecond] += w_vertex[ edge.first.first ];
+			if( edge.first.first == edge.first.second ){
+				P[core].push_back( edge.first.first );
+				//assigned[core] += w_vertex[ edge.first.first ] + w_vertex[ edge.first.second ];
+				assigned[core] += w_vertex[ edge.first.first ];
+			} else {
+				P[core].push_back( edge.first.first );
+				P[core].push_back( edge.first.second );
+				assigned[core] += w_vertex[ edge.first.first ] + w_vertex[ edge.first.second ];
 			}
 
-		} else if( kSecond == -1 ) {
+		} else if( core1 == -1 ) { // if edge.first.first has been assigned
+			//cout << "k = " << kSecond << endl;
+
+			if( assigned[core2] < (double)totalWeight / n_cpus + tol ) {
+				P[core2].push_back( edge.first.first );
+				assigned[core2] += w_vertex[ edge.first.first ];
+			}
+
+		} else if( core2 == -1 ) {
 			//cout << "k = " << kFirst << endl;
 
-			if( assigned[kFirst] < (double)totalWeight / n_cpus + tol ) {
-				P[kFirst].push_back( edge.first.second );
-				assigned[kFirst] += w_vertex[ edge.first.second ];
+			if( assigned[core1] < (double)totalWeight / n_cpus + tol ) {
+				P[core1].push_back( edge.first.second );
+				assigned[core1] += w_vertex[ edge.first.second ];
 			}
 
 		}
-
-		//TODO missing part of v2
-
-
-		// show P
-		/*for( unsigned i = 0 ; i < P.size() ; i++ ) {
-			cout << "P[" << i << "] = { " ;
-			for ( auto p : P[i] ) {
-				cout << p << ",";
-			}
-			cout << " }" << endl;
-		}*/
 	}
+	// post processing
+	//find no assigned compartments
+	for(size_t i = 0;  i < w_vertex.size() ; i++ ) {
+		int core = searchCompartment(P, i);
+		if( core == -1 ) {
+			core = minP(P);
+			P[core].push_back( i );
+			assigned[core] += w_vertex[ i ];
+		}
+	}
+
+	// showing P
+	cout << "showing assignment of vertex" << endl;
+	for( unsigned i = 0 ; i < P.size() ; i++ ) {
+		cout << "P[" << i << "] = { " ;
+		for ( auto p : P[i] ) {
+			cout << p << ",";
+		}
+		cout << " }" << endl;
+	}
+	cout << "end showing" << endl;
 
 	return P;
 }
 
 
+
+/** \brief Sort edges by weight from lowest to highest
+ *  @param w_edges edges with weight
+ */
 vector< pair< pair<int,int>, double > > Simulation::sortEdgesByWeidht( const map<pair<int,int>,double> &w_edges ) {
 	// function to sort edges
 	struct LocalSort {
@@ -176,17 +206,22 @@ unsigned Simulation::minP( vector<list<unsigned int>> P ) {
 	unsigned k = 0;
 	for ( unsigned i = 0; i < P.size() ; i++ ) {
 		for ( unsigned j = 0 ; j < P.size() ; j++ ) {
-			if( P[i].size() < P[j].size() ) k = i; // save the minus size
+			if( P[i].size() < P[j].size() )
+				k = i; // save the minus size
 		}
 	}
 	return k;
 }
 
-
+/** \brief Search if a compartment was assigned to a core
+ * @param assigned assigned compartment list
+ * @param c compartment to search
+ */
 int Simulation::searchCompartment(vector<list<unsigned int>> assigned, unsigned c ) {
 	for( int i = 0 ; i < (int)assigned.size() ; i++ ) {
 		for ( auto p : assigned[i] ) {
-			if( p == (int)c ) return i;
+			if( p == c )
+				return i;
 		}
 	}
 

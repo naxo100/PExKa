@@ -109,9 +109,16 @@
 %var: 'cantA' 1000
 %var: 'cantB' 987
 %compartment: 'bottles' [3][3] 0.7
-%channel: 'tube2' 'bottles'[x][y] -> 'bottles'[x][y] $1
+%channel: 'tube2' 'bottles'[0][0] -> 'bottles'[0][1] $1
+%channel: 'tube2' 'bottles'[0][1] -> 'bottles'[0][2] $1
+%channel: 'tube2' 'bottles'[0][2] -> 'bottles'[1][0] $1
+%channel: 'tube2' 'bottles'[1][0] -> 'bottles'[1][1] $1
+%channel: 'tube2' 'bottles'[1][1] -> 'bottles'[1][2] $1
+%channel: 'tube2' 'bottles'[1][2] -> 'bottles'[2][0] $1
+%channel: 'tube2' 'bottles'[2][0] -> 'bottles'[2][1] $1
+#%channel: 'tube2' 'bottles'[2][1] -> 'bottles'[1][1] $1
 
-# ERROR: bottles without dimension: maybe the solution is: if you don't declare dimension, the simulation will crush
+# ERROR: bottles without dimension: maybe the solution is: if you don't declare dimension, the simulation will crash
 #%use: 'bottles'
 
 %use: 'bottles'[x][y]

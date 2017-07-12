@@ -79,6 +79,19 @@ void SiteGraph::Node::setLink(small_id site_src,Node* lnk,small_id site_trgt){
 	interface[site_src].link.second = site_trgt;
 }
 
+SiteGraph::Internal* SiteGraph::Node::begin(){
+	return interface;
+}
+SiteGraph::Internal* SiteGraph::Node::end(){
+	return interface+intfSize;
+}
+
+
+pair<matching::InjSet&,matching::InjSet&>& SiteGraph::Node::getLifts(small_id site){
+	return interface[site].deps;
+}
+
+
 /********** Internal struct ************/
 
 SiteGraph::Internal::Internal() : val(small_id(-1)),link(nullptr,0) {}

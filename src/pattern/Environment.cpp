@@ -43,16 +43,6 @@ short Environment::declareVariable(const ast::Id &name_loc,bool is_kappa){
 	if(this->exists(name,varMap))
 		throw SemanticError("Label "+name+" already defined.",name_loc.loc);
 	short id;
-	/*if(is_kappa){
-		id = kappaNames.size();
-		kappaMap[name] = id;
-		kappaNames.push_back(name);
-	}
-	else{
-		id = algNames.size();
-		algMap[name] = id;
-		algNames.push_back(name);
-	}*/
 	id = varNames.size();
 	varMap[name] = id;
 	varNames.push_back(name);
@@ -127,6 +117,18 @@ const Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new
 	agentPatterns.emplace_back(*new_ag);
 	delete new_ag;
 	return agentPatterns.back();
+}
+
+simulation::Rule& Environment::declareRule(const ast::Id &name_loc){
+	//if(this->exists(name,algMap) || this->exists(name,kappaMap))
+	const string& name = name_loc.getString();
+	if(this->exists(name,varMap))
+		throw SemanticError("Label "+name+" already defined.",name_loc.loc);
+	short id;
+	id = varNames.size();
+	varMap[name] = id;
+	varNames.push_back(name);
+	return id;
 }
 
 short Environment::getVarId(const string &s) const {

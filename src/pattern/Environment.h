@@ -16,6 +16,7 @@
 #include "Compartment.h"
 #include "Channel.h"
 #include "Mixture.h"
+#include "../simulation/Rule.h"
 //#include "../state/AlgExpression.h"
 //#include "../grammar/ast/Basics.h"
 #include "../util/Exceptions.h"
@@ -66,6 +67,7 @@ public:
 	const Mixture& declareMixture(const Mixture& m);
 	const Mixture::Component& declareComponent(const Mixture::Component& c);
 	const Mixture::Agent& declareAgentPattern(const Mixture::Agent* a);
+	simulation::Rule& declareRule(const ast::Id &name);
 
 	const Signature& getSignature(short id) const;
 	const vector<Signature>& getSignatures() const;

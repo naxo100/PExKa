@@ -35,6 +35,7 @@ void State::addNodes(unsigned n,const pattern::Mixture& mix,const pattern::Envir
 			}
 			graph.allocate(node);
 			buff_nodes[i] = node;
+			i++;
 		}
 		for(auto bind : p_comp->getGraph())
 			buff_nodes[bind.first.first]->setLink(bind.first.second,

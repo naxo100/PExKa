@@ -135,6 +135,8 @@ instruction:
  	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6));}
 | CHANNEL LABEL comp_expr arrow comp_expr where_expr ATD alg_expr
  	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6,$8));}
+| CHANNEL error
+	{yy::KappaParser::error(@2, "Bad channel declaration");}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
 | USE MULT

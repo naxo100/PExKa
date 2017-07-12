@@ -10,8 +10,10 @@
 
 #include "../util/params.h"
 #include "../pattern/Mixture.h"
+#include "../grammar/location.hh"
 #include <list>
 
+//class pattern::Environment;
 
 namespace simulation {
 
@@ -29,22 +31,26 @@ class Rule {
 	};
 	struct Action {
 		ActionType t;
-		tuple<small_id,small_id,bool> trgt1,trgt2;
+		//		cc_id	ag_id	sit_id	isNew
+		tuple<small_id,small_id,small_id,bool> trgt1,trgt2;
 	};
 
+	yy::location loc;
+	string name;
 	const Mixture &lhs;
 	const Mixture rhs;
 	vector<ag_st_id> lhsMask,rhsMask;//[order] -> (comp_id,ag_id)
 	const state::BaseExpression* rate;//basic rate
 	pair<const state::BaseExpression*,const state::BaseExpression*> unaryRate;//rate,radius
 	list<Action> script;
+	vector<state::SiteGraph::Node> newNodes;
 public:
 	//Rule();
 	~Rule();
 
 
 
-	static list<Action> difference(const Environment& env,const OrderedMixture& lhs,const OrderedMixture& rhs);
+	list<Action> difference(const Environment& env,const vector<ag_st_id>& lhs_order,const vector<ag_st_id>& rhs_order);
 };
 
 } /* namespace simulation */

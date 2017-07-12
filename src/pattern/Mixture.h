@@ -26,7 +26,7 @@ namespace pattern {
 class Environment;
 
 //pair of shorts used for (agent,agent) or (agent,site) ids.
-typedef pair<short,short> ag_st_id;
+typedef pair<small_id,small_id> ag_st_id;
 
 //struct to compare id_pair needed for maps
 template <typename T1,typename T2>
@@ -95,6 +95,9 @@ public:
 	bool operator==(const Mixture& m) const;
 
 	const Agent& getAgent(small_id cc,small_id ag) const;
+	const Agent& getAgent(ag_st_id cc_ag ) const;
+
+	ag_st_id follow(small_id cc_id,small_id ag_id,small_id site) const;
 
 	/** \brief returns the agent counter.
 	 *
@@ -128,7 +131,7 @@ private:
 
 };
 
-typedef pair<Mixture,vector<ag_st_id> >OrderedMixture;
+typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;
 
 //bool (*f)(pair<short,short>,pair<short,short>) = [](pair<short,short>& p1,pair<short,short>& p2) {return p1.first < p2.first ? p1 : (p1.second < p2.second ? p1 : p2 );};
 
@@ -210,6 +213,7 @@ public:
 	string toString(const Environment& env) const;
 
 	const Mixture::Agent& getAgent(small_id ag) const;
+	ag_st_id follow(small_id ag_id,small_id site) const;
 
 	bool operator==(const Mixture::Component &m) const;
 };

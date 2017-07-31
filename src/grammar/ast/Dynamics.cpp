@@ -221,7 +221,7 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 				+" is not declared in agent signature of "+
 				sign->getName()+"().",loc);
 	}
-	const state::SomeValue *v;
+	//const state::SomeValue *v;
 	state::BaseExpression* num;
 	switch(stateInfo.type){
 	case SiteState::LABEL:
@@ -347,50 +347,34 @@ pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 }
 
 
-/****** Class MultipleMixture ****/
-MultipleMixture::MultipleMixture(): n(nullptr){};
-MultipleMixture::MultipleMixture(const location &l,const list<Agent> &m,const Expression *e):
-	Mixture(l,m), n(e) {};
-
-MultipleMixture::~MultipleMixture(){
-	if(n)
-		delete n;
-}
-
-/*TODO*/
-pattern::Mixture& MultipleMixture::eval(pattern::Environment &env) const{
-
-	for(list<Agent>::const_iterator it = agents.cbegin();it != agents.cend();it++){
-		//it->;
-	}
-	return *new pattern::Mixture(0);
-}
-
-
-
-
 /****** Class Effect *************/
-Effect::Effect(){}
-	//INTRO,DELETE
-Effect::Effect(const location &l,const Action &a,const MultipleMixture &mix):
-	Node(l),action(a),multi_exp(mix) {};
+Effect::Effect():
+	action(),n(nullptr),mix(nullptr),string_expr(nullptr),set(VarValue()) {};
+//INTRO,DELETE
+Effect::Effect(const location &l,const Action &a,const Expression *n ,list<Agent>& mix):
+	Node(l),action(a),n(n), mix(new Mixture(l,mix)) {};
 //UPDATE,UPDATE_TOK
 Effect::Effect(const location &l,const Action &a,const VarValue &dec):
-	Node(l),action(a),set(dec) {};
+	Node(l),action(a),set(dec)/*,n(nullptr),mix(nullptr) */{};
 //CFLOW,CFLOW_OFF
 Effect::Effect(const location &l,const Action &a,const Id &id):
-	Node(l),action(a),name(id) {};
+	Node(l),action(a),name(id),n(nullptr),mix(nullptr) {};
 //STOP,SNAPSHOT,FLUX,FLUXOFF,PRINT
 Effect::Effect(const location &l,const Action &a,const StringExpression &str):
-	Node(l),action(a),string_expr(new StringExpression(str)) {};
+	Node(l),action(a),string_expr(new StringExpression(str)),n(nullptr),mix(nullptr) {};
 //PRINTF
 Effect::Effect(const location &l,const Action &a,const StringExpression &str1,const StringExpression &str2):
-		Node(l),action(a),string_expr(new StringExpression[2]{str1,str2}) {};
+		Node(l),action(a),string_expr(new StringExpression[2]{str1,str2}),n(nullptr),mix(nullptr) {};
 
-Effect::Effect(const Effect &eff) : Node(eff.loc),action(eff.action){
+Effect::Effect(const Effect &eff):
+		Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
+
+	n = eff.n;
+	mix = eff.mix;
+
 	switch(action){
 	case INTRO:case DELETE:
-		multi_exp = eff.multi_exp;
+		//multi_exp = eff.multi_exp;
 		break;
 	case UPDATE:case UPDATE_TOK:
 		set = eff.set;
@@ -410,9 +394,13 @@ Effect::Effect(const Effect &eff) : Node(eff.loc),action(eff.action){
 Effect& Effect::operator=(const Effect& eff){
 	loc = eff.loc;
 	action = eff.action;
+
+	n = eff.n;
+	mix = eff.mix;
+
 	switch(action){
 	case INTRO:case DELETE:
-		multi_exp = eff.multi_exp;
+		//multi_exp = eff.multi_exp;
 		break;
 	case UPDATE:case UPDATE_TOK:
 		set = eff.set;
@@ -436,7 +424,7 @@ Effect::~Effect(){
 		delete string_expr;
 		break;
 	case PRINTF:
-		delete[] string_expr;
+		delete string_expr;
 		break;
 	default:
 		break;

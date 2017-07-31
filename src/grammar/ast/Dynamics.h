@@ -123,7 +123,7 @@ public:
 			const vector<Variable*> &vars,bool is_pattern = true) const;
 	virtual ~Mixture();
 };
-
+/*
 class MultipleMixture : public Mixture{
 	const Expression *n;
 public:
@@ -132,16 +132,19 @@ public:
 			const Expression *e);
 
 	pattern::Mixture& eval(pattern::Environment &env) const;
+	MultipleMixture& operator=( const MultipleMixture& multimix );
 	~MultipleMixture();
 };
-
+*/
 class Effect : public Node {
 public:
 	enum Action {INTRO,DELETE,UPDATE,UPDATE_TOK,STOP,SNAPSHOT,PRINT,PRINTF,CFLOW,CFLOW_OFF,FLUX,FLUX_OFF};
 
 	Effect();
 	//INTRO,DELETE
-	Effect(const location &l,const Action &a,const MultipleMixture &mix);
+	// Effect(const location &l,const Action &a,const MultipleMixture &mix);
+	//Effect(const location &l,const Action &a, pair<Expression*,Mixture> &mix);
+	Effect(const location &l,const Action &a,const Expression *n ,list<Agent>& mix);
 	//UPDATE,UPDATE_TOK
 	Effect(const location &l,const Action &a,const VarValue &dec);
 	//CFLOW,CFLOW_OFF
@@ -158,13 +161,20 @@ public:
 
 protected:
 	Action action;
-	union {
-		MultipleMixture multi_exp;
+	const Expression* n;
+	Mixture *mix;
+	VarValue set;
+	Id name;
+	StringExpression* string_expr;
+
+	// not working - it does not work
+	/*union {
 		VarValue set;
 		Id name;
 		StringExpression* string_expr;
-	};
+	};*/
 };
+
 
 class Perturbation: public Node {
 public:

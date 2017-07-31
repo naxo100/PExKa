@@ -29,6 +29,7 @@ public:
 	void allocate(Node* n);
 	size_t getNodeCount() const;
 
+
 protected:
 	Node& addNode(short sign_id);
 	Node& getNode(size_t address);
@@ -43,10 +44,9 @@ protected:
 
 struct SiteGraph::Internal {
 	SomeValue val;
-	//link(node,site_id)
 	pair<Node*,small_id> link;
-	//link(node_address,site_id) - for marshalize?
-	//pair<unsigned,short> fLink;
+	//for value, for link
+	pair<matching::InjSet&,matching::InjSet&> deps;
 	Internal();
 
 };
@@ -56,6 +56,7 @@ class SiteGraph::Node {
 	short_id signId;
 	big_id address;
 	Internal *interface;
+	small_id intfSize;
 public:
 	Node(short sign_id,short intf_size);
 	Node(const pattern::Signature& sign);
@@ -66,8 +67,18 @@ public:
 	void setState(small_id  site_id,T value);
 	void setLink(small_id site_src,Node* lnk,small_id site_trgt);
 
+
+	inline Internal* begin();
+	inline Internal* end();
+
 	void setCount(pop_size q);
 	pop_size getCount() const;
+
+
+
+	//unsafe
+	Internal& getInternalState(small_id);
+	pair<matching::InjSet&,matching::InjSet&>& getLifts(small_id site);
 
 
 };

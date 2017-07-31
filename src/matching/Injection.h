@@ -10,6 +10,7 @@
 
 #include "../util/params.h"
 #include <map>
+#include <set>
 
 
 using namespace std;
@@ -18,12 +19,18 @@ namespace matching {
 class Injection {
 	map<small_id,big_id> ccAgToNode;//unordered
 	mid_id address;
-	pair<small_id,small_id> coordinate;//mix_id,cc_id
+	small_id coordinate;//cc_id
 
 public:
 	Injection();
 	~Injection();
+
+	const map<small_id,big_id>& getEmbedding() const;
+
+	bool isTrashed() const;
 };
+
+typedef set<Injection> InjSet;
 
 } /* namespace simulation */
 

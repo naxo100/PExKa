@@ -45,6 +45,7 @@ public:
 
 	const Site& getSite(const small_id id) const;
 	const Site& getSite(const string &name) const;
+	const vector<Site*>& getSites() const;
 	short getSiteId(const string &name) const;
 
 	short_id getId() const;

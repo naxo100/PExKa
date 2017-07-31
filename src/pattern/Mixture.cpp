@@ -240,6 +240,13 @@ size_t Mixture::size() const {
 const Mixture::Agent& Mixture::getAgent(small_id cc,small_id ag) const{
 	return (*comps)[cc]->getAgent(ag);
 }
+const Mixture::Agent& Mixture::getAgent(ag_st_id cc_ag) const{
+	return (*comps)[cc_ag.first]->getAgent(cc_ag.second);
+}
+
+ag_st_id Mixture::follow(small_id cc_id,small_id ag_id,small_id site) const{
+	return (*comps)[cc_id]->follow(ag_id,site);
+}
 
 const vector<const Mixture::Component*>::iterator Mixture::begin() const {
 	return comps->begin();
@@ -450,6 +457,14 @@ void Mixture::Component::addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<sh
 	ag_st_id second(mask.at(lnk.second.first),lnk.second.second);
 	links->emplace_back(first);
 	links->emplace_back(second);
+}
+
+ag_st_id Mixture::Component::follow(small_id ag_id,small_id site) const{
+	try{
+		return graph->at(ag_st_id(ag_id,site));
+	}
+	catch(std::out_of_range& e){}
+	return make_pair(ag_id,site);
 }
 
 bool Mixture::Component::operator ==(const Component &c) const{

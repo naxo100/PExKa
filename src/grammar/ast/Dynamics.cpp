@@ -521,6 +521,8 @@ void Rule::eval(pattern::Environment& env,
 	auto lhs_mask = lhs_mix->setAndDeclareComponents(env);
 	auto rhs_mix = rhs.agents.eval(env,vars,true);
 	auto rhs_mask = rhs_mix->setComponents();
+	//simulation::Rule::difference(env,make_pair(*lhs_mix,lhs_mask),
+	//		make_pair(*rhs_mix,rhs_mask));
 }
 
 

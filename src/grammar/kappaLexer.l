@@ -108,32 +108,32 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 ":="		return KappaParser::make_ASSIGN(loc);
 "<>"		return KappaParser::make_DIFF(loc);
 \${letter}+	{
-			if(!strcmp(yytext,"$DEL"))
-				return KappaParser::make_DELETE(loc);
-			else if(!strcmp(yytext,"$ADD"))
-				return KappaParser::make_INTRO(loc);
-			else if(!strcmp(yytext,"$SNAPSHOT"))
-				return KappaParser::make_SNAPSHOT(loc);
-			else if(!strcmp(yytext,"$STOP"))
-				return KappaParser::make_STOP(loc);
-			else if(!strcmp(yytext,"$FLUX"))
-				return KappaParser::make_FLUX(loc);
-			else if(!strcmp(yytext,"$TRACK"))
-				return KappaParser::make_TRACK(loc);
-			else if(!strcmp(yytext,"$UPDATE"))
-				return KappaParser::make_ASSIGN2(loc);
-			else if(!strcmp(yytext,"$PRINT"))
-				return KappaParser::make_PRINT(loc);
-			else if(!strcmp(yytext,"$PRINTF"))
-				return KappaParser::make_PRINTF(loc);
-			else{					
-				char msg[150];
-				MakeMsg(msg, yytext);
+	if(!strcmp(yytext,"$DEL"))
+		return KappaParser::make_DELETE(loc);
+	else if(!strcmp(yytext,"$ADD"))
+		return KappaParser::make_INTRO(loc);
+	else if(!strcmp(yytext,"$SNAPSHOT"))
+		return KappaParser::make_SNAPSHOT(loc);
+	else if(!strcmp(yytext,"$STOP"))
+		return KappaParser::make_STOP(loc);
+	else if(!strcmp(yytext,"$FLUX"))
+		return KappaParser::make_FLUX(loc);
+	else if(!strcmp(yytext,"$TRACK"))
+		return KappaParser::make_TRACK(loc);
+	else if(!strcmp(yytext,"$UPDATE"))
+		return KappaParser::make_ASSIGN2(loc);
+	else if(!strcmp(yytext,"$PRINT"))
+		return KappaParser::make_PRINT(loc);
+	else if(!strcmp(yytext,"$PRINTF"))
+		return KappaParser::make_PRINTF(loc);
+	else{					
+		char msg[150];
+		MakeMsg(msg, yytext);
 
-				throw SyntaxError(msg, loc);
-				return KappaParser::make_NEWLINE(loc);
-			}
-		}
+		throw SyntaxError(msg, loc);
+		return KappaParser::make_NEWLINE(loc);
+	}
+}
 "[A]"		return KappaParser::make_ACTIVITY(loc);
 "[E]"		return KappaParser::make_EVENT(loc);
 "[E+]"		return KappaParser::make_PROD_EVENT(loc);

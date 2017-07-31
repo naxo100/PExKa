@@ -62,15 +62,51 @@ void VarValue::show( string tabs ) const{
 }
 
 /****** Class StringExpression *******/
-StringExpression::StringExpression() : t(STR),str(nullptr),next(nullptr){}
+StringExpression::StringExpression() : t(STR),str(nullptr),next(nullptr)/*,alg(nullptr)*/{}
 StringExpression::StringExpression(const location &l,const string &s):
-	Node(l),t(STR),str(new string(s)),next(nullptr) {};
+	Node(l),t(STR),str(new string(s)),next(nullptr)/*,alg(nullptr)*/ {};
+
 StringExpression::StringExpression(const location &l,const Expression *e):
-	Node(l),t(ALG),alg(e),next(nullptr) {};
+	Node(l),t(ALG),alg(e),next(nullptr)/*,str(nullptr)*/ {};
+
 StringExpression::StringExpression(const location &l,const Expression *e, const StringExpression* nxt):
-	Node(l),t(ALG),alg(e),next(new StringExpression(*nxt)) {};
+	Node(l),t(ALG),alg(e),next(nxt)/*,str(nullptr)*/ {};
+
 StringExpression::StringExpression(const location &l,const string &s, const StringExpression* nxt):
-	Node(l),t(STR),str(new string(s)),next(new StringExpression(*nxt)) {};
+	Node(l),t(STR),str(new string(s)),next(nxt)/*,alg(nullptr)*/ {};
+
+StringExpression::StringExpression( const StringExpression &str_expr ):
+	Node(str_expr.loc),t(str_expr.t),next(str_expr.next) {
+	//alg = str_expr.alg == nullptr ? nullptr : str_expr.alg;
+	//str = str_expr.str == nullptr ? nullptr : new string(*str_expr.str);
+	switch(t){
+	case ALG:
+		alg = str_expr.alg == nullptr ? nullptr : str_expr.alg;
+		break;
+	case STR:
+		str = str_expr.str == nullptr ? nullptr : new string(*str_expr.str);
+		break;
+	}
+}
+
+StringExpression& StringExpression::operator=( const StringExpression &str_expr ) {
+	loc = str_expr.loc;
+	t = str_expr.t;
+	next = str_expr.next;
+	//alg = str_expr.alg == nullptr ? nullptr : str_expr.alg;
+	//str = str_expr.str == nullptr ? nullptr : new string(*str_expr.str);
+	switch(t){
+	case ALG:
+		alg = str_expr.alg;
+		break;
+	case STR:
+		str = str_expr.str;
+		break;
+	}
+
+	return *this;
+}
+
 
 StringExpression::~StringExpression(){
 	if(t)

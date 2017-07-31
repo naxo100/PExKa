@@ -93,6 +93,10 @@ void KappaAst::add(const Use *u){
 	useExpressions.push_back(u);
 }
 
+void KappaAst::add(const Perturbation &p){
+	perturbations.push_back(p);
+}
+
 /*void KappaAst::add(Perturbation p){
 	perts.push_back(p);
 }*/

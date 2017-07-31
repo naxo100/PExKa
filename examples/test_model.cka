@@ -106,40 +106,45 @@
 #### USES & INITS
 %agent: A(s~1~2)
 %agent: B(t~1~2)
-%var: 'cantA' 1000
-%var: 'cantB' 987
-%compartment: 'bottles' [3][3] 0.7
-%channel: 'tube2' 'bottles'[0][0] -> 'bottles'[0][1] $1
-%channel: 'tube2' 'bottles'[0][1] -> 'bottles'[0][2] $1
-%channel: 'tube2' 'bottles'[0][2] -> 'bottles'[1][0] $1
-%channel: 'tube2' 'bottles'[1][0] -> 'bottles'[1][1] $1
-%channel: 'tube2' 'bottles'[1][1] -> 'bottles'[1][2] $1
-%channel: 'tube2' 'bottles'[1][2] -> 'bottles'[2][0] $1
-%channel: 'tube2' 'bottles'[2][0] -> 'bottles'[2][1] $1
-#%channel: 'tube2' 'bottles'[2][1] -> 'bottles'[1][1] $1
+#%var: 'cantA' 1000
+#%var: 'cantB' 987
+#%token: X
+%compartment: 'bottles' [1][2] 0.75
+%channel: 'tube2' 'bottles'[x][y] -> 'bottles'[0][0] $1
 
-# ERROR: bottles without dimension: maybe the solution is: if you don't declare dimension, the simulation will crash
+# ERROR: bottles without dimension: maybe the solution is:
+# if you don't declare dimension, the simulation will crash
 #%use: 'bottles'
 
-%use: 'bottles'[x][y]
+#%use: 'bottles'[x][y]
 
 # SOLVE: not accept mixtures
-%init: 'cantA' A(s!1),B(t!1)
+#%init: 'cantA' A(s!1),B(t!1)
 
 #%init: 'cantA' A(s~1)
 #%init: 'cantB' B()
 
-
+#%init: 100 'X'
 
 #### PERTURBATIONS
 # ERROR: fail to assign string on $STOP: double free or corruption (fasttop)
-#%mod: [false] do $STOP "test_model.cka"
+#%mod: [false] do $STOP "You shall not pass!"
 #%mod: [false] do $FLUX "string_exp" [true] 
 
 # ERROR: Segmentation fault
 #%mod: [false] do $TRACK 'a' [true]
 #%mod: [false] do $UPDATE 'a' 1
-#%mod: [false] do $ADD 1 A(s~1)
+#%mod: [false] do $ADD 1 A(s~1!1),B(t~2!1)
+
+%mod: [false] do $SNAPSHOT "snapshot here!"
+#%mod: [false] do $DEL 1 A(s~1!1),B(t~2!1)
+#%mod: [false] do $PRINT <"print this string">
+#%mod: [false] do $PRINT "print this string"
+#%mod: [false] do $STOP <"lalala "."print this string">
+
+#%mod: [false] do $PRINTF <"file"> <"print this string">
+
+#%mod: [false] do $PRINT <12+1."print this string">
 
 # ERROR: Segmentation fault
 #%mod: repeat [false] do $TRACK 'a' [false] until [false]

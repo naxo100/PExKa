@@ -178,7 +178,8 @@ public:
 	const unordered_map<small_id,Site>::const_iterator begin() const;
 	const unordered_map<small_id,Site>::const_iterator end() const;
 
-	const string toString( short mixAgId, const Environment& env, map<ag_st_id,short>& bindLabels ) const;
+	const string toString( const Environment& env, short mixAgId=-1,
+			map<ag_st_id,short> bindLabels = map<ag_st_id,short>() ) const;
 };
 
 /** \brief Defines a set of agents that are explicitly connected by sites.

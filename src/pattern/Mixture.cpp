@@ -180,7 +180,7 @@ vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 			order_mask[p1.first] = make_pair(c_id,0);
 			comps.back().second.emplace(p2.first,1);
 			comps.back().first->addAgent(agents[p2.first]);
-			order_mask[p2.first] = make_pair(c_id,0);
+			order_mask[p2.first] = make_pair(c_id,1);
 			comps.back().first->addLink(make_pair(p1,p2),comps.back().second);
 		}
 
@@ -201,16 +201,21 @@ vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 	compCount = comps.size();
 	delete[] agents;
 	this->comps = new vector<const Component*>(compCount);
+	vector<pair<const Component*,int>> comps_order(compCount);
 	int i=0;
 	//set comps.graph and declare comps in env
 	for(const auto& c : comps){
 		c.first->setGraph();
 		const Component &comp = env.declareComponent(*c.first);
 		delete c.first;
-		(*this->comps)[i] = &comp;
+		comps_order[i] = make_pair(&comp,i);
 		i++;
 	}
-	sort(this->comps->begin(),this->comps->end());
+	sort(comps_order.begin(),comps_order.end());
+	for(unsigned i = 0; i < compCount; i++)
+		(*this->comps)[i] = comps_order[i].first;
+	for(unsigned i = 0; i < order_mask.size(); i++)
+		order_mask[i].first = comps_order[order_mask[i].first].second;
 	links.clear();
 	declaredComps = true;
 	return order_mask;
@@ -317,7 +322,8 @@ void Mixture::Agent::setSiteValue(small_id site_id,small_id lbl_id){
 	interface[site_id].state.set(lbl_id);
 }
 
-const string Mixture::Agent::toString(short mixAgId, const Environment& env, map<ag_st_id,short>& bindLabels ) const {
+const string Mixture::Agent::toString(const Environment& env, short mixAgId,
+		map<ag_st_id,short> bindLabels  ) const {
 	string out = "", glue = ",";
 
 	const Signature& sign = env.getSignature(signId);
@@ -353,7 +359,7 @@ const string Mixture::Agent::toString(short mixAgId, const Environment& env, map
 
 		switch(it->second.link_type) {
 			case LinkType::BIND :
-				if ( bindLabels[ag_st_id(mixAgId, it->first)] )
+				if ( bindLabels.size() > 0 && bindLabels[ag_st_id(mixAgId, it->first)] )
 					out += "!" + to_string( bindLabels[ag_st_id(mixAgId, it->first)] );
 				else
 					out += "!_";
@@ -538,7 +544,7 @@ string Mixture::Component::toString(const Environment& env) const {
 	}
 
 	for( unsigned mixAgId = 0; mixAgId < agents.size(); mixAgId++ ) {
-		out += agents[mixAgId]->toString(mixAgId, env, bindLabels ) + glue;
+		out += agents[mixAgId]->toString(env, mixAgId, bindLabels ) + glue;
 		bindLabel++;
 	}
 

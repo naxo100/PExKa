@@ -168,7 +168,7 @@ const vector<pattern::Signature>& Environment::getSignatures() const{
 
 const Compartment& Environment::getCompartmentByCellId(unsigned cell_id) const{
 	for(auto &comp : compartments){
-		if(cell_id < comp.getLastCellId())
+		if(cell_id < (unsigned)comp.getLastCellId())
 			return comp;
 	}
 	throw std::out_of_range("Compartment of cell-id "+to_string(cell_id)+" not found.");

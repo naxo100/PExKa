@@ -102,6 +102,10 @@ void KappaAst::add(const Rule &r){
 	rules.push_back(r);
 }
 
+void KappaAst::add(const Perturbation &p){
+	perturbations.push_back(p);
+}
+
 /*void KappaAst::add(Perturbation p){
 	perts.push_back(p);
 }*/

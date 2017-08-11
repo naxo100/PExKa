@@ -26,6 +26,7 @@ using namespace boost::program_options;
 using namespace std;
 
 int main(int argc, char* argv[]){
+
 	const string version("0.1");
 	const string v_msg("PExKa "+version);
 	const string usage_msg("Simple usage is \n$ [mpirun* -np procs] PExKa ([-i] kappa_file)+ [-e events] -t time [-p points] -sync-t tau");

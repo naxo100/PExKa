@@ -31,4 +31,10 @@
 %use: *
 %init: 100 B()
 
+'hola' A(s~1),B(s) -> A(s~2),B(s!1),S(s!1) @ 1.0
+
+'chao' A(s~2) -> B() @ 1
+
+'chaito' A(s!1),B(s!1) -> A(s),B(s) @ 2
+
 

@@ -21,6 +21,7 @@
 	#include "ast/Statements.h"
 	#include "location.hh"
 	#include "../util/Exceptions.h"
+	#include <typeinfo>
 	
 	using namespace std;
 	using namespace ast;
@@ -47,6 +48,11 @@
     #include "KappaDriver.h"
 }
 
+
+/**
+ * DEFINITIONS
+ */
+
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
 %token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
@@ -70,40 +76,42 @@
 %left AND
 
 
-/*%type <Agent> agent_expression*/
-%type <Declaration> 			variable_declaration
-%type <Expression*> 			alg_expr bool_expr constant variable multiple where_expr
-/*%type <Arrow> 					arrow */
+%type <Declaration>				variable_declaration
+%type <Expression*>				alg_expr bool_expr constant variable multiple where_expr
 %type <bool>					rate_sep boolean join arrow
-%type <std::list<std::string> > value_list
+%type <std::list<std::string>>			value_list
 %type <SiteState>				internal_state
-%type <std::list<Id> >			state_enum
-%type <Link> 					link_state
-%type <CompExpression> 			comp_expr
-%type <Site> 					port_expression
-%type <std::list<Site> > 		interface_expression ne_interface_expression
-%type <Agent> 					agent_expression
-%type <std::list<Agent> > 		non_empty_mixture 
+%type <std::list<Id>>				state_enum
+%type <Link>					link_state
+%type <CompExpression>				comp_expr
+%type <Site>					port_expression
+%type <std::list<Site>>				interface_expression ne_interface_expression
+%type <Agent>					agent_expression
+%type <std::list<Agent>>			non_empty_mixture 
 %type <Mixture>					mixture
-%type <MultipleMixture> 		multiple_mixture
-%type <std::list<CompExpression> > comp_list
-%type <std::list<const Expression*>> 	dimension
-%type <StringExpression> 		print_expr
-%type <Effect> 					effect
-%type <std::list<Effect> > 		effect_list
-%type <StringExpression> 		string_or_pr_expr
-%type <Radius>   				alg_with_radius   
-%type <Rate> 					rate
-%type <Perturbation> 			perturbation_declaration
-%type <std::list<Token> > 		sum_token token_expr
+//%type <MultipleMixture> 			multiple_mixture
+//%type <std::pair<Expression*, Mixture>>		multiple_mixture
+%type <std::list<CompExpression>>		comp_list
+%type <std::list<const Expression*>>		dimension
+%type <StringExpression> 			print_expr
+%type <Effect>					effect
+%type <std::list<Effect>>			effect_list
+%type <StringExpression>			string_or_pr_expr
+%type <Radius>					alg_with_radius   
+%type <Rate>					rate
+%type <Perturbation>				perturbation_declaration
+%type <std::list<Token>>			sum_token token_expr
 %type <RuleSide> 				lhs_rhs
-%type <Id> 						rule_label
-%type <Rule> 					rule_expression
-%type <Init> 					init_declaration
-/*%type <std::list> value_list*/
+%type <Id>					rule_label
+%type <Rule>					rule_expression
+%type <Init>					init_declaration
+
 %start statements
 
 %%
+/**
+ * RULES
+ */
 statements:
 | statements statement newline
 	{}
@@ -122,9 +130,7 @@ statement:
 | rule_expression
 	{this->driver.getAst().add($1);}
 | instruction
-	{} 
-| error 
-	{yy::KappaParser::error(@$ , "Rule expression or instruction not recognized");}
+	{}
 ;
 
 
@@ -153,8 +159,6 @@ instruction:
 	{}
 | INIT init_declaration 
 	{this->driver.getAst().add($2);}
-| INIT error
-	{}
 | LET variable_declaration 
 	{this->driver.getAst().add($2);}
 | LET error
@@ -170,9 +174,9 @@ instruction:
 | PLOT error 
 	{}
 | PERT perturbation_declaration 
-	{}
-| PERT REPEAT perturbation_declaration UNTIL bool_expr 
-	{}
+	{this->driver.getAst().add($2);}
+/*| PERT REPEAT perturbation_declaration UNTIL bool_expr 
+	{}*/
 | CONFIG STRING value_list 
 	{}
 ;
@@ -282,14 +286,17 @@ perturbation_declaration:
 	{ $$ = Perturbation(@$,$1,$3); }
 | REPEAT bool_expr DO effect_list UNTIL bool_expr
 	{ $$ = Perturbation(@$,$2,$4,$6); }
-| REPEAT OP_PAR bool_expr DO effect_list CL_PAR UNTIL bool_expr
-	{ $$ = Perturbation(@$,$3,$5,$8); }
+/*| REPEAT OP_PAR bool_expr DO effect_list CL_PAR UNTIL bool_expr
+	{ $$ = Perturbation(@$,$3,$5,$8); }*/
 ;
 
 
 effect_list:
  OP_PAR effect_list CL_PAR {$$=$2;}
-| effect {$$=std::list<ast::Effect>(1,$1);}
+| effect
+	{
+		$$=std::list<ast::Effect>(1,$1);
+	}
 | effect SEMICOLON effect_list 
 	{
 		$3.push_front($1);
@@ -299,18 +306,14 @@ effect_list:
 
 
 effect:
- INTRO multiple_mixture 
-	{ $$ = Effect(@$,Effect::INTRO, $2); }
-| INTRO error
-	{}
-| DELETE multiple_mixture 
-	{ $$ = Effect(@$,Effect::DELETE,$2); }
-| DELETE error
-	{}
+// INTRO multiple_mixture 
+  INTRO alg_expr non_empty_mixture
+	{$$ = Effect(@$ ,Effect::INTRO, $2, $3);}
+// | DELETE multiple_mixture
+| DELETE alg_expr non_empty_mixture
+	{ $$ = Effect(@$, Effect::DELETE, $2, $3);}
 | STOP string_or_pr_expr
 	{ $$ = Effect(@$,Effect::STOP,$2); }
-| STOP error 
-	{ yy::KappaParser::error(@2, "Malformed perturbation"); }
 | FLUX string_or_pr_expr boolean 
 	{ $$ = Effect(@$,$3 ? Effect::FLUX : Effect::FLUX_OFF,$2); }
 | TRACK LABEL boolean 
@@ -323,33 +326,47 @@ effect:
 	{ $$ = Effect(@$,Effect::UPDATE_TOK,VarValue(@2,Id(@1,$1),$3));}
 | SNAPSHOT string_or_pr_expr
 	{ $$ = Effect(@$,Effect::SNAPSHOT,$2); }
+
 | PRINT SMALLER print_expr GREATER 
 	{ $$ = Effect(@$,Effect::PRINT,$3);}
 | PRINTF string_or_pr_expr SMALLER print_expr GREATER 
 	{ $$ = Effect(@$,Effect::PRINT,$2,$4); }
+//| PRINT string_or_pr_expr 
+//	{ $$ = Effect(@$,Effect::PRINT,$2);}
+//| PRINTF string_or_pr_expr string_or_pr_expr 
+//	{ $$ = Effect(@$,Effect::PRINT,$2,$3); }
 ;
 
 
 print_expr:
- STRING 
+  STRING 
 	{ $$ = StringExpression(@$,$1); }
-| alg_expr 
-	{ $$ = StringExpression(@$,$1); }
+/*| alg_expr 
+	{ $$ = StringExpression(@$,$1); }*/
 | STRING DOT print_expr 
-	{ $$ = StringExpression(@$,$1,&$3); }
+	{ $$ = StringExpression(@$,$1,&$3); 		
+		//$$ = StringExpression(@$,$1,$3);
+	}
 | alg_expr DOT print_expr 
-	{ $$ = StringExpression(@$,$1,&$3); }
+	{ $$ = StringExpression(@$,$1,&$3);
+		//$$ = StringExpression(@$,$1,$3);
+	}
+;
+
+string_or_pr_expr:
+  STRING {$$ = StringExpression(@$,$1);}
+| SMALLER print_expr GREATER {$$ = $2;}
 ;
 
 
 boolean:
- TRUE {$$=true;}
+  TRUE {$$=true;}
 | FALSE {$$=false;}
 ;
 
 
 variable_declaration:
- LABEL non_empty_mixture 
+  LABEL non_empty_mixture 
 	{$$ = Declaration(@$,Id(@1,$1),Mixture(@2,$2));}
 | LABEL alg_expr 
 	{$$ = Declaration(@$,Id(@1,$1),$2);}
@@ -358,7 +375,7 @@ variable_declaration:
 ;
 
 bool_expr:
- OP_PAR bool_expr CL_PAR 
+  OP_PAR bool_expr CL_PAR 
 	{$$=$2;}
 | bool_expr AND bool_expr 
 	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::AND);}
@@ -378,21 +395,16 @@ bool_expr:
 	{$$ = new Const(@$,false);}
 ;
 
-string_or_pr_expr:
- STRING {$$ = StringExpression(@$,$1);}
-| SMALLER print_expr GREATER {$$ = $2;}
-;
-
 
 multiple:
- INT   {$$ = new Const(@$,$1);}
+  INT   {$$ = new Const(@$,$1);}
 | FLOAT	{$$ = new Const(@$,$1);}
 | LABEL {$$ = new ast::Var(@$,Var::VAR,Id(@1,$1)); }
 ;
 
 
 constant:
- INF
+  INF
 	{$$ = new Const(@$,Const::INF);}
 | FLOAT
 	{$$ = new Const(@$,$1);}
@@ -414,7 +426,7 @@ rule_label:
 
 
 lhs_rhs:
-mixture token_expr 
+  mixture token_expr 
 	{ $$ = RuleSide(@$,$1,$2); }
 ;
 
@@ -430,7 +442,7 @@ token_expr:
 
 
 sum_token:
- OP_PAR sum_token CL_PAR 
+  OP_PAR sum_token CL_PAR 
 	{ $$ = $2; } 
 | alg_expr TYPE ID 
 	{$$=std::list<Token>(1,Token(@$,$1,Id(@3,$3)));}
@@ -443,7 +455,7 @@ sum_token:
 
 
 mixture:
-/*empty*/ 
+//empty 
 	{ $$ = Mixture(location(),std::list<ast::Agent>()); }
 | non_empty_mixture 
 	{ $$ = Mixture(@1,$1); }
@@ -451,7 +463,7 @@ mixture:
 
 
 rate_sep:
- AT {$$=false;}
+  AT {$$=false;}
 | FIX {$$=true;}
 
 /*(**  **)*/
@@ -459,7 +471,7 @@ rate_sep:
 ;
 
 rule_expression:
- rule_label lhs_rhs arrow lhs_rhs where_expr rate 
+  rule_label lhs_rhs arrow lhs_rhs where_expr rate 
 	{
 		$$=Rule(@$,$1,$2,$4,$3,$5,$6);
 	}
@@ -473,7 +485,7 @@ rule_expression:
 
 
 arrow:
- KAPPA_RAR 
+  KAPPA_RAR 
 	{$$=false;/*ast::Arrow(@$,ast::Arrow::RIGHT);*/}
 | KAPPA_LRAR
 	{$$=true;/*ast::Arrow(@$,ast::Arrow::BI);*/}
@@ -481,7 +493,7 @@ arrow:
 
 
 variable:
- ID
+  ID
 	{$$ = new Var(@$,Var::AUX,Id(@1,$1));}
 | PIPE ID PIPE 
 	{$$ = new Var(@$,Var::TOKEN,Id(@2,$2));}
@@ -503,7 +515,7 @@ variable:
 
 
 alg_expr:
- OP_PAR alg_expr CL_PAR 
+  OP_PAR alg_expr CL_PAR 
 	{$$ = $2;}
 | constant 
 	{$$ = $1;}
@@ -559,7 +571,7 @@ alg_expr:
 
 
 rate:
- rate_sep alg_expr OP_PAR alg_with_radius CL_PAR 
+  rate_sep alg_expr OP_PAR alg_with_radius CL_PAR 
 	{$$=ast::Rate(@$,$2,$1,&$4);}
 | rate_sep alg_expr 
 	{$$=ast::Rate(@$,$2,$1);}
@@ -569,21 +581,25 @@ rate:
 
 
 alg_with_radius:
- alg_expr {$$=ast::Radius(@$,$1);}
+  alg_expr {$$=ast::Radius(@$,$1);}
 | alg_expr TYPE alg_expr {$$=ast::Radius(@$,$1,$3);}
 ;
 
-
+/*
 multiple_mixture:
- alg_expr non_empty_mixture /*conflict here because ID (blah) could be token non_empty mixture or mixture...*/
-	{$$=ast::MultipleMixture(@$,$2,$1);}
+ alg_expr non_empty_mixture //conflict here because ID (blah) could be token non_empty mixture or mixture...
+	{//$$=ast::MultipleMixture(@$,$2,$1);
+		$$=std::make_pair($1,$2);
+	}
 | non_empty_mixture 
-	{$$=ast::MultipleMixture(@$,$1,new Const(yy::location(),1));}
+	{//$$=ast::MultipleMixture(@$,$1,new Const(yy::location(),1));
+		$$=std::make_pair(new Const(yy::location(),1),$1);
+	}
 ;
-
+*/
 
 non_empty_mixture:
- OP_PAR non_empty_mixture CL_PAR
+  OP_PAR non_empty_mixture CL_PAR
 	{ $$ = $2; }
 | agent_expression COMMA non_empty_mixture  
 	{
@@ -597,7 +613,7 @@ non_empty_mixture:
 
 /*Make a list for interface_expression*/
 agent_expression:
- ID OP_PAR interface_expression CL_PAR 
+  ID OP_PAR interface_expression CL_PAR 
 	{ $$ = Agent(@$,Id(@1,$1),$3); }
 | ID error 
 	{yy::KappaParser::error(@1,std::string("Malformed agent ")+$1);}
@@ -613,11 +629,11 @@ interface_expression:
 
 
 ne_interface_expression:
-| port_expression COMMA ne_interface_expression 
-{
-	$3.push_front($1);
-	$$=$3;
-}
+  port_expression COMMA ne_interface_expression 
+	{
+		$3.push_front($1);
+		$$=$3;
+	}
 | port_expression  
 	{$$=std::list<ast::Site>(1,$1);}
 ;
@@ -670,7 +686,9 @@ link_state:
 ;
 
 %%
-
+/**
+ * CODE
+ */
 
 void yy::KappaParser::error(const location &loc , const std::string &message) {
 	// Location should be initialized inside scanner action, but is not in this example.

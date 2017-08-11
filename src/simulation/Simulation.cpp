@@ -10,7 +10,7 @@
 namespace simulation {
 
 Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars) {
-	ccInjections = new set<matching::Injection>[env.size<pattern::Mixture::Component>()];
+	ccInjections = new set<matching::Injection*>[env.size<pattern::Mixture::Component>()];
 	mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
 }
 

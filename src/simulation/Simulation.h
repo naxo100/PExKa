@@ -28,7 +28,7 @@ class Simulation {
 	const vector<state::Variable*>& vars;
 	Counter counter;
 
-	set<matching::Injection> *ccInjections;//[cc_env_id].at(node_id)
+	set<matching::Injection*> *ccInjections;//[cc_env_id].at(node_id)
 	set<matching::Injection*> *mixInjections;//[mix_id].at(node_id)[cc_mix_id]
 
 

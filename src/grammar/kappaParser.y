@@ -120,7 +120,7 @@ NEWLINE {}
 
 statement:
 | rule_expression
-	{}
+	{this->driver.getAst().add($1);}
 | instruction
 	{} 
 | error 

@@ -11,7 +11,6 @@
 #include <list>
 #include "../grammar/location.hh"
 
-namespace simulation {
 
 class Warning {
 	std::string msg;
@@ -34,6 +33,5 @@ public:
 	using std::list<Warning>::emplace_back;
 };
 
-} /* namespace simulation */
 
 #endif /* SRC_UTIL_WARNING_H_ */

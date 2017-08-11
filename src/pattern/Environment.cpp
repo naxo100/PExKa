@@ -119,16 +119,17 @@ const Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new
 	return agentPatterns.back();
 }
 
-simulation::Rule& Environment::declareRule(const ast::Id &name_loc){
+simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture& mix){
 	//if(this->exists(name,algMap) || this->exists(name,kappaMap))
 	const string& name = name_loc.getString();
 	if(this->exists(name,varMap))
 		throw SemanticError("Label "+name+" already defined.",name_loc.loc);
-	short id;
+	small_id id;
 	id = varNames.size();
 	varMap[name] = id;
 	varNames.push_back(name);
-	return id;
+	rules.emplace_back(name_loc,mix);
+	return rules.back();
 }
 
 short Environment::getVarId(const string &s) const {
@@ -212,6 +213,10 @@ template <>
 void Environment::reserve<UseExpression>(size_t count) {
 	useExpressions.reserve(count);
 }
+template <>
+void Environment::reserve<simulation::Rule>(size_t count) {
+	rules.reserve(count);
+}
 
 
 //DEBUG methods
@@ -255,6 +260,14 @@ void Environment::show() const {
 		}
 		cout << "\tComponents[" << components.size() << "]" << endl;
 		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
+
+		cout << "\Rules[" << rules.size() << "]" << endl;
+		i = 0;
+		for(auto& rul : rules){
+			cout << (i+1) << ") ";
+			cout << rul.toString(*this) << endl;
+			i++;
+		}
 
 	}
 	catch(exception &e){

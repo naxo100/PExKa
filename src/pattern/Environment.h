@@ -52,6 +52,7 @@ protected:
 	list<Mixture> mixtures;
 	list<Mixture::Component> components;
 	list<Mixture::Agent> agentPatterns;
+	vector<simulation::Rule> rules;
 
 	bool exists(const string &name,const IdMap &map);
 public:
@@ -67,7 +68,7 @@ public:
 	const Mixture& declareMixture(const Mixture& m);
 	const Mixture::Component& declareComponent(const Mixture::Component& c);
 	const Mixture::Agent& declareAgentPattern(const Mixture::Agent* a);
-	simulation::Rule& declareRule(const ast::Id &name);
+	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix);
 
 	const Signature& getSignature(short id) const;
 	const vector<Signature>& getSignatures() const;

@@ -36,6 +36,7 @@ class KappaAst {
 	list<Channel> channels;
 	list<Init> inits;
 	list<const Use*> useExpressions;
+	list<Rule> rules;
 	//list<Perturbation> perts;
 
 public:
@@ -48,7 +49,8 @@ public:
 	void evaluateCompartments(pattern::Environment &env,const vector<Variable*>& vars);
 	void evaluateUseExpressions(pattern::Environment &env,const vector<Variable*>& consts);
 	void evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars);
-	void evaluateInits(const pattern::Environment &env,const vector<Variable*>,simulation::Simulation &sim);
+	void evaluateInits(const pattern::Environment &env,const vector<Variable*> &,simulation::Simulation &sim);
+	void evaluateRules(pattern::Environment &env,vector<Variable*> &vars);
 
 	//ADD functions
 	void add(const Declaration &d);
@@ -58,6 +60,7 @@ public:
 	void add(const Id &t);
 	void add(const Init &i);
 	void add(const Use *u);
+	void add(const Rule &r);
 	//void add(Perturbation p);
 
 

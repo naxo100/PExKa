@@ -20,7 +20,7 @@ KappaAst::~KappaAst() {
 }
 
 void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts){
-
+	env.reserve<pattern::Signature>(signatures.size());
 	for(list<Agent>::iterator it = signatures.begin();it != signatures.end(); it++){
 		it->eval(env,consts);
 	}
@@ -62,10 +62,16 @@ vector<Variable*> KappaAst::evaluateDeclarations(pattern::Environment &env,vecto
 }
 
 
-void KappaAst::evaluateInits(const pattern::Environment &env,const vector<Variable*> vars,simulation::Simulation &sim){
+void KappaAst::evaluateInits(const pattern::Environment &env,const vector<Variable*> &vars,simulation::Simulation &sim){
 	for(auto& init : inits){
 		init.eval(env,vars,sim);
 	}
+}
+
+void KappaAst::evaluateRules(pattern::Environment &env,vector<Variable*> &vars){
+	env.reserve<simulation::Rule>(Rule::getCount());
+	for(auto& r : rules)
+		r.eval(env,vars);
 }
 
 void KappaAst::add(const Declaration &d){
@@ -91,6 +97,9 @@ void KappaAst::add(const Init &i){
 }
 void KappaAst::add(const Use *u){
 	useExpressions.push_back(u);
+}
+void KappaAst::add(const Rule &r){
+	rules.push_back(r);
 }
 
 /*void KappaAst::add(Perturbation p){

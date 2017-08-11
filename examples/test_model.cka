@@ -145,9 +145,9 @@
 #%mod: [false] do $SNAPSHOT <"lalala "."print this string">
 #%mod: [false] do $PRINT <"print this string">
 #%mod: [false] do $PRINT "print this string"
-#%mod: [false] do $PRINT <12+1."print this string">
-%mod: [false] do $PRINT <"222222"."print this string">
-#%mod: [false] do $PRINTF <"file"> <"print this string">
+#%mod: [false] do $PRINT <"print this string".1+2>
+#%mod: [false] do $PRINT <"222222"."true"."print this string">
+%mod: [false] do $PRINTF <"file"."other file"> <"print this string". " & this other">
 
 
 # ERROR: Segmentation fault

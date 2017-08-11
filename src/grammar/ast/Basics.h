@@ -88,27 +88,16 @@ public:
 class StringExpression : public Node {
 public:
 	StringExpression();
-	//StringExpression(const location &l,const string &s);
-	//StringExpression(const location &l,const string &s, const StringExpression* nxt);
 
-	StringExpression(const location &l,string s);
-	StringExpression(const location &l,string s, const StringExpression* nxt);
+	StringExpression(const location &l,const string s);
 	StringExpression(const location &l,const Expression *e);
-	StringExpression(const location &l,const Expression *e, const StringExpression* nxt);
-
-//	StringExpression(const location &l, );
-
-	StringExpression( const StringExpression &str_expr );
-	StringExpression& operator=(const StringExpression& str_expr);
 
 	~StringExpression();
 
 protected:
 	enum Type {STR,ALG} t;
-	//const string *str;
 	string str;
-	const Expression  *alg;
-	const StringExpression* next;
+	const Expression *alg;
 
 	/*union{
 		const string *str;

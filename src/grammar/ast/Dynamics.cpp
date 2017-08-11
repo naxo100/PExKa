@@ -349,22 +349,22 @@ pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 
 /****** Class Effect *************/
 Effect::Effect():
-	action(),n(nullptr),mix(nullptr),string_expr(nullptr),set(VarValue()) {};
+	action(),n(nullptr),mix(nullptr),set(VarValue()) {};
 //INTRO,DELETE
-Effect::Effect(const location &l,const Action &a,const Expression *n ,list<Agent>& mix):
+Effect::Effect(const location& l,const Action& a,const Expression* n ,list<Agent>& mix):
 	Node(l),action(a),n(n), mix(new Mixture(l,mix)) {};
 //UPDATE,UPDATE_TOK
-Effect::Effect(const location &l,const Action &a,const VarValue &dec):
-	Node(l),action(a),set(dec)/*,n(nullptr),mix(nullptr) */{};
+Effect::Effect(const location& l,const Action& a,const VarValue& dec):
+	Node(l),action(a),set(dec),n(nullptr),mix(nullptr){};
 //CFLOW,CFLOW_OFF
-Effect::Effect(const location &l,const Action &a,const Id &id):
+Effect::Effect(const location& l,const Action& a,const Id& id):
 	Node(l),action(a),name(id),n(nullptr),mix(nullptr) {};
 //STOP,SNAPSHOT,FLUX,FLUXOFF,PRINT
-Effect::Effect(const location &l,const Action &a, const StringExpression &str):
-	Node(l),action(a),string_expr(new StringExpression(str)),n(nullptr),mix(nullptr) {};
+Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str):
+	Node(l),action(a),string_expr(str),n(nullptr),mix(nullptr) {};
 //PRINTF
-Effect::Effect(const location &l,const Action &a,const StringExpression &str1,const StringExpression &str2):
-		Node(l),action(a),string_expr(new StringExpression[2]{str1,str2}),n(nullptr),mix(nullptr) {};
+Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str1,const list<StringExpression>& str2):
+		Node(l),action(a),string_expr(str1),string_expr2(str2),n(nullptr),mix(nullptr) {};
 
 Effect::Effect(const Effect &eff):
 		Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
@@ -383,10 +383,11 @@ Effect::Effect(const Effect &eff):
 		name = eff.name;
 		break;
 	case STOP:case SNAPSHOT:case FLUX:case FLUX_OFF:case PRINT:
-		string_expr = new StringExpression(*eff.string_expr);
+		string_expr = eff.string_expr;
 		break;
 	case PRINTF:
-		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		string_expr = eff.string_expr;
+		string_expr2 = eff.string_expr2;
 		break;
 	}
 }
@@ -409,10 +410,11 @@ Effect& Effect::operator=(const Effect& eff){
 		name = eff.name;
 		break;
 	case STOP:case SNAPSHOT:case FLUX:case FLUX_OFF:case PRINT:
-		string_expr = new StringExpression(*eff.string_expr);
+		string_expr = eff.string_expr;
 		break;
 	case PRINTF:
-		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		string_expr = eff.string_expr;
+		string_expr2 = eff.string_expr2;
 		break;
 	}
 	return *this;
@@ -420,12 +422,9 @@ Effect& Effect::operator=(const Effect& eff){
 
 Effect::~Effect(){
 	switch(action){
-	case STOP:case SNAPSHOT:case FLUX:case FLUX_OFF:case PRINT:
-		delete string_expr;
-		break;
-	case PRINTF:
-		delete string_expr;
-		break;
+	case INTRO:
+		delete n;
+		delete mix;
 	default:
 		break;
 	}

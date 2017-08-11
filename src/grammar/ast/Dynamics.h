@@ -150,9 +150,9 @@ public:
 	//CFLOW,CFLOW_OFF
 	Effect(const location &l,const Action &a,const Id &id);
 	//STOP,SNAPSHOT,FLUX,FLUXOFF,PRINT
-	Effect(const location &l,const Action &a,const StringExpression &str);
+	Effect(const location &l,const Action &a,const list<StringExpression> &str);
 	//PRINTF
-	Effect(const location &l,const Action &a,const StringExpression &str1,const StringExpression &str2);
+	Effect(const location &l,const Action &a,const list<StringExpression> &str1,const list<StringExpression> &str2);
 
 	Effect(const Effect &eff);
 	Effect& operator=(const Effect& eff);
@@ -162,10 +162,12 @@ public:
 protected:
 	Action action;
 	const Expression* n;
-	Mixture *mix;
+	Mixture* mix;
 	VarValue set;
 	Id name;
-	const StringExpression* string_expr;
+	//const StringExpression* string_expr;
+	list<StringExpression> string_expr;
+	list<StringExpression> string_expr2;
 
 	// not working - it does not work
 	/*union {

@@ -14,6 +14,7 @@
 #include "SiteGraph.h"
 #include "../pattern/Mixture.h"
 #include "../simulation/Counter.h"
+#include "../simulation/Rule.h"
 
 namespace state {
 struct EventInfo;
@@ -37,13 +38,13 @@ class State {
 	template <int n>
 	void negativeUpdate(SiteGraph::Internal& intf);
 
-	inline void bind(const simulation::Rule::Action& a,EventInfo& event);
-	inline void free(const simulation::Rule::Action& a,EventInfo& e);
-	inline void modify(const simulation::Rule::Action& a,EventInfo& e);
-	inline void del(const simulation::Rule::Action& a, EventInfo& e);
+	void bind(const simulation::Rule::Action& a,EventInfo& event);
+	void free(const simulation::Rule::Action& a,EventInfo& e);
+	void modify(const simulation::Rule::Action& a,EventInfo& e);
+	void del(const simulation::Rule::Action& a, EventInfo& e);
 	//void add(const simulation::Rule::Action& a);
 
-	static void (State::*action[4])(const simulation::Rule::Action&);
+	static void (State::*action[4])(const simulation::Rule::Action&,EventInfo&);
 
 
 public:
@@ -60,8 +61,8 @@ public:
 };
 
 struct EventInfo {
-	//map of emb LHS
-	SiteGraph::Node** emb;
+	//map of emb LHS [cc_id][ag_id]
+	SiteGraph::Node*** emb;
 	//map of new_nodes RHS
 	SiteGraph::Node** fresh_emb;
 	//node_address,site_id

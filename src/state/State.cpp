@@ -49,13 +49,13 @@ void State::negativeUpdate(SiteGraph::Internal& intf){
 }
 template <> //for state
 void State::negativeUpdate<0>(SiteGraph::Internal& intf){
-	auto& lifts = intf.deps.first;
-	for(auto& lift : lifts){
-		if(lift.isTrashed()){
-			lifts.erase(lift);
+	matching::InjSet& lifts = intf.deps.first;
+	for(auto lift_it = lifts.begin(); lift_it != lifts.end(); lift_it++){
+		if((*lift_it)->isTrashed()){
+			lifts.erase(lift_it);
 			continue;
 		}
-		lift;
+		lift_it;
 	}
 }
 template <> //for links
@@ -65,8 +65,8 @@ void State::negativeUpdate<1>(SiteGraph::Internal& intf){
 }
 
 void State::bind(const simulation::Rule::Action& a,EventInfo& ev){
-	auto n1 = (get<3>(a.trgt1) ? ev.emb : ev.fresh_emb)[get<1>(a.trgt1)];
-	auto n2 = (get<3>(a.trgt2) ? ev.emb : ev.fresh_emb)[get<1>(a.trgt2)];
+	auto n1 = (get<3>(a.trgt1) ? ev.emb[get<0>(a.trgt1)] : ev.fresh_emb)[get<1>(a.trgt1)];
+	auto n2 = (get<3>(a.trgt2) ? ev.emb[get<0>(a.trgt2)] : ev.fresh_emb)[get<1>(a.trgt2)];
 	auto& int_state1 = n1->getInternalState(get<2>(a.trgt1));
 	auto& int_state2 = n2->getInternalState(get<2>(a.trgt2));
 
@@ -88,7 +88,7 @@ void State::bind(const simulation::Rule::Action& a,EventInfo& ev){
 }
 
 void State::free(const simulation::Rule::Action& a,EventInfo& ev){
-	auto& int_state = ev.emb[get<1>(a.trgt1)]->getInternalState(get<2>(a.trgt1));
+	auto& int_state = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)]->getInternalState(get<2>(a.trgt1));
 	if(int_state.link.first){
 		negativeUpdate<1>(int_state.link.first->getInternalState(int_state.link.second));
 		int_state.link.first->setLink(int_state.link.second,nullptr,0);
@@ -100,7 +100,7 @@ void State::free(const simulation::Rule::Action& a,EventInfo& ev){
 }
 
 void State::modify(const simulation::Rule::Action& a,EventInfo& ev){
-	auto& int_state = ev.emb[get<1>(a.trgt1)]->getInternalState(get<2>(a.trgt1));
+	auto& int_state = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)]->getInternalState(get<2>(a.trgt1));
 	if(int_state.val.smallVal == get<0>(a.trgt2))
 		ev.warns++;
 	else {
@@ -112,7 +112,7 @@ void State::modify(const simulation::Rule::Action& a,EventInfo& ev){
 
 void State::del(const simulation::Rule::Action& a,EventInfo& ev){
 	//auto node = graph.getNode(ev.emb[get<1>(a.trgt1)]);
-	auto node = ev.emb[get<1>(a.trgt1)];
+	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
 	//delete both inj of node and pointers to node.
 	for(auto site : *node){
 		negativeUpdate<2>(site);
@@ -124,19 +124,21 @@ void State::del(const simulation::Rule::Action& a,EventInfo& ev){
 	}
 }
 
+void (State::*State::action[4])(const simulation::Rule::Action&,EventInfo&) =
+		{&State::bind,&State::free,&State::modify,&State::del};
 
 void State::apply(const simulation::Rule& r,EventInfo& ev){
 	//ADD action first
-	ev.fresh_emb = new SiteGraph::Node*[r.newNodes.size()];
+	ev.fresh_emb = new SiteGraph::Node*[r.getNewNodes().size()];//maybe not!
 	int i = 0;
-	for(auto& n : r.newNodes){
+	for(auto& n : r.getNewNodes()){
 		auto node = new SiteGraph::Node(n);
 		graph.allocate(node);
 		ev.fresh_emb[i] = node;
 		i++;
 	}
-	for(auto& act : r.script){
-		action[act.t](act,ev);
+	for(auto& act : r.getScript()){
+		(this->*(action)[act.t])(act,ev);
 	}
 }
 

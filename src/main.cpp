@@ -95,6 +95,7 @@ int main(int argc, char* argv[]){
 		ast.evaluateSignatures(env,vars);
 		ast.evaluateDeclarations(env,vars,false);//vars
 		ast.evaluateChannels(env,vars);
+		ast.evaluateRules(env,vars);
 	}
 	catch(const exception &e){
 		cerr << "An exception found: " << e.what() << endl;
@@ -114,14 +115,14 @@ int main(int argc, char* argv[]){
 			}
 		}
 	}
-	cout << "total cells: " << pattern::Compartment::getTotalCells() << endl;
-	for(auto edge : edges)
-		cout << edge.first.first << "->" << edge.first.second << ": " << edge.second << endl;
+	//cout << "total cells: " << pattern::Compartment::getTotalCells() << endl;
+	//for(auto edge : edges)
+	//	cout << edge.first.first << "->" << edge.first.second << ": " << edge.second << endl;
 	auto cells = simulation::Simulation::allocCells(1,vector<double>(pattern::Compartment::getTotalCells(),1.0),edges,-1);
 	simulation::Simulation sim(env,vars);
-	for(auto i : cells[0])
-		cout << i << ", ";
-	cout << endl;
+	//for(auto i : cells[0])
+	//	cout << i << ", ";
+	//cout << endl;
 	sim.setCells(cells[0]);
 	try{
 		ast.evaluateInits(env,vars,sim);
@@ -130,7 +131,7 @@ int main(int argc, char* argv[]){
 		cerr << "An exception found: " << e.what() << endl;
 		exit(1);
 	}
-	sim.print();
+	//sim.print();
 
 	cout << "finished!" << endl;
 

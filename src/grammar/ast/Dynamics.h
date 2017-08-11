@@ -165,7 +165,7 @@ protected:
 	Mixture *mix;
 	VarValue set;
 	Id name;
-	StringExpression* string_expr;
+	const StringExpression* string_expr;
 
 	// not working - it does not work
 	/*union {

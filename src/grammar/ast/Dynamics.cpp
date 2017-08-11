@@ -360,7 +360,7 @@ Effect::Effect(const location &l,const Action &a,const VarValue &dec):
 Effect::Effect(const location &l,const Action &a,const Id &id):
 	Node(l),action(a),name(id),n(nullptr),mix(nullptr) {};
 //STOP,SNAPSHOT,FLUX,FLUXOFF,PRINT
-Effect::Effect(const location &l,const Action &a,const StringExpression &str):
+Effect::Effect(const location &l,const Action &a, const StringExpression &str):
 	Node(l),action(a),string_expr(new StringExpression(str)),n(nullptr),mix(nullptr) {};
 //PRINTF
 Effect::Effect(const location &l,const Action &a,const StringExpression &str1,const StringExpression &str2):

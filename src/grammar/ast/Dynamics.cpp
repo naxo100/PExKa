@@ -6,6 +6,7 @@
  */
 
 #include "Dynamics.h"
+#include "../../util/Warning.h"
 
 namespace ast {
 
@@ -469,20 +470,68 @@ Radius::~Radius(){
 
 /****** Class Rate ***************/
 Rate::Rate():
-	Node(), def(nullptr), fixed(nullptr), un(nullptr), op(nullptr) {};
-Rate::Rate(const location &l,const Expression *def,const bool &fix):
-	Node(l), def(def), fixed(fix), un(nullptr), op(nullptr) {};
-Rate::Rate(const location &l,const Expression *def,const bool &fix,const Radius *un):
-	Node(l), def(def), fixed(fix), un(new Radius(*un)), op(nullptr) {};
-Rate::Rate(const location &l,const Expression *def,const bool &fix,const Expression *ope):
-	Node(l), def(def), fixed(fix), un(nullptr), op(ope) {};
+	Node(), base(nullptr), reverse(nullptr), fixed(nullptr), unary(nullptr) {};
+Rate::Rate(const Rate& r) :
+		base(r.base ? r.base->clone() : nullptr),
+		reverse(r.reverse ? r.reverse->clone() : nullptr),
+		unary(r.unary ? new Radius(*r.unary) : nullptr),
+		volFixed(r.volFixed),fixed(r.fixed){}
+Rate& Rate::operator=(const Rate& r) {
+	base = r.base ? r.base->clone() : nullptr;
+	reverse = r.reverse ? r.reverse->clone() : nullptr;
+	unary = r.unary ? new Radius(*r.unary) : nullptr;
+	volFixed = r.volFixed;
+	fixed = r.fixed;
+	return *this;
+}
+
+Rate::Rate(const location &l,const Expression *def,const bool fix):
+	Node(l), base(def), reverse(nullptr), fixed(fix), unary(nullptr) {};
+Rate::Rate(const location &l,const Expression *def,const bool fix,const Radius *un):
+	Node(l), base(def), reverse(nullptr), fixed(fix), unary(new Radius(*un)) {};
+Rate::Rate(const location &l,const Expression *def,const bool fix,const Expression *ope):
+	Node(l), base(def), reverse(ope), fixed(fix), unary(nullptr) {};
 Rate::~Rate(){
-	/*if(def)
-		delete def;
-	if(un)
-		delete un;
-	if(op)
-		delete op;*/
+	if(base)
+		delete base;
+	if(unary){
+		delete unary->k1;
+		delete unary->opt;
+	}
+	if(reverse)
+		delete reverse;
+}
+
+const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulation::Rule& r,
+		const vector<state::Variable*> &vars,bool is_bi) const {
+	if(!base)
+		throw std::invalid_argument("Base rate cannot be null.");
+	auto base_rate = base->eval(env,vars,0);
+	r.setRate(base_rate);
+	if(is_bi){
+		if(unary)
+			throw SemanticError("Cannot define a bidirectional rule with a rate for unary cases.",loc);
+		if(!reverse)
+			WarningStack::getStack().emplace_back(
+				"Assuming same rate for both directions of bidirectional rule.",loc);
+		else{
+			return reverse->eval(env,vars,0);
+		}
+	}
+	else{
+		if(reverse)
+			throw SemanticError("Reverse rate defined for unidirectional rule.",loc);
+		if(unary){
+			auto un_rate = unary->k1->eval(env,vars,0);
+			int radius = 0;
+			if(unary->opt){
+				radius = unary->opt->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
+			}
+			r.setUnaryRate(make_pair(un_rate,radius));
+		}
+	}
+	return nullptr;
+
 }
 
 /****** Class Token **************/
@@ -497,6 +546,8 @@ RuleSide::RuleSide(const location &l,const Mixture &agents,const list<Token> &to
 
 /****** Class Rule ***************/
 
+size_t Rule::count = 0;
+
 Rule::Rule(){}
 Rule::Rule(	const location &l,
 		const Id          &label,
@@ -506,11 +557,11 @@ Rule::Rule(	const location &l,
 		const Expression* where,
 		const Rate 		  &rate):
 	Node(l), label(label), lhs(lhs), rhs(rhs),
-	bi(arrow),filter(where),rate(rate) {};
+	bi(arrow),filter(where),rate(rate) {count += bi ? 2 : 1;};
 Rule::~Rule() {};
 
 Rule::Rule(const Rule& r) : Node(r.loc),label(r.label),lhs(r.lhs),rhs(r.rhs),
-		bi(r.bi),filter(r.filter ? r.filter->clone() : nullptr){}
+		bi(r.bi),filter(r.filter ? r.filter->clone() : nullptr),rate(r.rate){}
 
 Rule& Rule::operator=(const Rule& r){
 	loc = r.loc;
@@ -522,6 +573,7 @@ Rule& Rule::operator=(const Rule& r){
 		filter = r.filter->clone();
 	else
 		filter = nullptr;
+	rate = r.rate;
 	return *this;
 }
 
@@ -530,14 +582,34 @@ void Rule::eval(pattern::Environment& env,
 	//TODO eval name...
 	auto lhs_mix = lhs.agents.eval(env,vars,true);
 	lhs_mix->declareAgents(env);
+	auto& rule = env.declareRule(label,*lhs_mix);
 	auto lhs_mask = lhs_mix->setAndDeclareComponents(env);
+
+	auto reverse = rate.eval(env,rule,vars,bi);
 	auto rhs_mix = rhs.agents.eval(env,vars,true);
-	auto rhs_mask = rhs_mix->setComponents();
+	vector<pattern::ag_st_id> rhs_mask;
+	if(bi){
+		rhs_mix->declareAgents(env);
+		rhs_mask = rhs_mix->setAndDeclareComponents(env);
+		auto reverse_label = label.getString()+" @bckwrds";
+		auto inverse_rule = env.declareRule(Id(label.loc,reverse_label),*rhs_mix);
+		inverse_rule.setRHS(lhs_mix,bi);
+		inverse_rule.difference(env,rhs_mask,lhs_mask);
+		inverse_rule.setRate(reverse);
+	}
+	else
+		rhs_mask = rhs_mix->setComponents();
+	rule.setRHS(rhs_mix,bi);
+	rule.difference(env,lhs_mask,rhs_mask);
+
+	//TODO set loc
 	//simulation::Rule::difference(env,make_pair(*lhs_mix,lhs_mask),
 	//		make_pair(*rhs_mix,rhs_mask));
 }
 
-
+size_t Rule::getCount(){
+	return count;
+}
 
 
 } /* namespace ast */

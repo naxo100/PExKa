@@ -179,7 +179,7 @@ protected:
 };
 
 
-class Radius : Node {
+struct Radius : Node {
 	const Expression *k1;
 	const Expression *opt;
 public:
@@ -194,15 +194,20 @@ public:
 //un : (undefined) a range of rate for rule in the right direction (optional)
 //op : (defined)   precise    rate for rule in the left  direction (optional)
 class Rate : Node {
-	const Expression *def;
-	bool fixed;
-	Radius *un;
-	const Expression *op;
+	const Expression *base;
+	const Expression *reverse;
+	Radius *unary;
+	bool volFixed;//do not depend on volume
+	bool fixed;//do not depend on concentrations
 public:
 	Rate();
-	Rate(const location &l,const Expression *def,const bool &fix);
-	Rate(const location &l,const Expression *def,const bool &fix,const Radius *un);
-	Rate(const location &l,const Expression *def,const bool &fix,const Expression *op);
+	Rate(const Rate& rate);
+	Rate& operator=(const Rate& rate);
+	Rate(const location &l,const Expression *def,const bool fix);
+	Rate(const location &l,const Expression *def,const bool fix,const Radius *un);
+	Rate(const location &l,const Expression *def,const bool fix,const Expression *op);
+	const state::BaseExpression* eval(const pattern::Environment& env,simulation::Rule& r,
+			const vector<state::Variable*> &vars,bool is_bi = false) const;
 	~Rate();
 };
 
@@ -236,6 +241,8 @@ protected:
 	bool bi;
 	const Expression* filter;
 	Rate rate;
+
+	static size_t count;
 public:
 	Rule();
 	Rule(const location &l,const Id &label,const RuleSide &lhs,
@@ -246,6 +253,7 @@ public:
 
 	void eval(pattern::Environment& env,const vector<state::Variable*>& vars) const;
 
+	static size_t getCount();
 
 
 	~Rule();

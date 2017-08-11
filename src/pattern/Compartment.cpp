@@ -280,7 +280,7 @@ bool InvertMatrix(const matrix<T>& input, matrix<T>& inverse)
 std::string Compartment::toString() const {
 	std::string ret(name);
 	for(unsigned int i = 0; i < dimensions.size(); i++)
-		ret += std::string("[")+std::to_string(dimensions[i])+"]";
+		ret += "["+std::to_string(dimensions[i])+"]";
 	return ret;
 }
 std::string Compartment::cellToString(const std::vector<short>& cell){

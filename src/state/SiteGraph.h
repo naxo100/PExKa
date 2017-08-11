@@ -11,10 +11,15 @@
 #include <utility> //pair
 #include <list>
 #include <vector>
+//#include "../pattern/Environment.h"
 #include "../util/params.h"
 #include "../state/AlgExpression.h"
 #include "../pattern/Signature.h"
+#include "../matching/Injection.h"
 
+namespace pattern {
+	class Environment;
+}
 namespace state {
 
 using namespace std;
@@ -45,8 +50,8 @@ protected:
 struct SiteGraph::Internal {
 	SomeValue val;
 	pair<Node*,small_id> link;
-	//for value, for link
-	pair<matching::InjSet&,matching::InjSet&> deps;
+	//for value, for link //TODO refs????
+	pair<matching::InjSet,matching::InjSet> deps;
 	Internal();
 
 };
@@ -67,9 +72,9 @@ public:
 	void setState(small_id  site_id,T value);
 	void setLink(small_id site_src,Node* lnk,small_id site_trgt);
 
-
-	inline Internal* begin();
-	inline Internal* end();
+	//inline?? TODO
+	Internal* begin();
+	Internal* end();
 
 	void setCount(pop_size q);
 	pop_size getCount() const;
@@ -78,8 +83,11 @@ public:
 
 	//unsafe
 	Internal& getInternalState(small_id);
-	pair<matching::InjSet&,matching::InjSet&>& getLifts(small_id site);
+	pair<matching::InjSet,matching::InjSet>& getLifts(small_id site);
 
+
+	//DEBUG
+	string toString(const pattern::Environment &env) const;
 
 };
 

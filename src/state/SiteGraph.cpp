@@ -6,6 +6,7 @@
  */
 
 #include "SiteGraph.h"
+#include "../pattern/Environment.h"
 
 namespace state {
 
@@ -56,6 +57,10 @@ void SiteGraph::Node::setCount(pop_size q){
 	n=q;
 }
 
+pop_size SiteGraph::Node::getCount() const {
+	return n;
+}
+
 template <typename T>
 void SiteGraph::Node::setState(small_id site_id,T value){
 	throw std::invalid_argument("Node::setState(): not a valid state value.");
@@ -86,14 +91,26 @@ SiteGraph::Internal* SiteGraph::Node::end(){
 	return interface+intfSize;
 }
 
+SiteGraph::Internal& SiteGraph::Node::getInternalState(small_id id){
+	return interface[id];
+}
 
-pair<matching::InjSet&,matching::InjSet&>& SiteGraph::Node::getLifts(small_id site){
+pair<matching::InjSet,matching::InjSet>& SiteGraph::Node::getLifts(small_id site){
 	return interface[site].deps;
 }
 
 
 /********** Internal struct ************/
 
-SiteGraph::Internal::Internal() : val(small_id(-1)),link(nullptr,0) {}
+SiteGraph::Internal::Internal() : val(small_id(-1)),link(nullptr,0),
+		deps(){}
+
+
+
+string SiteGraph::Node::toString(const pattern::Environment &env) const {
+	return env.getSignature(signId).getName();
+}
+
+
 
 } /* namespace ast */

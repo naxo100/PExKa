@@ -9,13 +9,15 @@
 
 namespace matching {
 
-Injection::Injection() {
-	// TODO Auto-generated constructor stub
-
-}
 
 Injection::~Injection() {
 	// TODO Auto-generated destructor stub
 }
+
+bool Injection::operator<(const Injection& inj) const {
+	return this->getEmbedding() < inj.getEmbedding();
+}
+
+
 
 } /* namespace simulation */

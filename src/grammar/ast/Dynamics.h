@@ -142,8 +142,6 @@ public:
 
 	Effect();
 	//INTRO,DELETE
-	// Effect(const location &l,const Action &a,const MultipleMixture &mix);
-	//Effect(const location &l,const Action &a, pair<Expression*,Mixture> &mix);
 	Effect(const location &l,const Action &a,const Expression *n ,list<Agent>& mix);
 	//UPDATE,UPDATE_TOK
 	Effect(const location &l,const Action &a,const VarValue &dec);

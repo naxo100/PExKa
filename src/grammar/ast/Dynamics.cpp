@@ -400,9 +400,9 @@ Effect& Effect::operator=(const Effect& eff){
 	mix = eff.mix;
 
 	switch(action){
-	case INTRO:case DELETE:
-		//multi_exp = eff.multi_exp;
-		break;
+	//case INTRO:case DELETE:
+	//	multi_exp = eff.multi_exp;
+	//	break;
 	case UPDATE:case UPDATE_TOK:
 		set = eff.set;
 		break;
@@ -422,9 +422,10 @@ Effect& Effect::operator=(const Effect& eff){
 
 Effect::~Effect(){
 	switch(action){
-	case INTRO:
-		delete n;
-		delete mix;
+	case INTRO: case DELETE:
+		//delete n;
+		//delete mix;
+		break;
 	default:
 		break;
 	}

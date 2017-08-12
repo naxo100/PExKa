@@ -341,11 +341,13 @@ print_expr_list: // list
 print_expr: // list
   STRING 
 	{ $$.push_front( StringExpression(@$,$1) ); }
-| STRING DOT print_expr
-	{ $3.push_front( StringExpression(@$,$1) );
-	  $$=$3; 
+| OP_BRA alg_expr CL_BRA
+	{ $$.push_front( StringExpression(@$,$2) ); }
+| OP_BRA alg_expr CL_BRA DOT print_expr
+	{ $5.push_front( StringExpression(@$,$2) ); 
+	  $$ = $5;
 	}
-| alg_expr DOT print_expr 
+| STRING DOT print_expr
 	{ $3.push_front( StringExpression(@$,$1) );
 	  $$=$3; 
 	}

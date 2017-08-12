@@ -79,8 +79,8 @@ StringExpression::StringExpression(const location &l,const Expression *e):
 
 
 StringExpression::~StringExpression(){
-	if(t)
-		delete alg;
+	/*if(t)
+		delete alg;*/
 }
 
 

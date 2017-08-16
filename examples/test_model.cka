@@ -128,29 +128,29 @@
 
 #### PERTURBATIONS
 # SOLVED: fail to assign string on $STOP: double free or corruption (fasttop)
-#%mod: [false] do $STOP "You shall not pass!"
+%mod: 2>1 do $STOP "You shall not pass!"
 
 # SOLVED: Segmentation fault - review StringExpression destructor
-#%mod: [false] do $TRACK 'a' [true]
-#%mod: [false] do $UPDATE 'a' 1
-#%mod: [false] do $FLUX "string_exp" [true]
-#%mod: [false] do $FLUX <"string_exp"> [true]
-#%mod: [false] do $FLUX <"string_exp"."string_exp2".[123]> [true] 
-#%mod: [false] do $STOP <"lalala "."print this string">
-#%mod: [false] do $SNAPSHOT "snapshot here!"
-#%mod: [false] do $SNAPSHOT <"lalala "."print this string">
-#%mod: [false] do $PRINT <"print this string">
-#%mod: [false] do $PRINT "print this string"
-#%mod: [false] do $PRINT <"print this string".[123]>
-#%mod: [false] do $PRINT <"222222".[1+2+3]."print this string">
-#%mod: [false] do $PRINTF <"file".[1+2+3]."other file"> <[1+2+3]."print this string". " & this other">
+%mod: [false] do $TRACK 'a' [true]
+%mod: [false] do $UPDATE 'a' 1
+%mod: [false] do $FLUX "string_exp" [true]
+%mod: [false] do $FLUX <"string_exp"> [true]
+%mod: [false] do $FLUX <"string_exp"."string_exp2".[123]> [true] 
+%mod: [false] do $STOP <"lalala "."print this string">
+%mod: [false] do $SNAPSHOT "snapshot here!"
+%mod: [false] do $SNAPSHOT <"lalala "."print this string">
+%mod: [false] do $PRINT <"print this string">
+%mod: [false] do $PRINT "print this string"
+%mod: [false] do $PRINT <"print this string".[123]>
+%mod: [false] do $PRINT <"222222".[1+2+3]."print this string">
+%mod: [false] do $PRINTF <"file".[1+2+3]."other file"> <[1+2+3]."print this string". " & this other">
 
 # SOLVED: Segmentation fault - review Effect destructor
-#%mod: [false] do $ADD 1 A(s~1!1),B(t~2!1)
-#%mod: [false] do $DEL 1 A(s~1!1),B(t~2!1)
+%mod: [false] do $ADD 1 A(s~1!1),B(t~2!1)
+%mod: [false] do $DEL 1 A(s~1!1),B(t~2!1)
 
 # ERROR: Segmentation fault
-%mod: repeat [false] do $TRACK 'a' [false] until [false]
+#%mod: repeat [false] do $TRACK 'a' [false] until [false]
 
 
 #### COMMON ERRORS

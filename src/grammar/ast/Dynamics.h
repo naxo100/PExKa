@@ -121,6 +121,7 @@ public:
 	Mixture(const location &l,const list<Agent> &m);
 	virtual pattern::Mixture* eval(const pattern::Environment &env,
 			const vector<Variable*> &vars,bool is_pattern = true) const;
+	void show(string tabs = "") const;
 	virtual ~Mixture();
 };
 /*
@@ -155,6 +156,8 @@ public:
 	Effect(const Effect &eff);
 	Effect& operator=(const Effect& eff);
 
+	void show(string tabs = "") const;
+
 	~Effect();
 
 protected:
@@ -181,7 +184,7 @@ public:
 	Perturbation();
 	Perturbation(const location &l,const Expression *cond,
 			const list<Effect> &effs,const Expression* rep = nullptr);
-
+	void show(string tabs = "");
 	~Perturbation();
 protected:
 	const Expression *condition,*until;

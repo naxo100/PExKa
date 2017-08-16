@@ -310,14 +310,14 @@ void Agent::eval(const pattern::Environment &env,const vector<state::Variable*> 
 
 void Agent::show( string tabs ) const {
 	tabs += "   ";
-	cout << "Agent " << name.getString() << " {";
+	cout << tabs << "Agent " << name.getString() << " {";
 
 	for(list<Site>::const_iterator it = sites.cbegin(); it != sites.cend(); it++){
-		cout << endl;
+		cout << endl << "   ";
 		it->show( tabs );
 	}
 
-	cout << endl << "}" << endl;
+	cout << endl << tabs <<  "}" << endl;
 }
 
 
@@ -346,6 +346,12 @@ pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 	return mix;
 }
 
+void Mixture::show(string tabs) const {
+	for(list<Agent>::const_iterator it = agents.cbegin() ; it != agents.cend() ; it++) {
+		it->show(tabs);
+	}
+}
+
 
 /****** Class Effect *************/
 Effect::Effect():
@@ -364,10 +370,10 @@ Effect::Effect(const location& l,const Action& a,const list<StringExpression>& s
 	Node(l),action(a),string_expr(str),n(nullptr),mix(nullptr) {};
 //PRINTF
 Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str1,const list<StringExpression>& str2):
-		Node(l),action(a),string_expr(str1),string_expr2(str2),n(nullptr),mix(nullptr) {};
+	Node(l),action(a),string_expr(str1),string_expr2(str2),n(nullptr),mix(nullptr) {};
 
 Effect::Effect(const Effect &eff):
-		Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
+	Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
 
 	n = eff.n;
 	mix = eff.mix;
@@ -420,6 +426,31 @@ Effect& Effect::operator=(const Effect& eff){
 	return *this;
 }
 
+void Effect::show(string tabs) const {
+	tabs += "   ";
+	cout << tabs << "effect :" << endl ;
+	cout << tabs << "   " << "action:" << action << endl;
+
+	if(n) {
+		cout << tabs << "   " << "expression:";
+		n->show(tabs+"   ");
+		cout << endl;
+	}
+
+	if(mix) {
+		cout << tabs << "   " << "mixture:" << endl;
+		mix->show(tabs+"   ");
+	}
+
+	cout << tabs << "   " << "set:" << endl;
+	set.show(tabs+"   ");
+
+	cout << tabs << "   " << "name:" << endl;
+	name.show(tabs+"   ");
+
+	// show  string_expr and string_expr2 StringExpression class
+}
+
 Effect::~Effect(){
 	switch(action){
 	case INTRO: case DELETE:
@@ -436,6 +467,26 @@ Effect::~Effect(){
 Perturbation::Perturbation() : condition(nullptr),until(nullptr){};
 Perturbation::Perturbation(const location &l,const Expression *cond,const list<Effect> &effs,const Expression* rep):
 	Node(l), condition(cond), until(rep), effects(effs){};
+
+void Perturbation::show(string tabs) {
+	tabs += "   ";
+	cout << "Perturbation {" << endl;
+
+	cout << "condition :" ;
+	condition->show(tabs);
+
+	if(until) {
+		cout << "until :";
+		until->show(tabs);
+	}
+
+	for(list<Effect>::const_iterator it = effects.cbegin(); it != effects.cend(); it++){
+		cout << endl;
+		it->show(tabs);
+	}
+
+	cout << endl << "}" << endl;
+}
 
 Perturbation::~Perturbation() {
 	if(until)

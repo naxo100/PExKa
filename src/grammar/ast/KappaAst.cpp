@@ -97,10 +97,6 @@ void KappaAst::add(const Perturbation &p){
 	perturbations.push_back(p);
 }
 
-/*void KappaAst::add(Perturbation p){
-	perts.push_back(p);
-}*/
-
 void KappaAst::show(){
 	cout << endl << "Showing variables:" << endl;
 	for(list<Declaration>::iterator it = variables.begin();it != variables.end(); it++){
@@ -114,6 +110,18 @@ void KappaAst::show(){
 
 	cout << endl << "Showing agents:" << endl;
 	for(list<Agent>::iterator it = signatures.begin();it != signatures.end(); it++){
+		it->show();
+	}
+
+	cout << endl << "Showing tokens:" << endl;
+	for(list<Id>::iterator it = tokens.begin();it != tokens.end(); it++){
+		it->show();
+	}
+
+	cout << endl << "Showing Perturbations:" << endl;
+	short i = 0;
+	for(list<Perturbation>::iterator it = perturbations.begin();it != perturbations.end(); it++){
+		cout << ++i << ") ";
 		it->show();
 	}
 

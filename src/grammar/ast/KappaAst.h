@@ -42,6 +42,7 @@ public:
 	KappaAst();
 	virtual ~KappaAst();
 
+	// evaluation of AST nodes
 	vector<float> evaluateTokens(pattern::Environment &env);
 	void evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts);
 	vector<Variable*> evaluateDeclarations(pattern::Environment &env,vector<Variable*> &vars,bool is_const = false);
@@ -49,6 +50,7 @@ public:
 	void evaluateUseExpressions(pattern::Environment &env,const vector<Variable*>& consts);
 	void evaluateChannels(pattern::Environment &env,const vector<Variable*> &vars);
 	void evaluateInits(const pattern::Environment &env,const vector<Variable*>,simulation::Simulation &sim);
+	void evaluatePerturbations(const pattern::Environment& env, const vector<Variable*>& vars);
 
 	//ADD functions
 	void add(const Declaration &d);
@@ -59,7 +61,6 @@ public:
 	void add(const Init &i);
 	void add(const Use *u);
 	void add(const Perturbation &p);
-	//void add(Perturbation p);
 
 
 	//show declarations

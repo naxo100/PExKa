@@ -61,6 +61,10 @@ pop_size SiteGraph::Node::getCount() const {
 	return n;
 }
 
+short_id SiteGraph::Node::getId() const{
+	return signId;
+}
+
 template <typename T>
 void SiteGraph::Node::setState(small_id site_id,T value){
 	throw std::invalid_argument("Node::setState(): not a valid state value.");

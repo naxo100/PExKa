@@ -79,6 +79,8 @@ public:
 	void setCount(pop_size q);
 	pop_size getCount() const;
 
+	short_id getId() const;
+
 
 
 	//unsafe

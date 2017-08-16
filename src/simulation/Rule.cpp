@@ -256,11 +256,14 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 	}
 	//check if there are binds to new nodes
 	map<ag_st_id,small_id> antimap;
-	for(int i = 0; i<rhs_order.size() ; i++)
+	for(unsigned i = 0; i<rhs_order.size() ; i++)
 		antimap[rhs_order[i]] = i;
 	for(auto& bind : binds){
-		if(antimap[make_pair(get<0>(bind.trgt2),get<1>(bind.trgt2))] >= first_del)
+		auto k = antimap[make_pair(get<0>(bind.trgt2),get<1>(bind.trgt2))];
+		if( k >= i ){
 			get<3>(bind.trgt2) = true;
+			get<1>(bind.trgt2) = k-i;
+		}
 		script.emplace_back(bind);
 	}
 
@@ -317,14 +320,18 @@ string Rule::toString(const pattern::Environment& env) const {
 			break;
 		case BIND:
 			s += acts[act.t] + " of agents sites ";
-			if(get<3>(act.trgt1))//new node
-				1;//TODO
+			if(get<3>(act.trgt1)){//new node
+				sign1 = &env.getSignature(newNodes[get<1>(act.trgt1)].getId());
+				s += "(new) " + sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
+			}
 			else{
 				sign1 = &env.getSignature(rhs->getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
 				s += sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
 			}
-			if(get<3>(act.trgt2))//new node
-				1;//TODO
+			if(get<3>(act.trgt2)){//new node
+				sign2 = &env.getSignature(newNodes[get<1>(act.trgt2)].getId());
+				s += "(new) " + sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+"\n";
+			}
 			else{
 				sign2 = &env.getSignature(rhs->getAgent(get<0>(act.trgt2),get<1>(act.trgt2)).getId());
 				s += sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+"\n";

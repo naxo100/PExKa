@@ -16,7 +16,8 @@ Node::Node(const yy::location& l)
 
 Node::~Node(){};
 void Node::show( string tabs ) const {
-	cout << "Node" << endl;
+	tabs += "   ";
+	cout << tabs << "Node" << endl;
 }
 
 
@@ -29,7 +30,8 @@ Id::~Id(){};
 const string& Id::getString() const {return id;};
 
 void Id::show( string tabs ) const {
-	cout << "Id: " << id;
+	tabs += "   ";
+	cout << tabs << "Id: " << id;
 }
 
 /****** Class Expression *************/
@@ -58,19 +60,17 @@ VarValue::VarValue() : value(nullptr){}
 VarValue::VarValue(const location &l,const Id &name,const Expression *exp) :
 	Node(l),var(name),value(exp) {}
 void VarValue::show( string tabs ) const{
-	cout << "VarValue : ";
+	tabs += "   ";
+	cout << tabs << "VarValue : ";
+	var.show();
+	if(value) value->show(tabs);
+	cout << endl;
 }
 
 /****** Class StringExpression *******/
 StringExpression::StringExpression():
 	t(STR),str(),alg(nullptr){};
 
-/*StringExpression::StringExpression(const location &l,const string &s):
-	Node(l),t(STR),str(new string(s)),next(nullptr),alg(nullptr) {};
-
-StringExpression::StringExpression(const location &l,const string &s, const StringExpression* nxt):
-	Node(l),t(STR),str(new string(s)),next(nxt),alg(nullptr) {};
-*/
 StringExpression::StringExpression(const location &l,const string s):
 	Node(l),t(STR),str(s),alg(nullptr) {};
 

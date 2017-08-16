@@ -38,9 +38,9 @@ size_t SiteGraph::getNodeCount() const{
 
 
 /********* Node Class ************/
-SiteGraph::Node::Node(const pattern::Signature& sign) : n(1),signId(sign.getId()),address(-1) {
-	interface = new Internal[sign.getSiteCount()];
-	for(int i = 0; i < sign.getSiteCount(); i++){
+SiteGraph::Node::Node(const pattern::Signature& sign) : n(1),signId(sign.getId()),address(-1), intfSize(sign.getSiteCount()){
+	interface = new Internal[intfSize];
+	for(int i = 0; i < intfSize; i++){
 		interface[i].val = sign.getSite(i).getDefaultValue();
 	}
 }
@@ -112,9 +112,47 @@ SiteGraph::Internal::Internal() : val(small_id(-1)),link(nullptr,0),
 
 
 string SiteGraph::Node::toString(const pattern::Environment &env) const {
-	return env.getSignature(signId).getName();
+	auto& sign = env.getSignature(signId);
+	string s(sign.getName()+"(");
+	for(small_id i = 0; i < intfSize; i++){
+		s += interface[i].toString(sign.getSite(i));
+		try{
+			dynamic_cast<const pattern::Signature::EmptySite&>(sign.getSite(i));
+		}
+		catch(std::bad_cast &e){
+			s += "~";
+			switch(interface[i].val.t){
+			case BaseExpression::FLOAT:
+				s += to_string(interface[i].val.fVal);
+				break;
+			case BaseExpression::INT:
+				s += to_string(interface[i].val.iVal);
+				break;
+			case BaseExpression::SHORT_ID:
+				s += dynamic_cast<const pattern::Signature::LabelSite&>(sign.getSite(i))
+						.getLabel(interface[i].val.shortVal);
+				break;
+			case BaseExpression::SMALL_ID:
+				s += dynamic_cast<const pattern::Signature::LabelSite&>(sign.getSite(i))
+						.getLabel(interface[i].val.smallVal);
+				break;
+			default:
+				s += "?";//TODO exception?
+			}
+		}
+		s += ",";
+	}
+	if(intfSize)
+		s.back() = ')';
+	else
+		s += ")";
+	return s;
 }
 
+string SiteGraph::Internal::toString(const pattern::Signature::Site& sit) const {
+	string s(sit.getName());
+	return s;
+}
 
 
 } /* namespace ast */

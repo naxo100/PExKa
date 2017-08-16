@@ -54,6 +54,8 @@ struct SiteGraph::Internal {
 	pair<matching::InjSet,matching::InjSet> deps;
 	Internal();
 
+	string toString(const pattern::Signature::Site& s) const;
+
 };
 
 class SiteGraph::Node {

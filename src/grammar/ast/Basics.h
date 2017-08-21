@@ -92,6 +92,8 @@ public:
 	StringExpression(const location &l,const string s);
 	StringExpression(const location &l,const Expression *e);
 
+	void show(string tabs = "") const;
+
 	~StringExpression();
 
 protected:

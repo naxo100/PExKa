@@ -168,7 +168,7 @@ protected:
 	Id name;
 	//const StringExpression* string_expr;
 	list<StringExpression> string_expr;
-	list<StringExpression> string_expr2;
+	list<StringExpression> filename;
 
 	// not working - it does not work
 	/*union {

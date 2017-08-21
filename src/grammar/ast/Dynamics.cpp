@@ -370,7 +370,7 @@ Effect::Effect(const location& l,const Action& a,const list<StringExpression>& s
 	Node(l),action(a),string_expr(str),n(nullptr),mix(nullptr) {};
 //PRINTF
 Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str1,const list<StringExpression>& str2):
-	Node(l),action(a),string_expr(str1),string_expr2(str2),n(nullptr),mix(nullptr) {};
+	Node(l),action(a),string_expr(str1),filename(str2),n(nullptr),mix(nullptr) {};
 
 Effect::Effect(const Effect &eff):
 	Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
@@ -393,7 +393,7 @@ Effect::Effect(const Effect &eff):
 		break;
 	case PRINTF:
 		string_expr = eff.string_expr;
-		string_expr2 = eff.string_expr2;
+		filename = eff.filename;
 		break;
 	}
 }
@@ -420,7 +420,7 @@ Effect& Effect::operator=(const Effect& eff){
 		break;
 	case PRINTF:
 		string_expr = eff.string_expr;
-		string_expr2 = eff.string_expr2;
+		filename = eff.filename;
 		break;
 	}
 	return *this;
@@ -449,6 +449,22 @@ void Effect::show(string tabs) const {
 	name.show(tabs+"   ");
 
 	// show  string_expr and string_expr2 StringExpression class
+	cout << endl;
+	cout << tabs << "   " << "string_exp:" << endl;
+	short i = 0;
+	for(list<StringExpression>::const_iterator it = string_expr.cbegin(); it != string_expr.cend() ; it++) {
+		cout << tabs << "      " << ++i << ")" ;
+		it->show();
+		cout << endl;
+	}
+
+	cout << tabs << "   " << "string_expr2:" << endl;
+	i = 0;
+	for(list<StringExpression>::const_iterator it = filename.cbegin(); it != filename.cend() ; it++) {
+		cout << tabs << "      " << ++i << ")" ;
+		it->show();
+		cout << endl;
+	}
 }
 
 Effect::~Effect(){

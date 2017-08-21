@@ -13,11 +13,11 @@ namespace ast {
 /****** Class Link ***********/
 Link::Link() : type(FREE),value(0){}
 Link::Link(const location &l,LinkType t):
-	Node(l), type(t)  {};
+	Node(l), type(t), value()  {};
 Link::Link(const location &l,LinkType t,int val):
 	Node(l), type(t), value(val) {};
 Link::Link(const location &l,LinkType t,const Id &ag,const Id &s):
-	Node(l), type(t), ag_site{ag,s} {	};
+	Node(l), type(t), ag_site{ag,s}, value() {	};
 Link::Link(const Link &l):Node(l){
 	type = l.type;
 	switch(type){
@@ -370,7 +370,7 @@ Effect::Effect(const location& l,const Action& a,const list<StringExpression>& s
 	Node(l),action(a),string_expr(str),n(nullptr),mix(nullptr) {};
 //PRINTF
 Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str1,const list<StringExpression>& str2):
-	Node(l),action(a),string_expr(str1),filename(str2),n(nullptr),mix(nullptr) {};
+	Node(l),action(a),filename(str1),string_expr(str2),n(nullptr),mix(nullptr) {};
 
 Effect::Effect(const Effect &eff):
 	Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
@@ -450,15 +450,15 @@ void Effect::show(string tabs) const {
 
 	// show  string_expr and string_expr2 StringExpression class
 	cout << endl;
-	cout << tabs << "   " << "string_exp:" << endl;
+	cout << tabs << "   " << "string_expr:" << endl;
 	short i = 0;
 	for(list<StringExpression>::const_iterator it = string_expr.cbegin(); it != string_expr.cend() ; it++) {
 		cout << tabs << "      " << ++i << ")" ;
-		it->show();
+		it->show(tabs);
 		cout << endl;
 	}
 
-	cout << tabs << "   " << "string_expr2:" << endl;
+	cout << tabs << "   " << "filename:" << endl;
 	i = 0;
 	for(list<StringExpression>::const_iterator it = filename.cbegin(); it != filename.cend() ; it++) {
 		cout << tabs << "      " << ++i << ")" ;

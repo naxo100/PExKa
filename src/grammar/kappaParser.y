@@ -328,7 +328,7 @@ effect:
 | PRINT print_expr_list 
 	{ $$ = Effect(@$,Effect::PRINT,$2); }
 | PRINTF print_expr_list print_expr_list 
-	{ $$ = Effect(@$,Effect::PRINT,$2,$3); }
+	{ $$ = Effect(@$,Effect::PRINTF,$2,$3); }
 ;
 
 

@@ -143,7 +143,7 @@
 #%mod: [false] do $PRINT "print this string"
 #%mod: [false] do $PRINT <"print this string".[123]>
 #%mod: [false] do $PRINT <"222222".[1+2+3]."print this string">
-%mod: [false] do $PRINTF <"file_name"> <[2^2]."print this string". " & this other">
+%mod: [false] do $PRINTF "file_name" <[2^2]."print this string". " & this other">
 
 # SOLVED: Segmentation fault - review Effect destructor
 #%mod: [false] do $ADD 1 A(s~1!1),B(t~2!1)

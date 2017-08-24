@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
 	// make AST
 	ast::KappaAst &ast = driver->getAst();
 	ast.show();
-	cout << "\n\n" ;
+	//cout << "\n\n" ;
 
 	// initialize states
 	pattern::Environment env;
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
-	//env.show(); cout << "\n\n" ;
+	env.show();
 	map<pair<int,int>,double> edges;
 	for(size_t i = 0; i < env.size<pattern::Channel>(); i++ ){
 		for(auto& channel : env.getChannels(i)){
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]){
 		cerr << "An exception found: " << e.what() << endl;
 		exit(1);
 	}
-	//sim.print();
+	sim.print();
 
 	cout << "finished!" << endl;
 

@@ -84,7 +84,8 @@ int main(int argc, char* argv[]){
 	}
 	// make AST
 	ast::KappaAst &ast = driver->getAst();
-	//ast.show();
+	ast.show();
+	cout << "\n\n" ;
 
 	// initialize states
 	pattern::Environment env;
@@ -103,7 +104,7 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
-	env.show();
+	//env.show(); cout << "\n\n" ;
 	map<pair<int,int>,double> edges;
 	for(size_t i = 0; i < env.size<pattern::Channel>(); i++ ){
 		for(auto& channel : env.getChannels(i)){

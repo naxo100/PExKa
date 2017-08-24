@@ -121,6 +121,7 @@ public:
 	Mixture(const location &l,const list<Agent> &m);
 	virtual pattern::Mixture* eval(const pattern::Environment &env,
 			const vector<Variable*> &vars,bool is_pattern = true) const;
+	void show(string tabs = "") const;
 	virtual ~Mixture();
 };
 /*
@@ -142,30 +143,32 @@ public:
 
 	Effect();
 	//INTRO,DELETE
-	// Effect(const location &l,const Action &a,const MultipleMixture &mix);
-	//Effect(const location &l,const Action &a, pair<Expression*,Mixture> &mix);
 	Effect(const location &l,const Action &a,const Expression *n ,list<Agent>& mix);
 	//UPDATE,UPDATE_TOK
 	Effect(const location &l,const Action &a,const VarValue &dec);
 	//CFLOW,CFLOW_OFF
 	Effect(const location &l,const Action &a,const Id &id);
 	//STOP,SNAPSHOT,FLUX,FLUXOFF,PRINT
-	Effect(const location &l,const Action &a,const StringExpression &str);
+	Effect(const location &l,const Action &a,const list<StringExpression> &str);
 	//PRINTF
-	Effect(const location &l,const Action &a,const StringExpression &str1,const StringExpression &str2);
+	Effect(const location &l,const Action &a,const list<StringExpression> &str1,const list<StringExpression> &str2);
 
 	Effect(const Effect &eff);
 	Effect& operator=(const Effect& eff);
+
+	void show(string tabs = "") const;
 
 	~Effect();
 
 protected:
 	Action action;
 	const Expression* n;
-	Mixture *mix;
+	Mixture* mix;
 	VarValue set;
 	Id name;
-	StringExpression* string_expr;
+	//const StringExpression* string_expr;
+	list<StringExpression> string_expr;
+	list<StringExpression> filename;
 
 	// not working - it does not work
 	/*union {
@@ -181,7 +184,7 @@ public:
 	Perturbation();
 	Perturbation(const location &l,const Expression *cond,
 			const list<Effect> &effs,const Expression* rep = nullptr);
-
+	void show(string tabs = "");
 	~Perturbation();
 protected:
 	const Expression *condition,*until;

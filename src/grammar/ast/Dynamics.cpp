@@ -647,7 +647,7 @@ void Rule::eval(pattern::Environment& env,
 		rhs_mix->declareAgents(env);
 		rhs_mask = rhs_mix->setAndDeclareComponents(env);
 		auto reverse_label = label.getString()+" @bckwrds";
-		auto inverse_rule = env.declareRule(Id(label.loc,reverse_label),*rhs_mix);
+		auto& inverse_rule = env.declareRule(Id(label.loc,reverse_label),*rhs_mix);
 		inverse_rule.setRHS(lhs_mix,bi);
 		inverse_rule.difference(env,rhs_mask,lhs_mask);
 		inverse_rule.setRate(reverse);

@@ -33,6 +33,7 @@ public:
 
 	void allocate(Node* n);
 	size_t getNodeCount() const;
+	size_t getPopulation() const;
 
 
 protected:
@@ -41,6 +42,7 @@ protected:
 	vector<Node*> container;
 	size_t fresh;
 	size_t nodeCount;
+	size_t population;
 	list<size_t> free;
 
 

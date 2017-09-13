@@ -10,7 +10,7 @@
 
 namespace state {
 
-SiteGraph::SiteGraph() : fresh(0),nodeCount(0) {
+SiteGraph::SiteGraph() : fresh(0),nodeCount(0),population(0) {
 	container.reserve(1000);
 }
 
@@ -23,17 +23,20 @@ void SiteGraph::allocate(Node* node){
 		container[free.front()] = node;
 		node->alloc(free.front());
 		free.pop_front();
-		nodeCount++;
 	}
 	else{
 		node->alloc(container.size());
 		container.push_back(node);
-		nodeCount++;
 	}
+	nodeCount++;
+	population += node->getCount();
 }
 
 size_t SiteGraph::getNodeCount() const{
 	return nodeCount;
+}
+size_t SiteGraph::getPopulation() const {
+	return population;
 }
 
 

@@ -84,7 +84,8 @@ int main(int argc, char* argv[]){
 	}
 	// make AST
 	ast::KappaAst &ast = driver->getAst();
-	//ast.show();
+	ast.show();
+	//cout << "\n\n" ;
 
 	// initialize states
 	pattern::Environment env;
@@ -132,7 +133,7 @@ int main(int argc, char* argv[]){
 		cerr << "An exception found: " << e.what() << endl;
 		exit(1);
 	}
-	//sim.print();
+	sim.print();
 
 	cout << "finished!" << endl;
 

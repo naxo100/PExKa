@@ -27,9 +27,9 @@
 #%var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
 
 # SOLVED: agents with states, ranges, ranges with default value
-#%agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
-#%agent: B(s,i~1~2)
-#%agent: S(s,t,u,v,w,x)
+%agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
+%agent: B(s,i~1~2)
+%agent: S(s,t,u,v,w,x)
 
 # SOLVED: define agent idem to a string
 #%agent: "asdasd"(x~1)
@@ -41,26 +41,27 @@
 
 
 #### RULES
-#%var: 'on_rate' 1.0
-#%const: 'ab' 0.5
+%var: 'on_rate' 1.0
+%const: 'ab' 0.5
 
 # SOLVED: rules can't be defined by error on rates
-#'a.b' A(s~1) -> B(i~2) @ 0.3
-#'a.b' A(s~2) -> B(i~1) @ 1
+#'a.b0' A(s~1) -> B(i~2) @ 0.3
+#'a.b1' A(s~2) -> B(i~1) @ 1
 
 # ERROR: rules with the same name
-#'a.b' A(s~3) -> B(i~1) @ 'on_rate'
-#'a.b' A(s~3) -> B(i~1) @ 'ab'
+#'a.b2' A(s~3) -> B(i~1) @ 'on_rate'
+#'a.b3' A(s~3) -> B(i~1) @ 'ab'
 
-# ERROR: var or const 'e' is not defined
-#'a.b' A(s~3) -> B(i~1) @ 'e'
+# SOLVED: var or const 'e' is not defined
+#'a.b4' A(s~3) -> B(i~1) @ 'e'
 
 # ERROR: segmentation fault. I don't know why, but to delete the rate, it crash
-#'a.b' A(s~3) <-> B(i~1) @ 'on_rate' , 1
+'a.b5' A(s~3) <-> B(i~1) @ 'on_rate','ab'
 
-#'a.b' "lalalla" -> "lalalal" @ 1
-#'a.b' 'lalalla' -> "lalalal" @ 1
-#'a.b' A(s~3) -> B(i~1) @ 1
+# SOLVED: string instead of agents
+#'a.b6' "lalalla" -> "lalalal" @ 1
+#'a.b7' 'lalalla' -> "lalalal" @ 1
+#'a.b8' A(s~3) -> B(i~1) @ 1
 
 # ERROR: this syntax is accepted, but should send a semantic error "at least one mixture/signature should exist"
 # waiting for evaluate rules method
@@ -104,13 +105,13 @@
 
 
 #### USES & INITS
-%agent: A(s~1~2)
-%agent: B(t~1~2)
+#%agent: A(s~1~2)
+#%agent: B(t~1~2)
 #%var: 'cantA' 1000
 #%var: 'cantB' 987
 #%token: X
-%compartment: 'bottles' [1][2] 0.75
-%channel: 'tube2' 'bottles'[x][y] -> 'bottles'[0][0] $1
+#%compartment: 'bottles' [1][2] 0.75
+#%channel: 'tube2' 'bottles'[x][y] -> 'bottles'[0][0] $1
 
 # ERROR: bottles without dimension: maybe the solution is:
 # if you don't declare dimension, the simulation will crash
@@ -127,24 +128,27 @@
 #%init: 100 'X'
 
 #### PERTURBATIONS
-# ERROR: fail to assign string on $STOP: double free or corruption (fasttop)
-#%mod: [false] do $STOP "You shall not pass!"
-#%mod: [false] do $FLUX "string_exp" [true] 
+# SOLVED: fail to assign string on $STOP: double free or corruption (fasttop)
+#%mod: 2>1 do $STOP "You shall not pass!"
 
-# ERROR: Segmentation fault
+# SOLVED: Segmentation fault - review StringExpression destructor
 #%mod: [false] do $TRACK 'a' [true]
 #%mod: [false] do $UPDATE 'a' 1
-#%mod: [false] do $ADD 1 A(s~1!1),B(t~2!1)
-
-%mod: [false] do $SNAPSHOT "snapshot here!"
-#%mod: [false] do $DEL 1 A(s~1!1),B(t~2!1)
+#%mod: [false] do $FLUX "string_exp" [true]
+#%mod: [false] do $FLUX <"string_exp"> [true]
+#%mod: [false] do $FLUX <"string_exp"."string_exp2".[123]> [true] 
+#%mod: [false] do $STOP <"lalala "."print this string">
+#%mod: [false] do $SNAPSHOT "snapshot here!"
+#%mod: [false] do $SNAPSHOT <"lalala "."print this string">
 #%mod: [false] do $PRINT <"print this string">
 #%mod: [false] do $PRINT "print this string"
-#%mod: [false] do $STOP <"lalala "."print this string">
+#%mod: [false] do $PRINT <"print this string".[123]>
+#%mod: [false] do $PRINT <"222222".[1+2+3]."print this string">
+#%mod: [false] do $PRINTF "file_name" <[2^2]."print this string". " & this other">
 
-#%mod: [false] do $PRINTF <"file"> <"print this string">
-
-#%mod: [false] do $PRINT <12+1."print this string">
+# SOLVED: Segmentation fault - review Effect destructor
+#%mod: [false] do $ADD 1 A(s~1!1),B(t~2!1)
+#%mod: [false] do $DEL 1 A(s~1!1),B(t~2!1)
 
 # ERROR: Segmentation fault
 #%mod: repeat [false] do $TRACK 'a' [false] until [false]

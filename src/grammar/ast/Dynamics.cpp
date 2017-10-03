@@ -14,11 +14,11 @@ namespace ast {
 /****** Class Link ***********/
 Link::Link() : type(FREE),value(0){}
 Link::Link(const location &l,LinkType t):
-	Node(l), type(t)  {};
+	Node(l), type(t), value()  {};
 Link::Link(const location &l,LinkType t,int val):
 	Node(l), type(t), value(val) {};
 Link::Link(const location &l,LinkType t,const Id &ag,const Id &s):
-	Node(l), type(t), ag_site{ag,s} {	};
+	Node(l), type(t), ag_site{ag,s}, value() {	};
 Link::Link(const Link &l):Node(l){
 	type = l.type;
 	switch(type){
@@ -317,14 +317,14 @@ void Agent::eval(const pattern::Environment &env,const vector<state::Variable*> 
 
 void Agent::show( string tabs ) const {
 	tabs += "   ";
-	cout << "Agent " << name.getString() << " {";
+	cout << tabs << "Agent " << name.getString() << " {";
 
 	for(list<Site>::const_iterator it = sites.cbegin(); it != sites.cend(); it++){
-		cout << endl;
+		cout << endl << "   ";
 		it->show( tabs );
 	}
 
-	cout << endl << "}" << endl;
+	cout << endl << tabs <<  "}" << endl;
 }
 
 
@@ -353,28 +353,34 @@ pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 	return mix;
 }
 
+void Mixture::show(string tabs) const {
+	for(list<Agent>::const_iterator it = agents.cbegin() ; it != agents.cend() ; it++) {
+		it->show(tabs);
+	}
+}
+
 
 /****** Class Effect *************/
 Effect::Effect():
-	action(),n(nullptr),mix(nullptr),string_expr(nullptr),set(VarValue()) {};
+	action(),n(nullptr),mix(nullptr),set(VarValue()) {};
 //INTRO,DELETE
-Effect::Effect(const location &l,const Action &a,const Expression *n ,list<Agent>& mix):
+Effect::Effect(const location& l,const Action& a,const Expression* n ,list<Agent>& mix):
 	Node(l),action(a),n(n), mix(new Mixture(l,mix)) {};
 //UPDATE,UPDATE_TOK
-Effect::Effect(const location &l,const Action &a,const VarValue &dec):
-	Node(l),action(a),set(dec)/*,n(nullptr),mix(nullptr) */{};
+Effect::Effect(const location& l,const Action& a,const VarValue& dec):
+	Node(l),action(a),set(dec),n(nullptr),mix(nullptr){};
 //CFLOW,CFLOW_OFF
-Effect::Effect(const location &l,const Action &a,const Id &id):
+Effect::Effect(const location& l,const Action& a,const Id& id):
 	Node(l),action(a),name(id),n(nullptr),mix(nullptr) {};
 //STOP,SNAPSHOT,FLUX,FLUXOFF,PRINT
-Effect::Effect(const location &l,const Action &a,const StringExpression &str):
-	Node(l),action(a),string_expr(new StringExpression(str)),n(nullptr),mix(nullptr) {};
+Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str):
+	Node(l),action(a),string_expr(str),n(nullptr),mix(nullptr) {};
 //PRINTF
-Effect::Effect(const location &l,const Action &a,const StringExpression &str1,const StringExpression &str2):
-		Node(l),action(a),string_expr(new StringExpression[2]{str1,str2}),n(nullptr),mix(nullptr) {};
+Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str1,const list<StringExpression>& str2):
+	Node(l),action(a),filename(str1),string_expr(str2),n(nullptr),mix(nullptr) {};
 
 Effect::Effect(const Effect &eff):
-		Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
+	Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
 
 	n = eff.n;
 	mix = eff.mix;
@@ -390,10 +396,11 @@ Effect::Effect(const Effect &eff):
 		name = eff.name;
 		break;
 	case STOP:case SNAPSHOT:case FLUX:case FLUX_OFF:case PRINT:
-		string_expr = new StringExpression(*eff.string_expr);
+		string_expr = eff.string_expr;
 		break;
 	case PRINTF:
-		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		string_expr = eff.string_expr;
+		filename = eff.filename;
 		break;
 	}
 }
@@ -406,9 +413,9 @@ Effect& Effect::operator=(const Effect& eff){
 	mix = eff.mix;
 
 	switch(action){
-	case INTRO:case DELETE:
-		//multi_exp = eff.multi_exp;
-		break;
+	//case INTRO:case DELETE:
+	//	multi_exp = eff.multi_exp;
+	//	break;
 	case UPDATE:case UPDATE_TOK:
 		set = eff.set;
 		break;
@@ -416,22 +423,62 @@ Effect& Effect::operator=(const Effect& eff){
 		name = eff.name;
 		break;
 	case STOP:case SNAPSHOT:case FLUX:case FLUX_OFF:case PRINT:
-		string_expr = new StringExpression(*eff.string_expr);
+		string_expr = eff.string_expr;
 		break;
 	case PRINTF:
-		string_expr = new StringExpression[2]{eff.string_expr[0],eff.string_expr[1]};
+		string_expr = eff.string_expr;
+		filename = eff.filename;
 		break;
 	}
 	return *this;
 }
 
+void Effect::show(string tabs) const {
+	tabs += "   ";
+	cout << tabs << "effect :" << endl ;
+	cout << tabs << "   " << "action:" << action << endl;
+
+	if(n) {
+		cout << tabs << "   " << "expression:";
+		n->show(tabs+"   ");
+		cout << endl;
+	}
+
+	if(mix) {
+		cout << tabs << "   " << "mixture:" << endl;
+		mix->show(tabs+"   ");
+	}
+
+	cout << tabs << "   " << "set:" << endl;
+	set.show(tabs+"   ");
+
+	cout << tabs << "   " << "name:" << endl;
+	name.show(tabs+"   ");
+
+	// show  string_expr and string_expr2 StringExpression class
+	cout << endl;
+	cout << tabs << "   " << "string_expr:" << endl;
+	short i = 0;
+	for(list<StringExpression>::const_iterator it = string_expr.cbegin(); it != string_expr.cend() ; it++) {
+		cout << tabs << "      " << ++i << ")" ;
+		it->show(tabs);
+		cout << endl;
+	}
+
+	cout << tabs << "   " << "filename:" << endl;
+	i = 0;
+	for(list<StringExpression>::const_iterator it = filename.cbegin(); it != filename.cend() ; it++) {
+		cout << tabs << "      " << ++i << ")" ;
+		it->show();
+		cout << endl;
+	}
+}
+
 Effect::~Effect(){
 	switch(action){
-	case STOP:case SNAPSHOT:case FLUX:case FLUX_OFF:case PRINT:
-		delete string_expr;
-		break;
-	case PRINTF:
-		delete string_expr;
+	case INTRO: case DELETE:
+		//delete n;
+		//delete mix;
 		break;
 	default:
 		break;
@@ -443,6 +490,26 @@ Effect::~Effect(){
 Perturbation::Perturbation() : condition(nullptr),until(nullptr){};
 Perturbation::Perturbation(const location &l,const Expression *cond,const list<Effect> &effs,const Expression* rep):
 	Node(l), condition(cond), until(rep), effects(effs){};
+
+void Perturbation::show(string tabs) {
+	tabs += "   ";
+	cout << "Perturbation {" << endl;
+
+	cout << "condition :" ;
+	condition->show(tabs);
+
+	if(until) {
+		cout << "until :";
+		until->show(tabs);
+	}
+
+	for(list<Effect>::const_iterator it = effects.cbegin(); it != effects.cend(); it++){
+		cout << endl;
+		it->show(tabs);
+	}
+
+	cout << endl << "}" << endl;
+}
 
 Perturbation::~Perturbation() {
 	if(until)
@@ -591,7 +658,7 @@ void Rule::eval(pattern::Environment& env,
 		delete rhs_mix_p;
 		rule.setRHS(&rhs_mix,bi);
 		auto reverse_label = label.getString()+" @bckwrds";
-		auto inverse_rule = env.declareRule(Id(label.loc,reverse_label),rhs_mix);
+		auto& inverse_rule = env.declareRule(Id(label.loc,reverse_label),rhs_mix);
 		inverse_rule.setRHS(&lhs_mix,bi);
 		inverse_rule.difference(env,rhs_mask,lhs_mask);
 		inverse_rule.setRate(reverse);

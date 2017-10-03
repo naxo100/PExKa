@@ -7,6 +7,8 @@
 
 #include "Simulation.h"
 #include <set>
+#include <boost/random.hpp>
+
 namespace simulation {
 
 Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars),
@@ -67,6 +69,40 @@ vector<unsigned> Simulation::allocAgents1(unsigned cells,unsigned ag_count,const
 	return allocs;
 }
 
+// Allocate agents sampling a multinomial distribution.
+vector<unsigned> Simulation::allocAgents2(unsigned cells, unsigned ag_counts, const list<float>* vol_ratios) {
+
+	vector<unsigned> allocs;
+	list<float> p_values;
+
+	// Create p_values from *vol_ratios.
+	if ( vol_ratios == nullptr )
+		p_values.assign(cells, 1.0/cells);
+	else {
+		float sum_vol_ratios = 0.0;
+		for (auto v : *vol_ratios)
+			sum_vol_ratios += v;
+		for (auto v : *vol_ratios)
+			p_values.push_back(v/sum_vol_ratios);
+	}
+
+	// Sampling multinomial distribution.
+	boost::mt19937 rng;
+	unsigned sum_ag = 0;
+	float sum_p  = 1.0;
+	for (auto p : p_values) {
+		boost::binomial_distribution<> distr(ag_counts - sum_ag , p/sum_p);
+		boost::variate_generator<boost::mt19937&,
+		                         boost::binomial_distribution<> > sampler(rng, distr);
+		unsigned s = sampler();
+		sum_ag += s;
+		sum_p  -= p;
+
+		allocs.push_back(s);
+	}
+
+	return allocs;
+}
 
 template <template<typename,typename...> class Range,typename... Args>
 void Simulation::addTokens(const Range<int,Args...> &cell_ids,float count,short token_id){
@@ -87,7 +123,7 @@ template void Simulation::addTokens(const std::set<int> &cell_ids,float count,sh
 
 template <template<typename,typename...> class Range,typename... Args>
 void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,const pattern::Mixture &mix){
-	auto per_cell = allocAgents1(cell_ids.size(),count);
+	auto per_cell = allocAgents2(cell_ids.size(),count);
 	auto ids_it = cell_ids.begin();
 	for(auto n : per_cell){
 		try{

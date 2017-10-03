@@ -174,7 +174,7 @@ void State::initializeInjections(const pattern::Environment &env) {
 
 
 void State::print() const {
-	cout << "{state with SiteGraph.size() = " << graph.getNodeCount();
+	cout << "{state with SiteGraph.size() = " << graph.getPopulation();
 	cout << ", vars.size() = " << vars.size();
 	cout << ", volume = " << volume.getValue().valueAs<float>();
 	cout << " }" << endl;

@@ -14,7 +14,7 @@
 #include "../../state/Variable.h"
 #include "../../pattern/Environment.h"
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 
@@ -23,10 +23,11 @@ namespace ast {
 class Node {
 public:
 	typedef yy::location location;
+	location loc;
+
 	Node();
 	Node(const yy::location& l);
 	virtual ~Node() = 0;
-	location loc;
 	virtual void show( string tabs = "" ) const;
 };
 
@@ -87,23 +88,23 @@ public:
 class StringExpression : public Node {
 public:
 	StringExpression();
-	StringExpression(const location &l,const string &s);
-	StringExpression(const location &l,const Expression *e);
-	StringExpression(const location &l,const Expression *e, const StringExpression* nxt);
-	StringExpression(const location &l,const string &s, const StringExpression* nxt);
 
-	StringExpression( const StringExpression &str_expr );
-	StringExpression& operator=(const StringExpression& str_expr);
+	StringExpression(const location &l,const string s);
+	StringExpression(const location &l,const Expression *e);
+
+	void show(string tabs = "") const;
 
 	~StringExpression();
 
 protected:
 	enum Type {STR,ALG} t;
-	/*union{*/
+	string str;
+	const Expression *alg;
+
+	/*union{
 		const string *str;
 		const Expression  *alg;
-	/*};*/
-	const StringExpression* next;
+	};*/
 };
 
 /** \brief Direction of a Reaction or Channel

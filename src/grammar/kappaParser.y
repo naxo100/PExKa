@@ -69,7 +69,7 @@
 %left MINUS PLUS MIN MAX
 %left MULT DIV
 %left MODULO
-%right POW 
+%right POW
 %nonassoc LOG SQRT EXPONENT SINUS COSINUS ABS TAN
 
 %left OR
@@ -93,10 +93,9 @@
 //%type <std::pair<Expression*, Mixture>>		multiple_mixture
 %type <std::list<CompExpression>>		comp_list
 %type <std::list<const Expression*>>		dimension
-%type <StringExpression> 			print_expr
+%type <std::list<StringExpression>>		print_expr print_expr_list
 %type <Effect>					effect
 %type <std::list<Effect>>			effect_list
-%type <StringExpression>			string_or_pr_expr
 %type <Radius>					alg_with_radius   
 %type <Rate>					rate
 %type <Perturbation>				perturbation_declaration
@@ -308,13 +307,13 @@ effect_list:
 effect:
 // INTRO multiple_mixture 
   INTRO alg_expr non_empty_mixture
-	{$$ = Effect(@$ ,Effect::INTRO, $2, $3);}
+	{ $$ = Effect(@$ ,Effect::INTRO, $2, $3); }
 // | DELETE multiple_mixture
 | DELETE alg_expr non_empty_mixture
-	{ $$ = Effect(@$, Effect::DELETE, $2, $3);}
-| STOP string_or_pr_expr
+	{ $$ = Effect(@$, Effect::DELETE, $2, $3); }
+| STOP print_expr_list
 	{ $$ = Effect(@$,Effect::STOP,$2); }
-| FLUX string_or_pr_expr boolean 
+| FLUX print_expr_list boolean 
 	{ $$ = Effect(@$,$3 ? Effect::FLUX : Effect::FLUX_OFF,$2); }
 | TRACK LABEL boolean 
 	{ $$ = Effect(@$,$3 ? Effect::CFLOW : Effect::CFLOW_OFF , Id(@2,$2)); }
@@ -323,40 +322,41 @@ effect:
 | ASSIGN2 LABEL alg_expr /*updating the rate of a rule*/
 	{ $$ = Effect(@$,Effect::UPDATE,VarValue(@1,Id(@2,$2),$3)); }
 | ID LAR alg_expr /*updating the value of a token*/
-	{ $$ = Effect(@$,Effect::UPDATE_TOK,VarValue(@2,Id(@1,$1),$3));}
-| SNAPSHOT string_or_pr_expr
+	{ $$ = Effect(@$,Effect::UPDATE_TOK,VarValue(@2,Id(@1,$1),$3)); }
+| SNAPSHOT print_expr_list
 	{ $$ = Effect(@$,Effect::SNAPSHOT,$2); }
-
-| PRINT SMALLER print_expr GREATER 
-	{ $$ = Effect(@$,Effect::PRINT,$3);}
-| PRINTF string_or_pr_expr SMALLER print_expr GREATER 
-	{ $$ = Effect(@$,Effect::PRINT,$2,$4); }
-//| PRINT string_or_pr_expr 
-//	{ $$ = Effect(@$,Effect::PRINT,$2);}
-//| PRINTF string_or_pr_expr string_or_pr_expr 
-//	{ $$ = Effect(@$,Effect::PRINT,$2,$3); }
+| PRINT print_expr_list 
+	{ $$ = Effect(@$,Effect::PRINT,$2); }
+| PRINTF print_expr_list print_expr_list 
+	{ $$ = Effect(@$,Effect::PRINTF,$2,$3); }
 ;
 
 
-print_expr:
-  STRING 
-	{ $$ = StringExpression(@$,$1); }
-/*| alg_expr 
-	{ $$ = StringExpression(@$,$1); }*/
-| STRING DOT print_expr 
-	{ $$ = StringExpression(@$,$1,&$3); 		
-		//$$ = StringExpression(@$,$1,$3);
-	}
-| alg_expr DOT print_expr 
-	{ $$ = StringExpression(@$,$1,&$3);
-		//$$ = StringExpression(@$,$1,$3);
-	}
-;
-
-string_or_pr_expr:
-  STRING {$$ = StringExpression(@$,$1);}
+print_expr_list: // list
+  STRING
+	{ $$ = std::list<StringExpression>(1,StringExpression(@$,$1)); }
 | SMALLER print_expr GREATER {$$ = $2;}
 ;
+
+print_expr: // list
+  STRING 
+	{ $$.push_front( StringExpression(@$,$1) ); }
+| OP_BRA alg_expr CL_BRA
+	{ $$.push_front( StringExpression(@$,$2) ); }
+| OP_BRA alg_expr CL_BRA DOT print_expr
+	{ $5.push_front( StringExpression(@$,$2) ); 
+	  $$ = $5;
+	}
+| STRING DOT print_expr
+	{ $3.push_front( StringExpression(@$,$1) );
+	  $$=$3; 
+	}
+;
+
+/*string_or_pr_expr:
+  STRING {$$ = StringExpression(@$,$1);}
+| SMALLER print_expr GREATER {$$ = $2;}
+;*/
 
 
 boolean:

@@ -41,6 +41,7 @@ public:
 	size_t getNodeCount() const;
 	vector<Node*>::iterator begin();
 	vector<Node*>::iterator end();
+	size_t getPopulation() const;
 
 
 protected:
@@ -49,6 +50,7 @@ protected:
 	vector<Node*> container;
 	size_t fresh;
 	size_t nodeCount;
+	size_t population;
 	list<size_t> free;
 
 

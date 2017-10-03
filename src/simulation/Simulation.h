@@ -39,8 +39,10 @@ class Simulation {
 	template <typename T>
 	list<T> allocParticles(unsigned cells,T count,const list<T>* vol_ratios = nullptr);
 
-	//deterministic
+	// deterministic
 	vector<unsigned> allocAgents1(unsigned cells,unsigned ag_count,const list<float>* vol_ratios = nullptr);
+	// random
+	vector<unsigned> allocAgents2(unsigned cells, unsigned ag_count, const list<float>* vol_ratios = nullptr);
 
 public:
 	Simulation(pattern::Environment& env,const std::vector<state::Variable*>& vars);

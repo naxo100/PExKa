@@ -18,4 +18,8 @@ Counter::~Counter() {
 	// TODO Auto-generated destructor stub
 }
 
+const double Counter::getTime() const{
+	return 1;//TODO
+}
+
 } /* namespace pattern */

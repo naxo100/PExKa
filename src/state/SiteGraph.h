@@ -11,17 +11,11 @@
 #include <utility> //pair
 #include <list>
 #include <vector>
-#include <queue>
 //#include "../pattern/Environment.h"
 #include "../util/params.h"
 #include "../state/AlgExpression.h"
 #include "../pattern/Signature.h"
-#include "../pattern/Mixture.h"
-//#include "../matching/Injection.h"
-
-namespace matching {
-	class InjSet;
-}
+#include "../matching/Injection.h"
 
 namespace pattern {
 	class Environment;
@@ -39,8 +33,6 @@ public:
 
 	void allocate(Node* n);
 	size_t getNodeCount() const;
-	vector<Node*>::iterator begin();
-	vector<Node*>::iterator end();
 	size_t getPopulation() const;
 
 
@@ -61,9 +53,8 @@ struct SiteGraph::Internal {
 	SomeValue val;
 	pair<Node*,small_id> link;
 	//for value, for link //TODO refs????
-	pair<matching::InjSet*,matching::InjSet*> deps;//pointers to accept forward declaration of InjSet
+	pair<matching::InjSet,matching::InjSet> deps;
 	Internal();
-	~Internal();
 
 	string toString(const pattern::Signature::Site& s) const;
 
@@ -94,19 +85,11 @@ public:
 
 	short_id getId() const;
 
-	/** \brief Tests whether a site of this node matches with a mixture site.
-	 * Tests if interface[id_site.first] matches with id_site.second.
-	 * Stores in port_list every site_id that needs to match, used later to
-	 * save injections. Also it stores in match_queue every pair
-	 * (to_follow_,Node*) that will be matched later.
-	 */
-	bool test(const pair<small_id,pattern::Mixture::Site>& id_site,
-			std::queue<pair<small_id,Node&> > &match_queue,
-			two<list<Internal*> > &port_list) const;
+
 
 	//unsafe
 	Internal& getInternalState(small_id);
-	pair<matching::InjSet*,matching::InjSet*>& getLifts(small_id site);
+	pair<matching::InjSet,matching::InjSet>& getLifts(small_id site);
 
 
 	//DEBUG

@@ -75,10 +75,6 @@ public:
 	const list<Channel>& getChannels(short id) const;
 	const Compartment& getCompartment(short id) const;
 	const UseExpression& getUseExpression(short id) const;
-	//const Mixture& getMixture(small_id id) const;
-	const list<Mixture>& getMixtures() const;
-	const list<Mixture::Component>& getComponents() const;
-
 
 	const Compartment& getCompartmentByCellId(unsigned id) const;
 

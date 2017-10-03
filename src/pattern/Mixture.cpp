@@ -5,7 +5,6 @@
  *      Author: naxo
  */
 
-#include <cstring>
 #include "Mixture.h"
 #include "Environment.h"
 
@@ -263,9 +262,9 @@ const vector<const Mixture::Component*>::iterator Mixture::end() const {
 
 string Mixture::toString(const Environment& env) const {
 	string out = "";
-	short i = 0;
+	short i = 1;
 
-	for( auto c : *comps ) {
+	for( auto &c : *comps ) {
 		out += "Component[" + to_string(i) + "] = " + c->toString(env) + "\n";
 		i++;
 	}
@@ -305,7 +304,7 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 	if(signId == a.signId && interface.size() == a.interface.size()){
 		for(const pair<int,Site> &id_site : interface){
 			try{
-				if(! (id_site.second == a.getSite(id_site.first)))
+				if(! (id_site.second == a.getSite(id_site.first)) )
 					return false;
 			}
 			catch(std::out_of_range &e){
@@ -321,10 +320,6 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 void Mixture::Agent::setSiteValue(small_id site_id,small_id lbl_id){
 	//interface[site_id].val_type = ValueType::LABEL;
 	interface[site_id].state.set(lbl_id);
-}
-void Mixture::Agent::setSiteValue(small_id site_id,float val){
-	//interface[site_id].val_type = ValueType::LABEL;
-	interface[site_id].state.set(val);
 }
 
 const string Mixture::Agent::toString(const Environment& env, short mixAgId,
@@ -357,7 +352,6 @@ const string Mixture::Agent::toString(const Environment& env, short mixAgId,
 			case state::BaseExpression::INT :
 				break;
 			case state::BaseExpression::FLOAT :
-				//TODO if NAN EmptySite;
 				break;
 			default:
 				throw std::invalid_argument("Mixture::Agent::toString(): not a valid state type.");
@@ -399,12 +393,8 @@ const string Mixture::Agent::toString(const Environment& env, short mixAgId,
 }
 
 /************** class Site *********************/
-Mixture::Site::Site() : state((small_id)-1),link_type() {}
+Mixture::Site::Site() : state((small_id)0),link_type() {}
 
-bool Mixture::Site::isEmptySite() const{
-	static auto empty = (small_id)-1;
-	return state.smallVal == empty;
-}
 bool Mixture::Site::operator ==(const Site &s) const{
 	/*if(val_type == s.val_type){
 		switch(val_type){
@@ -424,8 +414,7 @@ bool Mixture::Site::operator ==(const Site &s) const{
 			break;
 		}
 	}*/
-	//if(state != s.state)
-	if(memcmp(&state,&s.state,sizeof(state::SomeValue))) //only valid if union in state is cleaned at constructor
+	if(state != s.state)
 		return false;
 	if(s.link_type == link_type){
 		if(link_type == LinkType::BIND_TO && s.lnk_ptrn != lnk_ptrn)
@@ -480,7 +469,7 @@ ag_st_id Mixture::Component::follow(small_id ag_id,small_id site) const{
 	try{
 		return graph->at(ag_st_id(ag_id,site));
 	}
-	catch(std::out_of_range& e){}//TODO debug print (maybe use unsafe version for speed)
+	catch(std::out_of_range& e){}
 	return make_pair(ag_id,site);
 }
 

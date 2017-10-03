@@ -15,9 +15,6 @@ class Counter {
 public:
 	Counter();
 	~Counter();
-
-	const double getTime() const;
-	void advanceTime(double t);
 };
 
 } /* namespace pattern */

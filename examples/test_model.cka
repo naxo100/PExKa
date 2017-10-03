@@ -55,18 +55,30 @@
 # SOLVED: var or const 'e' is not defined
 #'a.b4' A(s~3) -> B(i~1) @ 'e'
 
-# ERROR: segmentation fault. I don't know why, but to delete the rate, it crash
-'a.b5' A(s~3) <-> B(i~1) @ 'on_rate','ab'
+# SOLVED: segmentation fault. I don't know why, but to delete the rate, it crash
+#'a.b5' A(s~3) <-> B(i~1) @ 'on_rate','ab'
 
 # SOLVED: string instead of agents
 #'a.b6' "lalalla" -> "lalalal" @ 1
 #'a.b7' 'lalalla' -> "lalalal" @ 1
 #'a.b8' A(s~3) -> B(i~1) @ 1
 
-# ERROR: this syntax is accepted, but should send a semantic error "at least one mixture/signature should exist"
+# SOLVED: this syntax is accepted, but should send a semantic error "at least one mixture/signature should exist"
 # waiting for evaluate rules method
-#->
-#<->
+#'empty rule' ->
+#'empty birule' <->
+
+# SOLVED: change tests
+#'insert' -> A(s~1) @ 'on_rate'
+#'change' A(s~1) -> A(s~2) @ 'on_rate'
+#'bind' A(s~1),B(i~1) -> A(s~1!1),B(i~1!1) @ 'on_rate'
+#'free' A(s~1!1),B(i~1!1) -> A(s~1),B(i~1) @ 'on_rate'
+#'free birule' A(s~1!1),B(i~1!1) <-> A(s~1),B(i~1) @ 'on_rate','on_rate'
+
+
+# ERROR: Segmentation fault.
+'delete' A(s~1) -> @ 'on_rate'
+#'free&change' A(s~2!1),B(i~1!1) -> A(s~1),B(i~2) @ 'on_rate'
 
 
 #### COMPARTMENTS

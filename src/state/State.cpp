@@ -7,6 +7,7 @@
 
 #include "State.h"
 #include "../pattern/Environment.h"
+#include "../matching/Injection.h"
 
 namespace state {
 
@@ -49,10 +50,10 @@ void State::negativeUpdate(SiteGraph::Internal& intf){
 }
 template <> //for state
 void State::negativeUpdate<0>(SiteGraph::Internal& intf){
-	matching::InjSet& lifts = intf.deps.first;
-	for(auto lift_it = lifts.begin(); lift_it != lifts.end(); lift_it++){
+	matching::InjSet* lifts = intf.deps.first;
+	for(auto lift_it = lifts->begin(); lift_it != lifts->end(); lift_it++){
 		if((*lift_it)->isTrashed()){
-			lifts.erase(lift_it);
+			lifts->erase(lift_it);//TODO better way?
 			continue;
 		}
 		lift_it;
@@ -142,6 +143,34 @@ void State::apply(const simulation::Rule& r,EventInfo& ev){
 	}
 }
 
+
+
+void State::advance(double tau) {
+
+}
+
+void State::initializeInjections(const pattern::Environment &env) {
+	injections = new matching::InjSet[env.size<pattern::Mixture::Component>()];
+	for(auto node_p : graph){
+		unsigned i = 0;
+		for(auto& comp : env.getComponents()){
+			two<std::list<state::SiteGraph::Internal*> > port_lists;
+			try{
+				matching::Injection* inj_p = new matching::CcInjection(comp,*node_p,port_lists);
+				//TODO inj_p.setAddress();inj_p.setCoordinate();
+				injections[i].emplace(inj_p);
+				for(auto port : port_lists.first)
+					port->deps.first->emplace(inj_p);
+				for(auto port : port_lists.second)
+					port->deps.second->emplace(inj_p);
+			}
+			catch(False& e){
+
+			}
+			i++;
+		}
+	}
+}
 
 
 void State::print() const {

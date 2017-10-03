@@ -15,6 +15,7 @@
 #include "../pattern/Mixture.h"
 #include "../simulation/Counter.h"
 #include "../simulation/Rule.h"
+#include "../data_structs/RandomTree.h"
 
 namespace state {
 struct EventInfo;
@@ -32,6 +33,9 @@ class State {
 	const state::BaseExpression& volume;
 	std::vector<Variable*> vars;
 	float* tokens;
+
+	//data_structs::RandomTree activityTree;
+	matching::InjSet* injections;
 	//simulation::Counter counter;
 	//time_t program_t0;
 
@@ -84,6 +88,10 @@ public:
 	 * @param ev embedding of nodes and other event information.
 	 */
 	void apply(const simulation::Rule& r,EventInfo& ev);
+
+	void advance(double tau);
+
+	void initializeInjections(const pattern::Environment &env);
 
 	/** \brief Print the state for debugging purposes.
 	 **/

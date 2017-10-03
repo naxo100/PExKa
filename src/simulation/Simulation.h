@@ -13,6 +13,7 @@
 #include <list>
 #include <vector>
 #include <unordered_map>
+#include "Parameters.h"
 #include "../state/State.h"
 #include "../pattern/Environment.h"
 #include "../pattern/RuleSet.h"
@@ -22,7 +23,8 @@ namespace simulation {
 using namespace std;
 
 class Simulation {
-	//state::State state;//vector?
+	vector<state::State> states;//vector?
+	const Parameters& params;
 	pattern::Environment& env;
 	pattern::RuleSet rules;
 	const vector<state::Variable*>& vars;
@@ -46,6 +48,7 @@ public:
 
 	void setCells(list<unsigned int>& cells);
 
+	void initialize();
 	void run();
 
 	template <template <typename,typename...> class Range,typename... Args>

@@ -9,7 +9,8 @@
 #include <set>
 namespace simulation {
 
-Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars) {
+Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars),
+		params(Parameters::getInstance()){
 	ccInjections = new set<matching::Injection*>[env.size<pattern::Mixture::Component>()];
 	mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
 }
@@ -25,8 +26,25 @@ void Simulation::setCells(list<unsigned int>& _cells){
 	}
 }
 
+void Simulation::initialize(){
+	for(auto& state : states){
+		state.initializeInjections(env);
+	}
+}
+
+
 void Simulation::run(){
-	//TODO
+	//updates
+	while(counter.getTime() < params.limitTime()){
+		//calculate Tau-Leaping
+			//calculate map [species -> diffusion-to-cells array]
+			//map-diffusion-in = scatter map-diffusion-to?
+		double tau;// = calculate-tau( map-diffusion-in )
+		//parallel
+		for(auto& state : states){
+			state.advance(tau);
+		}
+	}
 }
 
 //TODO

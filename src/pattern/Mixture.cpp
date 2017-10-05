@@ -273,6 +273,14 @@ string Mixture::toString(const Environment& env) const {
 	return out + "\nAgents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount) + "\n";
 }
 
+string Mixture::toString(const Environment& env,const vector<ag_st_id>& mask) const {
+	string out("");
+	for(size_t i = 0;i < mask.size(); i++)
+		out += getAgent(mask[i]).toString(env)+",";
+	out.pop_back();
+	return out;
+}
+
 
 /*************** Class Agent ********************/
 
@@ -351,13 +359,13 @@ const string Mixture::Agent::toString(const Environment& env, short mixAgId,
 		switch(it->second.state.t) {
 			case state::BaseExpression::SMALL_ID:
 				labelSite = dynamic_cast<const Signature::LabelSite*>(& site);
-				if(labelSite)//is not an empty site
+				if(labelSite && it->second.state.smallVal != small_id(-1))//is not an empty site
 					out += "~" + labelSite->getLabel(it->second.state.smallVal); //value of site
 				break;
 			case state::BaseExpression::INT :
 				break;
 			case state::BaseExpression::FLOAT :
-				//TODO if NAN EmptySite;
+				//TODO if NAN EmptySite;deprecated
 				break;
 			default:
 				throw std::invalid_argument("Mixture::Agent::toString(): not a valid state type.");
@@ -406,25 +414,6 @@ bool Mixture::Site::isEmptySite() const{
 	return state.smallVal == empty;
 }
 bool Mixture::Site::operator ==(const Site &s) const{
-	/*if(val_type == s.val_type){
-		switch(val_type){
-		case VOID:
-			break;
-		case LABEL:
-			if(s.state.id_value != state.id_value)
-				return false;
-			break;
-		case INT_VAL:
-			if(s.state.int_value != state.int_value)
-				return false;
-			break;
-		case FLOAT_VAL:
-			if(s.state.float_value != state.float_value)
-				return false;
-			break;
-		}
-	}*/
-	//if(state != s.state)
 	if(memcmp(&state,&s.state,sizeof(state::SomeValue))) //only valid if union in state is cleaned at constructor
 		return false;
 	if(s.link_type == link_type){

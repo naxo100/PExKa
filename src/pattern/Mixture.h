@@ -112,6 +112,7 @@ public:
 	 * @param env the environment of simulation.
 	 */
 	string toString(const Environment &env) const;
+	string toString(const Environment &env,const vector<ag_st_id> &mask) const;
 
 
 private:
@@ -141,14 +142,6 @@ typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;
  * declared site of an agent mixture.
  */
 struct Mixture::Site {
-	//valid type of the site state
-	/*ValueType val_type;
-	union {
-		int int_value;
-		float float_value;
-		short id_value;
-		string* lbl; // NO USED
-	} state;*/
 	state::SomeValue state;
 
 	LinkType link_type;
@@ -171,7 +164,6 @@ struct Mixture::Site {
  */
 class Mixture::Agent {
 	short signId; //signature ID
-	// int = site id
 	std::unordered_map<small_id,Site> interface;
 
 public:

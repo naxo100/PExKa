@@ -61,7 +61,7 @@ small_id Signature::addSite(const ast::Id &name_loc,float min,float max){
 }
 
 const Signature::Site& Signature::getSite(small_id id) const{
-	return *sites[id];
+	return *(sites[id]);
 }
 const vector<Signature::Site*>& Signature::getSites() const {
 	return sites;

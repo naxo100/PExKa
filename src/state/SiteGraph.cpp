@@ -8,6 +8,7 @@
 #include "SiteGraph.h"
 #include "../pattern/Environment.h"
 #include "../matching/Injection.h"
+#include <cstring>
 
 namespace state {
 
@@ -80,7 +81,7 @@ bool SiteGraph::Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		two<list<Internal*> > &port_list) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
-		if(port.val != id_site.second.state)
+		if(memcmp(&port.val,&id_site.second.state,sizeof(state::SomeValue)))
 			throw False();
 		else
 			port_list.first.emplace_back(&port);
@@ -96,7 +97,7 @@ bool SiteGraph::Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		break;
 	case pattern::Mixture::BIND:
 		if(!port.link.first)
-			return false;//or return port.link.first;
+			throw False();//or return port.link.first;
 		//else
 		port_list.second.emplace_back(&port);
 		match_queue.emplace(id_site.first,*(port.link.first));//its site_id instead ag_mix_id

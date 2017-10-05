@@ -226,7 +226,7 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 	state::BaseExpression* num;
 	switch(stateInfo.type){
 	case SiteState::EMPTY:
-		agent.setSiteValue(site_id,NAN);
+		//agent.setSiteValue(site_id,(small_id)-1);// default value
 		break;
 	case SiteState::LABEL:
 		if(stateInfo.labels.size() > 1)

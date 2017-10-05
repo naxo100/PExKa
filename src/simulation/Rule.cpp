@@ -38,6 +38,9 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 	unsigned first_del = 9999;
 	auto& warns = WarningStack::getStack();
 	list<Action> binds;
+	map<ag_st_id,small_id> antimap;
+	for(unsigned i = 0; i<rhs_order.size() ; i++)
+		antimap[rhs_order[i]] = i;
 	//modify nodes
 	for(i = 0; i < lhs_order.size(); i++){
 		auto lhs_ag = lhs.getAgent(lhs_order[i]);
@@ -58,7 +61,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 					try{
 						auto rhs_site = rhs_ag.getSite(j);
 						if(lhs_site.state.smallVal != rhs_site.state.smallVal){
-							a.t = CHANGE;a.trgt1 = make_tuple(rhs_order[i].first,rhs_order[i].second,j,false);
+							a.t = CHANGE;a.trgt1 = make_tuple(lhs_order[i].first,lhs_order[i].second,j,false);
 							get<0>(a.trgt2) = rhs_site.state.smallVal;
 							script.emplace_back(a);
 						}
@@ -78,7 +81,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 								if(lnk1.first == rhs_order[i].second && lnk1.second == j)
 									throw SemanticError("The link status of agent "+sign.getName()+", site "+
 											sign.getSite(j).getName()+" on the right hand side is inconsistent",loc);
-								if(lnk1 < make_pair(rhs_order[i].second,j))
+								if(i < antimap[make_pair(rhs_order[i].second,j)])
 									break;//link added before.
 								else{
 									a.t = BIND;a.trgt1 = make_tuple(rhs_order[i].first,rhs_order[i].second,j,false);
@@ -255,9 +258,6 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 
 	}
 	//check if there are binds to new nodes
-	map<ag_st_id,small_id> antimap;
-	for(unsigned i = 0; i<rhs_order.size() ; i++)
-		antimap[rhs_order[i]] = i;
 	for(auto& bind : binds){
 		auto k = antimap[make_pair(get<0>(bind.trgt2),get<1>(bind.trgt2))];
 		if( k >= i ){
@@ -309,18 +309,19 @@ string Rule::toString(const pattern::Environment& env) const {
 		s += "\t";
 		switch(act.t){
 		case DELETE:
-			s += acts[act.t] + " of agent "+lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).toString(env)+"\n";
+			s += acts[act.t] + " agent "+lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).toString(env)+"\n";
 			break;
 		case TRANSPORT:
 			break;
 		case CHANGE:
 			sign1 = &env.getSignature(lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
-			s += acts[act.t] + " of agent site "+sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
-					" to value "+static_cast<const pattern::Signature::LabelSite&>(sign1->getSite(get<2>(act.trgt1)))
+			s += acts[act.t] + " agent's site "+sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
+					" to value ";
+			s += dynamic_cast<const pattern::Signature::LabelSite&>(sign1->getSite(get<2>(act.trgt1)))
 					.getLabel(get<0>(act.trgt2))+"\n";
 			break;
 		case BIND:
-			s += acts[act.t] + " of agents sites ";
+			s += acts[act.t] + " agent's sites ";
 			if(get<3>(act.trgt1)){//new node
 				sign1 = &env.getSignature(newNodes[get<1>(act.trgt1)].getId());
 				s += "(new) " + sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
@@ -341,7 +342,7 @@ string Rule::toString(const pattern::Environment& env) const {
 		case FREE:
 			sign1 = &env.getSignature(lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
 			sign2 = &env.getSignature(lhs.getAgent(get<0>(act.trgt2),get<1>(act.trgt2)).getId());
-			s += acts[act.t] + " of agents site "+sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
+			s += acts[act.t] + " agent's sites "+sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
 				" and "+sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+"\n";
 			break;
 		default: break;

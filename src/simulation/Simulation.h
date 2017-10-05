@@ -23,7 +23,7 @@ namespace simulation {
 using namespace std;
 
 class Simulation {
-	vector<state::State> states;//vector?
+	//vector<state::State> states;//vector?
 	const Parameters& params;
 	pattern::Environment& env;
 	pattern::RuleSet rules;

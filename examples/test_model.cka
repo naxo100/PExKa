@@ -77,8 +77,12 @@
 
 
 # ERROR: Segmentation fault.
-'delete' A(s~1) -> @ 'on_rate'
+#'delete' A(s~1) -> @ 'on_rate'
 #'free&change' A(s~2!1),B(i~1!1) -> A(s~1),B(i~2) @ 'on_rate'
+
+#'insert2' A(s~2) -> A(s~1!1),B(i~2!1) @ 'on_rate'
+#'delete2' A(s~1!1),B(i~2!1) -> A(s~2) @ 'on_rate'
+'delete3' B(i~2!1),A(s~1!1) -> A(s~2) @ 'on_rate' #insrt(A(s~2))+del(B(i~2))+del(A(s~1))
 
 
 #### COMPARTMENTS

@@ -7,6 +7,11 @@
 
 #include "SiteGraph.h"
 #include "../pattern/Environment.h"
+<<<<<<< HEAD
+=======
+#include "../matching/Injection.h"
+#include <cstring>
+>>>>>>> refs/remotes/origin/Develop
 
 namespace state {
 
@@ -67,6 +72,53 @@ pop_size SiteGraph::Node::getCount() const {
 short_id SiteGraph::Node::getId() const{
 	return signId;
 }
+<<<<<<< HEAD
+=======
+
+bool SiteGraph::Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
+		std::queue<pair<small_id,Node&> >& match_queue,
+		two<list<Internal*> > &port_list) const{
+	auto& port = interface[id_site.first];
+	if(!id_site.second.isEmptySite()){
+		if(memcmp(&port.val,&id_site.second.state,sizeof(state::SomeValue)))
+			throw False();
+		else
+			port_list.first.emplace_back(&port);
+	}
+	switch(id_site.second.link_type){
+	case pattern::Mixture::WILD:
+		break;
+	case pattern::Mixture::FREE:
+		if(port.link.first)
+			throw False();
+		//else
+		port_list.second.emplace_back(&port);
+		break;
+	case pattern::Mixture::BIND:
+		if(!port.link.first)
+			throw False();//or return port.link.first;
+		//else
+		port_list.second.emplace_back(&port);
+		match_queue.emplace(id_site.first,*(port.link.first));//its site_id instead ag_mix_id
+		return true;
+		break;
+	case pattern::Mixture::BIND_TO:
+		if(port.link.first){
+			if(port.link.first->getId() != id_site.second.lnk_ptrn.first
+					|| port.link.second != id_site.second.lnk_ptrn.second)
+				throw False();
+		} else
+			throw False();
+		port_list.second.emplace_back(&port);
+		break;
+	case pattern::Mixture::PATH:
+		//TODO
+		break;
+	}
+	return false;
+}
+
+>>>>>>> refs/remotes/origin/Develop
 
 template <typename T>
 void SiteGraph::Node::setState(small_id site_id,T value){

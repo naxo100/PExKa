@@ -225,6 +225,9 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 	//const state::SomeValue *v;
 	state::BaseExpression* num;
 	switch(stateInfo.type){
+	case SiteState::EMPTY:
+		//agent.setSiteValue(site_id,(small_id)-1);// default value
+		break;
 	case SiteState::LABEL:
 		if(stateInfo.labels.size() > 1)
 			throw SemanticError("List of labels are only allowed in agent declaration.",loc);

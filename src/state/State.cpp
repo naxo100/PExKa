@@ -23,6 +23,8 @@ void State::addTokens(float n,short tok_id){
 }
 
 void State::addNodes(unsigned n,const pattern::Mixture& mix,const pattern::Environment &env){
+	if(n == 0)//test?
+		return;
 	vector<SiteGraph::Node*> buff_nodes;
 	for(auto p_comp : mix){
 		buff_nodes.reserve(p_comp->size());
@@ -142,13 +144,51 @@ void State::apply(const simulation::Rule& r,EventInfo& ev){
 	}
 }
 
+<<<<<<< HEAD
+=======
 
 
-void State::print() const {
-	cout << "{state with SiteGraph.size() = " << graph.getPopulation();
-	cout << ", vars.size() = " << vars.size();
-	cout << ", volume = " << volume.getValue().valueAs<float>();
-	cout << " }" << endl;
+void State::advance(double tau) {
+
+}
+
+void State::initializeInjections(const pattern::Environment &env) {
+	injections = new matching::InjSet[env.size<pattern::Mixture::Component>()];
+	for(auto node_p : graph){
+		unsigned i = 0;
+		for(auto& comp : env.getComponents()){
+			two<std::list<state::SiteGraph::Internal*> > port_lists;
+			try{
+				matching::Injection* inj_p = new matching::CcInjection(comp,*node_p,port_lists);
+				//TODO inj_p.setAddress();inj_p.setCoordinate();
+				injections[i].emplace(inj_p);
+				for(auto port : port_lists.first)
+					port->deps.first->emplace(inj_p);
+				for(auto port : port_lists.second)
+					port->deps.second->emplace(inj_p);
+				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
+			}
+			catch(False& e){
+
+			}
+			i++;
+		}
+	}
+}
+>>>>>>> refs/remotes/origin/Develop
+
+
+void State::print(const pattern::Environment &env) const {
+	cout << "state with {SiteGraph.size() = " << graph.getPopulation();
+	cout << "\n\tvolume = " << volume.getValue().valueAs<float>();
+	cout << "\n\tInjections {\n";
+	int i = 0;
+	for(auto& cc : env.getComponents()){
+		if(injections[i].size())
+			cout << "\t\t" << injections[i].size() << " injs of " << cc.toString(env) << endl;
+		i++;
+	}
+	cout << "\t}\n}" << endl;
 }
 
 } /* namespace ast */

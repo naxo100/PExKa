@@ -57,7 +57,17 @@ public:
 	//Injection or just map???
 	void apply(const simulation::Rule& r,EventInfo& e);
 
+<<<<<<< HEAD
 	void print() const;
+=======
+	void advance(double tau);
+
+	void initializeInjections(const pattern::Environment &env);
+
+	/** \brief Print the state for debugging purposes.
+	 **/
+	void print(const pattern::Environment &env) const;
+>>>>>>> refs/remotes/origin/Develop
 };
 
 struct EventInfo {

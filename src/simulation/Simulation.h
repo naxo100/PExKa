@@ -22,7 +22,12 @@ namespace simulation {
 using namespace std;
 
 class Simulation {
+<<<<<<< HEAD
 	//state::State state;//vector?
+=======
+	//vector<state::State> states;//vector?
+	const Parameters& params;
+>>>>>>> refs/remotes/origin/Develop
 	pattern::Environment& env;
 	pattern::RuleSet rules;
 	const vector<state::Variable*>& vars;

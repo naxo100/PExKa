@@ -14,7 +14,7 @@
 #include "../../state/Variable.h"
 #include "../../pattern/Environment.h"
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 

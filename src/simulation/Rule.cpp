@@ -302,10 +302,11 @@ string Rule::toString(const pattern::Environment& env) const {
 	static string acts[] = {"CREATE","DELETE","TRANSPORT","CHANGE","BIND","FREE"};
 	string s = name+"'s actions:\n";
 	for(auto& nn : newNodes){
-		s += "INSERT agent "+nn.toString(env)+"\n";
+		s += "\tINSERT agent "+nn.toString(env)+"\n";
 	}
 	const pattern::Signature *sign1,*sign2;
 	for(auto act : script){
+		s += "\t";
 		switch(act.t){
 		case DELETE:
 			s += acts[act.t] + " agent "+lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).toString(env)+"\n";

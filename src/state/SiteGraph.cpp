@@ -7,11 +7,8 @@
 
 #include "SiteGraph.h"
 #include "../pattern/Environment.h"
-<<<<<<< HEAD
-=======
 #include "../matching/Injection.h"
 #include <cstring>
->>>>>>> refs/remotes/origin/Develop
 
 namespace state {
 
@@ -44,6 +41,12 @@ size_t SiteGraph::getPopulation() const {
 	return population;
 }
 
+vector<SiteGraph::Node*>::iterator SiteGraph::begin() {
+	return container.begin();
+}
+vector<SiteGraph::Node*>::iterator SiteGraph::end() {
+	return container.end();
+}
 
 /********* Node Class ************/
 SiteGraph::Node::Node(const pattern::Signature& sign) : n(1),signId(sign.getId()),address(-1), intfSize(sign.getSiteCount()){
@@ -72,8 +75,6 @@ pop_size SiteGraph::Node::getCount() const {
 short_id SiteGraph::Node::getId() const{
 	return signId;
 }
-<<<<<<< HEAD
-=======
 
 bool SiteGraph::Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		std::queue<pair<small_id,Node&> >& match_queue,
@@ -118,8 +119,6 @@ bool SiteGraph::Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 	return false;
 }
 
->>>>>>> refs/remotes/origin/Develop
-
 template <typename T>
 void SiteGraph::Node::setState(small_id site_id,T value){
 	throw std::invalid_argument("Node::setState(): not a valid state value.");
@@ -154,7 +153,7 @@ SiteGraph::Internal& SiteGraph::Node::getInternalState(small_id id){
 	return interface[id];
 }
 
-pair<matching::InjSet,matching::InjSet>& SiteGraph::Node::getLifts(small_id site){
+pair<matching::InjSet*,matching::InjSet*>& SiteGraph::Node::getLifts(small_id site){
 	return interface[site].deps;
 }
 
@@ -162,7 +161,12 @@ pair<matching::InjSet,matching::InjSet>& SiteGraph::Node::getLifts(small_id site
 /********** Internal struct ************/
 
 SiteGraph::Internal::Internal() : val(small_id(-1)),link(nullptr,0),
-		deps(){}
+		deps(new matching::InjSet(),new matching::InjSet()){}
+
+SiteGraph::Internal::~Internal(){
+	delete deps.first;
+	delete deps.second;
+}
 
 
 

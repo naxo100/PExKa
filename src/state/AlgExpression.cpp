@@ -94,9 +94,9 @@ template BaseExpression* BaseExpression::makeBinaryExpression<false>
 /****** SomeValue ************/
 SomeValue::SomeValue(float f) : fVal(f),t(BaseExpression::FLOAT){}
 SomeValue::SomeValue(int i) : iVal(i),t(BaseExpression::INT){}
-SomeValue::SomeValue(bool b) : bVal(b),t(BaseExpression::BOOL){}
-SomeValue::SomeValue(small_id i) : smallVal(i),t(BaseExpression::SMALL_ID){}
-SomeValue::SomeValue(short_id i) : shortVal(i),t(BaseExpression::SHORT_ID){}
+SomeValue::SomeValue(bool b) : iVal(0),t(BaseExpression::BOOL){bVal=b;}
+SomeValue::SomeValue(small_id i) : iVal(0),t(BaseExpression::SMALL_ID){smallVal=i;}
+SomeValue::SomeValue(short_id i) : iVal(0),t(BaseExpression::SHORT_ID){shortVal=i;}
 
 //SomeValue::SomeValue(const std::string &s) : sVal(new std::string(s)),t(BaseExpression::STR){}
 
@@ -127,7 +127,17 @@ template <> void SomeValue::set(small_id i){smallVal = i;}
 template <> void SomeValue::set(short_id i){shortVal = i;}
 
 bool SomeValue::operator !=(const SomeValue& val) const {
-	return val.fVal != fVal && val.t != t;
+	/*switch(t){
+	case BaseExpression::FLOAT:
+			return static_cast<T>(fVal);
+		case BaseExpression::INT:
+			return static_cast<T>(iVal);
+		case BaseExpression::BOOL:
+			return static_cast<T>(bVal);
+		default:
+			throw std::invalid_argument("SomeValue::valueAs(): not sense in convert id-like values.");
+	}*/
+	return val.iVal != iVal && val.t != t;
 }
 
 

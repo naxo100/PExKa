@@ -164,6 +164,9 @@ const Signature& Environment::getSignature(short id) const {
 const vector<pattern::Signature>& Environment::getSignatures() const{
 	return signatures;
 }
+const list<Mixture::Component>& Environment::getComponents() const{
+	return components;
+}
 
 
 const Compartment& Environment::getCompartmentByCellId(unsigned cell_id) const{
@@ -250,7 +253,10 @@ void Environment::show() const {
 				it->printConnections(l);
 			}
 		}
-
+		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
+		/*for(auto& ap : agentPatterns)
+			cout << ap.toString(*this) << endl;*/
+		cout << "\tComponents[" << components.size() << "]" << endl;
 		cout << "\tMixtures[" << mixtures.size() << "]" << endl;
 		int i = 0;
 		for(auto& mix : mixtures){
@@ -258,8 +264,6 @@ void Environment::show() const {
 			cout << mix.toString(*this) << endl;
 			i++;
 		}
-		cout << "\tComponents[" << components.size() << "]" << endl;
-		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
 
 		cout << "\Rules[" << rules.size() << "]" << endl;
 		i = 0;

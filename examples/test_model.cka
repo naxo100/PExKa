@@ -55,15 +55,15 @@
 # SOLVED: var or const 'e' is not defined
 #'a.b4' A(s~3) -> B(i~1) @ 'e'
 
-# SOLVED: segmentation fault. I don't know why, but to delete the rate, it crash
-#'a.b5' A(s~3) <-> B(i~1) @ 'on_rate','ab'
+# ERROR: segmentation fault. I don't know why, but to delete the rate, it crash
+'a.b5' A(s~3) <-> B(i~1) @ 'on_rate','ab'
 
 # SOLVED: string instead of agents
 #'a.b6' "lalalla" -> "lalalal" @ 1
 #'a.b7' 'lalalla' -> "lalalal" @ 1
 #'a.b8' A(s~3) -> B(i~1) @ 1
 
-# SOLVED: this syntax is accepted, but should send a semantic error "at least one mixture/signature should exist"
+# ERROR: this syntax is accepted, but should send a semantic error "at least one mixture/signature should exist"
 # waiting for evaluate rules method
 #'empty rule' ->
 #'empty birule' <->
@@ -80,8 +80,8 @@
 #'delete' A(s~1) -> @ 'on_rate'
 #'free&change' A(s~2!1),B(i~1!1) -> A(s~1),B(i~2) @ 'on_rate'
 
-#'insert2' A(s~2) -> A(s~1!1),B(i~2!1) @ 'on_rate'
 
+#'insert2' A(s~2) -> A(s~1!1),B(i~2!1) @ 'on_rate'
 
 #'delete2' A(s~1!1),B(i~2!1) -> A(s~2) @ 'on_rate' # seg fault
 'delete3' B(i~2!1),A(s~1!1) -> A(s~2) @ 'on_rate' # insrt(A(s~2))+del(B(i~2))+del(A(s~1))

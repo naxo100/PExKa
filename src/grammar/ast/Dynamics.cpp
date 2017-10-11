@@ -251,6 +251,9 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 			}
 			agent.setSiteValue(site_id,lbl_id);
 		}
+		else{//empty list ? this should have been an SiteState::EMPTY
+			throw invalid_argument("empty list? this should have been an SiteState::EMPTY");
+		}
 		break;
 	case SiteState::RANGE:
 		throw SemanticError("Ranges for sites are only allowed in agent declaration.",loc);
@@ -638,26 +641,32 @@ Rule& Rule::operator=(const Rule& r){
 void Rule::eval(pattern::Environment& env,
 		const vector<state::Variable*> &vars) const{
 	//TODO eval name...
-	auto lhs_mix = lhs.agents.eval(env,vars,true);
-	lhs_mix->declareAgents(env);
-	auto& rule = env.declareRule(label,*lhs_mix);
-	auto lhs_mask = lhs_mix->setAndDeclareComponents(env);
+	auto lhs_mix_p = lhs.agents.eval(env,vars,true);
+	lhs_mix_p->declareAgents(env);
+	auto lhs_mask = lhs_mix_p->setAndDeclareComponents(env);
+	auto& lhs_mix = env.declareMixture(*lhs_mix_p);
+	delete lhs_mix_p;
+	auto& rule = env.declareRule(label,lhs_mix);
 
 	auto reverse = rate.eval(env,rule,vars,bi);
-	auto rhs_mix = rhs.agents.eval(env,vars,true);
+	auto rhs_mix_p = rhs.agents.eval(env,vars,true);
 	vector<pattern::ag_st_id> rhs_mask;
 	if(bi){
-		rhs_mix->declareAgents(env);
-		rhs_mask = rhs_mix->setAndDeclareComponents(env);
+		rhs_mix_p->declareAgents(env);
+		rhs_mask = rhs_mix_p->setAndDeclareComponents(env);
+		auto& rhs_mix = env.declareMixture(*rhs_mix_p);
+		delete rhs_mix_p;
+		rule.setRHS(&rhs_mix,bi);
 		auto reverse_label = label.getString()+" @bckwrds";
-		auto& inverse_rule = env.declareRule(Id(label.loc,reverse_label),*rhs_mix);
-		inverse_rule.setRHS(lhs_mix,bi);
+		auto& inverse_rule = env.declareRule(Id(label.loc,reverse_label),rhs_mix);
+		inverse_rule.setRHS(&lhs_mix,bi);
 		inverse_rule.difference(env,rhs_mask,lhs_mask);
 		inverse_rule.setRate(reverse);
 	}
-	else
-		rhs_mask = rhs_mix->setComponents();
-	rule.setRHS(rhs_mix,bi);
+	else{
+		rhs_mask = rhs_mix_p->setComponents();
+		rule.setRHS(rhs_mix_p,bi);
+	}
 	rule.difference(env,lhs_mask,rhs_mask);
 
 	//TODO set loc

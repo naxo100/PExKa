@@ -137,6 +137,10 @@ typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;
 //bool (*f)(pair<short,short>,pair<short,short>) = [](pair<short,short>& p1,pair<short,short>& p2) {return p1.first < p2.first ? p1 : (p1.second < p2.second ? p1 : p2 );};
 
 
+/** \brief Structure of an agent site of a mixture.
+ * It stores the site value and link state of kappa
+ * declared site of an agent mixture.
+ */
 struct Mixture::Site {
 	state::SomeValue state;
 
@@ -146,9 +150,18 @@ struct Mixture::Site {
 
 	bool operator==(const Site &s) const;
 
+	/** \brief Constructs an empty site.
+	 * Default state value is (small_id)-1 and
+	 * default link_type is FREE.
+	 */
 	Site();
+	bool isEmptySite() const;//TODO inline???
 };
 
+/** \brief Class of an agent declared in a mixture.
+ * Stores all site information of a kappa declared
+ * agent in a mixture.
+ */
 class Mixture::Agent {
 	short signId; //signature ID
 	std::unordered_map<small_id,Site> interface;
@@ -157,6 +170,11 @@ public:
 	Agent(short name_id);
 
 	short getId() const;
+	/** \brief Includes the site with id name_id in this agent.
+	 * The new site is added to a map with the default values,
+	 * like it has no declared value or link status. i.e.
+	 * (small_id)-1 and FREE.
+	 */
 	Site& addSite(short name_id);
 	void setSiteValue(small_id mix_site,small_id label);
 	void setSiteValue(small_id mix_site,int val);
@@ -206,6 +224,9 @@ public:
 	string toString(const Environment& env) const;
 
 	const Mixture::Agent& getAgent(small_id ag) const;
+
+	/** \brief Returns agent and site ids of site-link
+	 */
 	ag_st_id follow(small_id ag_id,small_id site) const;
 
 	bool operator==(const Mixture::Component &m) const;

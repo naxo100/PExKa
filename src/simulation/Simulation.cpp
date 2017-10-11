@@ -11,7 +11,8 @@
 
 namespace simulation {
 
-Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars) {
+Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars),
+		params(Parameters::getInstance()){
 	ccInjections = new set<matching::Injection*>[env.size<pattern::Mixture::Component>()];
 	mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
 }
@@ -27,20 +28,14 @@ void Simulation::setCells(list<unsigned int>& _cells){
 	}
 }
 
-<<<<<<< HEAD
-=======
 void Simulation::initialize(){
-	for(auto& id_state : cells){
-		id_state.second.initializeInjections(env);
+	for(auto& state : states){
+		state.initializeInjections(env);
 	}
 }
 
 
->>>>>>> refs/remotes/origin/Develop
 void Simulation::run(){
-<<<<<<< HEAD
-	//TODO
-=======
 	//updates
 	while(counter.getTime() < params.limitTime()){
 		//calculate Tau-Leaping
@@ -52,7 +47,6 @@ void Simulation::run(){
 			id_state.second.advance(tau);
 		}
 	}
->>>>>>> refs/remotes/origin/Develop
 }
 
 //TODO
@@ -132,8 +126,6 @@ void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,con
 	auto per_cell = allocAgents2(cell_ids.size(),count);
 	auto ids_it = cell_ids.begin();
 	for(auto n : per_cell){
-		if(n == 0)
-			continue;
 		try{
 			cells.at(*ids_it).addNodes(n,mix,env);
 		}
@@ -294,7 +286,7 @@ void Simulation::print() const {
 	cout << cells.size() << " cells in this simulation object." << endl;
 	for(auto& id_state : cells){
 		cout << env.cellIdToString(id_state.first) << endl;
-		id_state.second.print(env);
+		id_state.second.print();
 	}
 }
 

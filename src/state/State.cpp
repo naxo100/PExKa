@@ -171,7 +171,6 @@ void State::initializeInjections(const pattern::Environment &env) {
 		}
 	}
 }
->>>>>>> refs/remotes/origin/Develop
 
 
 void State::print() const {

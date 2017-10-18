@@ -45,6 +45,11 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 	for(i = 0; i < lhs_order.size(); i++){
 		auto lhs_ag = lhs.getAgent(lhs_order[i]);
 		try{
+			if(i >= rhs_order.size()) { // fixbug: when the right mixture have less agents than left
+				first_del = i;
+				break;
+			}
+
 			auto& rhs_ag = rhs->getAgent(rhs_order[i]);
 			if(lhs_ag.getId() != rhs_ag.getId()){
 				first_del = i;

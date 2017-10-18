@@ -29,8 +29,8 @@ void Simulation::setCells(list<unsigned int>& _cells){
 }
 
 void Simulation::initialize(){
-	for(auto& state : states){
-		state.initializeInjections(env);
+	for(auto& id_state : cells){
+		id_state.second.initializeInjections(env);
 	}
 }
 
@@ -126,6 +126,8 @@ void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,con
 	auto per_cell = allocAgents2(cell_ids.size(),count);
 	auto ids_it = cell_ids.begin();
 	for(auto n : per_cell){
+		if(n == 0)
+			continue;
 		try{
 			cells.at(*ids_it).addNodes(n,mix,env);
 		}
@@ -286,7 +288,7 @@ void Simulation::print() const {
 	cout << cells.size() << " cells in this simulation object." << endl;
 	for(auto& id_state : cells){
 		cout << env.cellIdToString(id_state.first) << endl;
-		id_state.second.print();
+		id_state.second.print(env);
 	}
 }
 

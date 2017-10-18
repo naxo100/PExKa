@@ -95,7 +95,7 @@ public:
 
 	/** \brief Print the state for debugging purposes.
 	 **/
-	void print() const;
+	void print(const pattern::Environment &env) const;
 };
 
 /** \brief Structure that stores the information related to an event.

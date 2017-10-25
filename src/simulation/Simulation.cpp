@@ -24,29 +24,30 @@ Simulation::~Simulation() {
 void Simulation::setCells(list<unsigned int>& _cells){
 	for(auto cell_id : _cells){
 		cells.emplace(piecewise_construct,forward_as_tuple(cell_id),
-				forward_as_tuple(env.size<pattern::Token>(),vars,env.getCompartmentByCellId(cell_id).getVolume()));
+				forward_as_tuple(env.size<pattern::Token>(),vars,env.getCompartmentByCellId(cell_id).getVolume(),env));
 	}
 }
 
 void Simulation::initialize(){
 	for(auto& id_state : cells){
-		id_state.second.initializeInjections(env);
+		id_state.second.initInjections();
+		id_state.second.initActTree();
 	}
 }
 
 
 void Simulation::run(){
 	//updates
-	while(counter.getTime() < params.limitTime()){
+	//TODO while(counter.getTime() < params.limitTime()){
 		//calculate Tau-Leaping
 			//calculate map [species -> diffusion-to-cells array]
 			//map-diffusion-in = scatter map-diffusion-to?
-		double tau;// = calculate-tau( map-diffusion-in )
+		double tau = 100.;// = calculate-tau( map-diffusion-in )
 		//parallel
 		for(auto& id_state : cells){
 			id_state.second.advance(tau);
 		}
-	}
+	//}
 }
 
 //TODO
@@ -129,7 +130,7 @@ void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,con
 		if(n == 0)
 			continue;
 		try{
-			cells.at(*ids_it).addNodes(n,mix,env);
+			cells.at(*ids_it).addNodes(n,mix);
 		}
 		catch(std::out_of_range &e){
 			//other mpi_process will add this tokens.
@@ -288,7 +289,7 @@ void Simulation::print() const {
 	cout << cells.size() << " cells in this simulation object." << endl;
 	for(auto& id_state : cells){
 		cout << env.cellIdToString(id_state.first) << endl;
-		id_state.second.print(env);
+		id_state.second.print();
 	}
 }
 

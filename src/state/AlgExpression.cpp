@@ -11,6 +11,7 @@
 #include <algorithm>	//std::max,std::min
 #include <type_traits>	//std::conditional
 #include "../util/Exceptions.h" //semanticError
+#include "State.h"
 
 namespace state {
 
@@ -30,6 +31,13 @@ std::set<std::string> BaseExpression::getAuxiliars() const {
 }
 
 BaseExpression::~BaseExpression(){};
+
+/*SomeValue BaseExpression::getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const{
+	throw std::invalid_argument("Cannot call this expression without state.");
+}
+SomeValue BaseExpression::getValue(const state::State& state) const{
+	throw std::invalid_argument("Cannot call this expression without auxiliars.");
+}*/
 
 template <bool isBool>
 BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,const BaseExpression *ex2,
@@ -140,8 +148,9 @@ bool SomeValue::operator !=(const SomeValue& val) const {
 	return val.iVal != iVal && val.t != t;
 }
 
-
-/****** AlgExpression ********/
+/*************************************/
+/********** AlgExpression ************/
+/*************************************/
 template <typename T>
 AlgExpression<T>::AlgExpression(){
 	if(std::is_same<T,float>::value)
@@ -151,27 +160,20 @@ AlgExpression<T>::AlgExpression(){
 	else if(std::is_same<T,bool>::value)
 		t=BOOL;
 	else
-		throw std::exception();
+		throw std::invalid_argument("Algebraic Expression can only be float, int or bool.");
 }
 template <typename T>
 AlgExpression<T>::~AlgExpression(){}
 
-/*template <typename T>
-T AlgExpression<T>::evaluate(std::unordered_map<std::string,int> *aux_values) const {
-	try{
-		return this->eval(aux_values);
-	}catch(std::out_of_range &e){
-
-	}catch(std::exception &e){
-
-	}
-}*/
 
 template <typename T>
-const SomeValue AlgExpression<T>::getValue(const std::unordered_map<std::string,int> *aux_values) const{
+SomeValue AlgExpression<T>::getValue(const std::unordered_map<std::string,int> *aux_values) const{
 	return SomeValue(this->evaluate(aux_values));
 }
-
+template <typename T>
+SomeValue AlgExpression<T>::getValue(const state::State& state) const{
+	return SomeValue(this->evaluate(state));
+}
 
 /******* Constant ************/
 template <typename T >
@@ -179,6 +181,10 @@ Constant<T>::Constant(T v) : val(v){}
 
 template <typename T>
 T Constant<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
+	return val;
+}
+template <typename T>
+T Constant<T>::evaluate(const state::State& state) const{
 	return val;
 }
 //TODO
@@ -192,9 +198,9 @@ template class Constant<int>;
 template class Constant<bool>;
 
 
-
+/***********************************************/
 /*********** BinaryOperations ******************/
-
+/***********************************************/
 
 template <typename T1,typename T2>
 bool (*BinaryOperations<bool,T1,T2>::funcs[10]) (T1,T2)={
@@ -223,6 +229,12 @@ template <typename R,typename T1,typename T2>
 R BinaryOperation< R, T1, T2>::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
 	auto a = exp1->evaluate(aux_values);
 	auto b = exp2->evaluate(aux_values);
+	return func(a,b);
+}
+template <typename R,typename T1,typename T2>
+R BinaryOperation< R, T1, T2>::evaluate(const state::State& state) const {
+	auto a = exp1->evaluate(state);
+	auto b = exp2->evaluate(state);
 	return func(a,b);
 }
 
@@ -297,6 +309,10 @@ int Auxiliar::evaluate(const std::unordered_map<std::string,int> *aux_values) co
 	return 0;
 }
 
+int Auxiliar::evaluate(const state::State& state) const{
+	throw std::invalid_argument("Cannot call Auxiliar::evaluate() without aux-map");
+}
+
 float Auxiliar::auxFactors(std::unordered_map<std::string,float> &var_factors) const{
 	var_factors[name] = 1;
 	return 0;
@@ -304,6 +320,24 @@ float Auxiliar::auxFactors(std::unordered_map<std::string,float> &var_factors) c
 
 std::set<std::string> Auxiliar::getAuxiliars() const{
 	return std::set<std::string>(&name,&name+1);
+}
+
+/********************************************/
+/************** class VarLabel **************/
+/********************************************/
+template <typename R>
+VarLabel<R>::VarLabel(BaseExpression* expr) : var(expr){}
+template <typename R>
+R VarLabel<R>::evaluate(std::unordered_map<std::string,int> *aux_values) const {
+	throw std::invalid_argument("This should never been used");
+}
+template <typename R>
+R VarLabel<R>::evaluate(const state::State& state) const {
+	throw std::invalid_argument("This should never been used");
+}
+template <typename R>
+int VarLabel<R>::auxFactors(std::unordered_map<std::string,int> &factor) const {
+	throw std::invalid_argument("This should never been used");
 }
 
 } /* namespace ast */

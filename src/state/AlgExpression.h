@@ -16,6 +16,8 @@
 
 namespace state {
 
+class State;
+
 class SomeValue;
 
 /** \brief Base class for algebraic and every number-evaluated expression.
@@ -38,7 +40,8 @@ public:
 	template <typename T>
 	struct EnumType {static const Type t = FLOAT;};
 
-	virtual const SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
+	virtual SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
+	virtual SomeValue getValue(const state::State& state) const = 0;
 
 	/** \brief Return an int vector that represents this expression
 	 * as an equation on auxiliars.
@@ -73,8 +76,10 @@ public:
 	AlgExpression();
 	virtual ~AlgExpression() = 0;
 	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
+	virtual T evaluate(const state::State& state) const = 0;
 	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override = 0;
-	virtual const SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual SomeValue getValue(const state::State& state) const override;
 };
 
 /*
@@ -131,6 +136,7 @@ class Constant : public AlgExpression<T> {
 public:
 	Constant(T v);
 	T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	T evaluate(const state::State& state) const override;
 	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
 };
 
@@ -143,6 +149,7 @@ class BinaryOperation : public AlgExpression<R> {
 	const char op;
 public:
 	R evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	R evaluate(const state::State& state) const override;
 	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
 	std::set<std::string> getAuxiliars() const override;
 	~BinaryOperation();
@@ -157,6 +164,7 @@ class VarLabel : public AlgExpression<R> {
 public:
 	VarLabel(BaseExpression* expr);
 	R evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	R evaluate(const state::State& state) const override;
 	int auxFactors(std::unordered_map<std::string,int> &factor) const override;
 };
 
@@ -167,6 +175,7 @@ public:
 	Auxiliar(const std::string &nme);
 	~Auxiliar();
 	int evaluate(const std::unordered_map<std::string,int> *aux_values) const override;
+	int evaluate(const state::State& state) const override;
 	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
 
 	std::set<std::string> getAuxiliars() const override;

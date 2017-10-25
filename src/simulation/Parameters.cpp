@@ -11,7 +11,7 @@ namespace simulation {
 
 Parameters Parameters::singleton;
 
-Parameters::Parameters() {
+Parameters::Parameters() : maxTime(5.) {
 	// TODO Auto-generated constructor stub
 
 }

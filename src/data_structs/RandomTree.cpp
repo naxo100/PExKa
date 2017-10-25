@@ -14,8 +14,8 @@ namespace data_structs {
 
 }*/
 
-/*RandomTree::~RandomTree() {
+RandomTree::~RandomTree() {
 	// TODO Auto-generated destructor stub
-}*/
+}
 
 } /* namespace simulation */

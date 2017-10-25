@@ -24,7 +24,7 @@ public:
 
 	/** \brief Destroy the Chain and free all memory locations.
 	 */
-	//virtual ~RandomTree();
+	virtual ~RandomTree();
 
 
 	/** Update all the nodes.
@@ -37,7 +37,7 @@ public:
 
 	/** \brief Calculate total sum of nodes.
 	 */
-	virtual float total() const = 0;
+	virtual float total() = 0;
 
 	/** \brief Add or change a value of a node in the chain.
 	 */
@@ -45,15 +45,15 @@ public:
 
 	/** \brief Choose random node from tree with probability = weight/total().
 	 */
-	virtual std::pair<int,float> chooseRandom() const = 0;
+	virtual std::pair<int,float> chooseRandom() = 0;
 
 	/** \brief Check if the rule "i" has an infinity probability.
 	*/
-	virtual bool is_infinite(int i) const = 0;
+	virtual bool isInfinite(int i) = 0;
 
 	/** \brief Return the probability of the rule "i"
 	*/
-	virtual float find(int i) const = 0;
+	virtual float find(int i) = 0;
 
 };
 

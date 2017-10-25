@@ -332,7 +332,7 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 	if(signId == a.signId && interface.size() == a.interface.size()){
 		for(const pair<int,Site> &id_site : interface){
 			try{
-				if(! (id_site.second == a.getSite(id_site.first)))
+				if(! (id_site.second == a.getSite(id_site.first)) )
 					return false;
 			}
 			catch(std::out_of_range &e){
@@ -426,13 +426,32 @@ const string Mixture::Agent::toString(const Environment& env, short mixAgId,
 }
 
 /************** class Site *********************/
-Mixture::Site::Site() : state((small_id)-1),link_type() {}
+Mixture::Site::Site() : state((small_id)0),link_type() {}
 
 bool Mixture::Site::isEmptySite() const{
 	static auto empty = (small_id)-1;
 	return state.smallVal == empty;
 }
 bool Mixture::Site::operator ==(const Site &s) const{
+	/*if(val_type == s.val_type){
+		switch(val_type){
+		case VOID:
+			break;
+		case LABEL:
+			if(s.state.id_value != state.id_value)
+				return false;
+			break;
+		case INT_VAL:
+			if(s.state.int_value != state.int_value)
+				return false;
+			break;
+		case FLOAT_VAL:
+			if(s.state.float_value != state.float_value)
+				return false;
+			break;
+		}
+	}*/
+	//if(state != s.state)
 	if(memcmp(&state,&s.state,sizeof(state::SomeValue))) //only valid if union in state is cleaned at constructor
 		return false;
 	if(s.link_type == link_type){
@@ -495,7 +514,7 @@ ag_st_id Mixture::Component::follow(small_id ag_id,small_id site) const{
 	try{
 		return graph->at(ag_st_id(ag_id,site));
 	}
-	catch(std::out_of_range& e){}//TODO debug print (maybe use unsafe version for speed)
+	catch(std::out_of_range& e){}
 	return make_pair(ag_id,site);
 }
 

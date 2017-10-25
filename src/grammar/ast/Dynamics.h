@@ -35,7 +35,7 @@ public:			//       !1    !?  !_   !A.s
 
 	void eval(const pattern::Environment &env,
 			pattern::Mixture::Site& mix_site,
-			unordered_map<unsigned,list<pair<short,short> > > &,
+			unordered_map<unsigned,list<pair<short,short> > > &links,
 			const pair<short,short> &mix_ag_site,bool allow_pattern) const;
 
 protected:

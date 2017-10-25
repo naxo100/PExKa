@@ -22,6 +22,18 @@ Rule::~Rule() {
 		delete rhs;
 }
 
+const string& Rule::getName() const {
+	return name;
+}
+
+const pattern::Mixture& Rule::getLHS() const {
+	return lhs;
+}
+
+const state::BaseExpression& Rule::getRate() const {
+	return *rate;
+}
+
 void Rule::setRHS(const Mixture* mix,bool is_declared){
 	rhs = mix;
 	isRhsDeclared = is_declared;
@@ -272,9 +284,9 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 	for(unsigned j = i; j < rhs_order.size(); j++){
 		auto& rhs_ag = rhs->getAgent(rhs_order[j]);
 		env.getSignature(rhs_ag.getId());
-		newNodes.emplace_back(env.getSignature(rhs_ag.getId()));
+		newNodes.emplace_back(new state::Node(env.getSignature(rhs_ag.getId())));
 		for(auto s : rhs_ag)
-			newNodes[j-i].setState(s.first,s.second.state);
+			newNodes[j-i]->setState(s.first,s.second.state);
 	}
 	//deleted nodes
 	for(unsigned j = first_del; j < lhs_order.size(); j++){
@@ -290,7 +302,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_order,
 const list<Rule::Action>& Rule::getScript() const{
 	return script;
 }
-const vector<state::SiteGraph::Node>& Rule::getNewNodes() const{
+const vector<state::Node*>& Rule::getNewNodes() const{
 	return newNodes;
 }
 
@@ -299,10 +311,10 @@ const vector<state::SiteGraph::Node>& Rule::getNewNodes() const{
 
 /**** DEBUG ****/
 string Rule::toString(const pattern::Environment& env) const {
-	static string acts[] = {"CREATE","DELETE","TRANSPORT","CHANGE","BIND","FREE"};
+	static string acts[] = {"CHANGE","BIND","FREE","DELETE","CREATE","TRANSPORT"};
 	string s = name+"'s actions:\n";
-	for(auto& nn : newNodes){
-		s += "\tINSERT agent "+nn.toString(env)+"\n";
+	for(auto nn : newNodes){
+		s += "\tINSERT agent "+nn->toString(env)+"\n";
 	}
 	const pattern::Signature *sign1,*sign2;
 	for(auto act : script){
@@ -323,7 +335,7 @@ string Rule::toString(const pattern::Environment& env) const {
 		case BIND:
 			s += acts[act.t] + " agent's sites ";
 			if(get<3>(act.trgt1)){//new node
-				sign1 = &env.getSignature(newNodes[get<1>(act.trgt1)].getId());
+				sign1 = &env.getSignature(newNodes[get<1>(act.trgt1)]->getId());
 				s += "(new) " + sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
 			}
 			else{
@@ -331,7 +343,7 @@ string Rule::toString(const pattern::Environment& env) const {
 				s += sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
 			}
 			if(get<3>(act.trgt2)){//new node
-				sign2 = &env.getSignature(newNodes[get<1>(act.trgt2)].getId());
+				sign2 = &env.getSignature(newNodes[get<1>(act.trgt2)]->getId());
 				s += "(new) " + sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+"\n";
 			}
 			else{

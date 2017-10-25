@@ -15,12 +15,13 @@ namespace pattern {
 
 /***************** class Mixture ************************/
 
-Mixture::Mixture(short agent_count) : declaredComps(false),agentCount(0),siteCount(0),compCount(0){
+Mixture::Mixture(short agent_count) : declaredComps(false),agentCount(0),
+		siteCount(0),compCount(0),id(-1){
 	agents = new const Agent*[agent_count];
 }
 
 Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),
-		agentCount(m.agentCount),siteCount(m.siteCount),compCount(m.compCount){
+		agentCount(m.agentCount),siteCount(m.siteCount),compCount(m.compCount),id(-1){
 	if(m.declaredComps){
 		comps = new vector<const Component*>(m.compCount);
 		for(size_t i = 0; i < compCount; i++)
@@ -42,6 +43,12 @@ Mixture::~Mixture() {
 		delete[] agents;
 }
 
+void Mixture::setId(short_id i){
+	id = i;
+}
+short_id Mixture::getId() const {
+	return id;
+}
 void Mixture::addAgent(const Mixture::Agent *a){
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call addAgent() on an initialized Mixture");
@@ -243,11 +250,23 @@ size_t Mixture::size() const {
 	return agentCount;
 }
 
+size_t Mixture::compsCount() const {
+	return compCount;
+}
+
 const Mixture::Agent& Mixture::getAgent(small_id cc,small_id ag) const{
 	return (*comps)[cc]->getAgent(ag);
 }
 const Mixture::Agent& Mixture::getAgent(ag_st_id cc_ag) const{
 	return (*comps)[cc_ag.first]->getAgent(cc_ag.second);
+}
+const Mixture::Agent& Mixture::getAgent(small_id ag_id) const {
+	for(size_t i = 0; i < comps->size(); i++){
+		if(ag_id < (*comps)[i]->size())
+			return getAgent(i,ag_id);
+		ag_id -= (*comps)[i]->size();
+	}
+	throw std::out_of_range("Agent id out of bounds for this Mixture.");
 }
 
 ag_st_id Mixture::follow(small_id cc_id,small_id ag_id,small_id site) const{
@@ -438,6 +457,13 @@ Mixture::Component::~Component(){
 
 size_t Mixture::Component::size() const{
 	return agents.size();
+}
+
+void Mixture::Component::setId(short_id i) {
+	id = i;
+}
+short_id Mixture::Component::getId() const {
+	return id;
 }
 
 const Mixture::Agent& Mixture::Component::getAgent(small_id ag) const {

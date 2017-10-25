@@ -22,6 +22,18 @@ using namespace std;
 
 namespace pattern {
 
+class Pattern {
+public:
+	class Agent;
+	struct Site;
+	enum LinkType {FREE,WILD,BIND,BIND_TO,PATH};
+	enum ValueType {VOID,LABEL,INT_VAL,FLOAT_VAL};
+	virtual ~Pattern(){};
+	virtual short_id getId() const = 0;
+	virtual const Agent& getAgent(small_id ag_id ) const = 0;
+	virtual size_t size() const = 0;
+};
+
 //Forward declaration needed for setComponents() and toString()
 class Environment;
 
@@ -44,13 +56,13 @@ struct ComparePair{
  * Any attempt to add links or agents to the mixture after setComponents() will
  * throw exceptions.
  */
-class Mixture {
+class Mixture : public Pattern {
 public:
-	struct Site;
-	class Agent;
+	using Agent = Pattern::Agent;
+	using Site = Pattern::Site;
 	class Component;
-	enum LinkType {FREE,WILD,BIND,BIND_TO,PATH};
-	enum ValueType {VOID,LABEL,INT_VAL,FLOAT_VAL};
+	using LinkType = Pattern::LinkType;
+
 
 	/** \brief Initialize a new Mixture with fixed capacity for agents
 	 *
@@ -59,6 +71,9 @@ public:
 	Mixture(short agent_count);
 	Mixture(const Mixture& m);
 	~Mixture();
+
+	void setId(short_id id);
+	short_id getId() const override;
 
 	/** \brief Add a new agent to the mixture.
 	 * Add a new agent to the mixture from a pointer to
@@ -96,6 +111,7 @@ public:
 
 	const Agent& getAgent(small_id cc,small_id ag) const;
 	const Agent& getAgent(ag_st_id cc_ag ) const;
+	const Agent& getAgent(small_id ag_id ) const override;
 
 	ag_st_id follow(small_id cc_id,small_id ag_id,small_id site) const;
 
@@ -103,6 +119,7 @@ public:
 	 *
 	 */
 	size_t size() const;
+	size_t compsCount() const;
 
 	const vector<const Component*>::iterator begin() const;
 	const vector<const Component*>::iterator end() const;
@@ -129,6 +146,7 @@ private:
 	//typedef pair<const Agent*,short> ag_st_pntr;
 	//link (agent<,site)->(agent>,site)
 	map< ag_st_id , ag_st_id> links;
+	short_id id;
 
 };
 
@@ -141,7 +159,7 @@ typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;
  * It stores the site value and link state of kappa
  * declared site of an agent mixture.
  */
-struct Mixture::Site {
+struct Pattern::Site {
 	state::SomeValue state;
 
 	LinkType link_type;
@@ -162,7 +180,7 @@ struct Mixture::Site {
  * Stores all site information of a kappa declared
  * agent in a mixture.
  */
-class Mixture::Agent {
+class Pattern::Agent {
 	short signId; //signature ID
 	std::unordered_map<small_id,Site> interface;
 
@@ -198,7 +216,8 @@ public:
  * making the mixture comparable and ready to be declared in the environment.
  *
  */
-class Mixture::Component {
+class Mixture::Component : public Pattern {
+	short_id id;
 	vector<const Agent*> agents;
 	union {
 		list<ag_st_id> *links;
@@ -214,7 +233,9 @@ public:
 	short addAgent(const Mixture::Agent* a);
 	void addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<short,short> &mask);
 
-	size_t size() const;
+	size_t size() const override;
+	void setId(short_id i);
+	short_id getId() const;
 
 	const vector<const Agent*>::const_iterator begin() const;
 	const vector<const Agent*>::const_iterator end() const;
@@ -223,7 +244,7 @@ public:
 	const map<ag_st_id,ag_st_id>& getGraph() const;
 	string toString(const Environment& env) const;
 
-	const Mixture::Agent& getAgent(small_id ag) const;
+	const Agent& getAgent(small_id ag_id ) const override;
 
 	/** \brief Returns agent and site ids of site-link
 	 */

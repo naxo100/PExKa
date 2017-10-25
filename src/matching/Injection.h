@@ -20,29 +20,36 @@ namespace matching {
 
 using namespace std;
 
-using Node = state::SiteGraph::Node;
+using Node = state::Node;
 
 class Injection {
+	const pattern::Pattern& ptrn;
 public:
-	//virtual ~Injection() = 0;
+	Injection(const pattern::Pattern& ptrn);
+	virtual ~Injection();
 	virtual const vector<Node*>& getEmbedding() const = 0;
 
 	virtual bool isTrashed() const = 0;
 
 	virtual void codomain(Node* injs[],set<Node*> cod) const = 0;
 
+	virtual unsigned count() const = 0;
+
+	const pattern::Pattern& pattern() const;
+
 	bool operator< (const Injection& inj) const;
+
 };
 
 class CcInjection : public Injection {
 	//map<small_id,big_id> ccAgToNode;//unordered
-	vector<state::SiteGraph::Node*> ccAgToNode;
+	vector<Node*> ccAgToNode;
 	mid_id address;
-	small_id coordinate;//cc_id
+	//const pattern::Mixture::Component& cc;//cc_id
 
 public:
-	CcInjection(const pattern::Mixture::Component& cc,state::SiteGraph::Node& node,
-			two<list<state::SiteGraph::Internal*> >& port_list);
+	CcInjection(const pattern::Mixture::Component& cc,Node& node,
+			two<list<state::Node::Internal*> >& port_list);
 	~CcInjection();
 
 	const vector<Node*>& getEmbedding() const override;
@@ -50,6 +57,8 @@ public:
 	bool isTrashed() const override;
 
 	void codomain(Node* injs[],set<Node*> cod) const override;
+
+	unsigned count() const override;
 };
 
 /*class MixInjection : Injection {
@@ -70,9 +79,10 @@ public:
 
 //TODO choose the best implementation of InjSet
 class InjSet : public set<Injection*> {
-
+	unsigned counter;
 public:
 	const Injection& chooseRandom() const;
+	unsigned count() const;
 };
 
 } /* namespace simulation */

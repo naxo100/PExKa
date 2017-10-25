@@ -2,7 +2,9 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
-#define DEBUG false
+#define DEBUG true
+
+typedef double FL_TYPE;
 
 typedef unsigned long big_id;
 typedef unsigned int mid_id;

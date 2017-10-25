@@ -93,6 +93,7 @@ const Mixture& Environment::declareMixture(const Mixture& new_mix) {
 			return mix;
 		}
 	mixtures.emplace_back(new_mix);
+	mixtures.back().setId(mixtures.size()-1);
 	return mixtures.back();
 }
 
@@ -103,7 +104,7 @@ const Mixture::Component& Environment::declareComponent(const Mixture::Component
 		}
 	}
 	components.emplace_back(new_comp);
-	//Mixture::Component& co =
+	components.back().setId(components.size()-1);
 	return components.back();
 }
 
@@ -167,6 +168,9 @@ const vector<pattern::Signature>& Environment::getSignatures() const{
 const list<Mixture::Component>& Environment::getComponents() const{
 	return components;
 }
+const vector<simulation::Rule>& Environment::getRules() const {
+	return rules;
+}
 
 
 const Compartment& Environment::getCompartmentByCellId(unsigned cell_id) const{
@@ -193,6 +197,10 @@ size_t Environment::size<Channel>() const {
 template <>
 size_t Environment::size<Token>() const {
 	return tokenNames.size();
+}
+template <>
+size_t Environment::size<simulation::Rule>() const {
+	return rules.size();
 }
 
 

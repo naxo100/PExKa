@@ -40,7 +40,7 @@ typedef unsigned short short_id;
 class Environment {
 protected:
 	typedef unordered_map<string,short> IdMap;
-
+	//static Environment env;
 	//IdMap algMap, kappaMap;
 	IdMap varMap, tokenMap, compartmentMap, channelMap, signatureMap;
 	//vector<string> algNames, kappaNames;
@@ -56,6 +56,7 @@ protected:
 
 	bool exists(const string &name,const IdMap &map);
 public:
+	//inline static Environment& getInstance() {return env;}
 	Environment();
 	~Environment();
 
@@ -78,6 +79,7 @@ public:
 	//const Mixture& getMixture(small_id id) const;
 	const list<Mixture>& getMixtures() const;
 	const list<Mixture::Component>& getComponents() const;
+	const vector<simulation::Rule>& getRules() const;
 
 
 	const Compartment& getCompartmentByCellId(unsigned id) const;
@@ -102,6 +104,8 @@ public:
 	void show() const;
 
 };
+
+//using env = Environment::getInstance();
 
 } /* namespace pattern */
 

@@ -137,6 +137,15 @@ int main(int argc, char* argv[]){
 	sim.initialize();
 	sim.print();
 
+	try{
+		sim.run();
+	}catch(exception &e){
+		cerr << "An exception found: " << e.what() << endl;
+		exit(1);
+	}
+
+	sim.print();
+
 	cout << "finished!" << endl;
 
 	/* TODO

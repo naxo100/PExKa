@@ -48,6 +48,7 @@ public:
 
 	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override;
 	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual T evaluate(const state::State& state) const override;
 
 };
 
@@ -59,6 +60,7 @@ public:
 
 	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
 	T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	T evaluate(const state::State& state) const override;
 };
 
 class KappaVar : public AlgExpression<int>, public Variable {
@@ -69,6 +71,7 @@ public:
 
 	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override;
 	virtual int evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual int evaluate(const state::State& state) const override;
 
 };
 

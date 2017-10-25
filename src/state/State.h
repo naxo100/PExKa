@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <ctime>
+#include <random>
 #include "Variable.h"
 #include "SiteGraph.h"
 #include "../pattern/Mixture.h"
@@ -29,13 +30,16 @@ struct EventInfo;
  * Kappa.
  */
 class State {
+	const pattern::Environment& env;
 	SiteGraph graph;
 	const state::BaseExpression& volume;
 	std::vector<Variable*> vars;
 	float* tokens;
 
-	//data_structs::RandomTree activityTree;
+	data_structs::RandomTree* activityTree;
 	matching::InjSet* injections;
+
+	default_random_engine randGen;
 	//simulation::Counter counter;
 	//time_t program_t0;
 
@@ -44,9 +48,9 @@ class State {
 	 * @param n 0 for internal value, 1 for link status, other for both.
 	 * @param intf interface of the site changed.
 	 */
-	template <int n>
+	/*template <int n>
 	void negativeUpdate(SiteGraph::Internal& intf);
-
+	 */
 	/** \brief Method of the actions that a rule can apply.
 	 * @param act Action to apply and target agents.
 	 * @param ev Embedding of nodes and other event information.
@@ -61,6 +65,9 @@ class State {
 	 */
 	static void (State::*action[4])(const simulation::Rule::Action&,EventInfo&);
 
+	EventInfo* selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const;
+	EventInfo* selectUnaryInj(const pattern::Mixture& mix) const;
+
 
 public:
 	/** \brief Initialize the state with the size of token vector, the vars vector and the volume.
@@ -68,7 +75,8 @@ public:
 	 * @param _vars the variable vector.
 	 * @param vol the volume of this state.
 	 */
-	State(size_t tok_count,const std::vector<Variable*>& _vars,const state::BaseExpression& vol);
+	State(size_t tok_count,const std::vector<Variable*>& _vars,
+			const BaseExpression& vol,const pattern::Environment& env);
 	~State();
 
 	/** \brief Add tokens population to the state.
@@ -81,7 +89,11 @@ public:
 	 * @param mix a mixture without patterns to create nodes.
 	 * @param env the environment of the simulation.
 	 */
-	void addNodes(unsigned n,const pattern::Mixture& mix,const pattern::Environment& env);
+	void addNodes(unsigned n,const pattern::Mixture& mix);
+
+	unsigned mixInstances(const pattern::Mixture& mix) const;
+
+	two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
 
 	/** \brief Apply actions described by r to the state.
 	 * @param r rule to apply.
@@ -91,28 +103,21 @@ public:
 
 	void advance(double tau);
 
-	void initializeInjections(const pattern::Environment &env);
+
+	EventInfo* selectInjection(const pattern::Mixture &mix,two<FL_TYPE> bin_act,
+			two<FL_TYPE> un_act);
+	pair<const simulation::Rule&,EventInfo*> drawRule();
+	FL_TYPE event();
+
+	void initInjections();
+	void initActTree();
 
 	/** \brief Print the state for debugging purposes.
 	 **/
-	void print(const pattern::Environment &env) const;
+	void print() const;
 };
 
-/** \brief Structure that stores the information related to an event.
- */
-struct EventInfo {
-	//map of emb LHS [cc_id][ag_id]
-	SiteGraph::Node*** emb;
-	//map of new_nodes RHS
-	SiteGraph::Node** fresh_emb;
-	//node_address,site_id
-	std::set<pair<SiteGraph::Node*,small_id> > side_effects;
-	//perturbation_ids
-	std::set<mid_id> pert_ids;
-	//null events
-	small_id warns;
 
-};
 
 } /* namespace state */
 

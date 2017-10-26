@@ -299,8 +299,8 @@ Node::Internal::~Internal(){
 }
 
 void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjSet* injs){
-	negativeUpdate(ev,deps.first);
-	negativeUpdate(ev,deps.second);
+	negativeUpdate(ev,injs,deps.first);
+	negativeUpdate(ev,injs,deps.second);
 }
 
 void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjSet* injs,matching::InjSet* deps){

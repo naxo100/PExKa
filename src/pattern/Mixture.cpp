@@ -213,7 +213,9 @@ vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 	int i=0;
 	//set comps.graph and declare comps in env
 	for(const auto& c : comps){
-		c.first->setGraph();
+		auto mask = c.first->setGraph();
+		for(auto mix_mask : c.second)
+			order_mask[mix_mask.first].second = mask[mix_mask.second];
 		const Component &comp = env.declareComponent(*c.first);
 		delete c.first;
 		comps_order[i] = make_pair(&comp,i);

@@ -31,7 +31,7 @@ class Channel {
 	const CompartmentExpr *source,*target;
 	const state::AlgExpression<bool> *filter;
 	//std::map<std::string,int*> varValues;
-
+	const state::BaseExpression* delay;
 
 public:
 	/** \brief Channel constructor.
@@ -51,6 +51,8 @@ public:
 	/** \brief Set a boolean expression on auxiliars to be a filter for cells.
 	 */
 	void setFilter(const state::BaseExpression *where);
+
+	void setDelay(const state::BaseExpression *delay);
 
 	void setVarValues(std::map<std::string,int*> &var_values);
 

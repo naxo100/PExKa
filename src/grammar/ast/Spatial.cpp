@@ -140,6 +140,7 @@ void Channel::eval(pattern::Environment &env,
 	channel.setCompExpressions(c_exp_src,c_exp_trgt);
 	if(filter)
 		channel.setFilter(filter->eval(env,vars));
+	channel.setDelay(delay->eval(env,vars));
 	return;
 }
 

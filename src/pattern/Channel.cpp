@@ -11,7 +11,7 @@
 namespace pattern {
 
 Channel::Channel(const std::string &nme)
-	: name(nme),source(nullptr),target(nullptr),filter(nullptr) {}
+	: name(nme),source(nullptr),target(nullptr),filter(nullptr),delay(nullptr) {}
 
 Channel::~Channel() {
 	if(source)
@@ -70,6 +70,10 @@ void Channel::setFilter(const state::BaseExpression *where){
 		delete filter;
 	filter = dynamic_cast<const state::AlgExpression<bool>* >(where);;
 }
+void Channel::setDelay(const state::BaseExpression *_delay){
+	delay = _delay;
+}
+
 //TODO
 void Channel::setVarValues(std::map<std::string,int*> &var_values){}
 

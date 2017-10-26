@@ -18,7 +18,7 @@ Rule::Rule(const ast::Id& nme, const Mixture& mix) : name(nme.getString()),loc(n
 
 Rule::~Rule() {
 	// TODO Auto-generated destructor stub
-	if(isRhsDeclared)
+	if(!isRhsDeclared)
 		delete rhs;
 }
 

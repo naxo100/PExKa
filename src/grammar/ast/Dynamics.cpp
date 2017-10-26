@@ -667,11 +667,8 @@ void Rule::eval(pattern::Environment& env,
 		rhs_mask = rhs_mix_p->setComponents();
 		rule.setRHS(rhs_mix_p,bi);
 	}
+	//DEBUG cout << lhs_mix.toString(env,lhs_mask) << " -> " << rhs_mix_p->toString(env,rhs_mask) << endl;
 	rule.difference(env,lhs_mask,rhs_mask);
-
-	//TODO set loc
-	//simulation::Rule::difference(env,make_pair(*lhs_mix,lhs_mask),
-	//		make_pair(*rhs_mix,rhs_mask));
 }
 
 size_t Rule::getCount(){

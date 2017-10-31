@@ -308,7 +308,6 @@ string Mixture::toString(const Environment& env,const vector<ag_st_id>& mask) co
 Mixture::Agent::Agent(short sign_id) : signId(sign_id){}
 
 Mixture::Site& Mixture::Agent::addSite(short env_site){
-	//auto &intf =
 	return interface[env_site] = Site();
 }
 
@@ -347,6 +346,54 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 	return true;
 }
 
+int Mixture::Agent::compare(const Agent &a) const {
+	int ret = 0;
+	if(this == &a)
+		return 0;
+	if(signId == a.signId){
+		for(const pair<int,Site> &id_site : interface){
+			try{
+				int ret_b = id_site.second.compare(a.getSite(id_site.first));
+				if(ret_b*ret == -1)
+					throw False();
+				else
+					ret = ret ? ret : ret_b;
+			}
+			catch(std::out_of_range &e){
+				if(!id_site.second.isEmptySite() ||
+						id_site.second.link_type != WILD){
+					if(ret > 0)
+						throw False();
+					else
+						ret = -1;
+				}
+			}
+		}
+		for(const pair<int,Site> &id_site : a.interface){
+			//TODO set of already done
+			try{
+				int ret_b = -1*id_site.second.compare(getSite(id_site.first));
+				if(ret_b*ret == -1)
+					throw False();
+				else
+					ret = ret ? ret : ret_b;
+			}
+			catch(std::out_of_range &e){
+				if(!id_site.second.isEmptySite() ||
+						id_site.second.link_type != WILD){
+					if(ret < 0)
+						throw False();
+					else
+						ret = 1;
+				}
+			}
+		}
+	}
+	else
+		throw False();
+	return ret;
+}
+
 void Mixture::Agent::setSiteValue(small_id site_id,small_id lbl_id){
 	//interface[site_id].val_type = ValueType::LABEL;
 	interface[site_id].state.set(lbl_id);
@@ -356,7 +403,20 @@ void Mixture::Agent::setSiteValue(small_id site_id,float val){
 	interface[site_id].state.set(val);
 }
 
-const string Mixture::Agent::toString(const Environment& env, short mixAgId,
+
+void Mixture::Agent::addEmbedding(const Agent *a){
+	greater.emplace_back(a);
+}
+void Mixture::Agent::addEmbedding(const list<const Agent*>& la){
+	greater.insert(greater.end(),la.begin(),la.end());
+}
+
+const list<const Mixture::Agent*>& Mixture::Agent::getEmbeddings() const {
+	return greater;
+}
+
+
+string Mixture::Agent::toString(const Environment& env, short mixAgId,
 		map<ag_st_id,short> bindLabels  ) const {
 	string out = "", glue = ",";
 
@@ -380,7 +440,7 @@ const string Mixture::Agent::toString(const Environment& env, short mixAgId,
 		switch(it->second.state.t) {
 			case state::BaseExpression::SMALL_ID:
 				labelSite = dynamic_cast<const Signature::LabelSite*>(& site);
-				if(labelSite && it->second.state.smallVal != small_id(-1))//is not an empty site
+				if(labelSite && !it->second.isEmptySite())//is not an empty site
 					out += "~" + labelSite->getLabel(it->second.state.smallVal); //value of site
 				break;
 			case state::BaseExpression::INT :
@@ -428,32 +488,13 @@ const string Mixture::Agent::toString(const Environment& env, short mixAgId,
 }
 
 /************** class Site *********************/
-Mixture::Site::Site() : state((small_id)0),link_type() {}
+Mixture::Site::Site() : state((small_id)-1),link_type(FREE) {}
 
 bool Mixture::Site::isEmptySite() const{
 	static auto empty = (small_id)-1;
 	return state.smallVal == empty;
 }
 bool Mixture::Site::operator ==(const Site &s) const{
-	/*if(val_type == s.val_type){
-		switch(val_type){
-		case VOID:
-			break;
-		case LABEL:
-			if(s.state.id_value != state.id_value)
-				return false;
-			break;
-		case INT_VAL:
-			if(s.state.int_value != state.int_value)
-				return false;
-			break;
-		case FLOAT_VAL:
-			if(s.state.float_value != state.float_value)
-				return false;
-			break;
-		}
-	}*/
-	//if(state != s.state)
 	if(memcmp(&state,&s.state,sizeof(state::SomeValue))) //only valid if union in state is cleaned at constructor
 		return false;
 	if(s.link_type == link_type){
@@ -462,6 +503,35 @@ bool Mixture::Site::operator ==(const Site &s) const{
 	}
 	else return false;
 	return true;
+}
+int Mixture::Site::compare(const Site &s) const{
+	int ret = 0;
+	if(memcmp(&state,&s.state,sizeof(state::SomeValue))){ //only valid if union in state is cleaned at constructor
+		if(isEmptySite())
+			ret = 1;
+		else{
+			if(s.isEmptySite())
+				ret = -1;
+			else
+				throw False();
+		}
+	}
+	if(s.link_type == link_type){
+		if(link_type == LinkType::BIND_TO && s.lnk_ptrn != lnk_ptrn)
+			throw False();
+		else
+			return ret;
+	}
+	else {
+		if(link_type == WILD)
+			return ret != -1 ? 1 : throw False();
+		else
+			if(s.link_type == WILD)
+				return ret != 1 ? -1 : throw False();
+			else
+				throw False();
+	}
+	return ret;
 }
 
 /************** class Component ****************/

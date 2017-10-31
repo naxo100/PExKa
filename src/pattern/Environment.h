@@ -51,7 +51,7 @@ protected:
 	vector<UseExpression> useExpressions;
 	list<Mixture> mixtures;
 	list<Mixture::Component> components;
-	list<Mixture::Agent> agentPatterns;
+	vector<list<Mixture::Agent> > agentPatterns;
 	vector<simulation::Rule> rules;
 
 	bool exists(const string &name,const IdMap &map);

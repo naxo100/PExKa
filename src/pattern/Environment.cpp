@@ -109,15 +109,37 @@ const Mixture::Component& Environment::declareComponent(const Mixture::Component
 }
 
 const Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag){
-	for(auto &ag : agentPatterns ){
-		if( ag == *new_ag){
-			delete new_ag;
-			return ag;
+	list<const Mixture::Agent*> greater;
+	list<Mixture::Agent*> less;
+	//cout << "Declaring agent pattern " << new_ag->toString(*this) << endl;
+	for(auto &ag : agentPatterns[new_ag->getId()] ){
+		try {
+			switch(new_ag->compare(ag)){//1 if new_ag < ag
+			case 0:
+				//cout << "Same agent pattern was declared before: " << ag.toString(*this) << endl;
+				delete new_ag;
+				return ag;
+			case 1:
+				//cout << "Found an agent pattern more specific: " << ag.toString(*this) << endl;
+				less.emplace_back(&ag);
+				break;
+			case -1:
+				//cout << "Found an agent pattern more general: " << ag.toString(*this) << endl;
+				greater.emplace_back(&ag);
+				break;
+			default:
+				break;
+			}
 		}
+		catch(False& ex){}
 	}
-	agentPatterns.emplace_back(*new_ag);
+	agentPatterns[new_ag->getId()].emplace_back(*new_ag);
+	auto& new_agent = agentPatterns[new_ag->getId()].back();
+	for(auto ag : less)
+		ag->addEmbedding(&new_agent);
+	new_agent.addEmbedding(greater);
 	delete new_ag;
-	return agentPatterns.back();
+	return new_agent;
 }
 
 simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture& mix){
@@ -213,6 +235,10 @@ void Environment::reserve<Signature>(size_t count) {
 	signatures.reserve(count);
 }
 template <>
+void Environment::reserve<Mixture::Agent>(size_t count) {
+	agentPatterns.resize(count);
+}
+template <>
 void Environment::reserve<Channel>(size_t count) {
 	channels.reserve(count);
 }
@@ -262,8 +288,13 @@ void Environment::show() const {
 			}
 		}
 		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
-		/*for(auto& ap : agentPatterns)
-			cout << ap.toString(*this) << endl;*/
+		for(auto& ap_list : agentPatterns)
+			for(auto& ap : ap_list){
+				cout << ap.toString(*this) << "\t ->  ";
+				for(auto& emb : ap.getEmbeddings())
+					cout << emb->toString(*this) << ", ";
+				cout << endl;
+			}
 		cout << "\tComponents[" << components.size() << "]" << endl;
 		cout << "\tMixtures[" << mixtures.size() << "]" << endl;
 		int i = 0;
@@ -273,7 +304,7 @@ void Environment::show() const {
 			i++;
 		}
 
-		cout << "\Rules[" << rules.size() << "]" << endl;
+		cout << "\tRules[" << rules.size() << "]" << endl;
 		i = 0;
 		for(auto& rul : rules){
 			cout << (i+1) << ") ";

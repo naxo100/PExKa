@@ -21,6 +21,7 @@ KappaAst::~KappaAst() {
 
 void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts){
 	env.reserve<pattern::Signature>(signatures.size());
+	env.reserve<pattern::Mixture::Agent>(signatures.size());
 	for(list<Agent>::iterator it = signatures.begin();it != signatures.end(); it++){
 		it->eval(env,consts);
 	}

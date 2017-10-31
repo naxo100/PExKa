@@ -167,6 +167,7 @@ struct Pattern::Site {
 	std::pair<short,short> lnk_ptrn;//agent,site
 
 	bool operator==(const Site &s) const;
+	int compare(const Site &s) const;
 
 	/** \brief Constructs an empty site.
 	 * Default state value is (small_id)-1 and
@@ -183,6 +184,7 @@ struct Pattern::Site {
 class Pattern::Agent {
 	short signId; //signature ID
 	std::unordered_map<small_id,Site> interface;
+	list<const Agent*> greater;
 
 public:
 	Agent(short name_id);
@@ -203,10 +205,20 @@ public:
 	const Site& getSite(short id) const;
 	bool operator==(const Agent& a) const;
 
+	/** \brief Compare two agents.
+	 * @return 0 if equal, 1 if this contains 'a',
+	 * -1 if 'a' contains this, throws False if none.
+	 */
+	int compare(const Agent& a) const;
+
+	void addEmbedding(const Agent *a);
+	void addEmbedding(const list<const Agent*>& la);
+	const list<const Agent*>& getEmbeddings() const;
+
 	const unordered_map<small_id,Site>::const_iterator begin() const;
 	const unordered_map<small_id,Site>::const_iterator end() const;
 
-	const string toString( const Environment& env, short mixAgId=-1,
+	string toString( const Environment& env, short mixAgId=-1,
 			map<ag_st_id,short> bindLabels = map<ag_st_id,short>() ) const;
 };
 

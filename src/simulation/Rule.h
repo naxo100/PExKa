@@ -13,6 +13,7 @@
 #include "../grammar/location.hh"
 #include "../state/SiteGraph.h"
 #include <list>
+#include <unordered_set>
 
 //class pattern::Environment;
 
@@ -33,8 +34,8 @@ class Rule {
 public:
 	enum ActionType {
 		CHANGE,
-		BIND,
-		FREE,
+		LINK,
+		UNBIND,
 		DELETE,//id_lhs
 		CREATE,//id_rhs,id_ag_mix
 		TRANSPORT//id_lhs,id_trgt_comp
@@ -57,6 +58,9 @@ protected:
 	pair<const state::BaseExpression*,int> unaryRate;//rate,radius
 	list<Action> script;
 	vector<state::Node*> newNodes;
+	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
+	unordered_set<const pattern::Mixture::Component*> influence;
+
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.
 	 * @param nme Declared kapa label of rule.
@@ -70,6 +74,7 @@ public:
 	const Mixture& getRHS() const;
 	const state::BaseExpression& getRate() const;
 	const state::BaseExpression& getUnaryRate() const;
+	const unordered_set<const pattern::Mixture::Component*>& getInfluences() const;
 
 	/** \brief Set RHS of the rule.
 	 * If this is a reversible rule, mix is declared in env and should not be
@@ -99,6 +104,8 @@ public:
 
 	const list<Action>& getScript() const;
 	const vector<state::Node*>& getNewNodes() const;
+
+	void checkInfluence();
 
 	string toString(const pattern::Environment& env) const;
 };

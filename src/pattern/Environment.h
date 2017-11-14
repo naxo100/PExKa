@@ -68,8 +68,10 @@ public:
 	Channel& declareChannel(const ast::Id &channel);
 	const Mixture& declareMixture(const Mixture& m);
 	const Mixture::Component& declareComponent(const Mixture::Component& c);
-	const Mixture::Agent& declareAgentPattern(const Mixture::Agent* a);
+	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,bool is_lhs = true);
 	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix);
+
+	void buildInfluenceMap();
 
 	const Signature& getSignature(short id) const;
 	const vector<Signature>& getSignatures() const;

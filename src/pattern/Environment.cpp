@@ -104,40 +104,56 @@ const Mixture::Component& Environment::declareComponent(const Mixture::Component
 		}
 	}
 	components.emplace_back(new_comp);
-	components.back().setId(components.size()-1);
-	return components.back();
+	auto& cc = components.back();
+	cc.setId(components.size()-1);
+	small_id i = 0;
+	for(auto ag : cc)
+		ag->addCc(&cc,i++);
+	return cc;
 }
 
-const Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag){
-	list<const Mixture::Agent*> greater;
-	list<Mixture::Agent*> less;
+Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bool is_lhs){
+	list<pair<set<small_id>,Mixture::Agent*> > greater;
+	list<pair<set<small_id>,Mixture::Agent*> > less;
 	//cout << "Declaring agent pattern " << new_ag->toString(*this) << endl;
 	for(auto &ag : agentPatterns[new_ag->getId()] ){
 		try {
-			switch(new_ag->compare(ag)){//1 if new_ag < ag
+			set<small_id> sites;
+			switch(new_ag->compare(ag,sites)){//1 if new_ag < ag
 			case 0:
 				//cout << "Same agent pattern was declared before: " << ag.toString(*this) << endl;
 				delete new_ag;
 				return ag;
 			case 1:
 				//cout << "Found an agent pattern more specific: " << ag.toString(*this) << endl;
-				less.emplace_back(&ag);
+				less.emplace_back(sites,&ag);
 				break;
 			case -1:
 				//cout << "Found an agent pattern more general: " << ag.toString(*this) << endl;
-				greater.emplace_back(&ag);
+				greater.emplace_back(sites,&ag);
 				break;
 			default:
+				less.emplace_back(sites,&ag);
+				greater.emplace_back(sites,&ag);
 				break;
 			}
 		}
-		catch(False& ex){}
+		catch(False& ex){/*different patterns*/}
 	}
 	agentPatterns[new_ag->getId()].emplace_back(*new_ag);
 	auto& new_agent = agentPatterns[new_ag->getId()].back();
-	for(auto ag : less)
-		ag->addEmbedding(&new_agent);
-	new_agent.addEmbedding(greater);
+	for(auto& sites_ag : less)
+		for(auto site : sites_ag.first){
+			//if (is_lhs)
+				sites_ag.second->addParent(site,&new_agent);
+			new_agent.addChild(site,sites_ag.second);
+		}
+	for(auto& sites_ag : greater)
+		for(auto site : sites_ag.first){
+			//if (is_lhs)
+				sites_ag.second->addChild(site,&new_agent);
+			new_agent.addParent(site,sites_ag.second);
+		}
 	delete new_ag;
 	return new_agent;
 }
@@ -153,6 +169,11 @@ simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture
 	varNames.push_back(name);
 	rules.emplace_back(name_loc,mix);
 	return rules.back();
+}
+
+void Environment::buildInfluenceMap() {
+	for(auto& r : rules)
+		r.checkInfluence();
 }
 
 short Environment::getVarId(const string &s) const {
@@ -290,9 +311,21 @@ void Environment::show() const {
 		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
 		for(auto& ap_list : agentPatterns)
 			for(auto& ap : ap_list){
-				cout << ap.toString(*this) << "\t ->  ";
-				for(auto& emb : ap.getEmbeddings())
-					cout << emb->toString(*this) << ", ";
+				for(auto& site_ptrns : ap.getParentPatterns()){
+					cout << this->getSignature(ap.getId()).getSite(site_ptrns.first).getName()
+							<< "~{";
+					for(auto& emb : site_ptrns.second)
+						cout << emb->toString(*this) << ",";
+					cout << "}, ";
+				}
+				cout << "   >>>   " << ap.toString(*this) << "   >>>   ";
+				for(auto& site_ptrns : ap.getChildPatterns()){
+					cout << this->getSignature(ap.getId()).getSite(site_ptrns.first).getName()
+							<< "~{";
+					for(auto& emb : site_ptrns.second)
+						cout << emb->toString(*this) << ",";
+					cout << "}, ";
+				}
 				cout << endl;
 			}
 		cout << "\tComponents[" << components.size() << "]" << endl;
@@ -308,7 +341,11 @@ void Environment::show() const {
 		i = 0;
 		for(auto& rul : rules){
 			cout << (i+1) << ") ";
-			cout << rul.toString(*this) << endl;
+			cout << rul.toString(*this);
+			cout << "influence-cc: ";
+			for(auto& inf : rul.getInfluences())
+				cout << inf->toString(*this) << ";  ";
+			cout << endl;
 			i++;
 		}
 

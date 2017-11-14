@@ -70,17 +70,19 @@ void Link::eval(const pattern::Environment &env,
 		else
 			links[value].push_back(mix_ag_site);
 		break;
-	default:
+	case ANY:
 		if(!allow_pattern)
 			throw SemanticError("Patterns are not allowed here.",loc);
-		break;
-	case ANY:
 		mix_site.link_type = pattern::Mixture::WILD;
 		break;
 	case SOME:
+		if(!allow_pattern)
+			throw SemanticError("Patterns are not allowed here.",loc);
 		mix_site.link_type = pattern::Mixture::BIND;
 		break;
 	case AG_SITE:
+		if(!allow_pattern)
+			throw SemanticError("Patterns are not allowed here.",loc);
 		mix_site.link_type = pattern::Mixture::BIND_TO;
 		try{
 			short bind_to_ag(env.getSignatureId(ag_site.first.getString()));
@@ -212,8 +214,8 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 	short ag_id = id_agent.first;
 	pattern::Mixture::Agent& agent = id_agent.second;
 	pattern::Mixture::Site* mix_site;
+	sign = &env.getSignature(agent.getId());
 	try{
-		sign = &env.getSignature(agent.getId());
 		site_id = sign->getSiteId(name.getString());
 		mix_site = &agent.addSite(site_id);
 	}
@@ -266,7 +268,6 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 		sign->getSite(site_id).isPossibleValue(num->getValue());
 		break;
 	}
-
 
 	link.eval(env,*mix_site,links,make_pair(ag_id,site_id),true);
 }
@@ -664,6 +665,7 @@ void Rule::eval(pattern::Environment& env,
 		inverse_rule.setRate(reverse);
 	}
 	else{
+		rhs_mix_p->declareAgents(env,false);
 		rhs_mask = rhs_mix_p->setComponents();
 		rule.setRHS(rhs_mix_p,bi);
 	}

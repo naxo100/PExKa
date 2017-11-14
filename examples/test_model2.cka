@@ -5,10 +5,10 @@
 %const: 'a' 0.0
 %var: 'a2' 1.1
 
-%compartment: 'bottles'[2][2] 1.0
+%compartment: 'bottles'[1][1] 1.0
 #%compartment: 'cities'[10] 5.0
 
-%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $0.1
+%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
 %channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
 #%channel: 'tube3' 'bottles'[0][0] -> 'bottles'[2][2] 
 #%channel: 'highway' 'cities'[x] -> 'cities'[x+1] $5
@@ -26,12 +26,23 @@
 %var: 'loop kappa' A(v!6,t!1),A(s!2,v!3),A(z!4,v!5),A(s!1,t!2),A(z!3,t!4),A(s!5,z!6)
 %var: 'kappa site.agent' A(v!v.A)
 
+%var: 'agent1' A(s~3,z!_,t~1)
+
+%var: 'As' A(s~1?)
+%var: 'As1' A(s~1!_)
+%var: 'A' A()
+
 #%use: 'bottles'[x + 1][x]#,'cities'[3*x]
 #%init: 2 A(s)
-%use: *
-%init: 10 A(s~2)
+%use: 'bottles'[x][y]
+%init: 4 A(s~2)
 
-'unbind' A(s~1!1),B(i~2!1) -> A(s~1),B(i~2) @ 1
+'unbind' A(s!1),B(i!1) -> A(s),B(i) @ 1
+'bind' A(s~1),B(i~1) -> A(s~1!1),B(i~1!1) @1
+
+#%var: 'ast1' A(s,t~1)
+#%var: 'as1t' A(s~1,t)
+
 
 'hola' A(s~1),B(s) -> A(s~2),B(s!1),S(s!1) @ 1.0
 
@@ -39,4 +50,4 @@
 
 'chaito' A(s!1),B(s!1) -> A(s),B(s) @ 2
 
-
+'a.b5 birule' A(s~3) <-> B(i~1) @ 1,2

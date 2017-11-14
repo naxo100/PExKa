@@ -80,7 +80,7 @@ public:
 	 * an agent in environment.
 	 * @param a a pointer to agent declared in the environment.
 	 */
-	void addAgent(const Agent* a);
+	void addAgent(Agent* a);
 
 	/** \brief Add a new connection between agent's sites
 	 *
@@ -94,7 +94,7 @@ public:
 	 * Need to call this method before setComponents(env).
 	 * @param env the environment of simulation.
 	 */
-	void declareAgents(Environment &env);
+	void declareAgents(Environment &env,bool is_lhs = true);
 
 	/** \brief Identify and declare connected components in this mixture.
 	 * Using the links and agents in this mixture, this method identifies
@@ -112,6 +112,8 @@ public:
 	const Agent& getAgent(small_id cc,small_id ag) const;
 	const Agent& getAgent(ag_st_id cc_ag ) const;
 	const Agent& getAgent(small_id ag_id ) const override;
+
+	const Component& getComponent(small_id) const;
 
 	ag_st_id follow(small_id cc_id,small_id ag_id,small_id site) const;
 
@@ -136,7 +138,7 @@ private:
 	//true for valid comps; false for valid agents.
 	bool declaredComps;
 	union {//we need to preserve mixture order!!!
-		const Agent** agents;
+		Agent** agents;
 		vector<const Component*>* comps;
 	};
 
@@ -164,7 +166,7 @@ struct Pattern::Site {
 
 	LinkType link_type;
 	//only valid if type is BIND_TO
-	std::pair<short,short> lnk_ptrn;//agent,site
+	ag_st_id lnk_ptrn;//agent,site (-1,-1)
 
 	bool operator==(const Site &s) const;
 	int compare(const Site &s) const;
@@ -174,7 +176,9 @@ struct Pattern::Site {
 	 * default link_type is FREE.
 	 */
 	Site();
+	int compareLinkPtrn(ag_st_id ptrn) const;
 	bool isEmptySite() const;//TODO inline???
+	bool isBindToAny() const;
 };
 
 /** \brief Class of an agent declared in a mixture.
@@ -184,10 +188,13 @@ struct Pattern::Site {
 class Pattern::Agent {
 	short signId; //signature ID
 	std::unordered_map<small_id,Site> interface;
-	list<const Agent*> greater;
+	map<small_id,list<Agent*> > parents;
+	map<small_id,list<Agent*> > childs;
+	mutable list<pair<const Mixture::Component*,small_id> > includedIn;
 
 public:
 	Agent(short name_id);
+	~Agent();
 
 	short getId() const;
 	/** \brief Includes the site with id name_id in this agent.
@@ -200,7 +207,8 @@ public:
 	void setSiteValue(small_id mix_site,int val);
 	void setSiteValue(small_id mix_site,float val);
 
-	void setSiteLink(short mix_site,LinkType l);
+	//void setSiteLink(short mix_site,LinkType l);
+	void setLinkPtrn(small_id trgt_site,small_id ag_ptrn,small_id site_ptrn);
 
 	const Site& getSite(short id) const;
 	bool operator==(const Agent& a) const;
@@ -209,11 +217,19 @@ public:
 	 * @return 0 if equal, 1 if this contains 'a',
 	 * -1 if 'a' contains this, throws False if none.
 	 */
-	int compare(const Agent& a) const;
+	int compare(const Agent& a,set<small_id>& already_done) const;
 
-	void addEmbedding(const Agent *a);
-	void addEmbedding(const list<const Agent*>& la);
-	const list<const Agent*>& getEmbeddings() const;
+	void addParent(small_id id,Agent *a);
+	void addParents(small_id id,const list<Agent*>& la);
+	void addChild(small_id id,Agent *a);
+	void addChilds(small_id id,const list<Agent*>& la);
+	const list<Agent*>& getParentPatterns(small_id id) const;
+	const list<Agent*>& getChildPatterns(small_id id) const;
+	const map<small_id,list<Agent*> >& getParentPatterns() const;
+	const map<small_id,list<Agent*> >& getChildPatterns() const;
+
+	void addCc(const Mixture::Component* cc,small_id id) const;
+	const list<pair<const Mixture::Component*,small_id> >& getIncludes() const;
 
 	const unordered_map<small_id,Site>::const_iterator begin() const;
 	const unordered_map<small_id,Site>::const_iterator end() const;
@@ -230,7 +246,7 @@ public:
  */
 class Mixture::Component : public Pattern {
 	short_id id;
-	vector<const Agent*> agents;
+	vector<Agent*> agents;
 	union {
 		list<ag_st_id> *links;
 		//(comp_ag_id,site_id) -> (comp_ag_id,site_id)
@@ -242,15 +258,15 @@ public:
 	Component(const Component& comp);
 	~Component();
 	bool contains(const Mixture::Agent* a);
-	short addAgent(const Mixture::Agent* a);
+	short addAgent(Mixture::Agent* a);
 	void addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<short,short> &mask);
 
 	size_t size() const override;
 	void setId(short_id i);
 	short_id getId() const;
 
-	const vector<const Agent*>::const_iterator begin() const;
-	const vector<const Agent*>::const_iterator end() const;
+	const vector<Agent*>::const_iterator begin() const;
+	const vector<Agent*>::const_iterator end() const;
 
 	vector<small_id> setGraph();
 	const map<ag_st_id,ag_st_id>& getGraph() const;

@@ -17,7 +17,7 @@ namespace pattern {
 
 Mixture::Mixture(short agent_count) : declaredComps(false),agentCount(0),
 		siteCount(0),compCount(0),id(-1){
-	agents = new const Agent*[agent_count];
+	agents = new Agent*[agent_count];
 }
 
 Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),
@@ -28,7 +28,7 @@ Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),
 			(*comps)[i] = (*m.comps)[i];
 	}
 	else {
-		agents = new const Agent*[m.compCount];
+		agents = new Agent*[m.compCount];
 		for(size_t i = 0; i < agentCount; i++)
 			agents[i] = m.agents[i];
 	}
@@ -49,7 +49,7 @@ void Mixture::setId(short_id i){
 short_id Mixture::getId() const {
 	return id;
 }
-void Mixture::addAgent(const Mixture::Agent *a){
+void Mixture::addAgent(Mixture::Agent *a){
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call addAgent() on an initialized Mixture");
 	agents[agentCount] = a;
@@ -66,13 +66,14 @@ void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
 		links.emplace(p2,p1);
 }
 
-void Mixture::declareAgents(Environment &env){
+void Mixture::declareAgents(Environment &env, bool is_lhs){
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call declareAgents() on a initialized Mixture");
 	for(size_t i = 0; i < agentCount ; i++){
-		agents[i] = &env.declareAgentPattern(agents[i]);
+		agents[i] = &env.declareAgentPattern(agents[i],is_lhs);
 	}
 }
+
 vector<ag_st_id> Mixture::setComponents(){
 	vector<ag_st_id> order_mask(agentCount);//ag_id(mix)-> (comp_id,ag_id(comp))
 	if(declaredComps)
@@ -270,6 +271,9 @@ const Mixture::Agent& Mixture::getAgent(small_id ag_id) const {
 	}
 	throw std::out_of_range("Agent id out of bounds for this Mixture.");
 }
+const Mixture::Component& Mixture::getComponent(small_id id) const {
+	return *(*comps)[id];
+}
 
 ag_st_id Mixture::follow(small_id cc_id,small_id ag_id,small_id site) const{
 	return (*comps)[cc_id]->follow(ag_id,site);
@@ -306,6 +310,9 @@ string Mixture::toString(const Environment& env,const vector<ag_st_id>& mask) co
 /*************** Class Agent ********************/
 
 Mixture::Agent::Agent(short sign_id) : signId(sign_id){}
+Mixture::Agent::~Agent(){
+	1;
+};
 
 Mixture::Site& Mixture::Agent::addSite(short env_site){
 	return interface[env_site] = Site();
@@ -346,45 +353,48 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 	return true;
 }
 
-int Mixture::Agent::compare(const Agent &a) const {
+int Mixture::Agent::compare(const Agent &a,set<small_id>& already_done) const {
 	int ret = 0;
 	if(this == &a)
 		return 0;
 	if(signId == a.signId){
-		for(const pair<int,Site> &id_site : interface){
+		for(auto &id_site : interface){
 			try{
 				int ret_b = id_site.second.compare(a.getSite(id_site.first));
-				if(ret_b*ret == -1)
-					throw False();
+				if(ret_b * ret == -1)
+					ret = -100;
 				else
 					ret = ret ? ret : ret_b;
+				already_done.emplace(id_site.first);
 			}
 			catch(std::out_of_range &e){
 				if(!id_site.second.isEmptySite() ||
 						id_site.second.link_type != WILD){
-					if(ret > 0)
-						throw False();
+					if(ret == 1)
+						ret = -100;
 					else
-						ret = -1;
+						ret = ret ? ret : -1;
 				}
 			}
 		}
-		for(const pair<int,Site> &id_site : a.interface){
-			//TODO set of already done
+		for(auto &id_site : a.interface){
+			if(already_done.count(id_site.first))
+				continue;
+			//already_done.emplace(id_site.first);
 			try{
 				int ret_b = -1*id_site.second.compare(getSite(id_site.first));
-				if(ret_b*ret == -1)
-					throw False();
+				if(ret_b * ret == -1)
+					ret = -100;
 				else
 					ret = ret ? ret : ret_b;
 			}
 			catch(std::out_of_range &e){
 				if(!id_site.second.isEmptySite() ||
 						id_site.second.link_type != WILD){
-					if(ret < 0)
+					if(ret == -1)
 						throw False();
 					else
-						ret = 1;
+						ret = ret ? ret : 1;
 				}
 			}
 		}
@@ -402,17 +412,51 @@ void Mixture::Agent::setSiteValue(small_id site_id,float val){
 	//interface[site_id].val_type = ValueType::LABEL;
 	interface[site_id].state.set(val);
 }
-
-
-void Mixture::Agent::addEmbedding(const Agent *a){
-	greater.emplace_back(a);
-}
-void Mixture::Agent::addEmbedding(const list<const Agent*>& la){
-	greater.insert(greater.end(),la.begin(),la.end());
+void Mixture::Agent::setLinkPtrn(small_id trgt_site,small_id ag_ptrn,small_id site_ptrn){
+	interface.at(trgt_site).lnk_ptrn = make_pair(ag_ptrn,site_ptrn);
 }
 
-const list<const Mixture::Agent*>& Mixture::Agent::getEmbeddings() const {
-	return greater;
+
+void Mixture::Agent::addParent(small_id id,Agent *a){
+	parents[id].emplace_back(a);
+}
+void Mixture::Agent::addParents(small_id id,const list<Agent*>& la){
+	parents[id].insert(parents[id].end(),la.begin(),la.end());
+}
+void Mixture::Agent::addChild(small_id id,Agent *a){
+	childs[id].emplace_back(a);
+}
+void Mixture::Agent::addChilds(small_id id,const list<Agent*>& la){
+	childs[id].insert(childs[id].end(),la.begin(),la.end());
+}
+
+const list<Mixture::Agent*>& Mixture::Agent::getParentPatterns(small_id id) const {
+	static list<Mixture::Agent*> empty;
+	try{
+		return parents.at(id);
+	} catch(std::out_of_range &ex){}
+	return empty;
+}
+const list<Mixture::Agent*>& Mixture::Agent::getChildPatterns(small_id id) const {
+	static list<Mixture::Agent*> empty;
+	try{
+		return childs.at(id);
+	} catch(std::out_of_range &ex){}
+	return empty;
+}
+const map<small_id,list<Mixture::Agent*> >& Mixture::Agent::getParentPatterns() const {
+	return parents;
+}
+const map<small_id,list<Mixture::Agent*> >& Mixture::Agent::getChildPatterns() const {
+	return childs;
+}
+
+
+void Mixture::Agent::addCc(const Mixture::Component* cc,small_id id) const{
+	includedIn.emplace_back(cc,id);
+}
+const list<pair<const Mixture::Component*,small_id> >& Mixture::Agent::getIncludes() const{
+	return includedIn;
 }
 
 
@@ -488,7 +532,7 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 }
 
 /************** class Site *********************/
-Mixture::Site::Site() : state((small_id)-1),link_type(FREE) {}
+Mixture::Site::Site() : state((small_id)-1),link_type(FREE),lnk_ptrn(-1,-1) {}
 
 bool Mixture::Site::isEmptySite() const{
 	static auto empty = (small_id)-1;
@@ -498,7 +542,7 @@ bool Mixture::Site::operator ==(const Site &s) const{
 	if(memcmp(&state,&s.state,sizeof(state::SomeValue))) //only valid if union in state is cleaned at constructor
 		return false;
 	if(s.link_type == link_type){
-		if(link_type == LinkType::BIND_TO && s.lnk_ptrn != lnk_ptrn)
+		if(link_type >= LinkType::BIND && s.lnk_ptrn != lnk_ptrn)//bind or bind_to //TODO PATH
 			return false;
 	}
 	else return false;
@@ -519,20 +563,56 @@ int Mixture::Site::compare(const Site &s) const{
 	if(s.link_type == link_type){
 		if(link_type == LinkType::BIND_TO && s.lnk_ptrn != lnk_ptrn)
 			throw False();
-		else
-			return ret;
+		if(link_type == LinkType::BIND)
+			switch(compareLinkPtrn(s.lnk_ptrn)){
+			case 0: return ret;
+			case 1: return ret > -1 ? 1 : -100;
+			case -1:return ret < 1 ? -1 : -100;
+			default: break;//never
+			}
 	}
 	else {
 		if(link_type == WILD)
-			return ret != -1 ? 1 : throw False();
+			return ret != -1 ? 1 : -100;
 		else
 			if(s.link_type == WILD)
-				return ret != 1 ? -1 : throw False();
+				return ret != 1 ? -1 : -100;
 			else
-				throw False();
+				if(link_type * s.link_type == 6)
+					switch(compareLinkPtrn(s.lnk_ptrn)){
+					case 0:return s.link_type == LinkType::BIND_TO ? (ret == 1 ? -100 : -1) : ret;
+					case 1:return ret > -1 ? 1 : -100;
+					case -1:return ret < 1 ? -1 : -100;
+					default: break;//never
+					}
+				else
+					throw False();
 	}
 	return ret;
 }
+
+int Mixture::Site::compareLinkPtrn(ag_st_id ptrn) const{
+	if(isBindToAny()){
+		if(ptrn.first == -1)
+			return 0;
+		else
+			return 1;
+	}
+	else{
+		if(ptrn.first == -1)
+			return -1;
+		else
+			if(lnk_ptrn == ptrn)
+				return link_type == LinkType::BIND_TO ? 1 : 0;//need to comparte with other type
+			else
+				throw False();
+	}
+}
+
+bool Mixture::Site::isBindToAny() const{
+	return link_type == LinkType::BIND && lnk_ptrn.first == -1;
+}
+
 
 /************** class Component ****************/
 
@@ -561,16 +641,16 @@ const Mixture::Agent& Mixture::Component::getAgent(small_id ag) const {
 	return *(agents[ag]);
 }
 
-const vector<const Mixture::Agent*>::const_iterator Mixture::Component::begin() const{
+const vector<Mixture::Agent*>::const_iterator Mixture::Component::begin() const{
 	agents.begin();
 	return agents.begin();
 }
-const vector<const Mixture::Agent*>::const_iterator Mixture::Component::end() const{
+const vector<Mixture::Agent*>::const_iterator Mixture::Component::end() const{
 	return agents.end();
 }
 
 
-short Mixture::Component::addAgent(const Mixture::Agent* a){
+short Mixture::Component::addAgent(Mixture::Agent* a){
 	agents.push_back(a);
 	return agents.size()-1;
 }
@@ -580,6 +660,10 @@ void Mixture::Component::addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<sh
 	ag_st_id second(mask.at(lnk.second.first),lnk.second.second);
 	links->emplace_back(first);
 	links->emplace_back(second);
+	agents.at(first.first)->setLinkPtrn(first.second,
+			agents.at(second.first)->getId(),second.second);
+	agents.at(second.first)->setLinkPtrn(second.second,
+			agents.at(first.first)->getId(),first.second);
 }
 
 ag_st_id Mixture::Component::follow(small_id ag_id,small_id site) const{
@@ -612,7 +696,7 @@ const map<ag_st_id,ag_st_id>& Mixture::Component::getGraph() const{
 }
 
 vector<small_id> Mixture::Component::setGraph() {
-	list<pair<const Agent*,short> > reorder;
+	list<pair<Agent*,short> > reorder;
 	for(size_t i = 0; i < agents.size(); i++ )
 		reorder.emplace_back(agents[i],(short)i);
 	reorder.sort();

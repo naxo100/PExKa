@@ -23,7 +23,7 @@ Node::Node(const pattern::Signature& sign) : signId(sign.getId()),address(-1), i
 	}
 }
 
-Node::Node(const Node& node,map<Node*,Node*>& mask) : signId(node.signId),address(-1),intfSize(node.intfSize) {
+Node::Node(const Node& node,const map<Node*,Node*>& mask) : signId(node.signId),address(-1),intfSize(node.intfSize) {
 	interface = new Internal[intfSize];
 	for(small_id i = 0; i < intfSize; i++){
 		interface[i].val = node.interface[i].val;

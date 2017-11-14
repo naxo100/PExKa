@@ -60,6 +60,7 @@ class State {
 	void modify(const simulation::Rule::Action& act,EventInfo& ev);
 	void del(const simulation::Rule::Action& act, EventInfo& ev);
 	//void add(const simulation::Rule::Action& a);
+	void positiveUpdate(const simulation::Rule& r,const EventInfo& ev);
 
 	/** \brief static vector with the basic rule action methods.
 	 */

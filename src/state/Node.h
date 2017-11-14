@@ -38,7 +38,7 @@ protected:
 public:
 	Node(short sign_id,short intf_size);
 	Node(const pattern::Signature& sign);
-	Node(const Node& node,map<Node*,Node*>& mask);
+	Node(const Node& node,const map<Node*,Node*>& mask);
 	void alloc(big_id addr);
 	big_id getAddress() const;
 

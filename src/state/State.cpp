@@ -147,9 +147,21 @@ void State::apply(const simulation::Rule& r,EventInfo& ev){
 	for(auto& act : r.getScript()){
 		(this->*(action)[act.t])(act,ev);
 	}
+	//TODO create left nodes from ev.new_cc
+	for(auto& node_pair : ev.new_cc){
+		if(!node_pair.second){
+			node_pair.second = new Node(*node_pair.first,ev.new_cc);
+		}
+	}
 }
 
+void State::positiveUpdate(const simulation::Rule& r,const EventInfo& ev){
+	//TODO vars_to_wake_up
+	vector<list<two<small_id> > > vars_to_wake_up(env.size<pattern::Mixture::Component>());
+	for(size_t i = 0; i < vars_to_wake_up.size(); i++){
 
+	}
+}
 
 void State::advance(double tau) {
 	double t(0);

@@ -98,7 +98,7 @@ void State::free(const simulation::Rule::Action& a,EventInfo& ev){
 		auto new_node = ev.new_cc.at(node);
 		if(!new_node)
 			new_node = new Node(*node,ev.new_cc);
-		node->unbind(ev,injections,get<2>(a.trgt1));
+		new_node->unbind(ev,injections,get<2>(a.trgt1));
 	}
 	catch(std::out_of_range &ex){
 		node->unbind(ev,injections,get<2>(a.trgt1));
@@ -111,7 +111,7 @@ void State::modify(const simulation::Rule::Action& a,EventInfo& ev){
 		auto new_node = ev.new_cc.at(node);
 		if(!new_node)
 			new_node = new Node(*node,ev.new_cc);
-		node->changeIntState(ev,injections,get<2>(a.trgt1),get<0>(a.trgt2));
+		new_node->changeIntState(ev,injections,get<2>(a.trgt1),get<0>(a.trgt2));
 	}
 	catch(std::out_of_range &ex){
 		node->changeIntState(ev,injections,get<2>(a.trgt1),get<0>(a.trgt2));
@@ -157,9 +157,38 @@ void State::apply(const simulation::Rule& r,EventInfo& ev){
 
 void State::positiveUpdate(const simulation::Rule& r,const EventInfo& ev){
 	//TODO vars_to_wake_up
-	vector<list<two<small_id> > > vars_to_wake_up(env.size<pattern::Mixture::Component>());
-	for(size_t i = 0; i < vars_to_wake_up.size(); i++){
+	auto& wake_up = r.getInfluences();
+	for(auto& cc_info : wake_up){
+		auto cc = cc_info.first;
+		auto& info = cc_info.second;
+		Node* node;
+		for(auto cc_ag_root : info.node_id){
+			if(cc_ag_root.first == small_id(-1))//new
+				node = ev.fresh_emb[cc_ag_root.second.first];
+			else
+				try {
+					node = ev.emb[cc_ag_root.first][cc_ag_root.second.first];
+					node = ev.new_cc.at(node);
+				}catch(out_of_range &ex) {}
+			two<std::list<Node::Internal*> > port_lists;
+			try{
+				matching::Injection* inj_p = new matching::CcInjection(*cc,*node,port_lists,cc_ag_root.second.second);
+				//TODO inj_p.setAddress();inj_p.setCoordinate();
+				injections[cc->getId()].emplace(inj_p);
+				for(auto port : port_lists.first)
+					port->deps.first->emplace(inj_p);
+				for(auto port : port_lists.second)
+					port->deps.second->emplace(inj_p);
+				if(!port_lists.first.size() && !port_lists.second.size())
+					node->addDep(inj_p);
+				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
+				auto rate = evalActivity(r);
+				activityTree->add(r.getId(),rate.first + rate.second);
+			}
+			catch(False& e){
 
+			}
+		}
 	}
 }
 
@@ -287,11 +316,11 @@ FL_TYPE State::event() {
 			//for(int i = 0; i < rule_eventp.first.getLHS().)
 		#endif
 		apply(rule_eventp.first,*rule_eventp.second);
+		positiveUpdate(rule_eventp.first,*rule_eventp.second);
 	}
 	catch(exception &ex){
-		1+1;//TODO
+		cout << "exception found: why?? " << ex.what() << endl;//TODO
 	}
-
 
 	return dt;
 
@@ -313,6 +342,8 @@ void State::initInjections() {
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
+				if(!port_lists.first.size() && !port_lists.second.size())
+					node_p->addDep(inj_p);
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
 			}
 			catch(False& e){

@@ -40,6 +40,7 @@ public:
 	vector<Node*>::iterator begin();
 	vector<Node*>::iterator end();
 	size_t getPopulation() const;
+	void decPopulation(size_t pop = 1);
 
 
 protected:

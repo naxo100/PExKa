@@ -24,7 +24,7 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 		const pattern::Environment& env) {
 	Node* buff_nodes[MAX_CC_SIZE];
 	unsigned i = 0;
-	if(n < 5) {//=> n = 1
+	if(n < 10) {//=> n = 1
 		while(n--){
 			i=0;
 			for(auto p_ag : cc){
@@ -77,6 +77,7 @@ void SiteGraph::allocate(Node* node){
 void SiteGraph::remove(Node* node){
 	free.push_back(node->getAddress());
 	container[node->getAddress()] = nullptr;
+	population--;// -= node->getCount();
 	//delete node;   Do not delete, save nodes for reuse
 }
 
@@ -85,6 +86,10 @@ size_t SiteGraph::getNodeCount() const{
 }
 size_t SiteGraph::getPopulation() const {
 	return population;
+}
+
+void SiteGraph::decPopulation(size_t pop){
+	population -= pop;
 }
 
 vector<Node*>::iterator SiteGraph::begin() {

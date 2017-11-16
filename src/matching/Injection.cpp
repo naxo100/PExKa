@@ -27,7 +27,7 @@ const pattern::Pattern& Injection::pattern() const{
 /********** CcInjection **********/
 
 CcInjection::CcInjection(const pattern::Mixture::Component& _cc,Node& node,
-		two<std::list<state::Node::Internal*> >& port_list)
+		two<std::list<state::Node::Internal*> >& port_list,small_id root)
 		: Injection(_cc),address(0) {
 	//ccAgToNode = new big_id[cc.size()];
 	ccAgToNode.resize(_cc.size());

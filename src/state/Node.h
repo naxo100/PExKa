@@ -17,6 +17,7 @@
 
 namespace matching {
 	class InjSet;
+	class Injection;
 }
 
 namespace state {
@@ -34,6 +35,8 @@ protected:
 	big_id address;
 	Internal *interface;
 	small_id intfSize;
+	matching::InjSet* deps;
+
 	virtual ~Node();
 public:
 	Node(short sign_id,short intf_size);
@@ -76,8 +79,7 @@ public:
 	const SomeValue& getInternalState(small_id);
 	const pair<Node*,small_id>& getLinkState(small_id);
 
-
-
+	void addDep(matching::Injection* inj);
 	pair<matching::InjSet*,matching::InjSet*>& getLifts(small_id site);
 	//DEBUG
 	string toString(const pattern::Environment &env) const;
@@ -93,7 +95,7 @@ struct Node::Internal {
 	~Internal();
 
 	void negativeUpdate(EventInfo& ev,matching::InjSet* injs);
-	void negativeUpdate(EventInfo& ev,matching::InjSet* injs,matching::InjSet* deps);
+	static void negativeUpdate(EventInfo& ev,matching::InjSet* injs,matching::InjSet* deps);
 
 
 	string toString(const pattern::Signature::Site& s) const;
@@ -154,6 +156,8 @@ struct EventInfo {
 
 	//new cc derived from multinode
 	map<Node*,Node*> new_cc;
+
+	set<small_id> to_update;
 
 };
 

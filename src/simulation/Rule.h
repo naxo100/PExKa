@@ -13,7 +13,7 @@
 #include "../grammar/location.hh"
 #include "../state/SiteGraph.h"
 #include <list>
-#include <unordered_set>
+#include <unordered_map>
 
 //class pattern::Environment;
 
@@ -47,8 +47,18 @@ public:
 		//	cc_id/val	ag_id	 sit_id	  isNew
 		tuple<small_id,small_id,small_id,small_id> trgt1,trgt2;
 	};
+
+	struct CandidateInfo {
+		bool is_valid;
+		bool is_new;
+		//small_id cc_root;
+		map<small_id,ag_st_id> node_id;//lhs_cc-> (lhs_cc_ag,cc_root)
+		CandidateInfo();
+		void set(small_id root,ag_st_id node);
+	};
 protected:
 	yy::location loc;
+	int id;
 	string name;
 	const Mixture &lhs;
 	const Mixture *rhs;
@@ -59,22 +69,25 @@ protected:
 	list<Action> script;
 	vector<state::Node*> newNodes;
 	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
-	unordered_set<const pattern::Mixture::Component*> influence;
+	list<ag_st_id> news;
+	list<pair<const pattern::Mixture::Component*,CandidateInfo> > influence;
+	map<ag_st_id,ag_st_id> matches;//rhs-ag -> lhs-ag
 
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.
 	 * @param nme Declared kapa label of rule.
 	 * @param mix LHS of the rule.
 	 */
-	Rule(const ast::Id& nme, const Mixture& mix);
+	Rule(int _id,const ast::Id& nme, const Mixture& mix);
 	~Rule();
 
+	int getId() const;
 	const string& getName() const;
 	const Mixture& getLHS() const;
 	const Mixture& getRHS() const;
 	const state::BaseExpression& getRate() const;
 	const state::BaseExpression& getUnaryRate() const;
-	const unordered_set<const pattern::Mixture::Component*>& getInfluences() const;
+	const list<pair<const pattern::Mixture::Component*,CandidateInfo> >& getInfluences() const;
 
 	/** \brief Set RHS of the rule.
 	 * If this is a reversible rule, mix is declared in env and should not be
@@ -105,10 +118,11 @@ public:
 	const list<Action>& getScript() const;
 	const vector<state::Node*>& getNewNodes() const;
 
-	void checkInfluence();
-
+	void checkInfluence(const Environment& env);
 	string toString(const pattern::Environment& env) const;
 };
+
+
 
 } /* namespace simulation */
 

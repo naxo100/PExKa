@@ -49,11 +49,12 @@
 # DELETE agent A(s~2!_)
 
 # when I declare A(s) without label in it state 's', 'env.show()' it break down
-# 'r3.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A(s) @ 1
-'r3.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A() @ 1
+#'r3.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A(s) @ 1
+
+'r3.2' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A() @ 1
 # INSERT agent A(s~1,t~1,v~-1.000000,z)
 
-# this rule is a copy of 'r3.1'. A rule repeated don't trigger a correct message
+# this rule is a copy of 'r3.2'. A rule repeated don't trigger a correct message
 #'r4.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A() @ 1
 
 'r5.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!1), A(s~1), A(s~2), A(s~3), B(i~1), B(i~2) @ 1
@@ -91,7 +92,7 @@
 
 # if I try FREE & DELETE a binded agent in same rule, It send a semantic error message
 #'r7.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s,v!5),A(s!5,v) @ 1
-# An exception found: Semantic error in file "examples/test_model3.cka", line 23, characters 1-7: The link status of agent A, site s on the right hand side is underspecified
+# An exception found: Semantic error in file "examples/test_model3.cka", line 25, characters 1-7: The link status of agent A, site s on the right hand side is underspecified
 
 'r7.2' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s,v!5),A(s!5,v), A(s,v) @ 1
 # FREE agent's sites A.s and A.v

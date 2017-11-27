@@ -167,13 +167,13 @@ simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture
 	id = varNames.size();
 	varMap[name] = id;
 	varNames.push_back(name);
-	rules.emplace_back(name_loc,mix);
+	rules.emplace_back(rules.size(),name_loc,mix);
 	return rules.back();
 }
 
 void Environment::buildInfluenceMap() {
 	for(auto& r : rules)
-		r.checkInfluence();
+		r.checkInfluence(*this);
 }
 
 short Environment::getVarId(const string &s) const {
@@ -210,6 +210,9 @@ const vector<pattern::Signature>& Environment::getSignatures() const{
 }
 const list<Mixture::Component>& Environment::getComponents() const{
 	return components;
+}
+const list<Mixture::Agent>& Environment::getAgentPatterns(small_id id) const{
+	return agentPatterns[id];
 }
 const vector<simulation::Rule>& Environment::getRules() const {
 	return rules;
@@ -344,7 +347,7 @@ void Environment::show() const {
 			cout << rul.toString(*this);
 			cout << "influence-cc: ";
 			for(auto& inf : rul.getInfluences())
-				cout << inf->toString(*this) << ";  ";
+				cout << inf.first->toString(*this) << ";  ";
 			cout << endl;
 			i++;
 		}

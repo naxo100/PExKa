@@ -49,7 +49,7 @@ class CcInjection : public Injection {
 
 public:
 	CcInjection(const pattern::Mixture::Component& cc,Node& node,
-			two<list<state::Node::Internal*> >& port_list);
+			two<list<state::Node::Internal*> >& port_list,small_id root = 0);
 	~CcInjection();
 
 	const vector<Node*>& getEmbedding() const override;

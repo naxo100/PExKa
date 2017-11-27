@@ -81,6 +81,7 @@ public:
 	//const Mixture& getMixture(small_id id) const;
 	const list<Mixture>& getMixtures() const;
 	const list<Mixture::Component>& getComponents() const;
+	const list<Mixture::Agent>& getAgentPatterns(small_id id) const;
 	const vector<simulation::Rule>& getRules() const;
 
 

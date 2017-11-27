@@ -5,6 +5,7 @@
  *      Author: naxo
  */
 
+#include <cstring>
 #include "../util/Exceptions.h"
 #include "../util/Warning.h"
 #include "Rule.h"
@@ -13,13 +14,18 @@
 
 namespace simulation {
 
-Rule::Rule(const ast::Id& nme, const Mixture& mix) : name(nme.getString()),loc(nme.loc),
+Rule::Rule(int _id,const ast::Id& nme, const Mixture& mix) : id(_id),name(nme.getString()),loc(nme.loc),
 		lhs(mix),rhs(nullptr),rate(nullptr),isRhsDeclared(false){}
 
 Rule::~Rule() {
 	// TODO Auto-generated destructor stub
 	if(!isRhsDeclared)
 		delete rhs;
+}
+
+
+int Rule::getId() const{
+	return id;
 }
 
 const string& Rule::getName() const {
@@ -55,6 +61,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		rhs_mask[rhs_unmask[i]] = i;
 	for(unsigned i = 0; i<lhs_unmask.size() ; i++)
 		lhs_mask[lhs_unmask[i]] = i;
+
 	//modify nodes
 	for(i = 0; i < lhs_unmask.size(); i++){
 		auto& lhs_ag = lhs.getAgent(lhs_unmask[i]);
@@ -70,6 +77,8 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 				break;
 			}
 			//match -> modify
+			matches[rhs_unmask[i]] = lhs_unmask[i];
+
 			auto& sign = env.getSignature(lhs_ag.getId());
 			small_id j = 0;
 			for(auto psite : sign.getSites()){
@@ -330,6 +339,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		auto& rhs_ag = rhs->getAgent(rhs_unmask[j]);
 		env.getSignature(rhs_ag.getId());
 		newNodes.emplace_back(new state::Node(env.getSignature(rhs_ag.getId())));
+		news.emplace_back(rhs_unmask[j]);
 		for(auto& s : rhs_ag)
 			newNodes[j-i]->setState(s.first,s.second.state);
 	}
@@ -339,6 +349,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		Action a;
 		a.t = DELETE;a.trgt1 = make_tuple(lhs_unmask[j].first,lhs_unmask[j].second,0,false);
 		script.emplace_back(a);
+		//deletes.emplace_back(lhs_unmask[j]);
 	}
 
 }
@@ -351,46 +362,43 @@ const vector<state::Node*>& Rule::getNewNodes() const{
 	return newNodes;
 }
 
-void Rule::checkInfluence() {
+
+
+void Rule::checkInfluence(const Environment& env) {
 	//TODO changes of BIND_TO -> FREE
 	//TODO changes of semi-link -> free ???
 	try{
-	struct Candidate {
-		const pattern::Mixture::Component* cc;
-		small_id agent_id,site_id;
-		Candidate(const pattern::Mixture::Component* _cc,small_id _ag,small_id _site) :
-			cc(_cc),agent_id(_ag),site_id(_site) {}
-	};
-	map<const pattern::Mixture::Component*,bool> candidates;
-	for(auto& ag_changes : changes){
+
+	map<const pattern::Mixture::Component*,CandidateInfo> candidates;
+	for(auto& ag_changes : changes){//for each agent that changes
 		auto& change_cc = rhs->getComponent(ag_changes.first.first.first);
 		auto& ag = rhs->getAgent(ag_changes.first.first);
 		if(ag_changes.first.second){
 			//new
 		}
 		else {
-			for(auto change : ag_changes.second.first){//site_value changes
-				for(auto emb : ag.getParentPatterns(change)){
+			for(auto change : ag_changes.second.first){//for each site_value changes
+				for(auto emb : ag.getParentPatterns(change)){//for each parent pattern in changed agent site
 					if(emb->getSite(change).isEmptySite())//if this pattern accept every value -> continue
 						continue;
 					for(auto& cc_agid : emb->getIncludes()){
-						candidates[cc_agid.first];
+						candidates[cc_agid.first].set(cc_agid.second,matches.at(ag_changes.first.first));
 					}
 				}
 				for(auto emb : ag.getChildPatterns(change)){
 					for(auto& cc_agid : emb->getIncludes()){
-						candidates[cc_agid.first];
+						candidates[cc_agid.first].set(cc_agid.second,matches.at(ag_changes.first.first));
 					}
 				}
 			}
-			for(auto change : ag_changes.second.second){//link_val/type changes
+			for(auto change : ag_changes.second.second){//for each link val/type changes
 				auto& rhs_graph = change_cc.getGraph();
 				ag_st_id rhs_lnk;
 				for(auto emb : ag.getParentPatterns(change)){
 					switch(emb->getSite(change).link_type){
 					case pattern::Pattern::FREE:
 						for(auto& cc_agid : emb->getIncludes())
-							candidates[cc_agid.first];
+							candidates[cc_agid.first].set(cc_agid.second,matches.at(ag_changes.first.first));
 						break;
 					//case pattern::Pattern::WILD://if this pattern accept every lnk-type -> continue
 						//break;//TODO remove if its in candidates??
@@ -404,14 +412,14 @@ void Rule::checkInfluence() {
 									set<small_id> s;
 									rhs->getAgent(ag_changes.first.first.first,rhs_lnk.first).compare(
 											cc_agid.first->getAgent(lnk.first),s);
-									candidates[cc_agid.first];
+									candidates[cc_agid.first].set(cc_agid.second,matches.at(ag_changes.first.first));
 
 								}
 								catch(False& ex){
-									candidates[cc_agid.first] = true;
+									candidates[cc_agid.first].is_valid = false;
 								}
 							else
-								candidates[cc_agid.first] = true;
+								candidates[cc_agid.first].is_valid = false;
 						}
 						break;
 					//case pattern::Pattern::PATH:
@@ -426,7 +434,7 @@ void Rule::checkInfluence() {
 					auto lt = emb->getSite(change).link_type;
 					if(lt == pattern::Mixture::FREE){
 						for(auto& cc_agid : emb->getIncludes())
-							candidates[cc_agid.first];
+							candidates[cc_agid.first].set(cc_agid.second,matches.at(ag_changes.first.first));
 						continue;
 					}
 					if(lt == pattern::Mixture::WILD)
@@ -441,7 +449,7 @@ void Rule::checkInfluence() {
 							auto cc_lnk = to_test.front().second;
 							to_test.pop_front();
 							if(rhs_lnk.second != cc_lnk.second){
-								candidates[cc_agid.first] = true;
+								candidates[cc_agid.first].is_valid = false;
 								break;
 							}
 							try{
@@ -460,30 +468,74 @@ void Rule::checkInfluence() {
 								}
 							}
 							catch(False &ex){
-								candidates[cc_agid.first] = true;
+								candidates[cc_agid.first].is_valid = false;
 								break;
 							}
 						}
-						candidates[cc_agid.first];
+						candidates[cc_agid.first].set(cc_agid.second,matches.at(ag_changes.first.first));
 					}
 				}
 			}
 		}
 	}
-	auto first_del = rhs->size() - newNodes.size();
-	for(;first_del < lhs.size(); first_del ++){
+	//no need to track deletes
+	/*for(auto del : deletes){
+		auto& del_ag = lhs.getAgent(del);
+		for(auto& cc_agid : del_ag.getIncludes())
+			candidates[cc_agid.first];
+		for(auto& embs : del_ag.getParentPatterns())
+			for(auto emb : embs.second)
+				for(auto& cc_agid : emb->getIncludes())
+					candidates[cc_agid.first];
+		for(auto& embs : del_ag.getChildPatterns())
+			for(auto emb : embs.second)
+				for(auto& cc_agid : emb->getIncludes())
+					candidates[cc_agid.first];
+	}*/
+	int i = 0;
+	for(auto n : news){
+		auto& new_ag = rhs->getAgent(n);
+		for(auto& ag : env.getAgentPatterns(new_ag.getId())){
+			bool isEmb = true;
+			for(auto& id_site : ag){
+				try{
+					auto& site = new_ag.getSite(id_site.first);
+					if(id_site.second.isEmptySite() ||
+							memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
+						/*TODO test for link
+						switch(id_site.second.link_type){
+						case Pattern::BIND:
+							if(id_site.second.isBindToAny())
 
+						}*/
+						continue;
+					}
+				}
+				catch(std::out_of_range &ex){
+					if( (id_site.second.isEmptySite() ||
+							!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue)))
+							&& id_site.second.link_type == Pattern::FREE)
+						continue;//ok
+				}
+				isEmb = false;break;
+			}
+			if(isEmb)
+				for(auto cc_agid : ag.getIncludes())
+					candidates[cc_agid.first].set(cc_agid.second,ag_st_id(-1,i));
+		}
+		i++;
 	}
-	for(auto& cc_bool : candidates)
-		if(!cc_bool.second)
-			influence.emplace(cc_bool.first);
+	for(auto& cc_info : candidates)
+		if(cc_info.second.is_valid)
+			influence.emplace_back(cc_info);
 	}
 	catch(exception &ex){
-		cout << "cannot check influences" << endl;
+		cout << "cannot check influences for " << this->getName() << endl;
+		//throw ex;
 	}
 }
 
-const unordered_set<const pattern::Mixture::Component*>& Rule::getInfluences() const{
+const list<pair<const pattern::Mixture::Component*,Rule::CandidateInfo> >& Rule::getInfluences() const{
 	return influence;
 }
 
@@ -541,6 +593,11 @@ string Rule::toString(const pattern::Environment& env) const {
 		}
 	}
 	return s;
+}
+
+Rule::CandidateInfo::CandidateInfo() : is_valid(true) {};
+void Rule::CandidateInfo::set(small_id root,ag_st_id node){
+	node_id[node.first] = make_pair(node.second,root);
 }
 
 

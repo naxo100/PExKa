@@ -16,14 +16,16 @@ namespace state {
 
 
 /********* Node Class ************/
-Node::Node(const pattern::Signature& sign) : signId(sign.getId()),address(-1), intfSize(sign.getSiteCount()){
+Node::Node(const pattern::Signature& sign) : signId(sign.getId()),address(-1),
+		intfSize(sign.getSiteCount()),deps(new matching::InjSet()){
 	interface = new Internal[intfSize];
 	for(int i = 0; i < intfSize; i++){
 		interface[i].val = sign.getSite(i).getDefaultValue();
 	}
 }
 
-Node::Node(const Node& node,const map<Node*,Node*>& mask) : signId(node.signId),address(-1),intfSize(node.intfSize) {
+Node::Node(const Node& node,const map<Node*,Node*>& mask) : signId(node.signId),address(-1),
+		intfSize(node.intfSize),deps(new matching::InjSet()){
 	interface = new Internal[intfSize];
 	for(small_id i = 0; i < intfSize; i++){
 		interface[i].val = node.interface[i].val;
@@ -146,6 +148,7 @@ void Node::removeFrom(EventInfo& ev,matching::InjSet* injs,SiteGraph& graph) {
 			ev.side_effects.emplace(lnk);
 		}
 	}
+	Internal::negativeUpdate(ev,injs,deps);
 	delete this;//TODO do not delete, reuse nodes
 }
 
@@ -207,6 +210,10 @@ pair<matching::InjSet*,matching::InjSet*>& Node::getLifts(small_id site){
 	return interface[site].deps;
 }
 
+void Node::addDep(matching::Injection* inj) {
+	deps->emplace(inj);
+}
+
 
 
 /*********** MultiNode *****************/
@@ -251,6 +258,7 @@ pop_size SubNode::getCount() const {
 void SubNode::removeFrom(EventInfo& ev,matching::InjSet* injs,SiteGraph& graph){
 	cc.dec(ev);
 	ev.new_cc[this] = this;
+	graph.decPopulation();
 }
 
 void SubNode::changeIntState(EventInfo& ev,matching::InjSet* injs,small_id id,small_id value){

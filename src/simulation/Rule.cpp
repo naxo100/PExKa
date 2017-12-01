@@ -21,6 +21,10 @@ Rule::~Rule() {
 	// TODO Auto-generated destructor stub
 	if(!isRhsDeclared)
 		delete rhs;
+	if(rate)
+		delete rate;
+	for(auto node : newNodes)
+		delete node;
 }
 
 
@@ -218,15 +222,18 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 									}
 								}
 								else {
-									if(lnk2.first == lhs_unmask[i].second && lnk2.second == j)//not-semi
+									if(lnk2.first == rhs_unmask[i].second && lnk2.second == j)//not-semi
 										throw SemanticError("The link status of agent "+sign.getName()+", site "+
 												sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
 									else {//not-not
-										if(lnk1 != lnk2){
+										if(lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first)) !=
+												rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first)) ||
+												lnk1.second != lnk2.second){
 											i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
+											warns.emplace_back(name+" rule induces a link permutation on site "
+													+sign.getSite(j).getName()+" of agent "+sign.getName(),loc);
 											if(i > i2)
 												break;//link added before.
-											warns.emplace_back("%s rule induces a link permutation on site '%s' of agent '%s'",loc);
 											a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
 											a.trgt2 = make_tuple(rhs_unmask[i].first,lnk2.first,lnk2.second,i2);
 											binds.emplace_back(a);
@@ -321,7 +328,8 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 			changes[make_pair(rhs_unmask[k]/*-i? TODO*/,true)].second.emplace_back(get<2>(bind.trgt2));
 			//changes[make_pair(rhs_unmask[j],false)].second.emplace_back(get<2>(bind.trgt1));
 			get<0>(bind.trgt2) = rhs_unmask[k].first;
-			get<3>(bind.trgt2) = k-i+1;
+			get<1>(bind.trgt2) = k-i;
+			get<3>(bind.trgt2) = k-i+1;//+1 to indicate new node
 		}
 		else{
 			changes[make_pair(rhs_unmask[k],false)].second.emplace_back(get<2>(bind.trgt2));
@@ -336,12 +344,31 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 	//new nodes
 	newNodes.reserve(rhs_unmask.size()-i);
 	for(unsigned j = i; j < rhs_unmask.size(); j++){
-		auto& rhs_ag = rhs->getAgent(rhs_unmask[j]);
-		env.getSignature(rhs_ag.getId());
+		auto cc_ag_id = rhs_unmask[j];
+		auto& rhs_ag = rhs->getAgent(cc_ag_id);
+		auto& sign = env.getSignature(rhs_ag.getId());
 		newNodes.emplace_back(new state::Node(env.getSignature(rhs_ag.getId())));
-		news.emplace_back(rhs_unmask[j]);
-		for(auto& s : rhs_ag)
-			newNodes[j-i]->setState(s.first,s.second.state);
+		news.emplace_back(cc_ag_id);
+		for(auto& s : rhs_ag){
+			auto lnk = rhs->follow(cc_ag_id.first,cc_ag_id.second,s.first);
+			if(!s.second.isEmptySite())
+				newNodes[j-i]->setState(s.first,s.second.state);
+			switch(s.second.link_type){
+			case Mixture::FREE:break;
+			case Mixture::BIND:{
+				auto k =rhs_mask.at(make_pair(cc_ag_id.first,lnk.first));
+				if(k > j){
+					Action a;
+					a.t = LINK;a.trgt1 = make_tuple(cc_ag_id.first,j-i,s.first,true);
+					a.trgt2 = make_tuple(cc_ag_id.first,k-i,lnk.second,true);
+					script.emplace_back(a);
+				}
+			};break;
+			default:
+				throw SemanticError("The link state of site "+sign.getSite(s.first).getName()+
+						" in the new agent "+sign.getName()+" is underspecified.",loc);
+			}
+		}
 	}
 	//deleted nodes
 	for(unsigned j = first_del; j < lhs_unmask.size(); j++){
@@ -492,16 +519,16 @@ void Rule::checkInfluence(const Environment& env) {
 				for(auto& cc_agid : emb->getIncludes())
 					candidates[cc_agid.first];
 	}*/
-	int i = 0;
+	small_id i = 0;
 	for(auto n : news){
 		auto& new_ag = rhs->getAgent(n);
 		for(auto& ag : env.getAgentPatterns(new_ag.getId())){
 			bool isEmb = true;
 			for(auto& id_site : ag){
 				try{
-					auto& site = new_ag.getSite(id_site.first);
+					/*auto& site = */new_ag.getSite(id_site.first);
 					if(id_site.second.isEmptySite() ||
-							memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
+							!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
 						/*TODO test for link
 						switch(id_site.second.link_type){
 						case Pattern::BIND:
@@ -567,7 +594,7 @@ string Rule::toString(const pattern::Environment& env) const {
 		case LINK:
 			s += acts[act.t] + " agent's sites ";
 			if(get<3>(act.trgt1)){//new node
-				sign1 = &env.getSignature(newNodes[get<3>(act.trgt1)]->getId());
+				sign1 = &env.getSignature(newNodes[get<1>(act.trgt1)]->getId());
 				s += "(new) " + sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
 			}
 			else{
@@ -575,7 +602,7 @@ string Rule::toString(const pattern::Environment& env) const {
 				s += sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
 			}
 			if(get<3>(act.trgt2)){//new node
-				sign2 = &env.getSignature(newNodes[get<3>(act.trgt2)-1]->getId());
+				sign2 = &env.getSignature(newNodes[get<1>(act.trgt2)]->getId());
 				s += "(new) " + sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+"\n";
 			}
 			else{

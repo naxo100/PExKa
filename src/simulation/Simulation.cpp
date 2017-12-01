@@ -13,12 +13,14 @@ namespace simulation {
 
 Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars),
 		params(Parameters::getInstance()){
-	ccInjections = new set<matching::Injection*>[env.size<pattern::Mixture::Component>()];
-	mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
+	//ccInjections = new set<matching::Injection*>[env.size<pattern::Mixture::Component>()];
+	//mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
 }
 
 Simulation::~Simulation() {
 	// TODO Auto-generated destructor stub
+	//delete[] ccInjections;
+	//delete[] mixInjections;
 }
 
 void Simulation::setCells(list<unsigned int>& _cells){
@@ -36,17 +38,18 @@ void Simulation::initialize(){
 }
 
 
-void Simulation::run(){
+void Simulation::run(const Parameters& params){
 	//updates
 	//TODO while(counter.getTime() < params.limitTime()){
 		//calculate Tau-Leaping
 			//calculate map [species -> diffusion-to-cells array]
 			//map-diffusion-in = scatter map-diffusion-to?
-		double tau = 100.;// = calculate-tau( map-diffusion-in )
+		auto tau = params.limitTime();// = calculate-tau( map-diffusion-in )
 		//parallel
 		for(auto& id_state : cells){
-			id_state.second.advance(tau);
+			id_state.second.advanceUntil(counter.getTime()+tau);
 		}
+		counter.advanceTime(tau);
 	//}
 }
 

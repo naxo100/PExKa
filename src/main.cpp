@@ -19,6 +19,8 @@
 #include "grammar/ast/KappaAst.h"
 #include "pattern/Environment.h"
 #include "simulation/Simulation.h"
+#include "simulation/Parameters.h"
+#include "util/Warning.h"
 
 
 using namespace boost::program_options;
@@ -105,6 +107,15 @@ int main(int argc, char* argv[]){
 	}
 
 	env.show();
+
+	WarningStack::getStack().show();
+
+	auto& params = simulation::Parameters::getInstance();
+	if(vm.count("events"))
+		params.maxEvent = vm["events"].as<int>();
+	if(vm.count("time"))
+		params.maxTime = vm["time"].as<float>();
+
 	map<pair<int,int>,double> edges;
 	for(size_t i = 0; i < env.size<pattern::Channel>(); i++ ){
 		for(auto& channel : env.getChannels(i)){
@@ -138,7 +149,7 @@ int main(int argc, char* argv[]){
 	sim.print();
 
 	try{
-		sim.run();
+		sim.run(params);
 	}catch(exception &e){
 		cerr << "An exception found: " << e.what() << endl;
 		exit(1);

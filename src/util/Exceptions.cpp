@@ -52,3 +52,21 @@ const char* SyntaxError::what() const _GLIBCXX_USE_NOEXCEPT {
 void SyntaxError::setLocation(const yy::location &l){
 	loc = l;
 }
+
+
+
+NullEvent::NullEvent(int e) : error(e) {}
+
+const char* NullEvent::what() const _GLIBCXX_USE_NOEXCEPT {
+	switch(error){
+	case 0:return "unary rule with binary instance";
+	case 1:return "binary rule with unary instance";
+	case 2:return "clashing instance";
+	case 3:return "overapproximation clash";
+	case 4:return "invalid injection clash";
+	case 5:return "perturbation interrupting time";
+	default:return "invalid arg";
+	}
+	return "invalid!!!!";
+}
+

@@ -1,0 +1,163 @@
+### COMPARTMENT
+%compartment: 'space' [1] 1
+
+%use: 'space' [0]
+
+### VARIABLES
+%const: 'ab' 1.0
+
+### AGENTS
+%agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
+%agent: B(s,i~1~2)
+%agent: S(s,t,u,v,w,x)
+
+### Tester's observations
+# in "INSERT tests", if I make a INSERT rule with It should send a BIND type rule?
+# in "DELETE tests", Id I try delete binded agents, It send us a weird "semantic error" (r6.1)
+
+#############
+### RULES ###
+#############
+
+#______________________
+#____ INSERT tests ____
+
+'r1.1' A(s~1!1),A(s~2!1) -> A(s~1!1),A(s~2!1), B(i~1!2),B(i~2!2) @ 1
+# INSERT agent B(s,i~1)
+# INSERT agent B(s,i~2)
+
+'r1.2' A(s~1!1),A(s~2!1) -> B(i~1!2),B(i~2!2) , A(s~1!1),A(s~2!1) @ 1
+# INSERT agent B(s,i~1)
+# INSERT agent B(s,i~2)
+# INSERT agent A(s~1,t~1,v~-1.000000,z)
+# INSERT agent A(s~2,t~1,v~-1.000000,z)
+# DELETE agent A(s~1!_)
+# DELETE agent A(s~2!_)
+
+'r2.1' A(s~1!1),A(s~2!1), B(i~1!2),B(i~2!2) -> A(s~1!1),A(s~2!1), B(i~1!2),B(i~2!2) , S() @ 1
+# INSERT agent S(s,t,u,v,w,x)
+
+'r2.2' B(i~1!2),B(i~2!2) , A(s~1!1),A(s~2!1) -> A(s~1!1),A(s~2!1), B(i~1!2),B(i~2!2) , S() @ 1
+# INSERT agent A(s~1,t~1,v~-1.000000,z)
+# INSERT agent A(s~2,t~1,v~-1.000000,z)
+# INSERT agent B(s,i~1)
+# INSERT agent B(s,i~2)
+# INSERT agent S(s,t,u,v,w,x)
+# DELETE agent B(i~1!_)
+# DELETE agent B(i~2!_)
+# DELETE agent A(s~1!_)
+# DELETE agent A(s~2!_)
+
+# when I declare A(s) without label in it state 's', 'env.show()' it break down
+# 'r3.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A(s) @ 1
+'r3.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A() @ 1
+# INSERT agent A(s~1,t~1,v~-1.000000,z)
+
+# this rule is a copy of 'r3.1'. A rule repeated don't trigger a correct message
+#'r4.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1), A() @ 1
+
+'r5.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!1), A(s~1), A(s~2), A(s~3), B(i~1), B(i~2) @ 1
+# INSERT agent A(s~1,t~1,v~-1.000000,z)
+# INSERT agent A(s~2,t~1,v~-1.000000,z)
+# INSERT agent A(s~3,t~1,v~-1.000000,z)
+# INSERT agent B(s,i~1)
+# INSERT agent B(s,i~2)
+
+'r5.2' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!1), A(s~1), A(s~2), A(s~3), B(i~1!4), B(i~2!4) @ 1
+# INSERT agent A(s~1,t~1,v~-1.000000,z)
+# INSERT agent A(s~2,t~1,v~-1.000000,z)
+# INSERT agent A(s~3,t~1,v~-1.000000,z)
+# INSERT agent B(s,i~1)
+# INSERT agent B(s,i~2)
+
+#______________________
+#____ DELETE tests ____
+
+'r6.1' A(s~1!1),A(s~2!1), B(i~1!2),B(i~2!2) -> A(s~1!1),A(s~2!1) @ 1
+# DELETE agent B(i~1!_)
+# DELETE agent B(i~2!_)
+
+'r6.2' A(s~1!1),A(s~2!1), B(i~1!2),B(i~2!2) -> B(i~1!2),B(i~2!2) @ 1
+# INSERT agent B(s,i~1)
+# INSERT agent B(s,i~2)
+# DELETE agent A(s~1!_)
+# DELETE agent A(s~2!_)
+# DELETE agent B(i~1!_)
+# DELETE agent B(i~2!_)
+
+'r6.3' B(i~1!2),B(i~2!2) , A(s~1!1),A(s~2!1) -> B(i~1!2),B(i~2!2) @ 1
+# DELETE agent A(s~1!_)
+# DELETE agent A(s~2!_)
+
+# if I try FREE & DELETE a binded agent in same rule, It send a semantic error message
+#'r7.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s,v!5),A(s!5,v) @ 1
+# An exception found: Semantic error in file "examples/test_model3.cka", line 23, characters 1-7: The link status of agent A, site s on the right hand side is underspecified
+
+'r7.2' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s,v!5),A(s!5,v), A(s,v) @ 1
+# FREE agent's sites A.s and A.v
+# FREE agent's sites A.v and A.s
+# BIND agent's sites A.v and A.s
+
+'r7.3' A(s,v!1),A(s!1,v), A(s,v) -> A(s,v!1),A(s!1,v) @ 1
+# DELETE agent A(v,s)
+
+'r7.4' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) , B(i~1!4),B(i~2!4) -> B(i~1) @ 1
+# INSERT agent B(s,i~1)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent B(i~1!_)
+# DELETE agent B(i~2!_)
+
+'r8.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) , B(i~1!4),B(i~2!4) -> @ 1
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent B(i~1!_)
+# DELETE agent B(i~2!_)
+
+'r8.2' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) , B(i~1), B(i~2) -> @ 1
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent B(i~1)
+# DELETE agent B(i~2)
+
+'r9.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) , A(s!5,v!6),A(s!6,v!5) , A(s!7,v!8),A(s!8,v!7) -> @ 1
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+
+'r9.2' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) , A(s!5,v!6),A(s!6,v!5) , A(s!7,v!8),A(s!8,v!7) -> A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) @ 1
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+
+'r9.3' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) , A(s!5,v!6),A(s!6,v!5) , A(s!7,v!8),A(s!8,v!7) -> A(s!5,v!6),A(s!6,v!5) @ 1
+# BIND agent's sites A.v and A.s
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+# DELETE agent A(v!_,s!_)
+
+# if 'r9.2' & 'r9.3' are commented on, this rule send a semantic error message
+#'r9.4' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) , A(s!5,v!6),A(s!6,v!5) , A(s!7,v!8),A(s!8,v!7) -> A(s!7,v!8),A(s!8,v!7) @ 1
+# An exception found: Semantic error in file "examples/test_model3.cka", line 37, characters 1-7: The link status of agent B, site i on the right hand side is underspecified
+
+#___________________
+#____ BIND tests____
+
+
+
+#### FREE tests
+
+#### CHANGE tests
+

@@ -15,21 +15,21 @@
 
 #### AGENTS AND MIXTURES
 # SOLVED: Mixtures, binds between differents agent types
-#%agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
-#%agent: B(s,i~1~2)
-#%agent: S(s,t,u,v,w,x)
-%var: 'other kappa fix' S(x!6,s!1),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
-%var: 'sintax_1' A(s~2!i.B),B(i!s.A)
-%var: 'other kappa wrong' S(s!1,x!6),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
-%var: 'other kappa fine' S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6),S(x!6,s!1)
-%var: 'some kappa' A(z!1,s~2),B(i~2!5,s!1),B(s!5), A(z!4),A(s~3,z!4)
-%var: 'loop kappa' A(v!6,t!1),A(s!1,t!2),A(s!2,v!3),A(z!3,t!4),A(z!4,v!5),A(s!5,z!6)
-%var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
-
-# SOLVED: agents with states, ranges, ranges with default value
 %agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
 %agent: B(s,i~1~2)
 %agent: S(s,t,u,v,w,x)
+#%var: 'other kappa fix' S(x!6,s!1),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
+#%var: 'sintax_1' A(s~2!i.B),B(i!s.A)
+#%var: 'other kappa wrong' S(s!1,x!6),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
+#%var: 'other kappa fine' S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6),S(x!6,s!1)
+#%var: 'some kappa' A(z!1,s~2),B(i~2!5,s!1),B(s!5), A(z!4),A(s~3,z!4)
+#%var: 'loop kappa' A(v!6,t!1),A(s!1,t!2),A(s!2,v!3),A(z!3,t!4),A(z!4,v!5),A(s!5,z!6)
+#%var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
+
+# SOLVED: agents with states, ranges, ranges with default value
+#%agent: A(s~1~2~3,t~1,v~[-2,2](-'ab'),z)
+#%agent: B(s,i~1~2)
+#%agent: S(s,t,u,v,w,x)
 
 # SOLVED: define agent idem to a string
 #%agent: "asdasd"(x~1)
@@ -77,7 +77,7 @@
 #'delete' A(s~1) -> @ 'on_rate'
 
 # SOLVED: INSERT+CHANGE+BIND
-'insert2' A(s~2) -> A(s~1!1),B(i~2!1) @ 'on_rate'
+#'insert2' A(s~2) -> A(s~1!1),B(i~2!1) @ 'on_rate'
 
 # SOLVED: INSERT+DELETE+DELETE
 #'delete2' A(s~1!1),B(i~2!1) -> A(s~2) @ 'on_rate' # seg fault
@@ -99,7 +99,7 @@
 
 # SOLVED: bottles with alphanumeric rate value assigned: segmentation fault
 # SOLVED: bottles with numeric name: Segmentation fault
-%compartment: 'bottles' [3][3][3] 1.0
+#%compartment: 'bottles' [3][3][3] 1.0
 #%compartment: 'my_comp' [3] 1.0
 
 #%compartment: '' [3][3][3] 1.0
@@ -108,6 +108,7 @@
 # SOLVED: we can't assign float to a bottle. piska assume dimension 0
 #%compartment: 'bottles' [2.5][5] 'ab'
 
+%compartment: 'bottles' [1] 1
 
 #### CHANNELS
 #%var: 'a' 1
@@ -118,7 +119,7 @@
 #%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
 
 # ERROR: repeat channel name
-#%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
+#%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y+1] $'a'
 
 # SOLVE: No compartment name
 #%channel: 'tube2' ''[x][y] <-> 'bottles'[x+1][y] $'a'
@@ -131,7 +132,7 @@
 #### USES & INITS
 #%agent: A(s~1~2)
 #%agent: B(t~1~2)
-%var: 'cantA' 1000
+#%var: 'cantA' 1000
 #%var: 'cantB' 987
 #%token: X
 #%compartment: 'bottles' [1][2] 0.75
@@ -139,16 +140,15 @@
 
 # ERROR: bottles without dimension: maybe the solution is:
 # if you don't declare dimension, the simulation will crash
-#%use: 'bottles'
-
+%use: 'bottles'
 #%use: 'bottles'[x][y]
 
 # SOLVE: not accept mixtures
-#%init: 'cantA' A(s!1),B(t!1)
+#%init: 'cantA' A(s~1!1),B(i~1!1)
 
-%init: 'cantA' A(s~1)
-%init: 10 A(s~2!1),B(i~2!1)
-%init: 1000 B(i~1)
+#%init: 'cantA' A(s~1)
+#%init: 10 A(s~2!1),B(i~2!1)
+#%init: 1000 B(i~1)
 
 #%init: 100 'X'
 
@@ -180,6 +180,6 @@
 
 
 #### COMMON ERRORS
+# SOLVED: don't send a error message
 #-
-#
 

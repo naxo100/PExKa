@@ -34,13 +34,26 @@ public:
 	void addComponents(unsigned n,const pattern::Mixture::Component& cc,
 			const pattern::Environment& env);
 
+	/** \brief Put a node in the sitegraph.
+	 * Put a node in the sitegraph, set its address,
+	 * and use free space in the container if any.
+	 */
 	void allocate(Node* n);
+	/** \brief Put a subnode in the graph at initialization.
+	 * Put a subnode in the graph at the beginning of container,
+	 * swapping the first normal node to the last position in
+	 * container, and set both addresses. Use only at initialization.
+	 */
+	void allocate(SubNode* n);
 	void remove(Node* n);
+	void remove(SubNode* n);
 	size_t getNodeCount() const;
 	vector<Node*>::iterator begin();
 	vector<Node*>::iterator end();
 	size_t getPopulation() const;
 	void decPopulation(size_t pop = 1);
+
+	string toString(const pattern::Environment& env) const;
 
 
 protected:
@@ -50,6 +63,7 @@ protected:
 	size_t fresh;
 	size_t nodeCount;
 	size_t population;
+	big_id subNodeCount;
 	list<size_t> free;
 
 

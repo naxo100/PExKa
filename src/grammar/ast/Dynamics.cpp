@@ -610,7 +610,7 @@ RuleSide::RuleSide(const location &l,const Mixture &agents,const list<Token> &to
 
 size_t Rule::count = 0;
 
-Rule::Rule(){}
+Rule::Rule() : bi(false),filter(nullptr){}
 Rule::Rule(	const location &l,
 		const Id          &label,
 		const RuleSide    &lhs,
@@ -649,6 +649,7 @@ void Rule::eval(pattern::Environment& env,
 	delete lhs_mix_p;
 	auto& rule = env.declareRule(label,lhs_mix);
 
+	lhs_mix.addInclude(rule.getId());
 	auto reverse = rate.eval(env,rule,vars,bi);
 	auto rhs_mix_p = rhs.agents.eval(env,vars,true);
 	vector<pattern::ag_st_id> rhs_mask;
@@ -663,6 +664,7 @@ void Rule::eval(pattern::Environment& env,
 		inverse_rule.setRHS(&lhs_mix,bi);
 		inverse_rule.difference(env,rhs_mask,lhs_mask);
 		inverse_rule.setRate(reverse);
+		rhs_mix.addInclude(inverse_rule.getId());
 	}
 	else{
 		rhs_mix_p->declareAgents(env,false);

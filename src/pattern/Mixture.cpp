@@ -13,21 +13,32 @@
 namespace pattern {
 
 
+const set<small_id>& Pattern::includedIn() const {
+	return includes;
+}
+
+void Pattern::addInclude(small_id id) {
+	includes.emplace(id);
+}
+
 /***************** class Mixture ************************/
 
 Mixture::Mixture(short agent_count) : declaredComps(false),agentCount(0),
 		siteCount(0),compCount(0),id(-1){
+	comps = nullptr;
 	agents = new Agent*[agent_count];
 }
 
 Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),
 		agentCount(m.agentCount),siteCount(m.siteCount),compCount(m.compCount),id(-1){
-	if(m.declaredComps){
-		comps = new vector<const Component*>(m.compCount);
+	if(m.comps){
+		agents = nullptr;
+		comps = new vector<Component*>(m.compCount);
 		for(size_t i = 0; i < compCount; i++)
 			(*comps)[i] = (*m.comps)[i];
 	}
 	else {
+		comps = nullptr;
 		agents = new Agent*[m.compCount];
 		for(size_t i = 0; i < agentCount; i++)
 			agents[i] = m.agents[i];
@@ -37,9 +48,15 @@ Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),
 //TODO
 Mixture::~Mixture() {
 	links.clear();
-	if(declaredComps)
+	if(!declaredComps)
+		for(auto comp : *comps){
+			for(auto ag : *comp)
+				delete ag;
+			delete comp;
+		}
+	if(comps)
 		delete comps;
-	else
+	if(agents)
 		delete[] agents;
 }
 
@@ -50,7 +67,7 @@ short_id Mixture::getId() const {
 	return id;
 }
 void Mixture::addAgent(Mixture::Agent *a){
-	if(declaredComps)
+	if(comps)
 		throw std::invalid_argument("Cannot call addAgent() on an initialized Mixture");
 	agents[agentCount] = a;
 	agentCount++;
@@ -58,7 +75,7 @@ void Mixture::addAgent(Mixture::Agent *a){
 }
 
 void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
-	if(declaredComps)
+	if(comps)
 		throw std::invalid_argument("Cannot call addLink() on an initialized Mixture");
 	if(p1.first < p2.first)
 		links.emplace(p1,p2);
@@ -67,7 +84,7 @@ void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
 }
 
 void Mixture::declareAgents(Environment &env, bool is_lhs){
-	if(declaredComps)
+	if(comps)
 		throw std::invalid_argument("Cannot call declareAgents() on a initialized Mixture");
 	for(size_t i = 0; i < agentCount ; i++){
 		agents[i] = &env.declareAgentPattern(agents[i],is_lhs);
@@ -76,7 +93,7 @@ void Mixture::declareAgents(Environment &env, bool is_lhs){
 
 vector<ag_st_id> Mixture::setComponents(){
 	vector<ag_st_id> order_mask(agentCount);//ag_id(mix)-> (comp_id,ag_id(comp))
-	if(declaredComps)
+	if(comps)
 		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");
 	list<pair<Component*,map<short,short> > > comps;
 	//iterate link map ordered by agent_id, one copy per non directed link
@@ -132,27 +149,26 @@ vector<ag_st_id> Mixture::setComponents(){
 		}
 	}
 	compCount = comps.size();
-	//delete[] agents; //we need to preserve mixture order.
-	this->comps = new vector<const Component*>(compCount);
+	delete[] agents;
+	agents = nullptr;
+	this->comps = new vector<Component*>(compCount);
+	//declaredComps = true;not declared
 	int i=0;
 	//set comps.graph and declare comps in env
-	for(const auto& c : comps){
+	for(auto& c : comps){
 		auto mask = c.first->setGraph();
 		for(auto mix_mask : c.second)
 			order_mask[mix_mask.first].second = mask[mix_mask.second];
-		//const Component &comp = env.declareComponent(*c.first);
-		//delete c.first;
 		(*this->comps)[i] = c.first;
 		i++;
 	}
 	//sort(this->comps->begin(),this->comps->end());
 	links.clear();
-	//declaredComps = true;
 	return order_mask;
 }
 vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 	vector<ag_st_id> order_mask(agentCount);//ag_id(mix)-> (comp_id,ag_id(comp))
-	if(declaredComps)
+	if(comps)
 		throw std::invalid_argument("Cannot call setComponents() on a initialized Mixture");
 	list<pair<Component*,map<short,short> > > comps;
 	//iterate link map ordered by agent_id, one copy per non directed link
@@ -209,15 +225,17 @@ vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 	}
 	compCount = comps.size();
 	delete[] agents;
-	this->comps = new vector<const Component*>(compCount);
-	vector<pair<const Component*,int>> comps_order(compCount);
+	agents = nullptr;
+	this->comps = new vector<Component*>(compCount);
+	declaredComps = true;
+	vector<pair<Component*,int>> comps_order(compCount);
 	int i=0;
 	//set comps.graph and declare comps in env
-	for(const auto& c : comps){
+	for(auto& c : comps){
 		auto mask = c.first->setGraph();
 		for(auto mix_mask : c.second)
 			order_mask[mix_mask.first].second = mask[mix_mask.second];
-		const Component &comp = env.declareComponent(*c.first);
+		auto &comp = env.declareComponent(*c.first);
 		delete c.first;
 		comps_order[i] = make_pair(&comp,i);
 		i++;
@@ -228,7 +246,6 @@ vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 	for(unsigned i = 0; i < order_mask.size(); i++)
 		order_mask[i].first = comps_order[order_mask[i].first].second;
 	links.clear();
-	declaredComps = true;
 	return order_mask;
 }
 
@@ -236,9 +253,9 @@ bool Mixture::operator==(const Mixture& m) const{
 	if(this == &m)
 		return true;
 	if(agentCount != m.agentCount || compCount != m.compCount ||
-			siteCount!= m.siteCount || declaredComps != m.declaredComps)
+			siteCount!= m.siteCount )
 		return false;
-	if(declaredComps){
+	if(comps){
 		for(size_t i = 0; i < compCount; i++)
 			if(!((*comps)[i] == (*m.comps)[i]))
 				return false;
@@ -275,14 +292,22 @@ const Mixture::Component& Mixture::getComponent(small_id id) const {
 	return *(*comps)[id];
 }
 
+void Mixture::addInclude(small_id r_id) {
+	if(!comps)
+		throw std::invalid_argument("Cannot call addInclude() on a uninitialized Mixture");
+	for(auto cc : *comps)
+		cc->addInclude(r_id);
+	Pattern::addInclude(r_id);
+}
+
 ag_st_id Mixture::follow(small_id cc_id,small_id ag_id,small_id site) const{
 	return (*comps)[cc_id]->follow(ag_id,site);
 }
 
-const vector<const Mixture::Component*>::iterator Mixture::begin() const {
+const vector<Mixture::Component*>::iterator Mixture::begin() const {
 	return comps->begin();
 }
-const vector<const Mixture::Component*>::iterator Mixture::end() const {
+const vector<Mixture::Component*>::iterator Mixture::end() const {
 	return comps->end();
 }
 

@@ -18,9 +18,7 @@ Environment::Environment() {
 	useExpressions[0].evaluateCells();
 }
 
-Environment::~Environment() {
-	// TODO Auto-generated destructor stub
-}
+Environment::~Environment() {}
 
 
 bool Environment::exists(const string &name,const Environment::IdMap &map){
@@ -87,8 +85,8 @@ Signature& Environment::declareSignature(const ast::Id &name_loc) {
 	return signatures[id];
 }
 
-const Mixture& Environment::declareMixture(const Mixture& new_mix) {
-	for(const auto &mix : mixtures)
+Mixture& Environment::declareMixture(const Mixture& new_mix) {
+	for(auto &mix : mixtures)
 		if( mix == new_mix ){
 			return mix;
 		}
@@ -97,8 +95,8 @@ const Mixture& Environment::declareMixture(const Mixture& new_mix) {
 	return mixtures.back();
 }
 
-const Mixture::Component& Environment::declareComponent(const Mixture::Component& new_comp){
-	for(const auto &comp : components ){
+Mixture::Component& Environment::declareComponent(const Mixture::Component& new_comp){
+	for(auto &comp : components ){
 		if( comp == new_comp){
 			return comp;
 		}

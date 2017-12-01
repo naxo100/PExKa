@@ -23,6 +23,8 @@ using namespace std;
 namespace pattern {
 
 class Pattern {
+protected:
+	set<small_id> includes;
 public:
 	class Agent;
 	struct Site;
@@ -32,6 +34,8 @@ public:
 	virtual short_id getId() const = 0;
 	virtual const Agent& getAgent(small_id ag_id ) const = 0;
 	virtual size_t size() const = 0;
+	const set<small_id>& includedIn() const;
+	virtual void addInclude(small_id id);
 };
 
 //Forward declaration needed for setComponents() and toString()
@@ -113,6 +117,8 @@ public:
 	const Agent& getAgent(ag_st_id cc_ag ) const;
 	const Agent& getAgent(small_id ag_id ) const override;
 
+	void addInclude(small_id id) override;
+
 	const Component& getComponent(small_id) const;
 
 	ag_st_id follow(small_id cc_id,small_id ag_id,small_id site) const;
@@ -123,8 +129,8 @@ public:
 	size_t size() const;
 	size_t compsCount() const;
 
-	const vector<const Component*>::iterator begin() const;
-	const vector<const Component*>::iterator end() const;
+	const vector<Component*>::iterator begin() const;
+	const vector<Component*>::iterator end() const;
 
 	/** \brief returns a string representation of this mixture.
 	 *
@@ -137,10 +143,8 @@ public:
 private:
 	//true for valid comps; false for valid agents.
 	bool declaredComps;
-	union {//we need to preserve mixture order!!!
-		Agent** agents;
-		vector<const Component*>* comps;
-	};
+	Agent** agents;
+	vector<Component*>* comps;
 
 	size_t agentCount;
 	size_t siteCount;
@@ -149,7 +153,6 @@ private:
 	//link (agent<,site)->(agent>,site)
 	map< ag_st_id , ag_st_id> links;
 	short_id id;
-
 };
 
 typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;

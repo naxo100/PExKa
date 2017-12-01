@@ -90,7 +90,7 @@
 # DELETE agent A(s~2!_)
 
 # if I try FREE & DELETE a binded agent in same rule, It send a semantic error message
-#'r7.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s,v!5),A(s!5,v) @ 1
+'r7.1' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s,v!5),A(s!5,v) @ 1
 # An exception found: Semantic error in file "examples/test_model3.cka", line 23, characters 1-7: The link status of agent A, site s on the right hand side is underspecified
 
 'r7.2' A(s!1,v!2),A(s!2,v!3),A(s!3,v!1) -> A(s,v!5),A(s!5,v), A(s,v) @ 1
@@ -151,13 +151,4 @@
 # if 'r9.2' & 'r9.3' are commented on, this rule send a semantic error message
 #'r9.4' A(s!1,v!2),A(s!2,v!3),A(s!3,v!4),A(s!4,v!1) , A(s!5,v!6),A(s!6,v!5) , A(s!7,v!8),A(s!8,v!7) -> A(s!7,v!8),A(s!8,v!7) @ 1
 # An exception found: Semantic error in file "examples/test_model3.cka", line 37, characters 1-7: The link status of agent B, site i on the right hand side is underspecified
-
-#___________________
-#____ BIND tests____
-
-
-
-#### FREE tests
-
-#### CHANGE tests
 

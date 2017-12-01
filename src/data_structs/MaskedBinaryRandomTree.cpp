@@ -30,7 +30,7 @@ MaskedBinaryRandomTree<Container>::MaskedBinaryRandomTree(std::size_t n,default_
 	//unbalanced_subtrees has to be init after layer because need to know what is the bigger layer
 	unbalanced_subtrees = new Container<int>[layer[sizetree]+1]();
 
-	unsigned seed;//=chrono::system_clock::now().time_since_epoch().count();
+	unsigned seed=1;//=chrono::system_clock::now().time_since_epoch().count();
   	generator=default_random_engine(seed);
 }
 

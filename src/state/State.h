@@ -37,10 +37,10 @@ class State {
 	float* tokens;
 
 	data_structs::RandomTree* activityTree;
-	matching::InjSet* injections;
+	matching::InjRandSet* injections;
 
-	default_random_engine randGen;
-	//simulation::Counter counter;
+	mutable default_random_engine randGen;
+	simulation::LocalCounter counter;
 	//time_t program_t0;
 
 	/** \brief Negative update of injections after apply a change to an agent site.
@@ -60,7 +60,7 @@ class State {
 	void modify(const simulation::Rule::Action& act,EventInfo& ev);
 	void del(const simulation::Rule::Action& act, EventInfo& ev);
 	//void add(const simulation::Rule::Action& a);
-	void positiveUpdate(const simulation::Rule& r,const EventInfo& ev);
+	void positiveUpdate(const simulation::Rule& r,EventInfo& ev);
 
 	/** \brief static vector with the basic rule action methods.
 	 */
@@ -79,6 +79,8 @@ public:
 	State(size_t tok_count,const std::vector<Variable*>& _vars,
 			const BaseExpression& vol,const pattern::Environment& env);
 	~State();
+
+	const simulation::Counter& getCounter();
 
 	/** \brief Add tokens population to the state.
 	 * @param n count of tokens (could be negative).
@@ -102,7 +104,7 @@ public:
 	 */
 	void apply(const simulation::Rule& r,EventInfo& ev);
 
-	void advance(double tau);
+	void advanceUntil(FL_TYPE sync_t);
 
 
 	EventInfo* selectInjection(const pattern::Mixture &mix,two<FL_TYPE> bin_act,

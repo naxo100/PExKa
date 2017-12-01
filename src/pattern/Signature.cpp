@@ -84,7 +84,7 @@ bool Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
 state::SomeValue Signature::EmptySite::getDefaultValue() const {
 	//no default value
 	//throw std::invalid_argument("Signature::EmptySite::getDefaultValue(): no default value for empty site.");
-	return state::SomeValue(0);
+	return state::SomeValue(small_id(-1));
 }
 
 

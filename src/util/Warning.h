@@ -20,7 +20,7 @@ public:
 	Warning(const std::string& msg,const yy::location& loc);
 	~Warning();
 
-	const std::string what() const;
+	const std::string& what() const;
 };
 
 
@@ -31,6 +31,7 @@ class WarningStack : std::list<Warning> {
 public:
 	static WarningStack& getStack();
 	using std::list<Warning>::emplace_back;
+	void show() const;
 };
 
 

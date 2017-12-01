@@ -9,17 +9,54 @@
 
 namespace simulation {
 
-Counter::Counter() {
-	// TODO Auto-generated constructor stub
+Counter::Counter() : time(0.),events(0),null_events(0),cons_null_events(0),
+		perturbation_events(0),null_actions(0),stat_null({}){}
 
+Counter::~Counter() {}
+
+FL_TYPE Counter::getTime() const{
+	return time;
 }
 
-Counter::~Counter() {
-	// TODO Auto-generated destructor stub
+UINT_TYPE Counter::getEvent() const{
+	return events;
 }
 
-const double Counter::getTime() const{
-	return 1;//TODO
+void Counter::advanceTime(FL_TYPE t){
+	time += t;
 }
+void Counter::incEvents(){
+	events++;
+	cons_null_events = 0;
+}
+void Counter::incNullEvents(unsigned type){
+	stat_null[type]++;
+	null_events++;
+	cons_null_events++;
+}
+void Counter::incNullActions(UINT_TYPE n){
+	null_actions += n;
+}
+
+string Counter::toString() const {
+	string ret;
+	ret += "Simulated time: " + to_string(time) + "\tEvents: " + to_string(events);
+	ret += "\nNull-Events: " + to_string(null_events) +
+			" ["+to_string(stat_null[0])+","+to_string(stat_null[1])+","+
+			to_string(stat_null[2])+","+to_string(stat_null[3])+","+to_string(stat_null[4])+"]\n";
+	ret += "Null-actions = " + to_string(null_actions);
+	return ret;
+}
+
+
+
+
+
+LocalCounter::LocalCounter(){}
+
+
+GlobalCounter::GlobalCounter(){}
+
+
 
 } /* namespace pattern */

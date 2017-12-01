@@ -17,6 +17,7 @@
 
 namespace matching {
 	class InjSet;
+	class InjRandSet;
 	class Injection;
 }
 
@@ -37,11 +38,15 @@ protected:
 	small_id intfSize;
 	matching::InjSet* deps;
 
-	virtual ~Node();
+	Node(const Node& node);
+	Node& operator=(const Node& node);
 public:
 	Node(short sign_id,short intf_size);
 	Node(const pattern::Signature& sign);
 	Node(const Node& node,const map<Node*,Node*>& mask);
+	virtual ~Node();
+
+	void copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs);//unsafe
 	void alloc(big_id addr);
 	big_id getAddress() const;
 
@@ -50,10 +55,10 @@ public:
 	void setLink(small_id site_src,Node* lnk,small_id site_trgt);
 
 
-	virtual void removeFrom(EventInfo& ev,matching::InjSet* injs,SiteGraph& graph);
-	virtual void changeIntState(EventInfo& ev,matching::InjSet* injs,small_id id,small_id value);
-	virtual void unbind(EventInfo& ev,matching::InjSet* injs,small_id id);
-	virtual void bind(EventInfo& ev,matching::InjSet* injs,small_id id,Node* trgt_node,small_id trgt_site);
+	virtual void removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph);
+	virtual void changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value);
+	virtual void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id);
+	virtual void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site);
 
 
 	//inline?? TODO
@@ -80,9 +85,10 @@ public:
 	const pair<Node*,small_id>& getLinkState(small_id);
 
 	void addDep(matching::Injection* inj);
+	bool removeDep(matching::Injection* inj);
 	pair<matching::InjSet*,matching::InjSet*>& getLifts(small_id site);
 	//DEBUG
-	string toString(const pattern::Environment &env) const;
+	virtual string toString(const pattern::Environment &env,bool show_binds = false) const;
 
 };
 
@@ -94,11 +100,11 @@ struct Node::Internal {
 	Internal();
 	~Internal();
 
-	void negativeUpdate(EventInfo& ev,matching::InjSet* injs);
-	static void negativeUpdate(EventInfo& ev,matching::InjSet* injs,matching::InjSet* deps);
+	void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs);
+	static void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,matching::InjSet* deps);
 
 
-	string toString(const pattern::Signature::Site& s) const;
+	string toString(const pattern::Signature::Site& s,bool show_binds = false) const;
 
 };
 
@@ -113,15 +119,17 @@ public:
 	pop_size getCount() const override;
 
 
-	void removeFrom(EventInfo& ev,matching::InjSet* injs,SiteGraph& graph) override;
+	void removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph) override;
 
-	void changeIntState(EventInfo& ev,matching::InjSet* injs,small_id id,small_id value) override;
-	void unbind(EventInfo& ev,matching::InjSet* injs,small_id id) override;
-	void bind(EventInfo& ev,matching::InjSet* injs,small_id id,Node* trgt_node,small_id trgt_site) override;
+	void changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value) override;
+	void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id) override;
+	void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site) override;
 
 	/*bool test(const pair<small_id,pattern::Mixture::Site>& id_site,
 			std::queue<pair<small_id,Node&> > &match_queue,
 			two<list<Internal*> > &port_list) const;*/
+
+	string toString(const pattern::Environment& env,bool show_binds = false) const override;
 };
 
 class MultiNode {
@@ -130,13 +138,17 @@ class MultiNode {
 	SubNode** cc;
 	small_id count;
 
+	~MultiNode();
 public:
 	MultiNode(unsigned n,pop_size pop);
 
 	pop_size getPopulation() const;
 
 	small_id add(SubNode* node);
+	void remove();
 	void dec(EventInfo& ev);
+
+	class OutOfInstances : exception {};
 };
 
 
@@ -145,6 +157,7 @@ public:
 struct EventInfo {
 	//map of emb LHS [cc_id][ag_id]
 	Node*** emb;
+	small_id cc_count;
 	//map of new_nodes RHS
 	Node** fresh_emb;
 	//node_address,site_id
@@ -156,8 +169,13 @@ struct EventInfo {
 
 	//new cc derived from multinode
 	map<Node*,Node*> new_cc;
+	//mask for new injections, nullptr are erased injs
+	map<matching::Injection*,matching::Injection*> inj_mask;
 
-	set<small_id> to_update;
+	set<const pattern::Pattern*> to_update;
+
+	EventInfo();
+	~EventInfo();
 
 };
 

@@ -7,18 +7,16 @@
 
 #include "Parameters.h"
 
+#include <limits>
+
 namespace simulation {
 
 Parameters Parameters::singleton;
 
-Parameters::Parameters() : maxTime(5.) {
-	// TODO Auto-generated constructor stub
+Parameters::Parameters() : maxEvent(std::numeric_limits<UINT_TYPE>::max()),
+		maxTime(/*std::numeric_limits<FL_TYPE>::infinity()*/0){}
 
-}
-
-Parameters::~Parameters() {
-	// TODO Auto-generated destructor stub
-}
+Parameters::~Parameters() {}
 
 
 Parameters& Parameters::getInstance(){
@@ -26,10 +24,10 @@ Parameters& Parameters::getInstance(){
 }
 
 
-const long Parameters::limitEvent() const{
+UINT_TYPE Parameters::limitEvent() const{
 	return maxEvent;
 }
-const long Parameters::limitTime() const{
+FL_TYPE Parameters::limitTime() const{
 	return maxTime;
 }
 

@@ -28,7 +28,7 @@ class Simulation {
 	pattern::Environment& env;
 	pattern::RuleSet rules;
 	const vector<state::Variable*>& vars;
-	Counter counter;
+	GlobalCounter counter;
 
 	set<matching::Injection*> *ccInjections;//[cc_env_id].at(node_id)
 	set<matching::Injection*> *mixInjections;//[mix_id].at(node_id)[cc_mix_id]
@@ -51,7 +51,7 @@ public:
 	void setCells(list<unsigned int>& cells);
 
 	void initialize();
-	void run();
+	void run(const Parameters& params);
 
 	template <template <typename,typename...> class Range,typename... Args>
 	void addTokens(const Range<int,Args...> &cell_ids,float count,short token_id);

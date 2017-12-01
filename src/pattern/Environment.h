@@ -66,8 +66,8 @@ public:
 	Compartment& declareCompartment(const ast::Id& comp);
 	UseExpression& declareUseExpression(unsigned short id,size_t n);
 	Channel& declareChannel(const ast::Id &channel);
-	const Mixture& declareMixture(const Mixture& m);
-	const Mixture::Component& declareComponent(const Mixture::Component& c);
+	Mixture& declareMixture(const Mixture& m);
+	Mixture::Component& declareComponent(const Mixture::Component& c);
 	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,bool is_lhs = true);
 	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix);
 

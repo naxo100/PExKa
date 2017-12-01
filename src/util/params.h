@@ -5,6 +5,10 @@
 #define DEBUG true
 
 typedef double FL_TYPE;
+typedef long INT_TYPE;
+typedef unsigned long UINT_TYPE;
+#define FRMT_FL "f"
+#define FRMT_UINT "lu"
 
 typedef unsigned long big_id;
 typedef unsigned int mid_id;

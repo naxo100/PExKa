@@ -635,7 +635,7 @@ int Mixture::Site::compareLinkPtrn(ag_st_id ptrn) const{
 }
 
 bool Mixture::Site::isBindToAny() const{
-	return link_type == LinkType::BIND && lnk_ptrn.first == -1;
+	return link_type == LinkType::BIND && lnk_ptrn.first == small_id(-1);
 }
 
 

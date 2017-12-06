@@ -52,7 +52,7 @@ public:
 		bool is_valid;
 		bool is_new;
 		//small_id cc_root;
-		map<small_id,ag_st_id> node_id;//lhs_cc-> (lhs_cc_ag,cc_root)
+		map<ag_st_id,small_id> node_id;//(lhs_cc,lhs_cc_ag) -> cc_root 		XXXXX //lhs_cc-> (lhs_cc_ag,cc_root)
 		CandidateInfo();
 		void set(small_id root,ag_st_id node);
 	};
@@ -69,9 +69,12 @@ protected:
 	list<Action> script;
 	vector<state::Node*> newNodes;
 	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
-	list<ag_st_id> news;
-	list<pair<const pattern::Mixture::Component*,CandidateInfo> > influence;
+	map<ag_st_id,small_id> news; //rhs(cc,ag) -> newNodes[i]
+	map<const pattern::Mixture::Component*,CandidateInfo> influence;
 	map<ag_st_id,ag_st_id> matches;//rhs-ag -> lhs-ag
+
+	bool test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
+		const Mixture::Component& test_cc,const Environment& env) const;
 
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.
@@ -87,7 +90,7 @@ public:
 	const Mixture& getRHS() const;
 	const state::BaseExpression& getRate() const;
 	const state::BaseExpression& getUnaryRate() const;
-	const list<pair<const pattern::Mixture::Component*,CandidateInfo> >& getInfluences() const;
+	const map<const pattern::Mixture::Component*,CandidateInfo>& getInfluences() const;
 
 	/** \brief Set RHS of the rule.
 	 * If this is a reversible rule, mix is declared in env and should not be

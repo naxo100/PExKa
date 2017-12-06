@@ -167,16 +167,16 @@ void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
 		auto& info = cc_info.second;
 		Node* node;
 		for(auto cc_ag_root : info.node_id){
-			if(cc_ag_root.first == small_id(-1))//new
-				node = ev.fresh_emb[cc_ag_root.second.first];
+			if(cc_ag_root.first.first == small_id(-1))//new
+				node = ev.fresh_emb[cc_ag_root.first.second];
 			else
 				try {
-					node = ev.emb[cc_ag_root.first][cc_ag_root.second.first];
+					node = ev.emb[cc_ag_root.first.first][cc_ag_root.first.second];
 					node = ev.new_cc.at(node);
 				}catch(out_of_range &ex) {}
 			two<std::list<Node::Internal*> > port_lists;
 			try{
-				matching::Injection* inj_p = injections[cc->getId()].emplace(*cc,*node,port_lists,cc_ag_root.second.second);
+				matching::Injection* inj_p = injections[cc->getId()].emplace(*cc,*node,port_lists,cc_ag_root.second);
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)

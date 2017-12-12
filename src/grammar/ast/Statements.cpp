@@ -18,16 +18,16 @@ short Statement::getUseId() const {
 }
 
 /****** Class Declaration *******/
-Declaration::Declaration() : type(ALG),constant(false),expr(NULL){};
+Declaration::Declaration() : type(ALG),constant(false),observable(false),expr(NULL){};
 Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
-	Node(l),name(lab),type(ALG),constant(false),expr(e) {};
+	Node(l),name(lab),type(ALG),constant(false),observable(false),expr(e) {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(l),name(lab),type(KAPPA),constant(false),mixture(new Mixture(m)) {
+	Node(l),name(lab),type(KAPPA),constant(false),observable(false),mixture(new Mixture(m)) {
 };
 
 Declaration::Declaration(const Declaration &d) :
-		Node(d.loc),name(d.name),type(d.type),constant(false){
+		Node(d.loc),name(d.name),type(d.type),constant(d.constant),observable(d.observable){
 	if(type)
 		mixture = new Mixture(*(d.mixture));
 	else
@@ -40,6 +40,7 @@ Declaration& Declaration::operator=(const Declaration &d){
 	loc = d.loc;
 	type = d.type;
 	constant = d.constant;
+	observable = d.observable;
 	if(expr)
 		delete expr;
 
@@ -167,6 +168,12 @@ void Declaration::setConstant(bool b){
 	constant = b;
 }
 
+bool Declaration::isObservable() const{
+	return observable;
+}
+void Declaration::setObservable(bool v){
+	observable = v;
+}
 void Declaration::show( string tabs ) {
 	string typeName[] = { "Variable", "Kappa" };
 

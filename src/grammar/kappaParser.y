@@ -167,7 +167,7 @@ instruction:
 | CONST error
 	{}
 | OBS variable_declaration
-	{}
+	{$2.setObservable();this->driver.getAst().add($2);}
 | PLOT alg_expr 
 	{}
 | PLOT error 

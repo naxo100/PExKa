@@ -57,7 +57,8 @@ vector<Variable*> KappaAst::evaluateDeclarations(pattern::Environment &env,vecto
 		else
 			var = it->evalVar(env,var_vector);
 		var_vector.push_back(var);
-		//env.declareVariable(var->getName(),it->isKappa());
+		if(it->isObservable())
+			env.declareObservable(var);
 	}
 	return var_vector;
 }

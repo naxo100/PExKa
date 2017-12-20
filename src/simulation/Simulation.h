@@ -14,6 +14,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Parameters.h"
+#include "Plot.h"
 #include "../state/State.h"
 #include "../pattern/Environment.h"
 #include "../pattern/RuleSet.h"
@@ -29,6 +30,7 @@ class Simulation {
 	pattern::RuleSet rules;
 	const vector<state::Variable*>& vars;
 	GlobalCounter counter;
+	Plot plot;
 
 	set<matching::Injection*> *ccInjections;//[cc_env_id].at(node_id)
 	set<matching::Injection*> *mixInjections;//[mix_id].at(node_id)[cc_mix_id]

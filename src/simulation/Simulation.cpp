@@ -12,7 +12,7 @@
 namespace simulation {
 
 Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars),
-		params(Parameters::getInstance()){
+		params(Parameters::getInstance()), plot(env){
 	//ccInjections = new set<matching::Injection*>[env.size<pattern::Mixture::Component>()];
 	//mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
 }
@@ -26,7 +26,7 @@ Simulation::~Simulation() {
 void Simulation::setCells(list<unsigned int>& _cells){
 	for(auto cell_id : _cells){
 		cells.emplace(piecewise_construct,forward_as_tuple(cell_id),
-				forward_as_tuple(env.size<pattern::Token>(),vars,env.getCompartmentByCellId(cell_id).getVolume(),env));
+				forward_as_tuple(env.size<pattern::Token>(),vars,env.getCompartmentByCellId(cell_id).getVolume(),plot,env));
 	}
 }
 

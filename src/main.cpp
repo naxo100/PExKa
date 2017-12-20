@@ -115,6 +115,12 @@ int main(int argc, char* argv[]){
 		params.maxEvent = vm["events"].as<int>();
 	if(vm.count("time"))
 		params.maxTime = vm["time"].as<float>();
+	if(vm.count("points"))
+		params.points = vm["points"].as<int>();
+	else
+		cerr << "No points to plot." << endl;
+	if(vm.count("out"))
+		params.file = vm["out"].as<string>();
 
 	map<pair<int,int>,double> edges;
 	for(size_t i = 0; i < env.size<pattern::Channel>(); i++ ){

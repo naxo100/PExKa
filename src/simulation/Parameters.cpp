@@ -14,7 +14,8 @@ namespace simulation {
 Parameters Parameters::singleton;
 
 Parameters::Parameters() : maxEvent(std::numeric_limits<UINT_TYPE>::max()),
-		maxTime(/*std::numeric_limits<FL_TYPE>::infinity()*/0){}
+		maxTime(/*std::numeric_limits<FL_TYPE>::infinity()*/0),points(1),
+		file("sim.out"){}
 
 Parameters::~Parameters() {}
 
@@ -29,6 +30,12 @@ UINT_TYPE Parameters::limitEvent() const{
 }
 FL_TYPE Parameters::limitTime() const{
 	return maxTime;
+}
+unsigned Parameters::plotPoints() const {
+	return points;
+}
+const string& Parameters::outputFile() const {
+	return file;
 }
 
 } /* namespace simulation */

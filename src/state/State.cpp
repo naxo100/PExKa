@@ -9,14 +9,17 @@
 #include "../pattern/Environment.h"
 #include "../matching/Injection.h"
 #include "../data_structs/MaskedBinaryRandomTree.h"
+#include "../simulation/Plot.h"
 #include <cmath>
 
 namespace state {
 
 State::State(size_t tok_count,const std::vector<Variable*>& _vars,
-		const state::BaseExpression& vol,const pattern::Environment& _env) :
+		const state::BaseExpression& vol,simulation::Plot& _plot,
+		const pattern::Environment& _env) :
 	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]),
-	activityTree(nullptr),injections(nullptr),randGen(0/*TODO seed*/){}
+	activityTree(nullptr),injections(nullptr),randGen(0/*TODO seed*/),
+	plot(_plot){}
 
 State::~State() {
 	delete[] tokens;
@@ -29,6 +32,10 @@ State::~State() {
 	injections = nullptr;
 }
 
+
+const simulation::Counter& State::getCounter() const {
+	return counter;
+}
 
 void State::addTokens(float n,short tok_id){
 	tokens[tok_id] += n;
@@ -195,6 +202,7 @@ void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
 
 void State::advanceUntil(FL_TYPE sync_t) {
 	while(counter.getTime() < sync_t){
+		plot.fill(*this,env);
 		try{
 			counter.advanceTime(event());
 			counter.incEvents();

@@ -53,6 +53,7 @@ protected:
 	list<Mixture::Component> components;
 	vector<list<Mixture::Agent> > agentPatterns;
 	vector<simulation::Rule> rules;
+	list<state::Variable*> observables;
 
 	bool exists(const string &name,const IdMap &map);
 public:
@@ -70,6 +71,7 @@ public:
 	Mixture::Component& declareComponent(const Mixture::Component& c);
 	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,bool is_lhs = true);
 	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix);
+	void declareObservable(state::Variable* obs);
 
 	void buildInfluenceMap();
 
@@ -83,6 +85,7 @@ public:
 	const list<Mixture::Component>& getComponents() const;
 	const list<Mixture::Agent>& getAgentPatterns(small_id id) const;
 	const vector<simulation::Rule>& getRules() const;
+	const list<state::Variable*>& getObservables() const;
 
 
 	const Compartment& getCompartmentByCellId(unsigned id) const;

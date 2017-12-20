@@ -19,6 +19,10 @@ class Parameters {
 	static Parameters singleton;
 	UINT_TYPE maxEvent;
 	FL_TYPE maxTime;
+	unsigned points;
+
+	string file;
+
 	Parameters();
 public:
 	friend int ::main(int argc, char* argv[]);
@@ -27,6 +31,8 @@ public:
 
 	UINT_TYPE limitEvent() const;
 	FL_TYPE limitTime() const;
+	unsigned plotPoints() const;
+	const string& outputFile() const;
 };
 
 } /* namespace simulation */

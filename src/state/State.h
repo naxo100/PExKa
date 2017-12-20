@@ -18,6 +18,10 @@
 #include "../simulation/Rule.h"
 #include "../data_structs/RandomTree.h"
 
+namespace simulation {
+	class Plot;
+}
+
 namespace state {
 struct EventInfo;
 
@@ -41,6 +45,7 @@ class State {
 
 	mutable default_random_engine randGen;
 	simulation::LocalCounter counter;
+	simulation::Plot& plot;
 	//time_t program_t0;
 
 	/** \brief Negative update of injections after apply a change to an agent site.
@@ -77,10 +82,11 @@ public:
 	 * @param vol the volume of this state.
 	 */
 	State(size_t tok_count,const std::vector<Variable*>& _vars,
-			const BaseExpression& vol,const pattern::Environment& env);
+			const BaseExpression& vol,simulation::Plot& plot,
+			const pattern::Environment& env);
 	~State();
 
-	const simulation::Counter& getCounter();
+	const simulation::Counter& getCounter() const;
 
 	/** \brief Add tokens population to the state.
 	 * @param n count of tokens (could be negative).

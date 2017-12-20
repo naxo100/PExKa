@@ -121,23 +121,23 @@
 %init: 7 (PER(id~1,loc~cyto,cki!1,P1~p,cry!2,P2~p),CRY(id~2,loc~cyto,clk,per!2),CKI(per!1,loc~cyto))
 
 
-#%obs: 'nucleus:mRNA(enc~PER1)' |mRNA(enc~PER1,loc~nuc)|
-#%obs: 'nucleus:mRNA(enc~PER2)' |mRNA(enc~PER2,loc~nuc)|
-#%obs: 'nucleus:mRNA(enc~CRY1)' |mRNA(enc~CRY1,loc~nuc)|
-#%obs: 'nucleus:mRNA(enc~CRY2)' |mRNA(enc~CRY2,loc~nuc)|
-#%obs: 'nucleus:PER(id~1)' |PER(id~1,loc~nuc)|
-#%obs: 'nucleus:PER(id~2)' |PER(id~2,loc~nuc)|
-#%obs: 'nucleus:CRY(id~1)' |CRY(id~1,loc~nuc)|
-#%obs: 'nucleus:CRY(id~2)' |CRY(id~2,loc~nuc)|
+%obs: 'nucleus:mRNA(enc~PER1)' mRNA(enc~PER1,loc~nuc)
+%obs: 'nucleus:mRNA(enc~PER2)' mRNA(enc~PER2,loc~nuc)
+%obs: 'nucleus:mRNA(enc~CRY1)' mRNA(enc~CRY1,loc~nuc)
+%obs: 'nucleus:mRNA(enc~CRY2)' mRNA(enc~CRY2,loc~nuc)
+%obs: 'nucleus:PER(id~1)' PER(id~1,loc~nuc)
+%obs: 'nucleus:PER(id~2)' PER(id~2,loc~nuc)
+%obs: 'nucleus:CRY(id~1)' CRY(id~1,loc~nuc)
+%obs: 'nucleus:CRY(id~2)' CRY(id~2,loc~nuc)
 
-#%obs: 'cytosol:mRNA(enc~PER1)' |mRNA(enc~PER1,loc~cyto)|
-#%obs: 'cytosol:mRNA(enc~PER2)' |mRNA(enc~PER2,loc~cyto)|
-#%obs: 'cytosol:mRNA(enc~CRY1)' |mRNA(enc~CRY1,loc~cyto)|
-#%obs: 'cytosol:mRNA(enc~CRY2)' |mRNA(enc~CRY2,loc~cyto)|
-#%obs: 'cytosol:PER(id~1)' |PER(id~1,loc~cyto)|
-#%obs: 'cytosol:PER(id~2)' |PER(id~2,loc~cyto)|
-#%obs: 'cytosol:CRY(id~1)' |CRY(id~1,loc~cyto)|
-#%obs: 'cytosol:CRY(id~2)' |CRY(id~2,loc~cyto)|
+%obs: 'cytosol:mRNA(enc~PER1)' mRNA(enc~PER1,loc~cyto)
+%obs: 'cytosol:mRNA(enc~PER2)' mRNA(enc~PER2,loc~cyto)
+%obs: 'cytosol:mRNA(enc~CRY1)' mRNA(enc~CRY1,loc~cyto)
+%obs: 'cytosol:mRNA(enc~CRY2)' mRNA(enc~CRY2,loc~cyto)
+%obs: 'cytosol:PER(id~1)' PER(id~1,loc~cyto)
+%obs: 'cytosol:PER(id~2)' PER(id~2,loc~cyto)
+%obs: 'cytosol:CRY(id~1)' CRY(id~1,loc~cyto)
+%obs: 'cytosol:CRY(id~2)' CRY(id~2,loc~cyto)
 
 
 #Perturbations:

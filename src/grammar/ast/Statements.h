@@ -49,6 +49,8 @@ public:
 	bool isKappa() const;
 	bool isConstant() const;
 	void setConstant(bool b);
+	bool isObservable() const;
+	void setObservable(bool v = true);
 
 
 	void show( string tabs = "" );
@@ -58,6 +60,7 @@ protected:
 	Id name;
 	VarType type;
 	bool constant;
+	bool observable;
 	union {
 		const Expression *expr;
 		const Mixture *mixture;

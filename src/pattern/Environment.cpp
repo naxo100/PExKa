@@ -169,6 +169,10 @@ simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture
 	return rules.back();
 }
 
+void Environment::declareObservable(state::Variable* var){
+	observables.emplace_back(var);
+}
+
 void Environment::buildInfluenceMap() {
 	for(auto& r : rules)
 		r.checkInfluence(*this);
@@ -214,6 +218,9 @@ const list<Mixture::Agent>& Environment::getAgentPatterns(small_id id) const{
 }
 const vector<simulation::Rule>& Environment::getRules() const {
 	return rules;
+}
+const list<state::Variable*>& Environment::getObservables() const {
+	return observables;
 }
 
 

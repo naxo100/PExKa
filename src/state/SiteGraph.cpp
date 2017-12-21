@@ -34,7 +34,8 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 				auto node = new Node(env.getSignature(p_ag->getId()));
 				//node->setCount(n);
 				for(auto id_site : *p_ag){
-					node->setState(id_site.first,id_site.second.state);
+					if(!id_site.second.isEmptySite())
+						node->setState(id_site.first,id_site.second.state);
 				}
 				this->allocate(node);
 				buff_nodes[i] = node;
@@ -49,7 +50,8 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 		for(auto p_ag : cc){
 			auto node = new SubNode(env.getSignature(p_ag->getId()),*multi);
 			for(auto id_site : *p_ag){
-				node->setState(id_site.first,id_site.second.state);
+				if(!id_site.second.isEmptySite())
+					node->setState(id_site.first,id_site.second.state);
 			}
 			this->allocate(node);
 			buff_nodes[i] = node;
@@ -79,7 +81,7 @@ void SiteGraph::allocate(Node* node){
 
 
 void SiteGraph::allocate(SubNode* node){
-	if(container.size()){
+	if(subNodeCount < container.size()){
 		container[subNodeCount]->alloc(container.size());
 		container.push_back(container[subNodeCount]);
 		container[subNodeCount] = node;
@@ -132,8 +134,10 @@ string SiteGraph::toString(const pattern::Environment& env) const {
 			if(node){
 				cout << node->getAddress() << ": ";
 				cout << node->toString(env,true) << endl;
-				if(i != node->getAddress())
+				if(i != node->getAddress()){
 					cout <<  "ERROR!!!!!!" << endl;
+					throw std::invalid_argument("bad allocation of node.");
+				}
 			}
 			i++;
 		}

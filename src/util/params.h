@@ -20,7 +20,9 @@ typedef unsigned int pop_size;
 #include <utility>
 template<typename T> using two = std::pair<T,T>;
 
-class False : public std::exception {};
+class False : public std::exception {
+	virtual const char* what() const _GLIBCXX_USE_NOEXCEPT override {return "False exception";}
+};
 
 
 #endif

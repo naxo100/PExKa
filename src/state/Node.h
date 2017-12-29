@@ -57,8 +57,8 @@ public:
 
 	virtual void removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph);
 	virtual void changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value);
-	virtual void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id);
-	virtual void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site);
+	virtual void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff = false);
+	virtual void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site,bool side_eff = false);
 
 
 	//inline?? TODO
@@ -76,8 +76,7 @@ public:
 	 * save injections. Also it stores in match_queue every pair
 	 * (to_follow_,Node*) that will be matched later.
 	 */
-	bool test(const pair<small_id,pattern::Mixture::Site>& id_site,
-			std::queue<pair<small_id,Node&> > &match_queue,
+	Node* test(const pair<small_id,pattern::Mixture::Site>& id_site,
 			two<list<Internal*> > &port_list) const;
 
 	//unsafe
@@ -122,8 +121,9 @@ public:
 	void removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph) override;
 
 	void changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value) override;
-	void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id) override;
-	void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site) override;
+	void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff = false) override;
+	void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,
+			Node* trgt_node,small_id trgt_site,bool side_eff = false) override;
 
 	/*bool test(const pair<small_id,pattern::Mixture::Site>& id_site,
 			std::queue<pair<small_id,Node&> > &match_queue,
@@ -161,7 +161,7 @@ struct EventInfo {
 	//map of new_nodes RHS
 	Node** fresh_emb;
 	//node_address,site_id
-	std::set<pair<Node*,small_id> > side_effects;
+	std::multimap<Node*,small_id> side_effects;
 	//perturbation_ids
 	std::set<mid_id> pert_ids;
 	//null events

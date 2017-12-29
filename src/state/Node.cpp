@@ -73,6 +73,7 @@ void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs) {
 			}
 			if(new_inj){
 				interface[i].deps.first->emplace(new_inj);
+				ev.to_update.emplace(&new_inj->pattern());
 			}
 		}
 		for(auto inj : *node.interface[i].deps.second){
@@ -81,23 +82,25 @@ void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs) {
 				new_inj = ev.inj_mask.at(inj);
 			}
 			catch(out_of_range &ex){
-				new_inj = ev.inj_mask[inj] = injs[new_inj->pattern().getId()].emplace(inj,ev.new_cc);
+				new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()].emplace(inj,ev.new_cc);
 			}
 			if(new_inj){
 				interface[i].deps.second->emplace(new_inj);
+				ev.to_update.emplace(&new_inj->pattern());
 			}
 		}
 	}
-	for(auto inj : *deps){
+	for(auto inj : *node.deps){
 		matching::Injection* new_inj;
 		try {
 			new_inj = ev.inj_mask.at(inj);
 		}
 		catch(out_of_range &ex){
-			new_inj = ev.inj_mask[inj] = injs[new_inj->pattern().getId()].emplace(inj,ev.new_cc);
+			new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()].emplace(inj,ev.new_cc);
 		}
 		if(new_inj){
 			deps->emplace(new_inj);
+			ev.to_update.emplace(&new_inj->pattern());
 		}
 	}
 }
@@ -122,8 +125,7 @@ short_id Node::getId() const{
 	return signId;
 }
 
-bool Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
-		std::queue<pair<small_id,Node&> >& match_queue,
+Node* Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		two<list<Internal*> > &port_list) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
@@ -143,11 +145,13 @@ bool Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		break;
 	case pattern::Mixture::BIND:
 		if(!port.link.first)
-			throw False();//or return port.link.first;
+			throw False();
 		//else
 		port_list.second.emplace_back(&port);
-		match_queue.emplace(id_site.first,*(port.link.first));//its site_id instead ag_mix_id
-		return true;
+		/* Do not test for site_id ptrn, it's obvious that they are ok*/
+		//else if(port.link.first->getLinkState(id_site.second.lnk_ptrn.second).second == id_site.first)//bind-node lnk-ptrn*/
+		if(id_site.second.lnk_ptrn.first != small_id(-1))//ptrn is not bind to any
+			return port.link.first;
 		break;
 	case pattern::Mixture::BIND_TO:
 		if(port.link.first){
@@ -162,7 +166,7 @@ bool Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		//TODO
 		break;
 	}
-	return false;
+	return nullptr;
 }
 
 
@@ -198,11 +202,12 @@ void Node::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph)
 		auto lnk = interface[i].link;
 		if(lnk.first){
 			lnk.first->interface[lnk.second].negativeUpdate(ev,injs,lnk.first->interface[lnk.second].deps.second);
-			lnk.first->setLink(lnk.second,nullptr,0);
+			lnk.first->setLink(lnk.second,nullptr,0);//maybe this first TODO
 			ev.side_effects.emplace(lnk);
 		}
 	}
 	Internal::negativeUpdate(ev,injs,deps);
+	ev.side_effects.erase(this);
 	delete this;//TODO do not delete, reuse nodes
 }
 
@@ -215,9 +220,11 @@ void Node::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,s
 		interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
 	}
 }
-void Node::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id){
+void Node::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff){
 	auto& inter = interface[id];
 	if(inter.link.first){
+		if(side_eff)
+			ev.side_effects.emplace(inter.link);
 		inter.link.first->interface[inter.link.second].negativeUpdate(ev,//?? private?
 				injs,inter.link.first->interface[inter.link.second].deps.second);
 		inter.link.first->setLink(inter.link.second,nullptr,0);
@@ -227,19 +234,22 @@ void Node::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id){
 	else
 		ev.warns++;
 }
-void Node::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site){
+void Node::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,
+		small_id trgt_site,bool side_eff){
 	//auto lnk2 = trgt_node->getLinkState(trgt_site);
 	auto& lnk1 = interface[id].link;
 	if(lnk1.first){
 		if(lnk1.first == trgt_node && lnk1.second == trgt_site)
 			return;
+		if(side_eff)//side-eff for node1, node2? TODO
+			ev.side_effects.emplace(lnk1);
 		lnk1.first->interface[lnk1.second].negativeUpdate(ev,injs,lnk1.first->interface[lnk1.second].deps.second);
 		lnk1.first->setLink(lnk1.second,nullptr,0);
 		ev.side_effects.emplace(lnk1);
 	}
 	interface[id].negativeUpdate(ev,injs,interface[id].deps.second);
 	lnk1.first = trgt_node;lnk1.second = trgt_site;
-	lnk1.first->bind(ev,injs,trgt_site,this,id);
+	lnk1.first->bind(ev,injs,trgt_site,this,id,side_eff);
 }
 
 Node::Internal* Node::begin(){
@@ -320,7 +330,7 @@ pop_size SubNode::getCount() const {
 }
 
 void SubNode::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph){
-	if(!ev.new_cc.size())
+	if(!ev.new_cc.count(this))
 		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
 			Node::removeFrom(ev,injs,graph);
 			graph.remove(this);
@@ -328,20 +338,29 @@ void SubNode::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& gra
 			//graph.decPopulation();//will be decreased when calling Node::removeFrom()
 			return;
 		}
+	if(ev.new_cc[this]){
+		ev.side_effects.erase(ev.new_cc[this]);//erasing possible side-effects on this node.
+		delete ev.new_cc[this];
+	}
 	ev.new_cc[this] = this;
 	graph.decPopulation();
 	for(auto i = 0; i < intfSize; i++){
-		for(auto dep : *interface[i].deps.first)
+		for(auto dep : *interface[i].deps.first)//necessary? TODO
 			ev.inj_mask[dep] = nullptr;
 		for(auto dep : *interface[i].deps.second)
 			ev.inj_mask[dep] = nullptr;
 		auto lnk = interface[i].link;
 		if(lnk.first){
-			for(auto dep : *lnk.first->getLifts(lnk.second).second)//TODO review
-				ev.inj_mask[dep] = nullptr;
-			ev.side_effects.emplace(lnk);
-			auto new_lnk_node = new Node(*lnk.first,ev.new_cc);
-			ev.new_cc[lnk.first] = new_lnk_node;
+			if(ev.new_cc[lnk.first] == lnk.first){
+				ev.side_effects.erase(lnk.first);
+			}
+			else{
+				for(auto dep : *lnk.first->getLifts(lnk.second).second)//TODO review
+					ev.inj_mask[dep] = nullptr;
+				auto new_lnkd_node = new Node(*lnk.first,ev.new_cc);
+				ev.new_cc[lnk.first] = new_lnkd_node;
+				ev.side_effects.emplace(new_lnkd_node,i);
+			}
 			//new_lnk_node->setLink(lnk.second,nullptr,0);//set link at constructor??
 		}
 	}
@@ -350,7 +369,7 @@ void SubNode::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& gra
 }
 
 void SubNode::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value){
-	if(!ev.new_cc.size())
+	if(!ev.new_cc.count(this))
 		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
 			Node::changeIntState(ev,injs,id,value);
 			return;
@@ -365,18 +384,24 @@ void SubNode::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id i
 	for(auto dep : *interface[id].deps.first)
 		ev.inj_mask[dep] = nullptr;
 }
-void SubNode::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id){
+void SubNode::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff){
 	//unbind must be inside cc
-	if(!ev.new_cc.size())
+	auto& lnk = this->interface[id].link;
+	if(!lnk.first){
+		ev.warns++;
+		return;//null_event
+	}
+	if(!ev.new_cc.count(this))
 		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
 			Node::unbind(ev,injs,id);
 			return;
 		}
-	auto& lnk = this->interface[id].link;
 	auto node1 = new Node(*this,ev.new_cc);
 	auto node2 = new Node(*lnk.first,ev.new_cc);
 	ev.new_cc.at(this) = node1;
 	ev.new_cc.at(lnk.first) = node2;
+	if(side_eff)
+		ev.side_effects.emplace(node2,lnk.second);
 	node1->setLink(id,nullptr,0);
 	node2->setLink(lnk.second,nullptr,0);
 	for(auto dep : *interface[id].deps.second)
@@ -384,15 +409,20 @@ void SubNode::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id){
 	for(auto dep : *lnk.first->getLifts(lnk.second).second)
 		ev.inj_mask[dep] = nullptr;
 }
-void SubNode::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site){
+void SubNode::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,
+		small_id trgt_site,bool side_eff){
 	if(!ev.new_cc.count(this))
 		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
-			Node::bind(ev,injs,id,trgt_node,trgt_site);
+			Node::bind(ev,injs,id,trgt_node,trgt_site,side_eff);
 			return;
 		}
 	auto new_node = new Node(*this,ev.new_cc);
 	ev.new_cc.at(this) = new_node;
 	auto& lnk = trgt_node->getLinkState(trgt_site);
+	for(auto it = ev.side_effects.find(this);it != ev.side_effects.end(); it++){
+		ev.side_effects.emplace(new_node,it->second);
+		ev.side_effects.erase(it);//TODO this may invalidate it++
+	}
 	if(lnk.first && lnk.first == this)//TODO compare with site?
 		trgt_node->setLink(trgt_site,new_node,lnk.second);
 	try{
@@ -404,11 +434,11 @@ void SubNode::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* tr
 			//link with a node in the same cc
 			new_trgt_node = new Node(*trgt_node,ev.new_cc);
 			ev.new_cc[trgt_node] = new_trgt_node;
-			new_node->Node::bind(ev,injs,id,new_trgt_node,trgt_site);
+			new_node->Node::bind(ev,injs,id,new_trgt_node,trgt_site,side_eff);
 		}
 	}
 	catch(std::out_of_range &e){
-		new_node->Node::bind(ev,injs,id,trgt_node,trgt_site);
+		new_node->Node::bind(ev,injs,id,trgt_node,trgt_site,side_eff);
 	}
 	for(auto dep : *interface[id].deps.second)
 		ev.inj_mask[dep] = nullptr;

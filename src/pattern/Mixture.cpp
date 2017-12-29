@@ -74,13 +74,18 @@ void Mixture::addAgent(Mixture::Agent *a){
 	//return agentCount-1;
 }
 
-void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2){
+void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2,const Environment& env){
 	if(comps)
 		throw std::invalid_argument("Cannot call addLink() on an initialized Mixture");
 	if(p1.first < p2.first)
 		links.emplace(p1,p2);
 	else
 		links.emplace(p2,p1);
+	agents[p1.first]->setLinkPtrn(p1.second,
+			agents[p2.first]->getId(),p2.second);
+	agents[p2.first]->setLinkPtrn(p2.second,
+			agents[p1.first]->getId(),p1.second);
+
 }
 
 void Mixture::declareAgents(Environment &env, bool is_lhs){
@@ -526,7 +531,13 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 				if ( bindLabels.size() > 0 && bindLabels[ag_st_id(mixAgId, it->first)] )
 					out += "!" + to_string( bindLabels[ag_st_id(mixAgId, it->first)] );
 				else
-					out += "!_";
+					if(it->second.isBindToAny())
+						out += "!_";
+					else{
+						signature2bind = & env.getSignature( it->second.lnk_ptrn.first );
+						site2bind = & signature2bind->getSite( it->second.lnk_ptrn.second );
+						out += "!{" + site2bind->getName() + "." + signature2bind->getName()+"}";
+					}
 				break;
 			case LinkType::BIND_TO :
 				signature2bind = & env.getSignature( it->second.lnk_ptrn.first );
@@ -618,17 +629,17 @@ int Mixture::Site::compare(const Site &s) const{
 
 int Mixture::Site::compareLinkPtrn(ag_st_id ptrn) const{
 	if(isBindToAny()){
-		if(ptrn.first == -1)
+		if(ptrn.first == small_id(-1))
 			return 0;
 		else
 			return 1;
 	}
 	else{
-		if(ptrn.first == -1)
+		if(ptrn.first == small_id(-1))
 			return -1;
 		else
 			if(lnk_ptrn == ptrn)
-				return link_type == LinkType::BIND_TO ? 1 : 0;//need to comparte with other type
+				return link_type == LinkType::BIND_TO ? 1 : 0;//need to compare with other type
 			else
 				throw False();
 	}
@@ -685,10 +696,6 @@ void Mixture::Component::addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<sh
 	ag_st_id second(mask.at(lnk.second.first),lnk.second.second);
 	links->emplace_back(first);
 	links->emplace_back(second);
-	agents.at(first.first)->setLinkPtrn(first.second,
-			agents.at(second.first)->getId(),second.second);
-	agents.at(second.first)->setLinkPtrn(second.second,
-			agents.at(first.first)->getId(),first.second);
 }
 
 ag_st_id Mixture::Component::follow(small_id ag_id,small_id site) const{

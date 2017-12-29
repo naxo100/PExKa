@@ -91,7 +91,7 @@ public:
 	 * @param first,second the new connection in the format
 	 * pair(agmix_id,site_id).
 	 */
-	void addLink(const ag_st_id &first,const ag_st_id &second);
+	void addLink(const ag_st_id &first,const ag_st_id &second,const Environment& env);
 
 	/** \brief Declare Agents in the environment.
 	 *

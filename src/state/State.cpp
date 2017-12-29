@@ -90,8 +90,9 @@ void State::negativeUpdate<1>(SiteGraph::Internal& intf){
 }*/
 
 void State::bind(const simulation::Rule::Action& a,EventInfo& ev){
-	auto n1 = (get<3>(a.trgt1) ? ev.fresh_emb : ev.emb[get<0>(a.trgt1)])[get<1>(a.trgt1)];
-	auto n2 = (get<3>(a.trgt2) ? ev.fresh_emb : ev.emb[get<0>(a.trgt2)])[get<1>(a.trgt2)];
+	using Action = simulation::Rule::Action;
+	auto n1 = (get<3>(a.trgt1) & Action::NEW ? ev.fresh_emb : ev.emb[get<0>(a.trgt1)])[get<1>(a.trgt1)];
+	auto n2 = (get<3>(a.trgt2) & Action::NEW ? ev.fresh_emb : ev.emb[get<0>(a.trgt2)])[get<1>(a.trgt2)];
 	try {
 		auto new_node = ev.new_cc.at(n1);
 		if(!new_node)
@@ -103,10 +104,11 @@ void State::bind(const simulation::Rule::Action& a,EventInfo& ev){
 			n2 = new Node(*n2,ev.new_cc);
 	}catch(...){}
 
-	n1->bind(ev,injections,get<2>(a.trgt1),n2,get<2>(a.trgt2));
+	n1->bind(ev,injections,get<2>(a.trgt1),n2,get<2>(a.trgt2),get<3>(a.trgt2) & Action::S_EFF);
 }
 
 void State::free(const simulation::Rule::Action& a,EventInfo& ev){
+	using Action = simulation::Rule::Action;
 	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
 	try{
 		auto new_node = ev.new_cc.at(node);
@@ -114,7 +116,7 @@ void State::free(const simulation::Rule::Action& a,EventInfo& ev){
 			new_node->unbind(ev,injections,get<2>(a.trgt1));
 	}
 	catch(std::out_of_range &ex){}
-	node->unbind(ev,injections,get<2>(a.trgt1));
+	node->unbind(ev,injections,get<2>(a.trgt1),get<3>(a.trgt1) & Action::S_EFF);
 }
 
 void State::modify(const simulation::Rule::Action& a,EventInfo& ev){
@@ -180,7 +182,7 @@ void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
 				try {
 					node = ev.emb[cc_ag_root.first.first][cc_ag_root.first.second];
 					node = ev.new_cc.at(node);
-				}catch(out_of_range &ex) {}
+				}catch(out_of_range &ex) {}//not in new_cc
 			two<std::list<Node::Internal*> > port_lists;
 			try{
 				matching::Injection* inj_p = injections[cc->getId()].emplace(*cc,*node,port_lists,cc_ag_root.second);
@@ -196,6 +198,31 @@ void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
 			catch(False& e){
 				//Not a match with candidate
 			}
+		}
+	}
+	for(auto side_eff : ev.side_effects){
+		for(auto& ag : env.getAgentPatterns(side_eff.first->getId())){
+			try {
+				if(ag.getSite(side_eff.second).link_type == pattern::Pattern::FREE){
+					for(auto& cc_ag : ag.getIncludes()){
+						two<std::list<Node::Internal*> > port_lists;
+						matching::Injection* inj_p;
+						try{
+							inj_p = injections[cc_ag.first->getId()].emplace(*cc_ag.first,*side_eff.first,port_lists,cc_ag.second);
+						}
+						catch(False& ex) {continue;}
+						for(auto port : port_lists.first)
+							port->deps.first->emplace(inj_p);
+						for(auto port : port_lists.second)
+							port->deps.second->emplace(inj_p);
+						if(!port_lists.first.size() && !port_lists.second.size())
+							side_eff.first->addDep(inj_p);
+						//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
+						ev.to_update.emplace(cc_ag.first);
+					}
+				}
+			}
+			catch(std::out_of_range& ex){}
 		}
 	}
 }
@@ -305,9 +332,6 @@ pair<const simulation::Rule&,EventInfo*> State::drawRule(){
 
 FL_TYPE State::event() {
 	FL_TYPE dt,act;
-	#if DEBUG
-		printf("Event %3lu",counter.getEvent());
-	#endif
 	act = activityTree->total();
 	if(act < 0.)
 		throw invalid_argument("Activity falls below zero.");
@@ -319,6 +343,7 @@ FL_TYPE State::event() {
 	//TODO perts
 
 	#if DEBUG
+		printf("Event %3lu",counter.getEvent());
 		printf("  dt = %3.4f",dt);
 	#endif
 	EventInfo* ev = nullptr;

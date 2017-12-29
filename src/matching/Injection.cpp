@@ -46,30 +46,37 @@ CcInjection::CcInjection(const pattern::Mixture::Component& _cc,Node& node,
 
 void CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 		two<std::list<state::Node::Internal*> >& port_list,small_id root) {
+	ccAgToNode.clear();
 	ccAgToNode.resize(_cc.size(),nullptr);
-	std::queue<pair<small_id,Node&> > q;
-	q.emplace(root,node);
+	std::queue<pair<small_id,Node*> > q;
+	q.emplace(root,&node);
+	const pattern::Mixture::Agent* ag;
+	const Node* curr_node;
+	pair<small_id,Node*> next_node;
 	while(q.size()){
-		auto& ag = _cc.getAgent(q.front().first);
-		if(ag.getId() != node.getId())
+		ag = &_cc.getAgent(q.front().first);
+		curr_node = q.front().second;
+		if(ag->getId() != curr_node->getId())
 			throw False();
-		for(auto& id_site : ag){
-			if(node.test(id_site,q,port_list)){
-				auto lnk = _cc.follow(q.front().first,q.back().first);
-				//need to check site of links?? TODO
-				if(ccAgToNode[lnk.first]){
-					if(ccAgToNode[lnk.first] == &(q.back().second))
+		for(auto& id_site : *ag){
+			next_node.second = curr_node->test(id_site,port_list);
+			if(next_node.second){
+				next_node.first = _cc.follow(q.front().first,id_site.first).first;
+				//need to check site of links?? TODO No
+				if(ccAgToNode[next_node.first]){
+					if(ccAgToNode[next_node.first] == next_node.second){
 						continue;
+					}
 					else
 						throw False();
 				}
 				else {
-					q.back().first = lnk.first;
-					ccAgToNode[lnk.first] = &(q.back().second);
+					q.emplace(next_node);
+					ccAgToNode[next_node.first] = next_node.second;
 				}
 			}
 		}
-		ccAgToNode[q.front().first] = &(q.front().second);//case when agent mixture with no sites
+		ccAgToNode[q.front().first] = q.front().second;//case when agent mixture with no sites
 		q.pop();
 	}
 	//TODO check_aditional_edges???

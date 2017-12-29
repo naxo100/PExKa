@@ -1,0 +1,31 @@
+
+%compartment: 'env' 1
+%use: 'env'
+
+%agent: Pred(i)
+%agent: Prey(i)
+%agent: Feed(i,j)
+
+%const: 'feed-rate' 0.1
+%const: 'prey-rep-rate' 0.8
+%const: 'pred-rep-rate' 100
+%const: 'die-rate' 1
+
+'feed'		Feed(i!_,j),Prey(i) -> Feed(i!_,j!1),Feed(i!1) \
+											@ 'feed-rate'
+'unfeed'	Feed(i!j.Feed,j) -> 			@ 'feed-rate'*10
+'prey-rep'	Prey(i) -> Prey(i),Prey(i) 		@ 'prey-rep-rate'
+'pred-rep'	Pred(i!1),Feed(i!1,j!2),Feed(i!2,j!3),Feed(i!3,j!4),Feed(i!4,j!5),Feed(i!5) ->\
+ 			Pred(i!1),Feed(i!1,j),Pred(i!2),Feed(i!2) \
+ 											@ 'pred-rep-rate'
+'die'		Pred(i!1),Feed(i!1,j) ->		@ 'die-rate'
+
+'clean'		Feed(i) -> 						@ 9999999999#[inf]
+
+
+%init: 100 Prey()
+%init: 10 Pred(i!1),Feed(i!1)
+
+%obs: 'Prey' Prey()
+%obs: 'Pred' Pred()
+%obs: 'Feed' Feed()

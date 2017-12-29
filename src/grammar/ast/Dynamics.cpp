@@ -348,7 +348,7 @@ pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 		if(n_link.second.size() == 1)
 			throw SemanticError("Edge identifier "+to_string(n_link.first)+
 					" is not paired in mixture.",loc);
-		mix->addLink(n_link.second.front(),*(++n_link.second.begin()));
+		mix->addLink(n_link.second.front(),*(++n_link.second.begin()),env);
 	}
 	//mix->setComponents();
 	return mix;

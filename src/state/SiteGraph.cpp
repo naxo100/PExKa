@@ -135,7 +135,8 @@ string SiteGraph::toString(const pattern::Environment& env) const {
 				cout << node->getAddress() << ": ";
 				cout << node->toString(env,true) << endl;
 				if(i != node->getAddress()){
-					cout <<  "ERROR!!!!!!" << endl;
+					cout <<  "ERROR!!!!!! i(" << i << ") != address(" <<
+							node->getAddress() << ")" << endl;
 					throw std::invalid_argument("bad allocation of node.");
 				}
 			}

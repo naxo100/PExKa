@@ -44,8 +44,9 @@ public:
 	 */
 	struct Action {
 		ActionType t;
-		//	cc_id/val	ag_id	 sit_id	  isNew
+		//	cc_id/val	ag_id	 sit_id	  flag
 		tuple<small_id,small_id,small_id,small_id> trgt1,trgt2;
+		enum {NEW=1,S_EFF=2};
 	};
 
 	struct CandidateInfo {
@@ -69,6 +70,7 @@ protected:
 	list<Action> script;
 	vector<state::Node*> newNodes;
 	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
+	list<ag_st_id> sideEffects;
 	map<ag_st_id,small_id> news; //rhs(cc,ag) -> newNodes[i]
 	map<const pattern::Mixture::Component*,CandidateInfo> influence;
 	map<ag_st_id,ag_st_id> matches;//rhs-ag -> lhs-ag

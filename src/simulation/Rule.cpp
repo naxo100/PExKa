@@ -146,7 +146,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 								warns.emplace_back("Application of rule '"+name+
 										"' will induce a null event when applied to an agent '"+sign.getName()+
 										"' that is free on site '"+sign.getSite(j).getName()+"'",loc);
-								a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+								a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 								script.emplace_back(a);
 								changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
 								break;
@@ -188,7 +188,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 								if(lnk1.first == lhs_unmask[i].second && lnk1.second == j){
 									warns.emplace_back("Rule '"+name+"': breaking a semi-link on site '"+
 											sign.getSite(j).getName()+"' will induce a side effect",loc);
-									get<3>(a.trgt2) = true;
+									get<3>(a.trgt2) = Action::S_EFF;
 								}
 								else{
 									i2 = lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first));
@@ -216,7 +216,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 										warns.emplace_back("The link state of site "+sign.getSite(j).getName()+
 												" of agent "+sign.getName()+
 												" is changed although it is a semi-link in the left hand side",loc);
-										a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+										a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 										a.trgt2 = make_tuple(rhs_unmask[i].first,lnk2.first,lnk2.second,i2);
 										binds.emplace_back(a);
 									}
@@ -252,7 +252,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 										sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
 								break;
 							case Mixture::FREE://disconnect
-								a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+								a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 								script.emplace_back(a);
 								changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
 								break;
@@ -266,9 +266,10 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 									if(i > i2)
 										break;//link added before.
 									warns.emplace_back("%s link state of site '%s' of agent '%s' is changed although it is a semi-link in the left hand side",loc);
-									a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+									a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 									a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
 									binds.emplace_back(a);
+									sideEffects.emplace_back(lhs_site.lnk_ptrn);
 								}
 								break;
 							case Mixture::BIND_TO://if different error else nothing
@@ -329,13 +330,13 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 			//changes[make_pair(rhs_unmask[j],false)].second.emplace_back(get<2>(bind.trgt1));
 			get<0>(bind.trgt2) = rhs_unmask[k].first;
 			get<1>(bind.trgt2) = k-i;
-			get<3>(bind.trgt2) = k-i+1;//+1 to indicate new node
+			get<3>(bind.trgt2) = k-i+1;//+1 to indicate new node TODO
 		}
 		else{
 			changes[make_pair(rhs_unmask[k],false)].second.emplace_back(get<2>(bind.trgt2));
 			get<0>(bind.trgt2) = lhs_unmask[k].first;
 			get<1>(bind.trgt2) = lhs_unmask[k].second;
-			k = false;
+			k -= k & Action::NEW;
 			//changes[make_pair(rhs_unmask[j],false)].second.emplace_back(get<2>(bind.trgt1));
 		}
 		script.emplace_back(bind);
@@ -666,7 +667,7 @@ string Rule::toString(const pattern::Environment& env) const {
 			break;
 		case LINK:
 			s += acts[act.t] + " agent's sites ";
-			if(get<3>(act.trgt1)){//new node
+			if(get<3>(act.trgt1) & Action::NEW){//new node
 				sign1 = &env.getSignature(newNodes[get<1>(act.trgt1)]->getId());
 				s += "(new) " + sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
 			}
@@ -674,7 +675,7 @@ string Rule::toString(const pattern::Environment& env) const {
 				sign1 = &env.getSignature(lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
 				s += sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+" and ";
 			}
-			if(get<3>(act.trgt2)){//new node
+			if(get<3>(act.trgt2) & Action::NEW){//new node
 				sign2 = &env.getSignature(newNodes[get<1>(act.trgt2)]->getId());
 				s += "(new) " + sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+"\n";
 			}
@@ -687,7 +688,8 @@ string Rule::toString(const pattern::Environment& env) const {
 			sign1 = &env.getSignature(lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
 			sign2 = &env.getSignature(lhs.getAgent(get<0>(act.trgt2),get<1>(act.trgt2)).getId());
 			s += acts[act.t] + " agent's sites "+sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
-				" and "+sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+"\n";
+				" and "+sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+
+				(get<3>(act.trgt1) & Action::S_EFF ? " (" : " (no ")+ "side effects)\n";
 			break;
 		default: break;
 		}

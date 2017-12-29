@@ -326,7 +326,7 @@ void Environment::show() const {
 						cout << emb->toString(*this) << ",";
 					cout << "}, ";
 				}
-				cout << "   >>>   " << ap.toString(*this) << "   >>>   ";
+				cout << " >>> [ " << ap.toString(*this) << " ] >>> ";
 				for(auto& site_ptrns : ap.getChildPatterns()){
 					cout << this->getSignature(ap.getId()).getSite(site_ptrns.first).getName()
 							<< "~{";

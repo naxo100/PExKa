@@ -19,7 +19,7 @@ Plot::Plot(const pattern::Environment& env) : nextPoint(0.),dT(0.) {
 		cout << "error opening output file." << endl;
 	}
 	dT = params.limitTime() / params.plotPoints();
-	file << "Time";
+	file << "#Time";
 	for(auto obs : env.getObservables())
 		file << "\t" << obs->getName();
 	file << endl;

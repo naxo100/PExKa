@@ -216,6 +216,21 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 		else
 			throw SemanticError("You can not assign a AUX in a variable or constant", loc);
 		break;
+	case TOKEN:
+		try {
+			auto id = env.getTokenId(name.getString());
+		}
+		catch(const std::out_of_range &e){
+			throw SemanticError("Token '"+name.getString()+
+					"' was not defined.",loc);
+		}
+		break;
+	case TIME:break;
+	case EVENT:break;
+	case NULL_EVENT:break;
+	case PROD_EVENT:break;
+	case CPUTIME:break;
+	case ACTIVITY:break;
 	default:break;
 	}
 	return expr;

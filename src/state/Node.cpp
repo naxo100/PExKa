@@ -351,15 +351,16 @@ void SubNode::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& gra
 			ev.inj_mask[dep] = nullptr;
 		auto lnk = interface[i].link;
 		if(lnk.first){
-			if(ev.new_cc[lnk.first] == lnk.first){
-				ev.side_effects.erase(lnk.first);
+			auto& opt_lnkd_node = ev.new_cc[lnk.first];
+			if(opt_lnkd_node == lnk.first){
+				ev.side_effects.erase(lnk.first);//maybe unnecessary
 			}
 			else{
 				for(auto dep : *lnk.first->getLifts(lnk.second).second)//TODO review
 					ev.inj_mask[dep] = nullptr;
-				auto new_lnkd_node = new Node(*lnk.first,ev.new_cc);
-				ev.new_cc[lnk.first] = new_lnkd_node;
-				ev.side_effects.emplace(new_lnkd_node,i);
+				if(opt_lnkd_node == nullptr)
+					opt_lnkd_node = new Node(*lnk.first,ev.new_cc);
+				ev.side_effects.emplace(opt_lnkd_node,i);
 			}
 			//new_lnk_node->setLink(lnk.second,nullptr,0);//set link at constructor??
 		}
@@ -374,13 +375,14 @@ void SubNode::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id i
 			Node::changeIntState(ev,injs,id,value);
 			return;
 		}
-	auto new_node = new Node(*this,ev.new_cc);
+	auto& new_node = ev.new_cc.at(this);
+	if(new_node == nullptr)
+		new_node = new Node(*this,ev.new_cc);
 	if(interface[id].val.smallVal == value){
 		ev.warns++;
 	}
 	else
 		new_node->setState(id,value);
-	ev.new_cc.at(this) = new_node;
 	for(auto dep : *interface[id].deps.first)
 		ev.inj_mask[dep] = nullptr;
 }
@@ -396,10 +398,12 @@ void SubNode::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool s
 			Node::unbind(ev,injs,id);
 			return;
 		}
-	auto node1 = new Node(*this,ev.new_cc);
-	auto node2 = new Node(*lnk.first,ev.new_cc);
-	ev.new_cc.at(this) = node1;
-	ev.new_cc.at(lnk.first) = node2;
+	auto& node1 = ev.new_cc.at(this);
+	auto& node2 = ev.new_cc.at(lnk.first);
+	if(node1 == nullptr)
+		node1 = new Node(*this,ev.new_cc);
+	if(node2 == nullptr)
+		node2 = new Node(*lnk.first,ev.new_cc);;
 	if(side_eff)
 		ev.side_effects.emplace(node2,lnk.second);
 	node1->setLink(id,nullptr,0);
@@ -416,26 +420,26 @@ void SubNode::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* tr
 			Node::bind(ev,injs,id,trgt_node,trgt_site,side_eff);
 			return;
 		}
-	auto new_node = new Node(*this,ev.new_cc);
-	ev.new_cc.at(this) = new_node;
+	auto& new_node = ev.new_cc.at(this);
+	if(new_node == nullptr)
+		new_node = new Node(*this,ev.new_cc);
 	auto& lnk = trgt_node->getLinkState(trgt_site);
-	for(auto it = ev.side_effects.find(this);it != ev.side_effects.end(); it++){
+	/*for(auto it = ev.side_effects.find(this);it != ev.side_effects.end(); it++){
 		ev.side_effects.emplace(new_node,it->second);
 		ev.side_effects.erase(it);//TODO this may invalidate it++
-	}
+	}*/
 	if(lnk.first && lnk.first == this)//TODO compare with site?
 		trgt_node->setLink(trgt_site,new_node,lnk.second);
 	try{
-		auto new_trgt_node = ev.new_cc.at(trgt_node);
+		auto& new_trgt_node = ev.new_cc.at(trgt_node);
 		if(new_trgt_node){//TODO check if true
-			throw invalid_argument("link between 2 sites of same agent, this cannot happen. do not make sense");
+			//throw invalid_argument("link between 2 sites of same agent, this cannot happen. do not make sense");
 		}
 		else{
-			//link with a node in the same cc
+			//link with a node in the same cc // or in other multi cc
 			new_trgt_node = new Node(*trgt_node,ev.new_cc);
-			ev.new_cc[trgt_node] = new_trgt_node;
-			new_node->Node::bind(ev,injs,id,new_trgt_node,trgt_site,side_eff);
 		}
+		new_node->Node::bind(ev,injs,id,new_trgt_node,trgt_site,side_eff);
 	}
 	catch(std::out_of_range &e){
 		new_node->Node::bind(ev,injs,id,trgt_node,trgt_site,side_eff);

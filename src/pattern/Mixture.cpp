@@ -422,7 +422,7 @@ int Mixture::Agent::compare(const Agent &a,set<small_id>& already_done) const {
 				if(!id_site.second.isEmptySite() ||
 						id_site.second.link_type != WILD){
 					if(ret == -1)
-						throw False();
+						return -100;
 					else
 						ret = ret ? ret : 1;
 				}

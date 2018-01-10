@@ -27,7 +27,7 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 		const pattern::Environment& env) {
 	Node* buff_nodes[MAX_CC_SIZE];
 	unsigned i = 0;
-	if(n < 9) {//=> n = 1
+	if(n < 1000) {//=> n = 1
 		while(n--){
 			i=0;
 			for(auto p_ag : cc){
@@ -128,7 +128,7 @@ vector<Node*>::iterator SiteGraph::end() {
 
 string SiteGraph::toString(const pattern::Environment& env) const {
 	string ret;
-	if(container.size() < 300){
+	if(container.size() - free.size()  < 300){
 		big_id i = 0;
 		for(auto node : container){
 			if(node){

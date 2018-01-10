@@ -47,6 +47,7 @@ public:
 	void alloc(size_t addr);
 
 	bool operator< (const Injection& inj) const;
+	virtual bool operator==(const Injection& inj) const = 0;
 
 };
 
@@ -73,6 +74,7 @@ public:
 
 	size_t count() const override;
 
+	bool operator==(const Injection& inj) const override;
 };
 
 /*class MixInjection : Injection {

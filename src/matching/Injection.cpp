@@ -117,6 +117,13 @@ void CcInjection::copy(const CcInjection* inj,const map<Node*,Node*>& mask){
 	}
 }
 
+bool CcInjection::operator==(const Injection& inj) const{
+	auto& cc_inj = static_cast<const CcInjection&>(inj);
+	for(size_t i = 0;i < ccAgToNode.size(); i++)
+		if(ccAgToNode[i] != cc_inj.ccAgToNode[i])
+			return false;
+	return true;
+}
 
 
 
@@ -186,7 +193,11 @@ Injection* InjRandSet::emplace(const pattern::Mixture::Component& cc,Node& node,
 	}
 	else
 		counter++;
-
+#if DEBUG
+	for(auto inj2 : container)
+		if(inj != inj2 && *inj == *inj2)
+			throw invalid_argument("InjSet cannot contain the same injection twice.");
+#endif
 	return inj;
 }
 
@@ -209,6 +220,11 @@ Injection* InjRandSet::emplace(Injection* base_inj,map<Node*,Node*>& mask){
 	else
 		counter++;
 
+#if DEBUG
+	for(auto inj2 : container)
+		if(inj != inj2 && *inj == *inj2)
+			throw invalid_argument("InjSet cannot contain the same injection twice.");
+#endif
 	return inj;
 }
 

@@ -76,7 +76,7 @@ protected:
 	map<ag_st_id,ag_st_id> matches;//rhs-ag -> lhs-ag
 
 	bool test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
-		const Mixture::Component& test_cc,const Environment& env) const;
+		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,const Environment& env) const;
 
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.

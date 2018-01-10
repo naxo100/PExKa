@@ -194,7 +194,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 									i2 = lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first));
 									if(i > i2){
 										changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
-										break;//link added before.
+										break;//unlink added before.
 									}
 									a.trgt2 = make_tuple(lhs_unmask[i].first,lnk1.first,lnk1.second,false);
 								}
@@ -394,8 +394,8 @@ const vector<state::Node*>& Rule::getNewNodes() const{
 
 
 bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
-		const Mixture::Component& test_cc,const Environment& env) const {
-	map<small_id,small_id> already_done;
+		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,const Environment& env) const {
+	map<small_id,small_id> visited;
 	while(to_test.size()){//test connected agents of emb
 		if(to_test.front().first.second != to_test.front().second.second)
 			return false;//not connected to the same site
@@ -403,13 +403,15 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		auto rhs_ag_id = to_test.front().first.first;
 		auto test_ag_id = to_test.front().second.first;
 		to_test.pop_front();
-		if(already_done.count(rhs_ag_id))
-			if(already_done[rhs_ag_id] == test_ag_id)
+		//auto key = make_pair(test_cc.getId(),test_ag_id);
+		//auto val = make_pair(rhs_cc_id,rhs_ag_id);
+		if(visited.count(test_ag_id))
+			if(visited[test_ag_id] == rhs_ag_id)
 				continue;
 			else
 				return false;
 		else
-			already_done.emplace(rhs_ag_id,test_ag_id);
+			visited[test_ag_id] = rhs_ag_id;
 		auto& rhs_ag = rhs_cc.getAgent(rhs_ag_id);
 		auto& test_ag = test_cc.getAgent(test_ag_id);
 		if(news.count(make_pair(rhs_cc_id,rhs_ag_id))){//testing for new node
@@ -489,6 +491,8 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		}
 
 	}
+	for(auto elem : visited)
+		already_done.emplace(ag_st_id(test_cc.getId(),elem.first),ag_st_id(rhs_cc_id,elem.second));
 	return true;
 }
 
@@ -501,6 +505,9 @@ void Rule::checkInfluence(const Environment& env) {
 	for(auto& ag_changes : changes){//for each agent that changes
 		auto& change_cc = rhs->getComponent(ag_changes.first.first.first);
 		auto& ag = rhs->getAgent(ag_changes.first.first);
+		for(auto& cc_agid : ag.getIncludes()){
+			candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
+		}
 		if(ag_changes.first.second){
 			//new
 		}
@@ -558,7 +565,10 @@ void Rule::checkInfluence(const Environment& env) {
 				for(auto emb : ag.getChildPatterns(change)){
 					list<two<ag_st_id> > to_test;//rhs-lnk,cc_lnk
 					auto lt = emb->getSite(change).link_type;
-					if(lt == pattern::Mixture::FREE){
+					if(lt != pattern::Mixture::WILD)
+						for(auto& cc_agid : emb->getIncludes())
+							candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
+					/*if(lt == pattern::Mixture::FREE){
 						for(auto& cc_agid : emb->getIncludes())
 							candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
 						continue;
@@ -574,7 +584,7 @@ void Rule::checkInfluence(const Environment& env) {
 							candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
 						else
 							candidates[cc_agid.first].is_valid = false;
-					}
+					}*/
 				}
 			}
 		}
@@ -590,14 +600,14 @@ void Rule::checkInfluence(const Environment& env) {
 					/*auto& site = */new_ag.getSite(id_site.first);
 					if(id_site.second.isEmptySite() ||
 							!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
-						/*TODO test for link*/
+						/*TODO test for link
 						switch(id_site.second.link_type){
 						case Pattern::BIND:
 							if(id_site.second.isBindToAny()){
 
 							}
 
-						}
+						}*/
 						continue;
 					}
 				}
@@ -616,11 +626,20 @@ void Rule::checkInfluence(const Environment& env) {
 		i++;
 	}
 	//Checking candidates
+	multimap<ag_st_id,ag_st_id> already_done;
 	for(auto& cc_info : candidates){
 		for(auto& info : cc_info.second.node_id){
+			bool rep = false;
+			auto key = make_pair(cc_info.first->getId(),info.second);
+			for(auto val_it = already_done.find(key);val_it != already_done.end(); val_it++)
+				if( val_it->second == info.first){
+					rep = true;continue;
+				}
+			if(rep)
+				continue;
 			list<two<ag_st_id> > to_test;
 			to_test.emplace_back(ag_st_id(info.first.second,0),ag_st_id(info.second,0));
-			if(test_linked_agents(to_test,info.first.first,*cc_info.first,env))
+			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,env))
 				try{
 					influence[cc_info.first].set(info.second,ag_st_id(-1,news.at(info.first)));
 				} catch(out_of_range &ex){

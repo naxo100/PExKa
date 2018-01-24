@@ -32,7 +32,7 @@ Plot::~Plot() {
 
 void Plot::fill(const state::State& state,const pattern::Environment& env) {
 	auto t = state.getCounter().getTime();
-	while(t > nextPoint){
+	while(t >= nextPoint){
 		file << nextPoint;
 		for(auto var : env.getObservables()){
 			file << "\t" << var->getValue(state).valueAs<int>();

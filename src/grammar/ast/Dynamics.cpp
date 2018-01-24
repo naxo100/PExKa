@@ -185,10 +185,10 @@ void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts
 		try{
 			BaseExpression* range[3];
 			if(!stateInfo.evalRange(env,consts,range)){
-				site = &sign.addSite<pattern::Signature::RangeSite<float> >(name);
-				static_cast<pattern::Signature::RangeSite<float>*>
-					(site)->setBoundaries(range[0]->getValue().valueAs<float>(),
-						range[2]->getValue().valueAs<float>(),range[1]->getValue().valueAs<float>());
+				site = &sign.addSite<pattern::Signature::RangeSite<FL_TYPE> >(name);
+				static_cast<pattern::Signature::RangeSite<FL_TYPE>*>
+					(site)->setBoundaries(range[0]->getValue().valueAs<FL_TYPE>(),
+						range[2]->getValue().valueAs<FL_TYPE>(),range[1]->getValue().valueAs<FL_TYPE>());
 			}
 			else{
 				site = &sign.addSite<pattern::Signature::RangeSite<int> >(name);
@@ -600,6 +600,20 @@ const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulati
 Token::Token() : exp(nullptr) {}
 Token::Token(const location &l,const Expression *e,const Id &id):
 	Node(l), exp(e), id(id) {};
+pair<unsigned,const BaseExpression*> Token::eval(const pattern::Environment& env,
+			const vector<state::Variable*> &vars,bool neg) const {
+	unsigned i;
+	try{
+		i = env.getTokenId(id.getString());
+	}
+	catch(std::out_of_range& ex){
+		throw SemanticError("Token "+id.getString()+" has not been declared",loc);
+	}
+	const Expression* expr = neg ? new AlgBinaryOperation(
+			location(),exp,new Const(location(),-1),BaseExpression::MULT)
+			: exp;
+	return make_pair(i,expr->eval(env,vars,0));//TODO flags
+}
 
 /****** Class RuleSide ***********/
 RuleSide::RuleSide() : agents(location(),list<Agent>()){}
@@ -653,6 +667,10 @@ void Rule::eval(pattern::Environment& env,
 	auto reverse = rate.eval(env,rule,vars,bi);
 	auto rhs_mix_p = rhs.agents.eval(env,vars,true);
 	vector<pattern::ag_st_id> rhs_mask;
+	for(auto& t : lhs.tokens)
+		rule.addTokenChange(t.eval(env,vars,true));
+	for(auto& t : rhs.tokens)
+		rule.addTokenChange(t.eval(env,vars));
 	if(bi){
 		rhs_mix_p->declareAgents(env);
 		rhs_mask = rhs_mix_p->setAndDeclareComponents(env);
@@ -665,6 +683,10 @@ void Rule::eval(pattern::Environment& env,
 		inverse_rule.difference(env,rhs_mask,lhs_mask);
 		inverse_rule.setRate(reverse);
 		rhs_mix.addInclude(inverse_rule.getId());
+		for(auto& t : rhs.tokens)
+			inverse_rule.addTokenChange(t.eval(env,vars,true));
+		for(auto& t : lhs.tokens)
+			inverse_rule.addTokenChange(t.eval(env,vars));
 	}
 	else{
 		rhs_mix_p->declareAgents(env,false);

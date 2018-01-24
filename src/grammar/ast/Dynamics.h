@@ -230,6 +230,8 @@ class Token : Node {
 public:
 	Token();
 	Token(const location &l,const Expression *e,const Id &id);
+	pair<unsigned,const BaseExpression*> eval(const pattern::Environment& env,
+			const vector<state::Variable*> &vars,bool neg = false) const;
 };
 
 //Structure to storage Agents and Tokens that are part of either the right or left side in a Rule

@@ -107,8 +107,8 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		BaseExpression* b_expr = expr->eval(env,vars,flag);
 		switch(b_expr->getType()){
 		case BaseExpression::FLOAT:
-			var = new state::AlgebraicVar<float>(id,name.getString(),false,
-				dynamic_cast<AlgExpression<float>*>(b_expr));
+			var = new state::AlgebraicVar<FL_TYPE>(id,name.getString(),false,
+				dynamic_cast<AlgExpression<FL_TYPE>*>(b_expr));
 			break;
 		case BaseExpression::INT:
 			var = new state::AlgebraicVar<int>(id,name.getString(),false,
@@ -140,8 +140,8 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 		BaseExpression* b_expr = expr->eval(env,vars,flag);
 		switch(b_expr->getType()){
 		case BaseExpression::FLOAT:
-			var = new state::ConstantVar<float>(id,name.getString(),
-				dynamic_cast<AlgExpression<float>*>(b_expr));
+			var = new state::ConstantVar<FL_TYPE>(id,name.getString(),
+				dynamic_cast<AlgExpression<FL_TYPE>*>(b_expr));
 			break;
 		case BaseExpression::INT:
 			var = new state::ConstantVar<int>(id,name.getString(),
@@ -232,7 +232,7 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		if(alg == nullptr)
 			throw std::invalid_argument("Null value for token init.");
 		else
-			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<float>();
+			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<FL_TYPE>();
 		tok_id = env.getTokenId(token.getString());
 		sim.addTokens(cells,tok_id,n);
 	}

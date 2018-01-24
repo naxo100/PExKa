@@ -208,7 +208,7 @@ public:
 	Site& addSite(short name_id);
 	void setSiteValue(small_id mix_site,small_id label);
 	void setSiteValue(small_id mix_site,int val);
-	void setSiteValue(small_id mix_site,float val);
+	void setSiteValue(small_id mix_site,FL_TYPE val);
 
 	//void setSiteLink(short mix_site,LinkType l);
 	void setLinkPtrn(small_id trgt_site,small_id ag_ptrn,small_id site_ptrn);

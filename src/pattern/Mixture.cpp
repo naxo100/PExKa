@@ -438,7 +438,7 @@ void Mixture::Agent::setSiteValue(small_id site_id,small_id lbl_id){
 	//interface[site_id].val_type = ValueType::LABEL;
 	interface[site_id].state.set(lbl_id);
 }
-void Mixture::Agent::setSiteValue(small_id site_id,float val){
+void Mixture::Agent::setSiteValue(small_id site_id,FL_TYPE val){
 	//interface[site_id].val_type = ValueType::LABEL;
 	interface[site_id].state.set(val);
 }
@@ -586,7 +586,13 @@ bool Mixture::Site::operator ==(const Site &s) const{
 }
 int Mixture::Site::compare(const Site &s) const{
 	int ret = 0;
-	if(memcmp(&state,&s.state,sizeof(state::SomeValue))){ //only valid if union in state is cleaned at constructor
+	/*cout << sizeof(state::SomeValue) << endl;
+	cout << sizeof(double) << endl;
+	for(int i = 0; i < sizeof(state::SomeValue); i++)
+		cout << (unsigned)((char*)(&state))[i] << "-" << (unsigned)((char*)(&s.state))[i] << " ";
+	cout << endl;*/
+	//if(memcmp(&state,&s.state,sizeof(state::SomeValue))){ //only valid if union in state is cleaned at constructor
+	if(state.fVal != s.state.fVal || state.t != s.state.t){
 		if(isEmptySite())
 			ret = 1;
 		else{

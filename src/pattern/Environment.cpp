@@ -14,8 +14,8 @@ namespace pattern {
 
 Environment::Environment() {
 //TODO
-	useExpressions.emplace_back(0);
-	useExpressions[0].evaluateCells();
+	//useExpressions.emplace_back(0);
+	//useExpressions[0].evaluateCells();
 }
 
 Environment::~Environment() {}
@@ -26,11 +26,11 @@ bool Environment::exists(const string &name,const Environment::IdMap &map){
 }
 
 
-short Environment::declareToken(const ast::Id &name_loc){
+unsigned Environment::declareToken(const ast::Id &name_loc){
 	const string& name = name_loc.getString();
 	if(tokenMap.count(name) || signatureMap.count(name) )
 		throw SemanticError("Name "+name+" already defined for agent or token.",name_loc.loc);
-	short id = tokenNames.size();
+	auto id = tokenNames.size();
 	tokenMap[name] = id;
 	tokenNames.push_back(name);
 	return id;
@@ -131,12 +131,15 @@ Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bo
 				greater.emplace_back(sites,&ag);
 				break;
 			default:
+				//cout << "Found an agent pattern more general and specific: " << ag.toString(*this) << endl;
 				less.emplace_back(sites,&ag);
 				greater.emplace_back(sites,&ag);
 				break;
 			}
 		}
-		catch(False& ex){/*different patterns*/}
+		catch(False& ex){
+			//cout << "not compatible patterns: " << ag.toString(*this) << endl;/*different patterns*/
+		}
 	}
 	agentPatterns[new_ag->getId()].emplace_back(*new_ag);
 	auto& new_agent = agentPatterns[new_ag->getId()].back();
@@ -246,7 +249,7 @@ size_t Environment::size<Channel>() const {
 	return channels.size();
 }
 template <>
-size_t Environment::size<Token>() const {
+size_t Environment::size<state::TokenVar>() const {
 	return tokenNames.size();
 }
 template <>
@@ -272,7 +275,7 @@ void Environment::reserve<Channel>(size_t count) {
 	channels.reserve(count);
 }
 template <>
-void Environment::reserve<Token>(size_t count) {
+void Environment::reserve<state::TokenVar>(size_t count) {
 	tokenNames.reserve(count);
 }
 template <>
@@ -316,7 +319,11 @@ void Environment::show() const {
 				it->printConnections(l);
 			}
 		}
-		cout << "\tAgentPatterns[" << agentPatterns.size() << "]" << endl;
+		cout << "\tAgentPatterns[" ;
+		int count = 0;
+		for(auto& ag_list : agentPatterns)
+			count += ag_list.size();
+		cout << count << "]" << endl;
 		for(auto& ap_list : agentPatterns)
 			for(auto& ap : ap_list){
 				for(auto& site_ptrns : ap.getParentPatterns()){
@@ -350,10 +357,12 @@ void Environment::show() const {
 		for(auto& rul : rules){
 			cout << (i+1) << ") ";
 			cout << rul.toString(*this);
-			cout << "influence-cc: ";
-			for(auto& inf : rul.getInfluences())
-				cout << inf.first->toString(*this) << ";  ";
-			cout << endl;
+			cout << "influence-cc: (" << rul.getInfluences().size() << ")" << endl;
+			for(auto& inf : rul.getInfluences()){
+				cout << "\t" << inf.first->toString(*this);
+				cout << "  (" << inf.second.node_id.size() << ")" << endl;
+			}
+			//cout << endl;
 			i++;
 		}
 

@@ -42,7 +42,8 @@ protected:
 	typedef unordered_map<string,short> IdMap;
 	//static Environment env;
 	//IdMap algMap, kappaMap;
-	IdMap varMap, tokenMap, compartmentMap, channelMap, signatureMap;
+	IdMap varMap, compartmentMap, channelMap, signatureMap;
+	unordered_map<string,unsigned> tokenMap;
 	//vector<string> algNames, kappaNames;
 	vector<string> varNames, tokenNames, compartmentNames;
 	vector<Signature> signatures;
@@ -61,7 +62,7 @@ public:
 	Environment();
 	~Environment();
 
-	short declareToken(const ast::Id &name);
+	unsigned declareToken(const ast::Id &name);
 	short declareVariable(const ast::Id &name,bool isKappa);
 	Signature& declareSignature(const ast::Id& sign);
 	Compartment& declareCompartment(const ast::Id& comp);

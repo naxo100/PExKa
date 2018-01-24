@@ -150,7 +150,10 @@ int main(int argc, char* argv[]){
 		cerr << "An exception found: " << e.what() << endl;
 		exit(1);
 	}
-
+	if(env.getRules().size() < 1){
+		cout << "No rules to execute a simulation. Aborting." << endl;
+		return 0;
+	}
 	sim.initialize();
 	sim.print();
 

@@ -7,6 +7,7 @@
 
 #include "KappaAst.h"
 #include "../../pattern/Environment.h"
+#include "../../util/Warning.h"
 
 namespace ast {
 
@@ -30,13 +31,19 @@ void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variabl
 }
 
 void KappaAst::evaluateCompartments(pattern::Environment &env,const vector<Variable*> &vars){
+	if(compartments.size() == 0){
+		WarningStack::getStack().emplace_back("No compartment declared. Declaring default compartment 'volume'.",yy::location());
+		env.declareCompartment(Id(yy::location(),"volume"));
+		return;
+	}
 	env.reserve<pattern::Compartment>(compartments.size());
 	for(list<Compartment>::iterator it = compartments.begin();it != compartments.end(); it++){
 		it->eval(env,vars);
 	}
 }
 void KappaAst::evaluateUseExpressions(pattern::Environment &env,const vector<Variable*> &consts){
-	env.reserve<pattern::UseExpression>(useExpressions.size()+1);
+	useExpressions.emplace_front(new Use(0));
+	env.reserve<pattern::UseExpression>(useExpressions.size());
 	for(auto use : useExpressions){
 		use->eval(env,consts);
 	}

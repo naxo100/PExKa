@@ -19,7 +19,7 @@ unsigned int Compartment::getTotalCells(){
 	return TOTAL_CELLS;
 }
 Compartment::Compartment(const std::string &nme)
-		:name(nme),dimensions(),volume(nullptr) {
+		:name(nme),dimensions(1,1),volume(nullptr) {//TODO initialize dims with (1,1)??
 	firstCell = TOTAL_CELLS;
 	cellsCount = 1;
 	TOTAL_CELLS += 1;
@@ -148,8 +148,8 @@ std::list<int> CompartmentExpr::getCells(const std::unordered_map<std::string,in
 			cell_values[dim].push_back(index);
 		}
 		catch(const std::out_of_range &e){
-			std::unordered_map<std::string,float> factors;
-			float b = (*it)->auxFactors(factors);
+			std::unordered_map<std::string,FL_TYPE> factors;
+			auto b = (*it)->auxFactors(factors);
 			for(std::unordered_map<std::string,int>::const_iterator m_it = var_values.cbegin();
 					m_it != var_values.cend(); m_it++){
 				//maybe if factors[s] = 0 for none then remove '?' TODO
@@ -159,7 +159,7 @@ std::list<int> CompartmentExpr::getCells(const std::unordered_map<std::string,in
 			if(factors.size() > 1)
 				throw std::exception();//Cannot solve this equation
 			for(int i = 0; i < comp.getDimensions()[dim];i++){
-				float value = (b + i) / (float)factors.begin()->second;
+				auto value = (b + i) / (FL_TYPE)factors.begin()->second;
 				if(value == (int)value)
 					cell_values[dim].push_back(i);
 			}
@@ -186,12 +186,12 @@ namespace boost_ublas = boost::numeric::ublas;
 
 void CompartmentExpr::solve(const std::vector<short> &cell_index,std::unordered_map<std::string,int>& var_values) const{
 	boost_ublas::vector<short,std::vector<short> > cell(cellExpr.size(),cell_index);
-	boost_ublas::vector<float> b_;
+	boost_ublas::vector<FL_TYPE> b_;
 	if(cellExpr.size() != inverseA.size1())
 		b_ = boost_ublas::prod(transA,b+cell);
 	else
 		b_ = (b + cell);
-	boost_ublas::vector<float> result = boost_ublas::prod(inverseA,b_);
+	boost_ublas::vector<FL_TYPE> result = boost_ublas::prod(inverseA,b_);
 	auto v1 = (b+cell);
 	auto v2 = boost_ublas::prod(A,result);
 	for(unsigned int i = 0; i < v1.size(); i++)
@@ -215,7 +215,7 @@ void CompartmentExpr::setEquation(){
 	//get factors, initialize b and var_order
 	std::set<std::string> var_names;
 	int j = 0;
-	auto *var_factors = new std::unordered_map<std::string,float>[cellExpr.size()];
+	auto *var_factors = new std::unordered_map<std::string,FL_TYPE>[cellExpr.size()];
 	for(std::list<const state::BaseExpression*>::const_iterator it = cellExpr.cbegin();it != cellExpr.cend();it++){
 		b[j] = -(*it)->auxFactors(var_factors[j]);
 		for(auto var_value : var_factors[j])
@@ -225,7 +225,7 @@ void CompartmentExpr::setEquation(){
 	varOrder = std::vector<std::string>(var_names.begin(),var_names.end());
 	//initialize A
 	j = 0;
-	auto A = matrix<float> (cellExpr.size(),varOrder.size());
+	auto A = matrix<FL_TYPE> (cellExpr.size(),varOrder.size());
 	for(std::list<const state::BaseExpression*>::const_iterator it = cellExpr.cbegin();it != cellExpr.cend();it++){
 		for(unsigned int i = 0; i < varOrder.size(); i++)
 			A(j,i) = var_factors[j][varOrder[i]];
@@ -233,14 +233,14 @@ void CompartmentExpr::setEquation(){
 	}
 	this->A = A;
 	if(A.size1() > A.size2()){//if there are more equations than vars
-		transA = matrix<float>(trans(A));
+		transA = matrix<FL_TYPE>(trans(A));
 		A = prod(transA,A);
 		//b = prod(At,b);
 	}
 	else if (A.size1() < A.size2())//if there are more vars than eqs
 		throw invalid_argument("Cannot solve the implicit equation system for this expression.");
 
-	inverseA = matrix<float>(A.size1(),A.size2());
+	inverseA = matrix<FL_TYPE>(A.size1(),A.size2());
 	bool invertible = InvertMatrix(A,inverseA);
 	if(!invertible)
 		throw invalid_argument("Cannot solve the implicit equation system for this expression.");

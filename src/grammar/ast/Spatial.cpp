@@ -157,6 +157,7 @@ Use::Use(const location &l, const list<CompExpression> &comps,
 	Node(l),id(++count),compartments(comps),filter(where){}
 Use::Use(const Use &u) : Node(u.loc),id(u.id),
 		compartments(u.compartments),filter(u.filter->clone()) {}
+Use::Use(short _id) : id(_id),filter(nullptr) {};
 Use::~Use(){
 	if(filter) delete filter;
 }

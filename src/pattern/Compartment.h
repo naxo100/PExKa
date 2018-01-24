@@ -72,8 +72,8 @@ class CompartmentExpr {
 	const Compartment& comp;
 	const std::list<const state::BaseExpression*> cellExpr;
 	std::vector<std::string> varOrder;
-	boost::numeric::ublas::matrix<float> A,inverseA,transA;
-	boost::numeric::ublas::vector<float> b;
+	boost::numeric::ublas::matrix<FL_TYPE> A,inverseA,transA;
+	boost::numeric::ublas::vector<FL_TYPE> b;
 
 	void cellIds(std::list<int>& cell_list,
 			std::list<short> *cell_values,std::vector<short> &cell_index,unsigned int dim) const;

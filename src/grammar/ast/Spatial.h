@@ -115,6 +115,7 @@ public:
 	Use(const location &l,
 		const list<CompExpression> &comps = list<CompExpression>(),
 		const Expression* where = nullptr);
+	Use(short _id);
 	Use(const Use& u);
 	~Use();
 

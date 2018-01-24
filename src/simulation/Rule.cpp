@@ -55,6 +55,14 @@ void Rule::setUnaryRate(pair<const state::BaseExpression*,int> u_rate ){
 	unaryRate = u_rate;
 }
 
+
+const list<pair<unsigned,const state::BaseExpression*> > Rule::getTokenChanges() const{
+	return tokenChanges;
+}
+void Rule::addTokenChange(pair<unsigned,const state::BaseExpression*> tok) {
+	tokenChanges.emplace_back(tok);
+}
+
 void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask,const vector<ag_st_id>& rhs_unmask){
 	small_id i;
 	unsigned first_del = 9999;
@@ -206,7 +214,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 								lnk1 = lhs.follow(lhs_unmask[i].first,lhs_unmask[i].second,j);
 								lnk2 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
 								if(lnk1.first == lhs_unmask[i].second && lnk1.second == j){
-									if(lnk2.first == lhs_unmask[i].second && lnk2.second == j){
+									if(lnk2.first == rhs_unmask[i].second && lnk2.second == j){
 										//semi-semi -> nothing
 									}
 									else {//semi-not
@@ -599,7 +607,8 @@ void Rule::checkInfluence(const Environment& env) {
 				try{
 					/*auto& site = */new_ag.getSite(id_site.first);
 					if(id_site.second.isEmptySite() ||
-							!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
+							id_site.second.state == newNodes[i]->getInternalState(id_site.first)){
+					//		!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
 						/*TODO test for link
 						switch(id_site.second.link_type){
 						case Pattern::BIND:
@@ -613,7 +622,7 @@ void Rule::checkInfluence(const Environment& env) {
 				}
 				catch(std::out_of_range &ex){
 					if( (id_site.second.isEmptySite() ||
-							!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue)))
+							id_site.second.state == newNodes[i]->getInternalState(id_site.first))
 							&& id_site.second.link_type == Pattern::FREE)
 						continue;//ok
 				}

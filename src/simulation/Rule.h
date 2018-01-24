@@ -74,6 +74,7 @@ protected:
 	map<ag_st_id,small_id> news; //rhs(cc,ag) -> newNodes[i]
 	map<const pattern::Mixture::Component*,CandidateInfo> influence;
 	map<ag_st_id,ag_st_id> matches;//rhs-ag -> lhs-ag
+	list<pair<unsigned,const state::BaseExpression*> > tokenChanges;
 
 	bool test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,const Environment& env) const;
@@ -93,6 +94,7 @@ public:
 	const state::BaseExpression& getRate() const;
 	const state::BaseExpression& getUnaryRate() const;
 	const map<const pattern::Mixture::Component*,CandidateInfo>& getInfluences() const;
+	const list<pair<unsigned,const state::BaseExpression*> > getTokenChanges() const;
 
 	/** \brief Set RHS of the rule.
 	 * If this is a reversible rule, mix is declared in env and should not be
@@ -119,6 +121,8 @@ public:
 	 * @param rhs_order initial order of RHS agents.
 	 */
 	void difference(const Environment& env,const vector<ag_st_id>& lhs_order,const vector<ag_st_id>& rhs_order);
+
+	void addTokenChange(pair<unsigned,const state::BaseExpression*> tok);
 
 	const list<Action>& getScript() const;
 	const vector<state::Node*>& getNewNodes() const;

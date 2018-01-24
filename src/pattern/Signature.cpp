@@ -49,13 +49,13 @@ Signature::Site& Signature::addSite(const ast::Id &name_loc){
 template Signature::Site& Signature::addSite<Signature::EmptySite>(const ast::Id &name_loc);
 template Signature::Site& Signature::addSite<Signature::LabelSite>(const ast::Id &name_loc);
 template Signature::Site& Signature::addSite<Signature::RangeSite<int> >(const ast::Id &name_loc);
-template Signature::Site& Signature::addSite<Signature::RangeSite<float> >(const ast::Id &name_loc);
+template Signature::Site& Signature::addSite<Signature::RangeSite<FL_TYPE> >(const ast::Id &name_loc);
 
 small_id Signature::addSite(const ast::Id &name_loc,int min,int max){
 	//const string& nme(name_loc.getString());
 	return 0;
 }
-small_id Signature::addSite(const ast::Id &name_loc,float min,float max){
+small_id Signature::addSite(const ast::Id &name_loc,FL_TYPE min,FL_TYPE max){
 	//const string& nme(name_loc.getString());
 	return 0;
 }
@@ -139,7 +139,7 @@ state::SomeValue Signature::RangeSite<T>::getDefaultValue() const {
 
 
 template <>
-bool Signature::RangeSite<float>::isPossibleValue(const state::SomeValue &val) const {
+bool Signature::RangeSite<FL_TYPE>::isPossibleValue(const state::SomeValue &val) const {
 	return val.t == state::BaseExpression::FLOAT && val.fVal >= min && val.fVal <= max;
 }
 template <>
@@ -147,7 +147,7 @@ bool Signature::RangeSite<int>::isPossibleValue(const state::SomeValue &val) con
 	return val.t == state::BaseExpression::INT && val.iVal >= min && val.iVal <= max;
 }
 
-template void Signature::RangeSite<float>::setBoundaries(float,float,float);
+template void Signature::RangeSite<FL_TYPE>::setBoundaries(FL_TYPE,FL_TYPE,FL_TYPE);
 template void Signature::RangeSite<int>::setBoundaries(int,int,int);
 
 

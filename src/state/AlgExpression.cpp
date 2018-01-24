@@ -44,7 +44,7 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 		const int op){
 	BaseExpression::Type type1 = ex1->getType();
 	BaseExpression::Type type2 = ex2->getType();
-	typedef typename std::conditional<isBool,bool,float>::type BoolOrFloat;
+	typedef typename std::conditional<isBool,bool,FL_TYPE>::type BoolOrFloat;
 	typedef typename std::conditional<isBool,bool,int>::type BoolOrInt;
 	BaseExpression* bin_op;
 
@@ -52,20 +52,20 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 	case BaseExpression::FLOAT:
 		switch(type2){
 		case BaseExpression::FLOAT:
-			bin_op = new BinaryOperation<BoolOrFloat,float,float>(ex1,ex2,op);
+			bin_op = new BinaryOperation<BoolOrFloat,FL_TYPE,float>(ex1,ex2,op);
 			break;
 		case BaseExpression::INT:
-			bin_op = new BinaryOperation<BoolOrFloat,float,int>(ex1,ex2,op);
+			bin_op = new BinaryOperation<BoolOrFloat,FL_TYPE,int>(ex1,ex2,op);
 			break;
 		case BaseExpression::BOOL:
-			bin_op = new BinaryOperation<BoolOrFloat,float,bool>(ex1,ex2,op);
+			bin_op = new BinaryOperation<BoolOrFloat,FL_TYPE,bool>(ex1,ex2,op);
 			break;
 		}
 		break;
 	case BaseExpression::INT:
 		switch(type2){
 		case BaseExpression::FLOAT:
-			bin_op = new BinaryOperation<BoolOrFloat,int,float>(ex1,ex2,op);
+			bin_op = new BinaryOperation<BoolOrFloat,int,FL_TYPE>(ex1,ex2,op);
 			break;
 		case BaseExpression::INT:
 			bin_op = new BinaryOperation<BoolOrInt,int,int>(ex1,ex2,op);
@@ -78,7 +78,7 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 	case BaseExpression::BOOL:
 		switch(type2){
 		case BaseExpression::FLOAT:
-			bin_op = new BinaryOperation<BoolOrFloat,bool,float>(ex1,ex2,op);
+			bin_op = new BinaryOperation<BoolOrFloat,bool,FL_TYPE>(ex1,ex2,op);
 			break;
 		case BaseExpression::INT:
 			bin_op = new BinaryOperation<BoolOrInt,bool,int>(ex1,ex2,op);
@@ -100,11 +100,11 @@ template BaseExpression* BaseExpression::makeBinaryExpression<false>
 
 
 /****** SomeValue ************/
-SomeValue::SomeValue(float f) : fVal(f),t(BaseExpression::FLOAT){}
-SomeValue::SomeValue(int i) : iVal(i),t(BaseExpression::INT){}
-SomeValue::SomeValue(bool b) : iVal(0),t(BaseExpression::BOOL){bVal=b;}
-SomeValue::SomeValue(small_id i) : iVal(0),t(BaseExpression::SMALL_ID){smallVal=i;}
-SomeValue::SomeValue(short_id i) : iVal(0),t(BaseExpression::SHORT_ID){shortVal=i;}
+SomeValue::SomeValue(FL_TYPE f) : fVal(f),t(BaseExpression::FLOAT){}
+SomeValue::SomeValue(int i) : fVal(0.0),t(BaseExpression::INT){iVal=i;}
+SomeValue::SomeValue(bool b) : fVal(0.0),t(BaseExpression::BOOL){bVal=b;}
+SomeValue::SomeValue(small_id i) : fVal(0.0),t(BaseExpression::SMALL_ID){smallVal=i;}
+SomeValue::SomeValue(short_id i) : fVal(0.0),t(BaseExpression::SHORT_ID){shortVal=i;}
 
 //SomeValue::SomeValue(const std::string &s) : sVal(new std::string(s)),t(BaseExpression::STR){}
 
@@ -124,11 +124,11 @@ T SomeValue::valueAs() const {
 	}
 	return 0;
 }
-template float SomeValue::valueAs<float>() const;
+template FL_TYPE SomeValue::valueAs<FL_TYPE>() const;
 template int SomeValue::valueAs<int>() const;
 template bool SomeValue::valueAs<bool>() const;
 
-template <> void SomeValue::set(float f){fVal = f;}
+template <> void SomeValue::set(FL_TYPE f){fVal = f;}
 template <> void SomeValue::set(int i){iVal = i;}
 template <> void SomeValue::set(bool b){bVal = b;}
 template <> void SomeValue::set(small_id i){smallVal = i;}
@@ -145,7 +145,10 @@ bool SomeValue::operator !=(const SomeValue& val) const {
 		default:
 			throw std::invalid_argument("SomeValue::valueAs(): not sense in convert id-like values.");
 	}*/
-	return val.iVal != iVal && val.t != t;
+	return val.fVal != fVal || val.t != t;
+}
+bool SomeValue::operator ==(const SomeValue& val) const {
+	return val.fVal == fVal && val.t == t;
 }
 
 /*************************************/
@@ -153,7 +156,7 @@ bool SomeValue::operator !=(const SomeValue& val) const {
 /*************************************/
 template <typename T>
 AlgExpression<T>::AlgExpression(){
-	if(std::is_same<T,float>::value)
+	if(std::is_same<T,FL_TYPE>::value)
 		t=FLOAT;
 	else if(std::is_same<T,int>::value)
 		t=INT;
@@ -189,11 +192,11 @@ T Constant<T>::evaluate(const state::State& state) const{
 }
 //TODO
 template <typename T>
-float Constant<T>::auxFactors(std::unordered_map<std::string,float> &aux_values) const{
+FL_TYPE Constant<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux_values) const{
 	return (int)val;
 }
 
-template class Constant<float>;
+template class Constant<FL_TYPE>;
 template class Constant<int>;
 template class Constant<bool>;
 
@@ -255,11 +258,11 @@ BinaryOperation< R, T1, T2>::~BinaryOperation(){
 }
 
 template <typename R,typename T1,typename T2>
-float BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,float> &var_factors) const{
-	typedef std::unordered_map<std::string,float> var_map;
+FL_TYPE BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,FL_TYPE> &var_factors) const{
+	typedef std::unordered_map<std::string,FL_TYPE> var_map;
 	var_map vars1,vars2;
-	float val1 = exp1->auxFactors(vars1);
-	float val2 = exp2->auxFactors(vars2);
+	FL_TYPE val1 = exp1->auxFactors(vars1);
+	FL_TYPE val2 = exp2->auxFactors(vars2);
 	if(op < BaseExpression::MULT){// + or -
 		for(var_map::iterator it = vars1.begin();it != vars1.end();it++){
 			var_factors[it->first]=func(it->second,vars2[it->first]);
@@ -313,7 +316,7 @@ int Auxiliar::evaluate(const state::State& state) const{
 	throw std::invalid_argument("Cannot call Auxiliar::evaluate() without aux-map");
 }
 
-float Auxiliar::auxFactors(std::unordered_map<std::string,float> &var_factors) const{
+FL_TYPE Auxiliar::auxFactors(std::unordered_map<std::string,FL_TYPE> &var_factors) const{
 	var_factors[name] = 1;
 	return 0;
 }
@@ -339,5 +342,21 @@ template <typename R>
 int VarLabel<R>::auxFactors(std::unordered_map<std::string,int> &factor) const {
 	throw std::invalid_argument("This should never been used");
 }
+
+/**************************/
+/****** class Token *******/
+/**************************/
+
+TokenVar::TokenVar(unsigned _id) : id(_id) {}
+FL_TYPE TokenVar::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
+	throw std::invalid_argument("Cannot call Token::evaluate() without state.");
+}
+FL_TYPE TokenVar::evaluate(const state::State& state) const{
+	return state.getTokenValue(id);
+}
+FL_TYPE TokenVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
+	throw std::invalid_argument("Cannot use tokens in this expression.");
+}
+
 
 } /* namespace ast */

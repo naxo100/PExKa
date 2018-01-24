@@ -12,7 +12,8 @@
 #define SRC_DATA_STRUCTS_RANDOMTREE_H_
 
 #include <utility>
-
+#include "../util/params.h"
+//typedef double FL_TYPE;
 namespace data_structs {
 
 class RandomTree {
@@ -37,15 +38,15 @@ public:
 
 	/** \brief Calculate total sum of nodes.
 	 */
-	virtual float total() = 0;
+	virtual FL_TYPE total() = 0;
 
 	/** \brief Add or change a value of a node in the chain.
 	 */
-	virtual void add(int id, float val) = 0;
+	virtual void add(int id, FL_TYPE val) = 0;
 
 	/** \brief Choose random node from tree with probability = weight/total().
 	 */
-	virtual std::pair<int,float> chooseRandom() = 0;
+	virtual std::pair<int,FL_TYPE> chooseRandom() = 0;
 
 	/** \brief Check if the rule "i" has an infinity probability.
 	*/
@@ -53,7 +54,7 @@ public:
 
 	/** \brief Return the probability of the rule "i"
 	*/
-	virtual float find(int i) = 0;
+	virtual FL_TYPE find(int i) = 0;
 
 };
 

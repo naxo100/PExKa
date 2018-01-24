@@ -66,7 +66,7 @@ BaseExpression* Const::eval(const pattern::Environment& env,
 	BaseExpression* cons;
 	switch(type){
 	case FLOAT:
-		cons = new state::Constant<float>(f);
+		cons = new state::Constant<FL_TYPE>(f);
 		break;
 	case INTEGER:
 		cons = new state::Constant<int>(n);
@@ -75,10 +75,10 @@ BaseExpression* Const::eval(const pattern::Environment& env,
 		cons = new state::Constant<bool>(b);
 		break;
 	case INF:
-		cons = new state::Constant<float>(std::numeric_limits<float>::infinity());
+		cons = new state::Constant<FL_TYPE>(std::numeric_limits<FL_TYPE>::infinity());
 		break;
 	case INF_NEG:
-		cons = new state::Constant<float>(-std::numeric_limits<float>::infinity());
+		cons = new state::Constant<FL_TYPE>(-std::numeric_limits<FL_TYPE>::infinity());
 		break;
 	case TMAX:
 		cons = new state::Constant<int>(-1);

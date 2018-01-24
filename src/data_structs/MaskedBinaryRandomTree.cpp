@@ -17,10 +17,10 @@ MaskedBinaryRandomTree<Container>::MaskedBinaryRandomTree(std::size_t n,default_
 		size(n),sizetree((n+1)/2),fresh_id(1),isConsistent(true),generator(gen)
 {
 	//initialization of node arrays with zero and false default values
-	weights           = new float[sizetree*2+1]();
-	nodes             = new float[sizetree*2+1]();
+	weights           = new FL_TYPE[sizetree*2+1]();
+	nodes             = new FL_TYPE[sizetree*2+1]();
 	unmask            = new int[sizetree*2+1]();
-	subtrees          = new float[sizetree+1]();
+	subtrees          = new FL_TYPE[sizetree+1]();
 	unbalanced_events = new  bool[sizetree+1]();
 	unbalanced_events2 = new  bool[sizetree+1]();
 
@@ -61,13 +61,13 @@ void MaskedBinaryRandomTree<Container>::initLayer(int k,int current_layer,int la
 
 //Agrega o cambia el valor de probabilidad de nodo i (id_externa) por el valor "val"
 template<template <typename,typename...> class Container>
-void MaskedBinaryRandomTree<Container>::add(int i,float val)
+void MaskedBinaryRandomTree<Container>::add(int i,FL_TYPE val)
 {
 	//obtenemos la id interna para modificar su data asociada
 	i=mask_id(i);
 
 	//revisamos si el nuevo valor es infinito
-	if( isinf(val) ) {
+	if( std::isinf(val) ) {
 		//en caso afirmativo, agregamos el nodo (id_interna) a la lista
 		//de reglas con valor infinito
 		inf_list.insert(i);
@@ -86,14 +86,14 @@ void MaskedBinaryRandomTree<Container>::add(int i,float val)
 
 //Retorna la id y la probabilidad de una regla del arbol elejida de manera random segun su probabilidad.
 template<template <typename,typename...> class Container>
-pair<int,float> MaskedBinaryRandomTree<Container>::chooseRandom()
+pair<int,FL_TYPE> MaskedBinaryRandomTree<Container>::chooseRandom()
 {
 	//chequeamos en  "inf_list" si hay reglas con probabilidad infinita
 	if(!inf_list.empty())
 	{
 		//si las hay, devolvemos la primera regla
 		std::set<int>::iterator it=inf_list.begin();
-		return pair<int,float>(unmask_id(*it),std::numeric_limits<float>::infinity());
+		return pair<int,FL_TYPE>(unmask_id(*it),std::numeric_limits<FL_TYPE>::infinity());
 	}
 	else
 	{
@@ -101,29 +101,29 @@ pair<int,float> MaskedBinaryRandomTree<Container>::chooseRandom()
 		//Comenzamos por actualizar el arbol binario
 		update();
 		//obtenemos la probabilidad total
-		float a=subtrees[1];
+		FL_TYPE a=subtrees[1];
 		//si es nula retornamos error -1
 		if( a == 0.0e0){
 			throw std::invalid_argument("MaskedBinaryTree::chooseRandom(): NotFound");//cout<<"MaskedBinaryTree::chooseRandom(): NotFound"<<endl;
-			return pair<int,float>(-1,0.0);
+			return pair<int,FL_TYPE>(-1,0.0);
 		}
 		//si no es nula, hacemos la busqueda
 		else{
 			//generamos un numero random "r"
-			std::uniform_real_distribution<float> distribution(0.0,a);
-			float r = distribution(generator);
+			std::uniform_real_distribution<FL_TYPE> distribution(0.0,a);
+			FL_TYPE r = distribution(generator);
 			//partimos de la posicion 1 (nodo root)  del arbol
 			int i=1;//position in the tree
 			do
 			{
 				//verificamos si el num random pertenece al intervalo de alguno de los nodos
 				//lineales y retornamos en caso afirmativo
-				if(r<=nodes[2*i-1])  return pair<int,float>(unmask[2*i-1],nodes[2*i-1]);
-				if(r<=nodes[2*i])    return pair<int,float>(unmask[2*i],nodes[2*i]);
+				if(r<=nodes[2*i-1])  return pair<int,FL_TYPE>(unmask[2*i-1],weights[2*i-1]);
+				if(r<=nodes[2*i])    return pair<int,FL_TYPE>(unmask[2*i],weights[2*i]);
 				//si no pertence, chequeamo si pertenece al intervalo de la rama (hijo) izquierda
 				i=i*2;                     //indice rama hijo izquierdo.
 				r = r-nodes[i];            //random number respecto al intervalo del hijo izquierdo.
-				float left = subtrees[i];  //longitud total del hijo izquierdo.
+				FL_TYPE left = subtrees[i];  //longitud total del hijo izquierdo.
 				//si pertenece a esta rama continuamos la busqueda en este intervalo.
 				if( r <= left ) continue;
 				//si no pertence, pasamos a la rama derecha y continuamos la busqueda
@@ -138,7 +138,7 @@ pair<int,float> MaskedBinaryRandomTree<Container>::chooseRandom()
 }
 
 template<template <typename,typename...> class Container>
-float MaskedBinaryRandomTree<Container>::total()
+FL_TYPE MaskedBinaryRandomTree<Container>::total()
 {
 	if(inf_list.empty())
 	{
@@ -147,7 +147,7 @@ float MaskedBinaryRandomTree<Container>::total()
 	}
 	else
 	{
-		return std::numeric_limits<float>::infinity();
+		return std::numeric_limits<FL_TYPE>::infinity();
 	}
 }
 
@@ -159,7 +159,7 @@ bool MaskedBinaryRandomTree<Container>::isInfinite(int i)
 }
 
 template<template <typename,typename...> class Container>
-float MaskedBinaryRandomTree<Container>::find(int i)
+FL_TYPE MaskedBinaryRandomTree<Container>::find(int i)
 {
 	return nodes[mask_id(i)];
 }
@@ -212,7 +212,7 @@ void MaskedBinaryRandomTree<Container>::update()
 }
 
 template<template <typename,typename...> class Container>
-inline float MaskedBinaryRandomTree<Container>::weight_of_subtree(int k) const
+inline FL_TYPE MaskedBinaryRandomTree<Container>::weight_of_subtree(int k) const
 {
 	 return (k > sizetree) ? 0.0: subtrees[k];
 }

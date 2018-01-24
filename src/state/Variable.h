@@ -46,7 +46,7 @@ public:
 	AlgebraicVar(const short var_id, const std::string &nme,const bool is_obs,
 			const AlgExpression<T> *exp);
 
-	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	virtual T evaluate(const state::State& state) const override;
 
@@ -58,7 +58,7 @@ class ConstantVar : public Variable, public AlgExpression<T> {
 public:
 	ConstantVar(const short var_id, const std::string &name, const AlgExpression<T> *exp);
 
-	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	T evaluate(const state::State& state) const override;
 };
@@ -69,7 +69,7 @@ public:
 	KappaVar(const short var_id, const std::string &nme,const bool is_obs,
 			const pattern::Mixture &kappa);
 
-	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	virtual int evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	virtual int evaluate(const state::State& state) const override;
 

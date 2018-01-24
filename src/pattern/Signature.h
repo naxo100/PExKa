@@ -41,7 +41,7 @@ public:
 	Site& addSite(const ast::Id &name);
 	small_id addSite(const ast::Id &name,const vector<string> &labels);
 	small_id addSite(const ast::Id &name,int min,int max);
-	small_id addSite(const ast::Id &name,float min,float max);
+	small_id addSite(const ast::Id &name,FL_TYPE min,FL_TYPE max);
 
 	const Site& getSite(const small_id id) const;
 	const Site& getSite(const string &name) const;
@@ -61,7 +61,7 @@ private:
 class Signature::Value {
 public:
 	union {
-		const float f;
+		const FL_TYPE f;
 		const int i;
 		const string *s;
 		const short id;
@@ -116,7 +116,7 @@ public:
 	state::SomeValue getDefaultValue() const override;
 };
 
-class Token {};
+//class Token {};
 
 /*class Signature::IntRangeSite : Site {
 	int min,max;

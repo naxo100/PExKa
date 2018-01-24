@@ -129,7 +129,8 @@ Node* Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		two<list<Internal*> > &port_list) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
-		if(memcmp(&port.val,&id_site.second.state,sizeof(state::SomeValue)))
+		//if(memcmp(&port.val,&id_site.second.state,sizeof(state::SomeValue)))
+		if(port.val.fVal != id_site.second.state.fVal || port.val.t != id_site.second.state.t )
 			throw False();
 		else
 			port_list.first.emplace_back(&port);

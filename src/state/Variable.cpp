@@ -28,18 +28,18 @@ AlgebraicVar<T>::AlgebraicVar(const short var_id, const std::string &nme,
 		BaseExpression(), Variable(var_id,nme,is_obs),expression(exp) {}
 template <typename T>
 T AlgebraicVar<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
-	expression->evaluate(aux_values);
+	return expression->evaluate(aux_values);
 }
 template <typename T>
 T AlgebraicVar<T>::evaluate(const state::State& state) const{
-	expression->evaluate(state);
+	return expression->evaluate(state);
 }
 template <typename T>
-float AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,float> &aux_values) const{
-	expression->auxFactors(aux_values);
+FL_TYPE AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux_values) const{
+	return expression->auxFactors(aux_values);
 }
 
-template class AlgebraicVar<float>;
+template class AlgebraicVar<FL_TYPE>;
 template class AlgebraicVar<int>;
 template class AlgebraicVar<bool>;
 
@@ -59,11 +59,11 @@ T ConstantVar<T>::evaluate(const state::State& state) const{
 	return val;
 }
 template <typename T>
-float ConstantVar<T>::auxFactors(std::unordered_map<std::string,float> &aux_values) const{
+FL_TYPE ConstantVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux_values) const{
 	return val;
 }
 
-template class ConstantVar<float>;
+template class ConstantVar<FL_TYPE>;
 template class ConstantVar<int>;
 template class ConstantVar<bool>;
 
@@ -77,7 +77,7 @@ KappaVar::KappaVar(const short id,const std::string &nme,const bool is_obs,
 				mixture(kappa) {}
 
 //TODO
-float KappaVar::auxFactors(std::unordered_map<std::string,float> &factor) const {
+FL_TYPE KappaVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
 	return 0;
 }
 

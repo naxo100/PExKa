@@ -21,9 +21,9 @@ template<template <typename,typename...> class Container>
 class MaskedBinaryRandomTree: public RandomTree {
 	int size;						///<Numero de sub-nodos lineales.
 	int sizetree;					///<Numero de nodos arbol binario.
-	float* weights;					///<Probabilidad de cada sub-nodo lineal.
-	float* nodes;					///<Probabilidad Acumulada de cada sub-nodo lineal dentro del nodo binario (sub_nodo_1=weight_1, sub_nodo_2=sub_nodo_1+weight_2).
-	float* subtrees;				///<Suma Probabilidad de los 2 sub-nodos lineales mas todos los sub-nodos de sus decendientes binarios.
+	FL_TYPE* weights;					///<Probabilidad de cada sub-nodo lineal.
+	FL_TYPE* nodes;					///<Probabilidad Acumulada de cada sub-nodo lineal dentro del nodo binario (sub_nodo_1=weight_1, sub_nodo_2=sub_nodo_1+weight_2).
+	FL_TYPE* subtrees;				///<Suma Probabilidad de los 2 sub-nodos lineales mas todos los sub-nodos de sus decendientes binarios.
 	int fresh_id;					///<Id del arbol disponible para ser ocupada por una nueva regla.
 	map<int, int> mask;				///<Mapa entre la Id externa de una regla y la Id interna (Posicion) del Arbol binario.
 	int* unmask;					///<Mapa opuesto, la posicion en este array indica la Id interna y el valor indica la Id externa.
@@ -39,7 +39,7 @@ class MaskedBinaryRandomTree: public RandomTree {
 	int mask_id(int i);				///<Transforma una id externa en una id interna
 	int unmask_id(int i) const;		///<Transforma una id interna en una id externa
 
-	float weight_of_subtree(int i) const;	///<Valor de subtrees[i], nulo en caso de no existir el nodo "i".
+	FL_TYPE weight_of_subtree(int i) const;	///<Valor de subtrees[i], nulo en caso de no existir el nodo "i".
 
 	void declare_unbalanced(int i);			///<Agrega el nodo "i" a la correpondiente fila (capa) de la matriz "unbalanced_events_by_layer".
 
@@ -62,15 +62,15 @@ public:
 
 	/** \brief Calculate total sum of nodes.
 	 */
-	float total() override;
+	FL_TYPE total() override;
 
 	/** \brief Add or change a value of a node in the chain.
 	 */
-	void add(int id, float val) override;
+	void add(int id, FL_TYPE val) override;
 
 	/** \brief Choose random node from tree with probability = weight/total().
 	 */
-	std::pair<int, float> chooseRandom() override;
+	std::pair<int, FL_TYPE> chooseRandom() override;
 
 	/** \brief Check if the rule "i" has an infinity probability.
 	 */
@@ -78,7 +78,7 @@ public:
 
 	/** \brief Return the probability of the rule "i"
 	 */
-	float find(int i) override;
+	FL_TYPE find(int i) override;
 };
 
 

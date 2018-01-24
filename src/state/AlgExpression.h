@@ -47,7 +47,7 @@ public:
 	 * as an equation on auxiliars.
 	 *
 	 */
-	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const = 0;
+	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const = 0;
 
 	virtual std::set<std::string> getAuxiliars() const;
 
@@ -77,7 +77,7 @@ public:
 	virtual ~AlgExpression() = 0;
 	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
 	virtual T evaluate(const state::State& state) const = 0;
-	virtual float auxFactors(std::unordered_map<std::string,float> &factor) const override = 0;
+	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override = 0;
 	virtual SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	virtual SomeValue getValue(const state::State& state) const override;
 };
@@ -99,7 +99,7 @@ class SomeValue {
 private:
 public:
 	union {
-		float fVal;
+		FL_TYPE fVal;
 		int iVal;
 		small_id smallVal;
 		short_id shortVal;
@@ -108,7 +108,7 @@ public:
 	};
 	BaseExpression::Type t;
 
-	SomeValue(float f);
+	SomeValue(FL_TYPE f);
 	SomeValue(int i);
 	SomeValue(short_id id);
 	SomeValue(small_id id);
@@ -126,6 +126,7 @@ public:
 	T valueAs() const;
 
 	bool operator!=(const SomeValue&) const;
+	bool operator==(const SomeValue&) const;
 
 
 };
@@ -137,7 +138,7 @@ public:
 	Constant(T v);
 	T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	T evaluate(const state::State& state) const override;
-	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 };
 
 template<typename R,typename T1,typename T2>
@@ -150,7 +151,7 @@ class BinaryOperation : public AlgExpression<R> {
 public:
 	R evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	R evaluate(const state::State& state) const override;
-	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	std::set<std::string> getAuxiliars() const override;
 	~BinaryOperation();
 	BinaryOperation
@@ -168,6 +169,15 @@ public:
 	int auxFactors(std::unordered_map<std::string,int> &factor) const override;
 };
 
+class TokenVar : public AlgExpression<FL_TYPE> {
+	unsigned id;
+public:
+	TokenVar(unsigned _id);
+	FL_TYPE evaluate(const std::unordered_map<std::string,int> *aux_values) const override;
+	FL_TYPE evaluate(const state::State& state) const override;
+	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
+};
+
 
 class Auxiliar : public AlgExpression<int> {
 	std::string name;
@@ -176,7 +186,7 @@ public:
 	~Auxiliar();
 	int evaluate(const std::unordered_map<std::string,int> *aux_values) const override;
 	int evaluate(const state::State& state) const override;
-	float auxFactors(std::unordered_map<std::string,float> &factor) const override;
+	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
 	std::set<std::string> getAuxiliars() const override;
 };

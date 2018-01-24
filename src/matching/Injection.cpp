@@ -193,11 +193,11 @@ Injection* InjRandSet::emplace(const pattern::Mixture::Component& cc,Node& node,
 	}
 	else
 		counter++;
-#if DEBUG
+/*#if DEBUG
 	for(auto inj2 : container)
 		if(inj != inj2 && *inj == *inj2)
 			throw invalid_argument("InjSet cannot contain the same injection twice.");
-#endif
+#endif*/
 	return inj;
 }
 
@@ -220,11 +220,11 @@ Injection* InjRandSet::emplace(Injection* base_inj,map<Node*,Node*>& mask){
 	else
 		counter++;
 
-#if DEBUG
+/*#if DEBUG
 	for(auto inj2 : container)
 		if(inj != inj2 && *inj == *inj2)
 			throw invalid_argument("InjSet cannot contain the same injection twice.");
-#endif
+#endif*/
 	return inj;
 }
 

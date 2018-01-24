@@ -37,8 +37,11 @@ const simulation::Counter& State::getCounter() const {
 	return counter;
 }
 
-void State::addTokens(float n,short tok_id){
+void State::addTokens(float n,unsigned tok_id){
 	tokens[tok_id] += n;
+}
+float State::getTokenValue(unsigned tok_id) const{
+	return tokens[tok_id];
 }
 
 void State::addNodes(unsigned n,const pattern::Mixture& mix){
@@ -60,7 +63,7 @@ unsigned State::mixInstances(const pattern::Mixture& mix) const{
 
 two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
 	two<FL_TYPE> act;
-	act.first = mixInstances(r.getLHS()) * r.getRate().getValue(*this).valueAs<float>();
+	act.first = mixInstances(r.getLHS()) * r.getRate().getValue(*this).valueAs<FL_TYPE>();
 	//TODO act.second = ...
 	act.second = 0.;
 	return act;
@@ -166,6 +169,9 @@ void State::apply(const simulation::Rule& r,EventInfo& ev){
 			graph.allocate(node_pair.second);
 		}
 	}
+	//apply token changes
+	for(auto& change : r.getTokenChanges())
+		tokens[change.first] += change.second->getValue(*this).valueAs<FL_TYPE>();
 }
 
 void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
@@ -417,12 +423,12 @@ void State::initActTree() {
 
 void State::print() const {
 	cout << "state with {SiteGraph.size() = " << graph.getPopulation();
-	cout << "\n\tvolume = " << volume.getValue().valueAs<float>();
+	//cout << "\n\tvolume = " << volume.getValue().valueAs<FL_TYPE>();
 	cout << "\n\tInjections {\n";
 	int i = 0;
 	for(auto& cc : env.getComponents()){
 		if(injections[i].count())
-			cout << "\t\t" << injections[i].count() << " injs of " << cc.toString(env) << endl;
+			cout << "\t"<< i <<"\t" << injections[i].count() << " injs of " << cc.toString(env) << endl;
 		i++;
 	}
 	cout << "\t}\n}" << endl;

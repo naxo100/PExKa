@@ -89,10 +89,13 @@ public:
 	const simulation::Counter& getCounter() const;
 
 	/** \brief Add tokens population to the state.
-	 * @param n count of tokens (could be negative).
+	 * @param n count of tokens (can be negative).
 	 * @param tok_id token id type to add.
 	 */
-	void addTokens(float n,short tok_id);
+	void addTokens(float n,int tok_id);
+
+	float getTokenValue(unsigned tok_id) const;
+
 	/** \brief Add nodes to the SiteGraph using a fully described mixture.
 	 * @param n count of copies of the mixture.
 	 * @param mix a mixture without patterns to create nodes.

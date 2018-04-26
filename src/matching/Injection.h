@@ -10,6 +10,7 @@
 
 #include <map>
 #include <set>
+#include <unordered_set>
 #include <vector>
 #include <list>
 #include <random>
@@ -46,7 +47,7 @@ public:
 
 	void alloc(size_t addr);
 
-	bool operator< (const Injection& inj) const;
+	//bool operator< (const Injection& inj) const;
 	virtual bool operator==(const Injection& inj) const = 0;
 
 };
@@ -94,13 +95,14 @@ public:
 };*/
 
 //TODO choose the best implementation of InjSet
-class InjSet : public set<Injection*> {
-	unsigned counter;
+//typedef set<Injection*> InjSet;
+/*class InjSet : public set<Injection*> {
+	//unsigned counter;
 public:
 	//const Injection& chooseRandom() const;
 	//unsigned count() const;
 
-};
+};*/
 
 class InjRandSet {
 	size_t counter;
@@ -117,7 +119,7 @@ public:
 	Injection* emplace(const pattern::Mixture::Component& cc,Node& node,
 			two<std::list<Node::Internal*> > &port_lists,small_id root = 0);
 	Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask);
-	void erase(const Injection* inj);
+	void erase(Injection* inj);
 
 	vector<CcInjection*>::iterator begin();
 	vector<CcInjection*>::iterator end();

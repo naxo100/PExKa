@@ -15,9 +15,9 @@ Injection::Injection(const pattern::Pattern& _ptrn) : ptrn(_ptrn),address(size_t
 
 Injection::~Injection() {}
 
-bool Injection::operator<(const Injection& inj) const {
+/*bool Injection::operator<(const Injection& inj) const {
 	return this->getEmbedding() < inj.getEmbedding();
-}
+}*/
 
 void Injection::alloc(size_t addr){
 	address = addr;
@@ -41,19 +41,22 @@ CcInjection::CcInjection(const pattern::Pattern& _cc) : Injection(_cc) {};
 CcInjection::CcInjection(const pattern::Mixture::Component& _cc,Node& node,
 		two<std::list<state::Node::Internal*> >& port_list,small_id root)
 		: Injection(_cc) {
+	ccAgToNode.resize(_cc.size(),nullptr);
 	reuse(_cc,node,port_list,root);
 }
 
 void CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 		two<std::list<state::Node::Internal*> >& port_list,small_id root) {
-	ccAgToNode.clear();
-	ccAgToNode.resize(_cc.size(),nullptr);
-	std::queue<pair<small_id,Node*> > q;
-	q.emplace(root,&node);
+	//ccAgToNode.clear();
+	for(auto& n : ccAgToNode)
+		n = nullptr;
+	//ccAgToNode.resize(_cc.size(),nullptr);
+	std::list<pair<small_id,Node*> > q;
+	q.emplace_back(root,&node);
 	const pattern::Mixture::Agent* ag;
 	const Node* curr_node;
 	pair<small_id,Node*> next_node;
-	while(q.size()){
+	while(!q.empty()){
 		ag = &_cc.getAgent(q.front().first);
 		curr_node = q.front().second;
 		if(ag->getId() != curr_node->getId())
@@ -71,13 +74,13 @@ void CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 						throw False();
 				}
 				else {
-					q.emplace(next_node);
-					ccAgToNode[next_node.first] = next_node.second;
+					q.emplace_back(next_node);
+					ccAgToNode[next_node.first] = next_node.second;//todo review
 				}
 			}
 		}
 		ccAgToNode[q.front().first] = q.front().second;//case when agent mixture with no sites
-		q.pop();
+		q.pop_front();
 	}
 	//TODO check_aditional_edges???
 }
@@ -228,17 +231,17 @@ Injection* InjRandSet::emplace(Injection* base_inj,map<Node*,Node*>& mask){
 	return inj;
 }
 
-void InjRandSet::erase(const Injection* inj){
-	if(!container.size())
-		throw invalid_argument("InjRandSet is empty, what injection are you trying to delete?");
+void InjRandSet::erase(Injection* inj){
+	//if(container.empty())
+	//	throw invalid_argument("InjRandSet is empty, what injection are you trying to delete?");
 	if(inj->address < multiCount)
 		multiCount--;
-	freeInjs.push_back(container[inj->address]);
+	freeInjs.push_back(static_cast<CcInjection*>(inj));
 	if(container.size() > 1){
 		container.back()->alloc(inj->address);
 		container[inj->address] = container.back();
 	}
-	freeInjs.back()->alloc(size_t(-1));//dealloc
+	inj->alloc(size_t(-1));//dealloc
 	container.pop_back();
 	counter -= inj->count();
 }

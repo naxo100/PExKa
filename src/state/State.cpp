@@ -13,13 +13,20 @@
 #include <cmath>
 
 namespace state {
+using Deps = pattern::Dependencies;
 
 State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		const state::BaseExpression& vol,simulation::Plot& _plot,
 		const pattern::Environment& _env) :
 	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]),
 	activityTree(nullptr),injections(nullptr),randGen(0/*TODO seed*/),
-	plot(_plot){}
+	plot(_plot){
+	//TODO these numbers are arbitrary!!
+	ev.emb = new Node**[4];
+	for(int i = 0; i < 4 ; i++)
+		ev.emb[i] = new Node*[12];
+	ev.fresh_emb = new Node*[5];
+}
 
 State::~State() {
 	delete[] tokens;
@@ -52,9 +59,9 @@ void State::addNodes(unsigned n,const pattern::Mixture& mix){
 	}
 }
 
-unsigned State::mixInstances(const pattern::Mixture& mix) const{
+UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
 	//auto& mix = env.getMixtures().front();
-	unsigned count = 1;
+	UINT_TYPE  count = 1;
 	for(auto cc : mix){
 		count *= injections[cc->getId()].count();
 	}
@@ -92,7 +99,7 @@ void State::negativeUpdate<1>(SiteGraph::Internal& intf){
 
 }*/
 
-void State::bind(const simulation::Rule::Action& a,EventInfo& ev){
+void State::bind(const simulation::Rule::Action& a){
 	using Action = simulation::Rule::Action;
 	auto n1 = (get<3>(a.trgt1) & Action::NEW ? ev.fresh_emb : ev.emb[get<0>(a.trgt1)])[get<1>(a.trgt1)];
 	auto n2 = (get<3>(a.trgt2) & Action::NEW ? ev.fresh_emb : ev.emb[get<0>(a.trgt2)])[get<1>(a.trgt2)];
@@ -110,7 +117,7 @@ void State::bind(const simulation::Rule::Action& a,EventInfo& ev){
 	n1->bind(ev,injections,get<2>(a.trgt1),n2,get<2>(a.trgt2),get<3>(a.trgt2) & Action::S_EFF);
 }
 
-void State::free(const simulation::Rule::Action& a,EventInfo& ev){
+void State::free(const simulation::Rule::Action& a){
 	using Action = simulation::Rule::Action;
 	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
 	try{
@@ -122,7 +129,7 @@ void State::free(const simulation::Rule::Action& a,EventInfo& ev){
 	node->unbind(ev,injections,get<2>(a.trgt1),get<3>(a.trgt1) & Action::S_EFF);
 }
 
-void State::modify(const simulation::Rule::Action& a,EventInfo& ev){
+void State::modify(const simulation::Rule::Action& a){
 	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
 	try{
 		auto new_node = ev.new_cc.at(node);
@@ -133,17 +140,17 @@ void State::modify(const simulation::Rule::Action& a,EventInfo& ev){
 	node->changeIntState(ev,injections,get<2>(a.trgt1),get<0>(a.trgt2));
 }
 
-void State::del(const simulation::Rule::Action& a,EventInfo& ev){
+void State::del(const simulation::Rule::Action& a){
 	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
 	node->removeFrom(ev,injections,graph);
 }
 
-void (State::*State::action[4])(const simulation::Rule::Action&,EventInfo&) =
+void (State::*State::action[4])(const simulation::Rule::Action&) =
 		{&State::modify,&State::bind,&State::free,&State::del};
 
-void State::apply(const simulation::Rule& r,EventInfo& ev){
+void State::apply(const simulation::Rule& r){
 	//ADD action first
-	ev.fresh_emb = new Node*[r.getNewNodes().size()];//maybe not!
+	//ev.fresh_emb = new Node*[r.getNewNodes().size()];//maybe not!
 	int i = 0;
 	for(auto n : r.getNewNodes()){
 		auto node = new Node(*n,ev.new_cc);
@@ -152,7 +159,7 @@ void State::apply(const simulation::Rule& r,EventInfo& ev){
 		i++;
 	}
 	for(auto& act : r.getScript()){
-		(this->*(action)[act.t])(act,ev);
+		(this->*(action)[act.t])(act);
 	}
 	for(auto inj : ev.inj_mask)//only injs that will no be copied
 		ev.to_update.emplace(&inj.first->pattern());
@@ -174,7 +181,7 @@ void State::apply(const simulation::Rule& r,EventInfo& ev){
 		tokens[change.first] += change.second->getValue(*this).valueAs<FL_TYPE>();
 }
 
-void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
+void State::positiveUpdate(const simulation::Rule& r){
 	//TODO vars_to_wake_up
 	auto& wake_up = r.getInfluences();
 	for(auto& cc_info : wake_up){
@@ -196,10 +203,11 @@ void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
-				if(!port_lists.first.size() && !port_lists.second.size())
+				if(port_lists.first.empty() && port_lists.second.empty())
 					node->addDep(inj_p);
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
 				ev.to_update.emplace(cc);
+				updateDeps(Deps::Dependency(Deps::KAPPA,cc->getId()));
 			}
 			catch(False& e){
 				//Not a match with candidate
@@ -207,28 +215,29 @@ void State::positiveUpdate(const simulation::Rule& r,EventInfo& ev){
 		}
 	}
 	for(auto side_eff : ev.side_effects){
-		for(auto& ag : env.getAgentPatterns(side_eff.first->getId())){
+		/*for(auto& ag : env.getAgentPatterns(side_eff.first->getId())){
 			try {
 				if(ag.getSite(side_eff.second).link_type == pattern::Pattern::FREE){
-					for(auto& cc_ag : ag.getIncludes()){
-						two<std::list<Node::Internal*> > port_lists;
-						matching::Injection* inj_p;
-						try{
-							inj_p = injections[cc_ag.first->getId()].emplace(*cc_ag.first,*side_eff.first,port_lists,cc_ag.second);
-						}
-						catch(False& ex) {continue;}
-						for(auto port : port_lists.first)
-							port->deps.first->emplace(inj_p);
-						for(auto port : port_lists.second)
-							port->deps.second->emplace(inj_p);
-						if(!port_lists.first.size() && !port_lists.second.size())
-							side_eff.first->addDep(inj_p);
-						//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
-						ev.to_update.emplace(cc_ag.first);
-					}
+					for(auto& cc_ag : ag.getIncludes()){*/
+		for(auto& cc_ag : env.getFreeSiteCC(side_eff.first->getId(),side_eff.second)){
+			two<std::list<Node::Internal*> > port_lists;
+			matching::Injection* inj_p;
+			try{
+				inj_p = injections[cc_ag.first->getId()].emplace(*cc_ag.first,*side_eff.first,port_lists,cc_ag.second);
+			}
+			catch(False& ex) {continue;}
+			for(auto port : port_lists.first)
+				port->deps.first->emplace(inj_p);
+			for(auto port : port_lists.second)
+				port->deps.second->emplace(inj_p);
+			if(port_lists.first.empty() && port_lists.second.empty())
+				side_eff.first->addDep(inj_p);
+			//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
+			ev.to_update.emplace(cc_ag.first);
+			/*		}
 				}
 			}
-			catch(std::out_of_range& ex){}
+			catch(std::out_of_range& ex){}*/
 		}
 	}
 }
@@ -241,45 +250,51 @@ void State::advanceUntil(FL_TYPE sync_t) {
 			counter.incEvents();
 		}
 		catch(NullEvent &ex){
-			#if DEBUG
-				cout << "\t(null-event)" << endl;
+			#ifdef DEBUG
+				cout << "\t(null-event " << ex.error << ")" << endl;
 			#endif
 			counter.incNullEvents(ex.error);
 		}
 	}
 }
 
-EventInfo* State::selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const {
-	set<Node*> roots,total_cod;
+void State::selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const {
+	set<Node*> total_cod;
 	//map<int,SiteGraph::Node*> total_inj;
 	//SiteGraph::Node*** total_inj = new SiteGraph::Node**[mix.compsCount()];
-	EventInfo* ev = new EventInfo();
-	ev->emb = new Node**[mix.compsCount()];
-	ev->cc_count = mix.compsCount();
+	//ev->emb = new Node**[mix.compsCount()];
+	ev.side_effects.clear();
+	ev.pert_ids.clear();
+	ev.new_cc.clear();
+	ev.inj_mask.clear();
+	ev.to_update.clear();
+	ev.rule_ids.clear();
+	ev.warns = 0;
+	ev.cc_count = mix.compsCount();
 	int i = 0;
 	for(auto cc : mix){
-		ev->emb[i] = new Node*[cc->size()];
+		//ev->emb[i] = new Node*[cc->size()];
 		auto& inj = injections[cc->getId()].chooseRandom(randGen);
 		try{
-			inj.codomain(ev->emb[i],total_cod);
+			inj.codomain(ev.emb[i],total_cod);
 		}
 		catch(False& ex){
-			delete[] ev->emb;
-			delete ev;
+			//delete[] ev->emb;
+			//delete ev;
 			throw NullEvent(2);//overlapped codomains
 		}
 		i++;
 	}
 	if(clsh_if_un)
-		return ev;//TODO
-	return ev;
+		return;//TODO
+	return;
 }
 
-EventInfo* State::selectUnaryInj(const pattern::Mixture& mix) const {
-	return nullptr;
+void State::selectUnaryInj(const pattern::Mixture& mix) const {
+	return;
 }
 
-EventInfo* State::selectInjection(const pattern::Mixture& mix,two<FL_TYPE> bin_act,
+void State::selectInjection(const pattern::Mixture& mix,two<FL_TYPE> bin_act,
 		two<FL_TYPE> un_act) {
 	//if mix.is empty TODO
 	//if mix.unary -> select_binary
@@ -305,10 +320,10 @@ EventInfo* State::selectInjection(const pattern::Mixture& mix,two<FL_TYPE> bin_a
 				return selectUnaryInj(mix);
 		}
 	}
-	return nullptr;
+	return;
 }
 
-pair<const simulation::Rule&,EventInfo*> State::drawRule(){
+const simulation::Rule& State::drawRule(){
 	auto rid_alpha = activityTree->chooseRandom();
 	auto& rule = env.getRules()[rid_alpha.first];
 
@@ -330,13 +345,16 @@ pair<const simulation::Rule&,EventInfo*> State::drawRule(){
 		}
 	}
 	int radius = 0;//TODO
-	EventInfo* ev_p;
-	ev_p = selectInjection(rule.getLHS(),make_pair(a1a2.second,radius),
+	//EventInfo* ev_p;
+	selectInjection(rule.getLHS(),make_pair(a1a2.second,radius),
 			make_pair(a1a2.first,radius));
-	return pair<const simulation::Rule&,EventInfo*>(rule,ev_p);
+	return rule;
 }
 
 FL_TYPE State::event() {
+	/*if(counter.getEvent() == 234463)
+		cout << "aca!!!"
+				<< endl;*/
 	FL_TYPE dt,act;
 	act = activityTree->total();
 	if(act < 0.)
@@ -348,39 +366,55 @@ FL_TYPE State::event() {
 	}
 	//TODO perts
 
-	#if DEBUG
+	#ifdef DEBUG
 		printf("Event %3lu",counter.getEvent());
 		printf("  dt = %3.4f",dt);
 	#endif
-	EventInfo* ev = nullptr;
-	auto rule_eventp = drawRule();
-	ev = rule_eventp.second;
-	#if DEBUG
-		printf( "  | Rule: %-11.11s",rule_eventp.first.getName().c_str());
+	//EventInfo* ev = nullptr;
+	auto& rule = drawRule();
+	#ifdef DEBUG
+		printf( "  | Rule: %-11.11s",rule.getName().c_str());
 		cout << "  Root-node: ";
-		for(int i = 0; i < ev->cc_count; i++)
-			cout << ev->emb[i][0]->getAddress() << ",";
+		for(int i = 0; i < ev.cc_count; i++)
+			cout << ev.emb[i][0]->getAddress() << ",";
 		cout << endl;
 		//printf("  Root-node: %03lu\n",(ev->cc_count ?
 		//		ev->emb[0][0]->getAddress() : -1L));
 	#endif
-	apply(rule_eventp.first,*rule_eventp.second);
-	positiveUpdate(rule_eventp.first,*rule_eventp.second);
+	apply(rule);
+	positiveUpdate(rule);
 	//prepare negative_update
-	set<small_id> rule_ids;
-	for(auto cc : rule_eventp.second->to_update){
+	//set<small_id> rule_ids;
+	for(auto cc : ev.to_update){
 		for(auto r_id : cc->includedIn())
-			rule_ids.emplace(r_id);
+			ev.rule_ids.emplace(r_id);
 	}
 	//total update
-	for(auto r_id : rule_ids){
+	for(auto r_id : ev.rule_ids){
 		auto act = evalActivity(env.getRules()[r_id]);
 		activityTree->add(r_id,act.first+act.second);
 	}
-	counter.incNullActions(ev->warns);
-	delete ev;
+	counter.incNullActions(ev.warns);
 	return dt;
 
+}
+
+void State::updateDeps(const Deps::Dependency& d){
+	pattern::DepSet deps;
+	deps.emplace(d);
+	while(!deps.empty()){
+		auto& dep = *deps.begin();
+		switch(dep.type){
+		case Deps::RULE:
+			ev.rule_ids.emplace(dep.id);
+			break;
+			//auto act = evalActivity(env.getRules()[dep.id]);
+			//activityTree->add(dep.id,act.first+act.second);
+		}
+		deps.erase(deps.begin());
+		auto more_deps = env.getDependencies(dep);
+		deps.insert(more_deps.begin(),more_deps.end());
+	}
 }
 
 void State::initInjections() {
@@ -388,6 +422,7 @@ void State::initInjections() {
 		delete[] injections;
 	injections = new matching::InjRandSet[env.size<pattern::Mixture::Component>()];
 	for(auto node_p : graph){
+		//cout << node_p->toString(env) << endl;
 		unsigned i = 0;
 		for(auto& comp : env.getComponents()){
 			two<std::list<Node::Internal*> > port_lists;
@@ -397,7 +432,7 @@ void State::initInjections() {
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
-				if(!port_lists.first.size() && !port_lists.second.size())
+				if(port_lists.first.empty() && port_lists.second.empty())
 					node_p->addDep(inj_p);
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
 			}
@@ -408,6 +443,7 @@ void State::initInjections() {
 		}
 	}
 }
+
 void State::initActTree() {
 	if(activityTree)
 		delete activityTree;
@@ -424,7 +460,7 @@ void State::initActTree() {
 void State::print() const {
 	cout << "state with {SiteGraph.size() = " << graph.getPopulation();
 	//cout << "\n\tvolume = " << volume.getValue().valueAs<FL_TYPE>();
-	cout << "\n\tInjections {\n";
+	cout << "\n\tInjectionsss {\n";
 	int i = 0;
 	for(auto& cc : env.getComponents()){
 		if(injections[i].count())

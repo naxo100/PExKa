@@ -17,6 +17,7 @@
 #include "../simulation/Counter.h"
 #include "../simulation/Rule.h"
 #include "../data_structs/RandomTree.h"
+#include "../pattern/Dependencies.h"
 
 namespace simulation {
 	class Plot;
@@ -46,6 +47,7 @@ class State {
 	mutable default_random_engine randGen;
 	simulation::LocalCounter counter;
 	simulation::Plot& plot;
+	mutable EventInfo ev;
 	//time_t program_t0;
 
 	/** \brief Negative update of injections after apply a change to an agent site.
@@ -60,19 +62,19 @@ class State {
 	 * @param act Action to apply and target agents.
 	 * @param ev Embedding of nodes and other event information.
 	 */
-	void bind(const simulation::Rule::Action& act,EventInfo& ev);
-	void free(const simulation::Rule::Action& act,EventInfo& ev);
-	void modify(const simulation::Rule::Action& act,EventInfo& ev);
-	void del(const simulation::Rule::Action& act, EventInfo& ev);
+	void bind(const simulation::Rule::Action& act);
+	void free(const simulation::Rule::Action& act);
+	void modify(const simulation::Rule::Action& act);
+	void del(const simulation::Rule::Action& act);
 	//void add(const simulation::Rule::Action& a);
-	void positiveUpdate(const simulation::Rule& r,EventInfo& ev);
+	void positiveUpdate(const simulation::Rule& r);
 
 	/** \brief static vector with the basic rule action methods.
 	 */
-	static void (State::*action[4])(const simulation::Rule::Action&,EventInfo&);
+	static void (State::*action[4])(const simulation::Rule::Action&);
 
-	EventInfo* selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const;
-	EventInfo* selectUnaryInj(const pattern::Mixture& mix) const;
+	void selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const;
+	void selectUnaryInj(const pattern::Mixture& mix) const;
 
 
 public:
@@ -92,7 +94,7 @@ public:
 	 * @param n count of tokens (can be negative).
 	 * @param tok_id token id type to add.
 	 */
-	void addTokens(float n,int tok_id);
+	void addTokens(float n,unsigned tok_id);
 
 	float getTokenValue(unsigned tok_id) const;
 
@@ -103,7 +105,7 @@ public:
 	 */
 	void addNodes(unsigned n,const pattern::Mixture& mix);
 
-	unsigned mixInstances(const pattern::Mixture& mix) const;
+	UINT_TYPE mixInstances(const pattern::Mixture& mix) const;
 
 	two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
 
@@ -111,14 +113,16 @@ public:
 	 * @param r rule to apply.
 	 * @param ev embedding of nodes and other event information.
 	 */
-	void apply(const simulation::Rule& r,EventInfo& ev);
+	void apply(const simulation::Rule& r);
 
 	void advanceUntil(FL_TYPE sync_t);
 
+	void updateDeps(const pattern::Dependencies::Dependency& dep);
 
-	EventInfo* selectInjection(const pattern::Mixture &mix,two<FL_TYPE> bin_act,
+
+	void selectInjection(const pattern::Mixture &mix,two<FL_TYPE> bin_act,
 			two<FL_TYPE> un_act);
-	pair<const simulation::Rule&,EventInfo*> drawRule();
+	const simulation::Rule& drawRule();
 	FL_TYPE event();
 
 	void initInjections();

@@ -2,9 +2,9 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
-#define DEBUG true
+//#define DEBUG false //in make command
 
-typedef double FL_TYPE;
+typedef float FL_TYPE;
 typedef long INT_TYPE;
 typedef unsigned long UINT_TYPE;
 #define FRMT_FL "f"

@@ -17,7 +17,8 @@ namespace state {
 
 /********* Node Class ************/
 Node::Node(const pattern::Signature& sign) : signId(sign.getId()),address(-1),
-		intfSize(sign.getSiteCount()),deps(new matching::InjSet()){
+		intfSize(sign.getSiteCount()),deps(new InjSet()){
+	//deps->reserve(10);
 	interface = new Internal[intfSize];
 	for(int i = 0; i < intfSize; i++){
 		interface[i].val = sign.getSite(i).getDefaultValue();
@@ -33,7 +34,7 @@ Node& Node::operator=(const Node& node){
 }
 
 Node::Node(const Node& node,const map<Node*,Node*>& mask) :
-		signId(node.signId),address(-1),intfSize(node.intfSize),deps(new matching::InjSet()){
+		signId(node.signId),address(-1),intfSize(node.intfSize),deps(new InjSet()){
 	interface = new Internal[intfSize];
 	for(small_id i = 0; i < intfSize; i++){
 		interface[i].val = node.interface[i].val;
@@ -267,7 +268,7 @@ const pair<Node*,small_id>& Node::getLinkState(small_id id){
 	return interface[id].link;
 }
 
-pair<matching::InjSet*,matching::InjSet*>& Node::getLifts(small_id site){
+two<InjSet*>& Node::getLifts(small_id site){
 	return interface[site].deps;
 }
 
@@ -457,9 +458,10 @@ void SubNode::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* tr
 /********** Internal struct ************/
 
 Node::Internal::Internal() : val(small_id(-1)),link(nullptr,0),
-		deps(new matching::InjSet(),new matching::InjSet()){}
+		deps(new InjSet(),new InjSet()){}
 
 Node::Internal::~Internal(){
+	//cout << "deps count: " << deps.first->size() << " - " << deps.second->size() << endl;
 	delete deps.first;
 	delete deps.second;
 	deps.first = nullptr;
@@ -471,10 +473,11 @@ void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs){
 	negativeUpdate(ev,injs,deps.second);
 }
 
-void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,matching::InjSet* deps){
+void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,InjSet* deps){
 	auto dep_it = deps->begin();
 	auto nxt = dep_it;
-	while(dep_it != deps->end()){
+	auto end = deps->end();
+	while(dep_it != end){
 		auto inj = *dep_it;
 		nxt = next(dep_it);
 		if((*dep_it)->isTrashed())
@@ -486,18 +489,21 @@ void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,mat
 				if(emb[i]->removeDep(inj))
 					continue;
 				auto& mix_ag = cc.getAgent(i);
+				//int n = 0;
+				//int m = 1;
 				for(auto& id_site : mix_ag){
 					if(id_site.second.link_type != pattern::Pattern::WILD)
-						emb[i]->getLifts(id_site.first).second->erase(inj);
+						/*m++,n += */emb[i]->getLifts(id_site.first).second->erase(inj);
 					switch(id_site.second.state.t){
 					case BaseExpression::SMALL_ID:
 						if(!id_site.second.isEmptySite())
-							emb[i]->getLifts(id_site.first).first->erase(inj);
+							/*m++,n += */emb[i]->getLifts(id_site.first).first->erase(inj);
 						break;
 					default:
 						break;//TODO other types of values
 					}
 				}
+				//cout << "erase calls = " << m << " || erased elems = " << n << endl;
 			}
 			injs[cc.getId()].erase(inj);
 			//delete *dep_it;//TODO reuse injections
@@ -562,7 +568,7 @@ EventInfo::EventInfo() : emb(nullptr),cc_count(0),fresh_emb(nullptr),warns(0) {}
 
 EventInfo::~EventInfo(){
 	if(emb){
-		for(small_id i = 0; i < cc_count; i++)
+		for(small_id i = 0; i < 4; i++)
 			delete[] emb[i];
 		delete[] emb;
 	}

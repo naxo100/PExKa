@@ -13,13 +13,25 @@
 #include <queue>
 #include "../pattern/Signature.h"
 #include "../pattern/Mixture.h"
+#include "../data_structs/SimpleSet.h"
+#include <unordered_set>
 //#include "../matching/Injection.h"
+//#include <boost/fusion/container/set.hpp>
+//#include <boost/fusion/include/set.hpp>
+//#include <boost/fusion/container/set/set_fwd.hpp>
+//#include <boost/fusion/include/set_fwd.hpp>
+
 
 namespace matching {
-	class InjSet;
+	//class InjSet;
 	class InjRandSet;
 	class Injection;
 }
+
+//typedef data_structs::SimpleSet<matching::Injection*> InjSet;
+typedef set<matching::Injection*> InjSet;
+//typedef unordered_set<matching::Injection*> InjSet;
+//typedef boost::container::set<matching::Injection*> InjSet;
 
 namespace state {
 
@@ -36,7 +48,7 @@ protected:
 	big_id address;
 	Internal *interface;
 	small_id intfSize;
-	matching::InjSet* deps;
+	InjSet* deps;
 
 	Node(const Node& node);
 	Node& operator=(const Node& node);
@@ -85,7 +97,7 @@ public:
 
 	void addDep(matching::Injection* inj);
 	bool removeDep(matching::Injection* inj);
-	pair<matching::InjSet*,matching::InjSet*>& getLifts(small_id site);
+	two<InjSet*>& getLifts(small_id site);
 	//DEBUG
 	virtual string toString(const pattern::Environment &env,bool show_binds = false) const;
 
@@ -95,12 +107,12 @@ struct Node::Internal {
 	SomeValue val;
 	pair<Node*,small_id> link;
 	//for value, for link //TODO refs????
-	pair<matching::InjSet*,matching::InjSet*> deps;//pointers to accept forward declaration of InjSet
+	two<InjSet*> deps;//pointers to accept forward declaration of InjSet
 	Internal();
 	~Internal();
 
 	void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs);
-	static void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,matching::InjSet* deps);
+	static void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,InjSet* deps);
 
 
 	string toString(const pattern::Signature::Site& s,bool show_binds = false) const;
@@ -173,6 +185,7 @@ struct EventInfo {
 	map<matching::Injection*,matching::Injection*> inj_mask;
 
 	set<const pattern::Pattern*> to_update;
+	set<small_id> rule_ids;
 
 	EventInfo();
 	~EventInfo();

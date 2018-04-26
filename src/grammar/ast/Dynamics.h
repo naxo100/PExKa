@@ -220,7 +220,8 @@ public:
 	Rate(const location &l,const Expression *def,const bool fix,const Radius *un);
 	Rate(const location &l,const Expression *def,const bool fix,const Expression *op);
 	const state::BaseExpression* eval(const pattern::Environment& env,simulation::Rule& r,
-			const vector<state::Variable*> &vars,bool is_bi = false) const;
+			const vector<state::Variable*> &vars,two<pattern::DepSet>& deps,
+			bool is_bi = false) const;
 	~Rate();
 };
 

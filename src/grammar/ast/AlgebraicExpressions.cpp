@@ -61,7 +61,7 @@ void Const::show( string tabs ) const {
 }
 
 BaseExpression* Const::eval(const pattern::Environment& env,
-		const VAR &vars,
+		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
 	BaseExpression* cons;
 	switch(type){
@@ -99,10 +99,10 @@ BoolBinaryOperation::BoolBinaryOperation(const location &l,const Expression *e1,
 		Expression(l),exp1(e1),exp2(e2),op(o){}
 
 BaseExpression* BoolBinaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,
+		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
-	BaseExpression* ex1 = exp1->eval(env,vars,flags);
-	BaseExpression* ex2 = exp2->eval(env,vars,flags);
+	BaseExpression* ex1 = exp1->eval(env,vars,deps,flags);
+	BaseExpression* ex2 = exp2->eval(env,vars,deps,flags);
 
 	return BaseExpression::makeBinaryExpression<true>(ex1,ex2,op);
 }
@@ -127,10 +127,10 @@ AlgBinaryOperation::AlgBinaryOperation(const location &l,const Expression *e1,
 		Expression(l),exp1(e1),exp2(e2),op(o){};
 
 BaseExpression* AlgBinaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,
+		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
-	BaseExpression* ex1 = exp1->eval(env,vars,flags);
-	BaseExpression* ex2 = exp2->eval(env,vars,flags);
+	BaseExpression* ex1 = exp1->eval(env,vars,deps,flags);
+	BaseExpression* ex2 = exp2->eval(env,vars,deps,flags);
 
 	return BaseExpression::makeBinaryExpression<false>(ex1,ex2,op);
 }
@@ -154,7 +154,7 @@ UnaryOperation::UnaryOperation(const location &l,const Expression *e,
 		const BaseExpression::Unary f):
 		Expression(l),exp(e),func(f){};
 BaseExpression* UnaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,
+		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
 	return new Constant<int>(0);
 }
@@ -174,7 +174,7 @@ void UnaryOperation::show( string tabs ) const {
 
 /****** Class NullaryOperation ******/
 BaseExpression* NullaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,
+		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
 	return new Constant<int>(0);
 }
@@ -196,14 +196,22 @@ Var::Var(const location &l,const VarType &t,const Id &label):
 	Expression(l),name(label),type(t){};
 
 BaseExpression* Var::eval(const pattern::Environment& env,
-		const Expression::VAR &vars,
+		const Expression::VAR &vars,pattern::DepSet* deps,
 		const char flags) const {
 	BaseExpression* expr;
 	switch(type){
 	case VAR:
 		try {
-			short id = env.getVarId(name.getString());
+			unsigned id = env.getVarId(name.getString());
 			expr = vars[id];
+			if(deps){
+				auto* kappa = dynamic_cast<state::KappaVar*>(vars[id]);
+				if(kappa)
+					for(auto cc : kappa->getMix())
+						deps->emplace(pattern::Dependencies::KAPPA,cc->getId());
+				else
+					deps->emplace(pattern::Dependencies::VAR,id);
+			}
 		}
 		catch(const std::out_of_range &e){
 			throw SemanticError("Variable or constant '"+name.getString()+
@@ -219,6 +227,8 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 	case TOKEN:
 		try {
 			auto id = env.getTokenId(name.getString());
+			if(deps)
+				deps->emplace(pattern::Dependencies::TOK,id);
 		}
 		catch(const std::out_of_range &e){
 			throw SemanticError("Token '"+name.getString()+

@@ -64,7 +64,7 @@ list<const state::BaseExpression*> CompExpression::evalExpression(const pattern:
 	auto& dims = env.getCompartment(comp_id).getDimensions();
 	int i = 0;
 	for(auto index : indexList){
-		auto expr = index->eval(env,vars,Expression::AUX_ALLOW);
+		auto expr = index->eval(env,vars,nullptr,Expression::AUX_ALLOW);
 		try{
 			int d = expr->getValue().valueAs<int>();
 			if(d < 0 || d >= dims[i])
@@ -91,7 +91,7 @@ void Compartment::eval(pattern::Environment &env,const vector<Variable*> &vars){
 	const Id& name = comp.evalName(env,true);
 	pattern::Compartment& c = env.declareCompartment(name);
 	vector<short> dims = comp.evalDimensions(env,vars);
-	state::BaseExpression* vol = volume->eval(env,vars,Expression::CONST);
+	state::BaseExpression* vol = volume->eval(env,vars,nullptr,Expression::CONST);
 	c.setDimensions(dims);
 	c.setVolume(vol);
 	return;

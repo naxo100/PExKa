@@ -13,6 +13,7 @@
 #include "../location.hh"
 #include "../../state/Variable.h"
 #include "../../pattern/Environment.h"
+#include "../../pattern/Dependencies.h"
 
 //#define DEBUG
 
@@ -62,7 +63,7 @@ public:
 	virtual ~Expression()=0;
 
 	virtual state::BaseExpression* eval(const pattern::Environment& env,
-			const VAR &vars,
+			const VAR &vars,pattern::DepSet* deps = nullptr,
 			const char flags = 0) const;
 	virtual bool isConstant();
 	virtual Expression* clone() const = 0;

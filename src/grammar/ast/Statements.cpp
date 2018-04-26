@@ -104,7 +104,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 	}
 	else {
 		char flag = constant ? Expression::CONST : 0;
-		BaseExpression* b_expr = expr->eval(env,vars,flag);
+		BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
 		switch(b_expr->getType()){
 		case BaseExpression::FLOAT:
 			var = new state::AlgebraicVar<FL_TYPE>(id,name.getString(),false,
@@ -137,7 +137,7 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 		throw SemanticError("Constants can not depend on agent mixtures.",loc);
 	else {
 		char flag = constant ? Expression::CONST : 0;
-		BaseExpression* b_expr = expr->eval(env,vars,flag);
+		BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
 		switch(b_expr->getType()){
 		case BaseExpression::FLOAT:
 			var = new state::ConstantVar<FL_TYPE>(id,name.getString(),
@@ -232,7 +232,7 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		if(alg == nullptr)
 			throw std::invalid_argument("Null value for token init.");
 		else
-			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<FL_TYPE>();
+			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue().valueAs<FL_TYPE>();
 		tok_id = env.getTokenId(token.getString());
 		sim.addTokens(cells,tok_id,n);
 	}
@@ -241,7 +241,7 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		if(alg == nullptr)
 			throw std::invalid_argument("Null value for mix init.");
 		else
-			n = alg->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
+			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue().valueAs<int>();
 		auto mix = mixture.eval(env,vars,false);
 		mix->setComponents();
 		sim.addAgents(cells,n,*mix);

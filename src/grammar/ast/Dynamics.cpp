@@ -123,12 +123,12 @@ bool SiteState::evalRange(pattern::Environment &env,const vector<state::Variable
 		BaseExpression** expr_values) const{
 	//using ast::Expression::VAR;
 	//using ast::Expression::FLAGS;
-	expr_values[0] = range[0]->eval(env,consts,
+	expr_values[0] = range[0]->eval(env,consts,nullptr,
 			Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
-	expr_values[2] = range[2]->eval(env,consts,
+	expr_values[2] = range[2]->eval(env,consts,nullptr,
 			Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
 	if(range[1] != nullptr)
-		expr_values[1] = range[1]->eval(env,consts,
+		expr_values[1] = range[1]->eval(env,consts,nullptr,
 					Expression::FLAGS::FORCE | Expression::FLAGS::CONST);
 	else
 		expr_values[1] = expr_values[0];
@@ -264,7 +264,7 @@ void Site::eval(const pattern::Environment &env,const vector<Variable*> &consts,
 		//agent.setS
 		break;
 	case SiteState::EXPR:
-		num = stateInfo.val->eval(env,consts,Expression::CONST);
+		num = stateInfo.val->eval(env,consts,nullptr,Expression::CONST);
 		sign->getSite(site_id).isPossibleValue(num->getValue());
 		break;
 	}
@@ -565,10 +565,10 @@ Rate::~Rate(){
 }
 
 const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulation::Rule& r,
-		const vector<state::Variable*> &vars,bool is_bi) const {
+		const vector<state::Variable*> &vars,two<pattern::DepSet> &deps,bool is_bi) const {
 	if(!base)
 		throw std::invalid_argument("Base rate cannot be null.");
-	auto base_rate = base->eval(env,vars,0);
+	auto base_rate = base->eval(env,vars,&deps.first,0);
 	r.setRate(base_rate);
 	if(is_bi){
 		if(unary)
@@ -577,17 +577,17 @@ const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulati
 			WarningStack::getStack().emplace_back(
 				"Assuming same rate for both directions of bidirectional rule.",loc);
 		else{
-			return reverse->eval(env,vars,0);
+			return reverse->eval(env,vars,&deps.second,0);
 		}
 	}
 	else{
 		if(reverse)
 			throw SemanticError("Reverse rate defined for unidirectional rule.",loc);
 		if(unary){
-			auto un_rate = unary->k1->eval(env,vars,0);
+			auto un_rate = unary->k1->eval(env,vars,&deps.first,0);
 			int radius = 0;
 			if(unary->opt){
-				radius = unary->opt->eval(env,vars,Expression::CONST)->getValue().valueAs<int>();
+				radius = unary->opt->eval(env,vars,&deps.first,Expression::CONST)->getValue().valueAs<int>();
 			}
 			r.setUnaryRate(make_pair(un_rate,radius));
 		}
@@ -664,7 +664,8 @@ void Rule::eval(pattern::Environment& env,
 	auto& rule = env.declareRule(label,lhs_mix);
 
 	lhs_mix.addInclude(rule.getId());
-	auto reverse = rate.eval(env,rule,vars,bi);
+	two<pattern::DepSet> deps;
+	auto reverse = rate.eval(env,rule,vars,deps,bi);
 	auto rhs_mix_p = rhs.agents.eval(env,vars,true);
 	vector<pattern::ag_st_id> rhs_mask;
 	for(auto& t : lhs.tokens)
@@ -687,6 +688,8 @@ void Rule::eval(pattern::Environment& env,
 			inverse_rule.addTokenChange(t.eval(env,vars,true));
 		for(auto& t : lhs.tokens)
 			inverse_rule.addTokenChange(t.eval(env,vars));
+		for(auto& dep : deps.second)
+			env.addDependency(dep,pattern::Dependencies::RULE,inverse_rule.getId());
 	}
 	else{
 		rhs_mix_p->declareAgents(env,false);
@@ -695,6 +698,8 @@ void Rule::eval(pattern::Environment& env,
 	}
 	//DEBUG cout << lhs_mix.toString(env,lhs_mask) << " -> " << rhs_mix_p->toString(env,rhs_mask) << endl;
 	rule.difference(env,lhs_mask,rhs_mask);
+	for(auto& dep : deps.first)
+		env.addDependency(dep,pattern::Dependencies::RULE,rule.getId());
 }
 
 size_t Rule::getCount(){

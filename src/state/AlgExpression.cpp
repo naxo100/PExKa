@@ -178,6 +178,10 @@ SomeValue AlgExpression<T>::getValue(const state::State& state) const{
 	return SomeValue(this->evaluate(state));
 }
 
+template class AlgExpression<FL_TYPE>;
+template class AlgExpression<int>;
+template class AlgExpression<bool>;
+
 /******* Constant ************/
 template <typename T >
 Constant<T>::Constant(T v) : val(v){}
@@ -253,8 +257,10 @@ BinaryOperation< R, T1, T2>::BinaryOperation
 
 template <typename R,typename T1,typename T2>
 BinaryOperation< R, T1, T2>::~BinaryOperation(){
-	delete exp1;
-	delete exp2;
+	if(!dynamic_cast<const Variable*>(exp1))
+		delete exp1;
+	if(!dynamic_cast<const Variable*>(exp2))
+		delete exp2;
 }
 
 template <typename R,typename T1,typename T2>

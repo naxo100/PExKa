@@ -31,6 +31,7 @@ void Simulation::setCells(list<unsigned int>& _cells){
 }
 
 void Simulation::initialize(){
+	env.buildFreeSiteCC();
 	for(auto& id_state : cells){
 		id_state.second.initInjections();
 		id_state.second.initActTree();

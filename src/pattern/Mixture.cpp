@@ -50,8 +50,8 @@ Mixture::~Mixture() {
 	links.clear();
 	if(!declaredComps)
 		for(auto comp : *comps){
-			for(auto ag : *comp)
-				delete ag;
+			//for(auto ag : *comp)
+			//	delete ag;
 			delete comp;
 		}
 	if(comps)
@@ -317,15 +317,15 @@ const vector<Mixture::Component*>::iterator Mixture::end() const {
 }
 
 string Mixture::toString(const Environment& env) const {
-	string out = "";
+	string out = "Agents: " + to_string(agentCount) + "\tComponents: " + to_string(compCount) + "\n";
 	short i = 0;
 
 	for( auto c : *comps ) {
-		out += "Component[" + to_string(i) + "] = " + c->toString(env) + "\n";
+		out += "[" + to_string(i) + "] -> " + c->toString(env) + ", ";
 		i++;
 	}
 
-	return out + "\nAgents: " + to_string(agentCount) + "\nComponents: " + to_string(compCount) + "\n";
+	return out;
 }
 
 string Mixture::toString(const Environment& env,const vector<ag_st_id>& mask) const {

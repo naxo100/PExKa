@@ -1,53 +1,16 @@
-%var: 'y' 3
-%var: 'x' 3/5.0 + 10*5.1 + 100^2 + (5 = 3)
+
+%agent: A(s~1~2~3,t~1~2)
+%agent: B(t)
+
+%var: '1' A(s~3)
+#%var: '2' A(s)
+#%var: '3' A(s!1),B(t!1)
+#%var: '4' A(s!_)
+%var: '5' A(s~3,t?)
 
 
-%const: 'a' 0.0
-%var: 'a2' 1.1
-
-%compartment: 'bottles'[1][1] 1.0
-#%compartment: 'cities'[10] 5.0
-
-%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x+1][y] $'a'
-%channel: 'tube' 'bottles'[x][y] <-> 'bottles'[x][y+1] $0.1
-#%channel: 'tube3' 'bottles'[0][0] -> 'bottles'[2][2] 
-#%channel: 'highway' 'cities'[x] -> 'cities'[x+1] $5
-
-%agent: A(s~1~2~3,t~1,v~[-1,1](-'a'),z)
-%agent: B(s,i~1~2)
-%agent: S(s,t,u,v,w,x)
-%token: a
-
-%var: 'some kappa' A(s~2,z!1),A(z!4),B(s!1,i~2!5),A(z!4,s~3),B(s!5)
-%var: 'other kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
-%var: 'same kappa' A(),A(z!2),A(z!2),A(z!1,s~3),A(z!1)
-
-%var: 'other kappa2' S(s!1,x!6),S(s!1,t!2),S(t!2,u!3),S(u!3,v!4),S(v!4,w!5),S(w!5,x!6)
-%var: 'loop kappa' A(v!6,t!1),A(s!2,v!3),A(z!4,v!5),A(s!1,t!2),A(z!3,t!4),A(s!5,z!6)
-%var: 'kappa site.agent' A(v!v.A)
-
-%var: 'agent1' A(s~3,z!_,t~1)
-
-%var: 'As' A(s~1?)
-%var: 'As1' A(s~1!_)
-%var: 'A' A()
-
-#%use: 'bottles'[x + 1][x]#,'cities'[3*x]
-#%init: 2 A(s)
-%use: 'bottles'[x][y]
-%init: 4 A(s~2)
-
-'unbind' A(s!1),B(i!1) -> A(s),B(i) @ 1
-'bind' A(s~1),B(i~1) -> A(s~1!1),B(i~1!1) @1
-
-#%var: 'ast1' A(s,t~1)
-#%var: 'as1t' A(s~1,t)
-
-
-'hola' A(s~1),B(s) -> A(s~2),B(s!1),S(s!1) @ 1.0
-
-'chao' A(s~2) -> B() @ 0.4
-
-'chaito' A(s!1),B(s!1) -> A(s),B(s) @ 2
-
-'a.b5 birule' A(s~3) <-> B(i~1) @ 1,2
+%init: 30 A(s~3)
+%init: 10 A(s)
+%init: 1 A()
+%init: 200 A(s!1),B(t!1)
+%init: 1000 A(s~2!1),B(t!1)

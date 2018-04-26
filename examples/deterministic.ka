@@ -1,0 +1,38 @@
+
+%agent: A(s~1~2)
+%agent: B(s~1~2)
+%agent: C(s)
+
+%var: 'As' A()
+%var: 'Bs' B()
+%var: 'Cs' C()
+%var: 'B(s2)s' B(s~2?)
+%var: 'A(s2)s' A(s~2?)
+
+%init: 100000 B()
+
+#create
+'create A'  -> A() @ 1
+
+
+#change
+'change B' B(s~1) -> B(s~2) @ 0
+
+
+#bind
+'bind AB' A(s),B(s~2) -> A(s!1),B(s~2!1),C() @ 0
+
+
+#unbind
+'unbind AB' A(s~1!1),B(s!1) -> A(s~2),B(s) @ 0
+
+
+#delete
+'delete B' B(s~2) -> @ 0
+
+
+
+%mod: 'As' = 100000 do $UPDATE 'create A' 0; $UPDATE 'change B' 1
+%mod: 'B(s2)s' = 100000 do $UPDATE 'change B' 0; $UPDATE 'bind AB' 0.3
+%mod: 'Cs' = 100000 do $UPDATE 'bind AB' 0; $UPDATE 'unbind AB' 1
+%mod: 'A(s2)s' = 100000 do $UPDATE 'unbind AB' 0; $UPDATE 'delete B' 1 

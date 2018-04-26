@@ -6,10 +6,10 @@
 %agent: Prey(i)
 %agent: Feed(i,j)
 
-%const: 'feed-rate' 0.1
-%const: 'prey-rep-rate' 0.8
-%const: 'pred-rep-rate' 100
-%const: 'die-rate' 1
+%var: 'feed-rate' 0.1
+%var: 'prey-rep-rate' 0.8
+%var: 'pred-rep-rate' 100
+%var: 'die-rate' 1
 
 'feed'		Feed(i!_,j),Prey(i) -> Feed(i!_,j!1),Feed(i!1) \
 											@ 'feed-rate'
@@ -20,11 +20,11 @@
  											@ 'pred-rep-rate'
 'die'		Pred(i!1),Feed(i!1,j) ->		@ 'die-rate'
 
-'clean'		Feed(i) -> 						@ 9999999999#[inf]
+'clean'		Feed(i) -> 					@ 9999999999#[inf]
 
 
-%init: 100 Prey()
-%init: 10 Pred(i!1),Feed(i!1)
+%init: 50 Prey()
+%init: 5 Pred(i!1),Feed(i!1,j)
 
 %obs: 'Prey' Prey()
 %obs: 'Pred' Pred()

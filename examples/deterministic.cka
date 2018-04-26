@@ -1,0 +1,32 @@
+
+%agent: A(s~1~2)
+%agent: B(s~1~2)
+%agent: C(s)
+
+%var: 'As' A()
+%var: 'Bs' B()
+%var: 'Cs' C()
+%var: 'B(s2)s' B(s~2?)
+%var: 'A(s2)s' A(s~2?)
+
+%init: 100000 B()
+
+#create
+'create A'  -> A() @ 1 - ('As'/100000)
+
+
+#change
+'change B' B(s~1) -> B(s~2) @ ('As'/100000)
+
+
+#bind
+'bind AB' A(s),B(s~2) -> A(s!1),B(s~2!1),C() @ 0.001 * ('B(s2)s'/100000) * (1 - 'Cs'/100000)
+
+
+#unbind
+'unbind AB' A(s~1!1),B(s!1) -> A(s~2),B(s) @ 1 * ('Cs'/100000)
+
+
+#delete
+'delete B' B(s~2) -> @ 1 * ('A(s2)s'/100000)
+

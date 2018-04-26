@@ -19,16 +19,16 @@
 'tlrv' mRNA(enc~REVERBa,loc~cyto) -> mRNA(enc~REVERBa,loc~cyto),REV_ERBa(loc~cyto,rore) @ 2.53
 
 #Chapter 'Transcription'
-'trPo' GENE(id~PER1,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5) -> \
-	GENE(id~PER1,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5),mRNA(enc~PER1,loc~nuc) @ 9415.947
-'trPt' GENE(id~PER2,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5) -> \
-	GENE(id~PER2,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5),mRNA(enc~PER2,loc~nuc) @ 3601.244
-'trRo'GENE(id~CRY1,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4)->\
-	GENE(id~CRY1,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4),mRNA(enc~CRY1,loc~nuc) @105.3084
-'trRt' GENE(id~CRY2,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4)->\
-	GENE(id~CRY2,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4),mRNA(enc~CRY2,loc~nuc) @89.3318
-'trRv' GENE(id~REVERBa,S1!1,S2!2,S3!3,S4,S5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3) -> \
-	GENE(id~REVERBa,S1!1,S2!2,S3!3,S4,S5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),mRNA(enc~REVERBa,loc~nuc) @ 0.58
+'trPo' 	GENE(id~PER1,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5) -> \
+		GENE(id~PER1,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5),mRNA(enc~PER1,loc~nuc) @ 9415.947
+'trPt' 	GENE(id~PER2,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5) -> \
+		GENE(id~PER2,S1!1,S2!2,S3!3,S4!4,S5!5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),EBOX_CLK_BMAL1(cry,gene!4),EBOX_CLK_BMAL1(cry,gene!5),mRNA(enc~PER2,loc~nuc) @ 3601.244
+'trRo'	GENE(id~CRY1,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4)->\
+		GENE(id~CRY1,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4),mRNA(enc~CRY1,loc~nuc) @105.3084
+'trRt' 	GENE(id~CRY2,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4)->\
+		GENE(id~CRY2,S1!1,S2!2,S3!3,S4!4,S5),EBOX_CLK_BMAL1(cry,gene!1),RORE(REV_ERBa,gene!2),RORE(REV_ERBa,gene!3),RORE(REV_ERBa,gene!4),mRNA(enc~CRY2,loc~nuc) @89.3318
+'trRv' 	GENE(id~REVERBa,S1!1,S2!2,S3!3,S4,S5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3) -> \
+		GENE(id~REVERBa,S1!1,S2!2,S3!3,S4,S5),EBOX_CLK_BMAL1(cry,gene!1),EBOX_CLK_BMAL1(cry,gene!2),EBOX_CLK_BMAL1(cry,gene!3),mRNA(enc~REVERBa,loc~nuc) @ 0.58
 
 #Chapter 'Degradation'
 'uRv' REV_ERBa() -> @ 16.25

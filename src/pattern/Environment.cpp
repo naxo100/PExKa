@@ -145,13 +145,13 @@ Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bo
 	auto& new_agent = agentPatterns[new_ag->getId()].back();
 	for(auto& sites_ag : less)
 		for(auto site : sites_ag.first){
-			//if (is_lhs)
+			if (is_lhs)
 				sites_ag.second->addParent(site,&new_agent);
 			new_agent.addChild(site,sites_ag.second);
 		}
 	for(auto& sites_ag : greater)
 		for(auto site : sites_ag.first){
-			//if (is_lhs)
+			if (is_lhs)
 				sites_ag.second->addChild(site,&new_agent);
 			new_agent.addParent(site,sites_ag.second);
 		}
@@ -180,6 +180,27 @@ void Environment::buildInfluenceMap() {
 	for(auto& r : rules)
 		r.checkInfluence(*this);
 }
+void Environment::buildFreeSiteCC() {
+	for(auto& ag_class : agentPatterns){
+		for(auto ag : ag_class){
+			for(auto& site_id : ag){
+				if(site_id.second.link_type == Pattern::FREE){
+					auto& l = freeSiteCC[(ag.getId() << sizeof(small_id)) + site_id.first];
+					l.insert(l.end(),ag.getIncludes().begin(),ag.getIncludes().end());
+				}
+			}
+		}
+	}
+}
+
+const list<pair<const Mixture::Component*,small_id> >& Environment::getFreeSiteCC(small_id ag,small_id site) const{
+	static list<pair<const Mixture::Component*,small_id> > l;
+	try{
+		return freeSiteCC.at((ag << sizeof(small_id)) + site);
+	}
+	catch(std::out_of_range& ex){}
+	return l;
+}
 
 short Environment::getVarId(const string &s) const {
 	return varMap.at(s);
@@ -193,7 +214,7 @@ short Environment::getCompartmentId(const string &s) const {
 short Environment::getSignatureId(const string &s) const {
 	return signatureMap.at(s);
 }
-short Environment::getTokenId(const string &s) const {
+unsigned Environment::getTokenId(const string &s) const {
 	return tokenMap.at(s);
 }
 
@@ -287,6 +308,13 @@ void Environment::reserve<simulation::Rule>(size_t count) {
 	rules.reserve(count);
 }
 
+const DepSet& Environment::getDependencies(const Dependencies::Dependency& dep) const{
+	return deps.getDependencies(dep).deps;
+}
+void Environment::addDependency(Dependencies::Dependency key,Dependencies::Dep dep,unsigned id){
+	deps.addDependency(key,dep,id);
+}
+
 
 //DEBUG methods
 
@@ -298,11 +326,11 @@ std::string Environment::cellIdToString(unsigned int cell_id) const {
 void Environment::show() const {
 	try{
 		cout << "This is the environment content" << endl;
-		cout << "\tCompartments[" << compartments.size() << "]" << endl;
+		cout << "\t\tCompartments[" << compartments.size() << "]" << endl;
 		for(unsigned int i = 0; i < compartments.size() ; i++)
 			cout << (i+1) << ") " << compartments[i].toString() << endl;
 
-		cout << "\tUseExpressions[" << useExpressions.size() << "]" << endl;
+		cout << "\n\t\tUseExpressions[" << useExpressions.size() << "]" << endl;
 		for(auto& use_expr : useExpressions){
 			cout << "list of cells: " ;
 			for(auto cell_id : use_expr.getCells())
@@ -310,7 +338,7 @@ void Environment::show() const {
 			cout << endl;
 		}
 
-		cout << "\tChannels[" << channels.size() << "]" << endl;
+		cout << "\n\t\tChannels[" << channels.size() << "]" << endl;
 		for(unsigned int i = 0; i < channels.size() ; i++){
 			cout << (i+1) << ") ";
 			for(list<Channel>::const_iterator it = channels[i].cbegin();it != channels[i].cend();it++){
@@ -319,12 +347,12 @@ void Environment::show() const {
 				it->printConnections(l);
 			}
 		}
-		cout << "\tAgentPatterns[" ;
+		cout << "\n\t\tAgentPatterns[" ;
 		int count = 0;
 		for(auto& ag_list : agentPatterns)
 			count += ag_list.size();
 		cout << count << "]" << endl;
-		for(auto& ap_list : agentPatterns)
+		/*for(auto& ap_list : agentPatterns)
 			for(auto& ap : ap_list){
 				for(auto& site_ptrns : ap.getParentPatterns()){
 					cout << this->getSignature(ap.getId()).getSite(site_ptrns.first).getName()
@@ -342,17 +370,17 @@ void Environment::show() const {
 					cout << "}, ";
 				}
 				cout << endl;
-			}
-		cout << "\tComponents[" << components.size() << "]" << endl;
-		cout << "\tMixtures[" << mixtures.size() << "]" << endl;
+			}*/
+		cout << "\n\t\tComponents[" << components.size() << "]" << endl;
 		int i = 0;
-		for(auto& mix : mixtures){
-			cout << (i+1) << ") ";
-			cout << mix.toString(*this) << endl;
-			i++;
+		for(auto& comp : components){
+			cout << "[" << comp.getId() << "] -> ";
+			cout << comp.toString(*this) << endl;
+			//i++;
 		}
+		cout << "\n\t\tMixtures[" << mixtures.size() << "]" << endl;
 
-		cout << "\tRules[" << rules.size() << "]" << endl;
+		cout << "\n\t\tRules[" << rules.size() << "]" << endl;
 		i = 0;
 		for(auto& rul : rules){
 			cout << (i+1) << ") ";
@@ -360,9 +388,9 @@ void Environment::show() const {
 			cout << "influence-cc: (" << rul.getInfluences().size() << ")" << endl;
 			for(auto& inf : rul.getInfluences()){
 				cout << "\t" << inf.first->toString(*this);
-				cout << "  (" << inf.second.node_id.size() << ")" << endl;
+				cout << "  (" << inf.second.node_id.size() << ") ;";
 			}
-			//cout << endl;
+			cout << endl;
 			i++;
 		}
 

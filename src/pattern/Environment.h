@@ -16,6 +16,7 @@
 #include "Compartment.h"
 #include "Channel.h"
 #include "Mixture.h"
+#include "Dependencies.h"
 #include "../simulation/Rule.h"
 //#include "../state/AlgExpression.h"
 //#include "../grammar/ast/Basics.h"
@@ -55,6 +56,10 @@ protected:
 	vector<list<Mixture::Agent> > agentPatterns;
 	vector<simulation::Rule> rules;
 	list<state::Variable*> observables;
+	mutable Dependencies deps;//mutable because [] accessing
+
+	//(ag_id,site) -> list { (cc,ag_id) }
+	unordered_map<int,list<pair<const Mixture::Component*,small_id> > > freeSiteCC;
 
 	bool exists(const string &name,const IdMap &map);
 public:
@@ -75,6 +80,8 @@ public:
 	void declareObservable(state::Variable* obs);
 
 	void buildInfluenceMap();
+	void buildFreeSiteCC();
+	const list<pair<const Mixture::Component*,small_id> >& getFreeSiteCC(small_id ag,small_id site) const;
 
 	const Signature& getSignature(short id) const;
 	const vector<Signature>& getSignatures() const;
@@ -96,9 +103,12 @@ public:
 	short getChannelId(const string &name) const;
 	short getCompartmentId(const string &name) const;
 	short getSignatureId(const string &name) const;
-	short getTokenId(const string &name) const;
+	unsigned getTokenId(const string &name) const;
 
 	state::BaseExpression* getVarExpression(const string &name) const;
+
+	const DepSet& getDependencies(const Dependencies::Dependency& dep) const;
+	void addDependency(Dependencies::Dependency key,Dependencies::Dep dep,unsigned id);
 
 	template <typename T>
 	size_t size() const;

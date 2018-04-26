@@ -17,24 +17,33 @@ namespace pattern {
 
 using namespace std;
 class Dependencies {
-	enum Dep : char {TIME,EVENT,KAPPA,VAR,RULE,PERT};
+public:
+	enum Dep : char {TIME,EVENT,KAPPA,TOK,VAR,RULE,PERT};
 	struct Dependency {
-		Dep dep;
+		Dep type;
 		unsigned int id;
+		Dependency(Dep d,unsigned i);
+		bool operator<(const Dependency& d) const;
 	};
-	struct DepSet {
+	struct DepSet2 {
 		set<Dependency> deps;
-		list<Dependency> ordered_deps;
+		list<Dependency> ordered_deps;//todo idea to improve time execution in time perturbations?
 	};
-	map< Dependency , DepSet > deps;
+protected:
+	map< Dependency , DepSet2 > deps;
 public:
 	Dependencies();
 	~Dependencies();
 
 	void addDependency(Dependency key,Dep d, unsigned int id);
-	DepSet getDependencies(Dependency d);
+	const DepSet2& getDependencies(Dependency d);
 };
 
+typedef set<Dependencies::Dependency> DepSet;
+
+
 } /* namespace pattern */
+
+
 
 #endif /* PATTERN_DEPENDENCIES_H_ */

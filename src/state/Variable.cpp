@@ -88,4 +88,8 @@ int KappaVar::evaluate(const state::State& state) const {
 	return state.mixInstances(mixture);
 }
 
+const pattern::Mixture& KappaVar::getMix() const {
+	return mixture;
+}
+
 } /* namespace state */

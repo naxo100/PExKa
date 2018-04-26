@@ -64,7 +64,7 @@ public:
 };
 
 class KappaVar : public AlgExpression<int>, public Variable {
-	pattern::Mixture mixture;
+	const pattern::Mixture& mixture;
 public:
 	KappaVar(const short var_id, const std::string &nme,const bool is_obs,
 			const pattern::Mixture &kappa);
@@ -72,6 +72,8 @@ public:
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	virtual int evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	virtual int evaluate(const state::State& state) const override;
+
+	const pattern::Mixture& getMix() const;
 
 };
 

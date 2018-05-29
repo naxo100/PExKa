@@ -126,13 +126,13 @@ short_id Node::getId() const{
 	return signId;
 }
 
-Node* Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
+bool Node::test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site,
 		two<list<Internal*> > &port_list) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
 		//if(memcmp(&port.val,&id_site.second.state,sizeof(state::SomeValue)))
 		if(port.val.fVal != id_site.second.state.fVal || port.val.t != id_site.second.state.t )
-			throw False();
+			return false;
 		else
 			port_list.first.emplace_back(&port);
 	}
@@ -141,34 +141,34 @@ Node* Node::test(const pair<small_id,pattern::Mixture::Site>& id_site,
 		break;
 	case pattern::Mixture::FREE:
 		if(port.link.first)
-			throw False();
+			return false;
 		//else
 		port_list.second.emplace_back(&port);
 		break;
 	case pattern::Mixture::BIND:
 		if(!port.link.first)
-			throw False();
+			return false;
 		//else
 		port_list.second.emplace_back(&port);
 		/* Do not test for site_id ptrn, it's obvious that they are ok*/
 		//else if(port.link.first->getLinkState(id_site.second.lnk_ptrn.second).second == id_site.first)//bind-node lnk-ptrn*/
 		if(id_site.second.lnk_ptrn.first != small_id(-1))//ptrn is not bind to any
-			return port.link.first;
+			node = port.link.first;
 		break;
 	case pattern::Mixture::BIND_TO:
 		if(port.link.first){
 			if(port.link.first->getId() != id_site.second.lnk_ptrn.first
 					|| port.link.second != id_site.second.lnk_ptrn.second)
-				throw False();
+				return false;
 		} else
-			throw False();
+			return false;
 		port_list.second.emplace_back(&port);
 		break;
 	case pattern::Mixture::PATH:
 		//TODO
 		break;
 	}
-	return nullptr;
+	return true;
 }
 
 
@@ -513,24 +513,30 @@ void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,Inj
 	}
 }
 
-string Node::toString(const pattern::Environment &env,bool show_binds) const {
+string Node::toString(const pattern::Environment &env,bool show_binds,map<const Node*,bool> *visited) const {
 	auto& sign = env.getSignature(signId);
 	string s(sign.getName()+"(");
 	for(small_id i = 0; i < intfSize; i++){
-		s += interface[i].toString(sign.getSite(i),show_binds) + ",";
+		s += interface[i].toString(sign.getSite(i),show_binds,visited) + ",";
 	}
 	if(intfSize)
 		s.back() = ')';
 	else
 		s += ")";
+	if(visited){
+		(*visited)[this] = true;
+		for(auto nhb : *visited)
+			if(!nhb.second)
+				s += ", " + nhb.first->toString(env, show_binds, visited);
+	}
 	return s;
 }
 
-string SubNode::toString(const pattern::Environment &env,bool show_binds) const {
-	return to_string(cc.getPopulation())+" " + Node::toString(env,show_binds);
+string SubNode::toString(const pattern::Environment &env,bool show_binds,map<const Node*,bool> *visit) const {
+	return to_string(cc.getPopulation())+" " + Node::toString(env,show_binds,visit);
 }
 
-string Node::Internal::toString(const pattern::Signature::Site& sit,bool show_binds) const {
+string Node::Internal::toString(const pattern::Signature::Site& sit,bool show_binds,map<const Node*,bool> *visit) const {
 	string s(sit.getName());
 	try{
 		dynamic_cast<const pattern::Signature::EmptySite&>(sit);
@@ -557,8 +563,12 @@ string Node::Internal::toString(const pattern::Signature::Site& sit,bool show_bi
 		}
 	}
 	if(show_binds)
-		if(link.first)
+		if(link.first){
 			s += "!("+to_string(link.first->address)+")";
+			if(visit)
+				(*visit)[link.first];
+		}
+
 	return s;
 }
 

@@ -88,7 +88,7 @@ public:
 	 * save injections. Also it stores in match_queue every pair
 	 * (to_follow_,Node*) that will be matched later.
 	 */
-	Node* test(const pair<small_id,pattern::Mixture::Site>& id_site,
+	bool test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site,
 			two<list<Internal*> > &port_list) const;
 
 	//unsafe
@@ -99,7 +99,7 @@ public:
 	bool removeDep(matching::Injection* inj);
 	two<InjSet*>& getLifts(small_id site);
 	//DEBUG
-	virtual string toString(const pattern::Environment &env,bool show_binds = false) const;
+	virtual string toString(const pattern::Environment &env,bool show_binds = false,map<const Node*,bool> *visit = nullptr) const;
 
 };
 
@@ -115,7 +115,7 @@ struct Node::Internal {
 	static void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,InjSet* deps);
 
 
-	string toString(const pattern::Signature::Site& s,bool show_binds = false) const;
+	string toString(const pattern::Signature::Site& s,bool show_binds = false,map<const Node*,bool> *visit = nullptr) const;
 
 };
 
@@ -141,7 +141,7 @@ public:
 			std::queue<pair<small_id,Node&> > &match_queue,
 			two<list<Internal*> > &port_list) const;*/
 
-	string toString(const pattern::Environment& env,bool show_binds = false) const override;
+	string toString(const pattern::Environment& env,bool show_binds = false,map<const Node*,bool> *visit = nullptr) const override;
 };
 
 class MultiNode {

@@ -27,6 +27,14 @@ using Node = state::Node;
 
 class InjRandSet;
 
+struct try_match {
+	const pattern::Mixture::Component* comp;
+	Node* node;
+	two<list<Node::Internal*> > port_lists;
+	small_id root;
+};
+
+
 class Injection {
 	friend class InjRandSet;
 	const pattern::Pattern& ptrn;
@@ -59,14 +67,13 @@ class CcInjection : public Injection {
 	//const pattern::Mixture::Component& cc;//cc_id
 
 	CcInjection(const pattern::Pattern& _cc);
-	CcInjection(const pattern::Mixture::Component& cc,Node& node,
-			two<list<state::Node::Internal*> >& port_list,small_id root = 0);
+	CcInjection(const pattern::Mixture::Component& cc);
 	Injection* clone(const map<Node*,Node*>& mask) const override;
 	void copy(const CcInjection* inj,const map<Node*,Node*>& mask);
 public:
 	~CcInjection();
 
-	void reuse(const pattern::Mixture::Component& cc,Node& node,
+	bool reuse(const pattern::Mixture::Component& cc,Node& node,
 			two<list<state::Node::Internal*> >& port_list,small_id root = 0);
 
 	const vector<Node*>& getEmbedding() const override;

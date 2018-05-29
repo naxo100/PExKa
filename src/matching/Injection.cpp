@@ -38,51 +38,55 @@ bool Injection::isTrashed() const {
 
 CcInjection::CcInjection(const pattern::Pattern& _cc) : Injection(_cc) {};
 
-CcInjection::CcInjection(const pattern::Mixture::Component& _cc,Node& node,
-		two<std::list<state::Node::Internal*> >& port_list,small_id root)
-		: Injection(_cc) {
-	ccAgToNode.resize(_cc.size(),nullptr);
-	reuse(_cc,node,port_list,root);
+CcInjection::CcInjection(const pattern::Mixture::Component& _cc)
+		: Injection(_cc),ccAgToNode(_cc.size(),nullptr) {
+	//reuse(_cc,node,port_list,root);
 }
 
-void CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
+bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 		two<std::list<state::Node::Internal*> >& port_list,small_id root) {
 	//ccAgToNode.clear();
 	for(auto& n : ccAgToNode)
 		n = nullptr;
-	//ccAgToNode.resize(_cc.size(),nullptr);
+	//if(_cc.getAgent(root).getId() == node.getId()){
+	ccAgToNode.resize(_cc.size(),nullptr);
 	std::list<pair<small_id,Node*> > q;
 	q.emplace_back(root,&node);
 	const pattern::Mixture::Agent* ag;
 	const Node* curr_node;
-	pair<small_id,Node*> next_node;
+	pair<small_id,Node*> next_node(0,nullptr);
+	//for(auto elem : _cc.getGraph())
+	//	printf("(%d,%d)->(%d,%d); ",elem.first.first,elem.first.second,elem.second.first,elem.second.second);
+	//cout << endl;
 	while(!q.empty()){
 		ag = &_cc.getAgent(q.front().first);
 		curr_node = q.front().second;
 		if(ag->getId() != curr_node->getId())
-			throw False();
+			return false;
 		for(auto& id_site : *ag){
-			next_node.second = curr_node->test(id_site,port_list);
-			if(next_node.second){
-				next_node.first = _cc.follow(q.front().first,id_site.first).first;
-				//need to check site of links?? TODO No
-				if(ccAgToNode[next_node.first]){
-					if(ccAgToNode[next_node.first] == next_node.second){
-						continue;
+			if(curr_node->test(next_node.second,id_site,port_list)){
+				if(next_node.second){
+					next_node.first = _cc.follow(q.front().first,id_site.first).first;
+					//need to check site of links?? TODO No
+					if(ccAgToNode[next_node.first]){
+						if(ccAgToNode[next_node.first] != next_node.second)
+							return false;
 					}
-					else
-						throw False();
-				}
-				else {
-					q.emplace_back(next_node);
-					ccAgToNode[next_node.first] = next_node.second;//todo review
+					else {
+						q.emplace_back(next_node);
+						ccAgToNode[next_node.first] = next_node.second;//todo review
+					}
+					next_node.second = nullptr;
 				}
 			}
+			else
+				return false;
 		}
 		ccAgToNode[q.front().first] = q.front().second;//case when agent mixture with no sites
 		q.pop_front();
 	}
-	//TODO check_aditional_edges???
+	return true;
+	//} else throw False();//TODO check_aditional_edges???
 }
 
 CcInjection::~CcInjection(){};
@@ -181,26 +185,22 @@ Injection* InjRandSet::emplace(const pattern::Mixture::Component& cc,Node& node,
 		two<std::list<Node::Internal*> > &port_lists,small_id root) {
 	CcInjection* inj;
 	if(freeInjs.empty()){
-		inj = new CcInjection(cc,node,port_lists,root);
-		insert(inj);
+		inj = new CcInjection(cc);
+		freeInjs.push_back(inj);
 	}
 	else {
 		inj = freeInjs.front();
-		inj->reuse(cc,node,port_lists,root);
-		insert(inj);
-		freeInjs.pop_front();
 	}
+	if(inj->reuse(cc,node,port_lists,root) == false)
+		return nullptr;
+	insert(inj);
+	freeInjs.pop_front();
 	if(inj->count() > 1){
 		counter += inj->count();
 		multiCount++;
 	}
 	else
 		counter++;
-/*#if DEBUG
-	for(auto inj2 : container)
-		if(inj != inj2 && *inj == *inj2)
-			throw invalid_argument("InjSet cannot contain the same injection twice.");
-#endif*/
 	return inj;
 }
 
@@ -210,12 +210,13 @@ Injection* InjRandSet::emplace(Injection* base_inj,map<Node*,Node*>& mask){
 		inj = static_cast<CcInjection*>(base_inj->clone(mask));
 		insert(inj);
 	}
-	else {
+	else
 		inj = freeInjs.front();
-		inj->copy(container[base_inj->address],mask);
-		container[inj->address];
-		freeInjs.pop_front();
-	}
+
+	inj->copy(container[base_inj->address],mask);
+	container[inj->address];
+	freeInjs.pop_front();
+
 	if(inj->count() > 1){
 		counter += inj->count();
 		multiCount++;

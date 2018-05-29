@@ -43,6 +43,7 @@ class Environment;
 
 //pair of shorts used for (agent,agent) or (agent,site) ids.
 typedef pair<small_id,small_id> ag_st_id;
+ostream& operator<<(ostream& os,const ag_st_id &ag_st);
 
 //struct to compare id_pair needed for maps
 template <typename T1,typename T2>
@@ -189,23 +190,23 @@ struct Pattern::Site {
  * agent in a mixture.
  */
 class Pattern::Agent {
-	short signId; //signature ID
+	short_id signId; //signature ID
 	std::unordered_map<small_id,Site> interface;
 	map<small_id,list<Agent*> > parents;
 	map<small_id,list<Agent*> > childs;
 	mutable list<pair<const Mixture::Component*,small_id> > includedIn;
 
 public:
-	Agent(short name_id);
+	Agent(short_id name_id);
 	~Agent();
 
-	short getId() const;
+	short_id getId() const;
 	/** \brief Includes the site with id name_id in this agent.
 	 * The new site is added to a map with the default values,
 	 * like it has no declared value or link status. i.e.
 	 * (small_id)-1 and FREE.
 	 */
-	Site& addSite(short name_id);
+	Site& addSite(small_id name_id);
 	void setSiteValue(small_id mix_site,small_id label);
 	void setSiteValue(small_id mix_site,int val);
 	void setSiteValue(small_id mix_site,FL_TYPE val);
@@ -213,7 +214,7 @@ public:
 	//void setSiteLink(short mix_site,LinkType l);
 	void setLinkPtrn(small_id trgt_site,small_id ag_ptrn,small_id site_ptrn);
 
-	const Site& getSite(short id) const;
+	const Site& getSite(small_id id) const;
 	bool operator==(const Agent& a) const;
 
 	/** \brief Compare two agents.

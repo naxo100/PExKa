@@ -339,20 +339,20 @@ string Mixture::toString(const Environment& env,const vector<ag_st_id>& mask) co
 
 /*************** Class Agent ********************/
 
-Mixture::Agent::Agent(short sign_id) : signId(sign_id){}
+Mixture::Agent::Agent(short_id sign_id) : signId(sign_id){}
 Mixture::Agent::~Agent(){
 	1;
 };
 
-Mixture::Site& Mixture::Agent::addSite(short env_site){
+Mixture::Site& Mixture::Agent::addSite(small_id env_site){
 	return interface[env_site] = Site();
 }
 
-const Mixture::Site& Mixture::Agent::getSite(short id) const {
+const Mixture::Site& Mixture::Agent::getSite(small_id id) const {
 	return interface.at(id);
 }
 
-short Mixture::Agent::getId() const {
+short_id Mixture::Agent::getId() const {
 	return signId;
 }
 
@@ -659,7 +659,7 @@ bool Mixture::Site::isBindToAny() const{
 /************** class Component ****************/
 
 Mixture::Component::Component() : links(new list<ag_st_id>()){};
-Mixture::Component::Component(const Component& comp) : agents(comp.size(),nullptr) {
+Mixture::Component::Component(const Component& comp) : agents(comp.size(),nullptr),id(-1) {
 	for(size_t i = 0; i < agents.size() ; i++)
 		agents[i] = comp.agents[i];
 	graph = new map<ag_st_id,ag_st_id>(*comp.graph);
@@ -800,6 +800,11 @@ string Mixture::Component::toString(const Environment& env) const {
 template <typename T1,typename T2>
 bool ComparePair<T1,T2>::operator()(pair<T1,T2> p1,pair<T1,T2> p2){
 	return p1.first < p2.first ? true : (p1.second < p2.second ? true : false );
+}
+
+
+ostream& operator<<(ostream& os,const ag_st_id &ag_st){
+	return os << "(" << ag_st.first << "," << ag_st.second << ")";
 }
 
 } /* namespace pattern */

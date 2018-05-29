@@ -196,9 +196,11 @@ void State::positiveUpdate(const simulation::Rule& r){
 					node = ev.emb[cc_ag_root.first.first][cc_ag_root.first.second];
 					node = ev.new_cc.at(node);
 				}catch(out_of_range &ex) {}//not in new_cc
+			//if(cc->getAgent(cc_ag_root.second).getId() != node->getId())
+			//	continue;
 			two<std::list<Node::Internal*> > port_lists;
-			try{
-				matching::Injection* inj_p = injections[cc->getId()].emplace(*cc,*node,port_lists,cc_ag_root.second);
+			matching::Injection* inj_p = injections[cc->getId()].emplace(*cc,*node,port_lists,cc_ag_root.second);
+			if(inj_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
@@ -209,9 +211,6 @@ void State::positiveUpdate(const simulation::Rule& r){
 				ev.to_update.emplace(cc);
 				updateDeps(Deps::Dependency(Deps::KAPPA,cc->getId()));
 			}
-			catch(False& e){
-				//Not a match with candidate
-			}
 		}
 	}
 	for(auto side_eff : ev.side_effects){
@@ -220,24 +219,22 @@ void State::positiveUpdate(const simulation::Rule& r){
 				if(ag.getSite(side_eff.second).link_type == pattern::Pattern::FREE){
 					for(auto& cc_ag : ag.getIncludes()){*/
 		for(auto& cc_ag : env.getFreeSiteCC(side_eff.first->getId(),side_eff.second)){
+
+			//if(cc_ag.first->getAgent(cc_ag.second).getId() != side_eff.first->getId())
+			//	continue;
+
 			two<std::list<Node::Internal*> > port_lists;
-			matching::Injection* inj_p;
-			try{
-				inj_p = injections[cc_ag.first->getId()].emplace(*cc_ag.first,*side_eff.first,port_lists,cc_ag.second);
+			matching::Injection* inj_p = injections[cc_ag.first->getId()].emplace(*cc_ag.first,*side_eff.first,port_lists,cc_ag.second);
+			if(inj_p){
+				for(auto port : port_lists.first)
+					port->deps.first->emplace(inj_p);
+				for(auto port : port_lists.second)
+					port->deps.second->emplace(inj_p);
+				if(port_lists.first.empty() && port_lists.second.empty())
+					side_eff.first->addDep(inj_p);
+				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
+				ev.to_update.emplace(cc_ag.first);
 			}
-			catch(False& ex) {continue;}
-			for(auto port : port_lists.first)
-				port->deps.first->emplace(inj_p);
-			for(auto port : port_lists.second)
-				port->deps.second->emplace(inj_p);
-			if(port_lists.first.empty() && port_lists.second.empty())
-				side_eff.first->addDep(inj_p);
-			//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
-			ev.to_update.emplace(cc_ag.first);
-			/*		}
-				}
-			}
-			catch(std::out_of_range& ex){}*/
 		}
 	}
 }
@@ -368,7 +365,7 @@ FL_TYPE State::event() {
 
 	#ifdef DEBUG
 		printf("Event %3lu",counter.getEvent());
-		printf("  dt = %3.4f",dt);
+		printf(" act = %f\t dt = %3.6f",act,dt);
 	#endif
 	//EventInfo* ev = nullptr;
 	auto& rule = drawRule();
@@ -422,24 +419,22 @@ void State::initInjections() {
 		delete[] injections;
 	injections = new matching::InjRandSet[env.size<pattern::Mixture::Component>()];
 	for(auto node_p : graph){
-		//cout << node_p->toString(env) << endl;
-		unsigned i = 0;
+		//map<const Node*,bool> visits;
+		//cout << node_p->toString(env,true,&visits) << endl;
 		for(auto& comp : env.getComponents()){
+			if(comp.getAgent(0).getId() != node_p->getId())//very little speed-up
+				continue;
+			//cout << comp.toString(env) << endl;
 			two<std::list<Node::Internal*> > port_lists;
-			try{
-				matching::Injection* inj_p = injections[i].emplace(comp,*node_p,port_lists);
+			matching::Injection* inj_p = injections[comp.getId()].emplace(comp,*node_p,port_lists);
+			if(inj_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
 				if(port_lists.first.empty() && port_lists.second.empty())
 					node_p->addDep(inj_p);
-				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
 			}
-			catch(False& e){
-
-			}
-			i++;
 		}
 	}
 }
@@ -449,9 +444,15 @@ void State::initActTree() {
 		delete activityTree;
 	activityTree = new data_structs::MaskedBinaryRandomTree<stack>(env.size<simulation::Rule>(),randGen);
 	unsigned i = 0;
+#ifdef DEBUG
+	cout << "Initial activity tree" << endl;
+#endif
 	for(auto& rule : env.getRules()){
 		auto act_pr = evalActivity(rule);
 		activityTree->add(i,act_pr.first+act_pr.second);
+#ifdef DEBUG
+		cout << "\t" << rule.getName() << "\t" << (act_pr.first+act_pr.second) << endl;
+#endif
 		i++;
 	}
 }

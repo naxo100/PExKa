@@ -56,7 +56,7 @@
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
 %token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
-%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET CONST DIV PLOT SINE COSINE TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
+%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER KAPPA_VALUE SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET CONST DIV PLOT SINE COSINE TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
 %token EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
 %token <int> INT 
 %token <std::string> ID LABEL KAPPA_MRK NAME 
@@ -648,10 +648,34 @@ port_expression:
 internal_state:
  state_enum 
 	{$$ = SiteState(@$,$1);}
-| KAPPA_INTER alg_expr COMMA alg_expr CL_BRA
+| KAPPA_VALUE alg_expr SMALLER EQUAL ID SMALLER EQUAL alg_expr CL_CUR
+	{$$ = SiteState(@$,Id(@5,$5),SiteState::MIN_EQUAL + SiteState::MAX_EQUAL,$2,$8);}
+| KAPPA_VALUE alg_expr SMALLER EQUAL ID SMALLER alg_expr CL_CUR
+	{$$ = SiteState(@$,Id(@5,$5),SiteState::MIN_EQUAL,$2,$7);}
+| KAPPA_VALUE alg_expr SMALLER EQUAL ID CL_CUR
+	{$$ = SiteState(@$,Id(@5,$5),SiteState::MIN_EQUAL,$2,nullptr);}
+| KAPPA_VALUE alg_expr SMALLER ID SMALLER EQUAL alg_expr CL_CUR
+	{$$ = SiteState(@$,Id(@4,$4),SiteState::MAX_EQUAL,$2,$7);}
+| KAPPA_VALUE alg_expr SMALLER ID SMALLER alg_expr CL_CUR
+	{$$ = SiteState(@$,Id(@4,$4),0,$2,$6);}
+| KAPPA_VALUE alg_expr SMALLER ID CL_CUR
+	{$$ = SiteState(@$,Id(@4,$4),0,$2,nullptr);}
+| KAPPA_VALUE ID SMALLER EQUAL alg_expr CL_CUR
+	{$$ = SiteState(@$,Id(@2,$2),SiteState::MAX_EQUAL,nullptr,$5);}
+| KAPPA_VALUE ID SMALLER alg_expr CL_CUR
+	{$$ = SiteState(@$,Id(@2,$2),0,nullptr,$4);}
+| KAPPA_VALUE ID EQUAL alg_expr CL_CUR
+	{$$ = SiteState(@$,Id(@2,$2),$4);}
+| KAPPA_VALUE ID CL_CUR
+	{$$ = SiteState(@$,Id(@2,$2),'\0');}
+| KAPPA_VALUE alg_expr CL_CUR
+	{$$ = SiteState(@$,$2);}
+
+| KAPPA_INTER alg_expr COMMA alg_expr CL_BRA //default is smallest
 	{$$ = SiteState(@$,$2,$4);}
-| KAPPA_INTER alg_expr COMMA alg_expr CL_BRA OP_PAR alg_expr CL_PAR
+| KAPPA_INTER alg_expr COMMA alg_expr CL_BRA OP_PAR alg_expr CL_PAR //default is third alg_expr
 	{$$ = SiteState(@$,$2,$4,$7);}
+
 | error
 	{yy::KappaParser::error(@1,"Invalid internal state");}
 ;

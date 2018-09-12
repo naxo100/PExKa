@@ -197,6 +197,7 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "!"				return KappaParser::make_KAPPA_LNK(loc);
 "~"[0-9a-zA-Z]+	return KappaParser::make_KAPPA_MRK(&yytext[1],loc);
 "~["			return KappaParser::make_KAPPA_INTER(loc);
+"~{"			return KappaParser::make_KAPPA_VALUE(loc);
 "?"				return KappaParser::make_KAPPA_WLD(loc);
 "_"				return KappaParser::make_KAPPA_SEMI(loc);
 .	{ 

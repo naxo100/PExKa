@@ -106,21 +106,31 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
-	env.show();
-
+#ifdef DEBUG
+	//env.show();
+#endif
 	WarningStack::getStack().show();
 
 	auto& params = simulation::Parameters::getInstance();
-	if(vm.count("events"))
-		params.maxEvent = vm["events"].as<int>();
-	if(vm.count("time"))
+	if(vm.count("time")){
 		params.maxTime = vm["time"].as<float>();
+		if(vm.count("events"))
+			cout << "ignoring given max-event option" << endl;
+	}
+	else if(vm.count("events"))
+		params.maxEvent = vm["events"].as<int>();
+	else{
+		cout << "No max-events or max-time given. Aborting..." << endl;
+		exit(0);
+	}
 	if(vm.count("points"))
 		params.points = vm["points"].as<int>();
 	else
-		cerr << "No points to plot." << endl;
+		cout << "No points to plot." << endl;
 	if(vm.count("out"))
 		params.file = vm["out"].as<string>();
+	if(vm.count("dir"))
+		params.file = vm["dir"].as<string>() + "/" + params.file;
 
 	map<pair<int,int>,double> edges;
 	for(size_t i = 0; i < env.size<pattern::Channel>(); i++ ){
@@ -155,7 +165,7 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 	sim.initialize();
-	sim.print();
+	//sim.print();
 
 	try{
 		sim.run(params);

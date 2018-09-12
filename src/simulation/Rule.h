@@ -38,6 +38,7 @@ public:
 		UNBIND,
 		DELETE,//id_lhs
 		CREATE,//id_rhs,id_ag_mix
+		ASSIGN,
 		TRANSPORT//id_lhs,id_trgt_comp
 	};
 	/** \brief Target mix_agent and the action to be applied.
@@ -46,6 +47,7 @@ public:
 		ActionType t;
 		//	cc_id/val	ag_id	 sit_id	  flag
 		tuple<small_id,small_id,small_id,small_id> trgt1,trgt2;
+		const state::BaseExpression* value;
 		enum {NEW=1,S_EFF=2};
 	};
 

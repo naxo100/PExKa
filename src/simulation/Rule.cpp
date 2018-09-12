@@ -111,11 +111,21 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 								warns.emplace_back("Application of rule '"+name+
 										"' will induce a null event when applied to an agent '"+sign.getName()+
 										"' that have the same value ",loc);
-							if(lhs_site.state.smallVal != rhs_site.state.smallVal){//TODO other type of value changes
+							if(rhs_site.isExpression()){
+								if(*rhs_site.values[1] != *lhs_site.values[1]){
+									a.t = ASSIGN;
+									a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+									a.value = rhs_site.values[1];
+								}
+							}
+							else if(lhs_site.label != rhs_site.label){//TODO other type of value changes
 								a.t = CHANGE;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-								get<0>(a.trgt2) = rhs_site.state.smallVal;
+								get<0>(a.trgt2) = rhs_site.label;
 								script.emplace_back(a);
 								changes[make_pair(rhs_unmask[i],false)].first.emplace_back(j);
+							}
+							else{//expression valued sites
+
 							}
 						}
 						switch(lhs_site.link_type){
@@ -273,7 +283,8 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 									i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
 									if(i > i2)
 										break;//link added before.
-									warns.emplace_back("%s link state of site '%s' of agent '%s' is changed although it is a semi-link in the left hand side",loc);
+									warns.emplace_back("The link state of site "+sign.getSite(j).getName()+
+											" in agent "+sign.getName()+" is changed although it is a semi-link in the left hand side",loc);
 									a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 									a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
 									binds.emplace_back(a);
@@ -304,9 +315,10 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						}
 					}
 					catch(std::out_of_range &e){
-						//WARNING
-						throw SemanticError("The internal/lnk state of the site "+psite->getName()+
-								" in agent "+sign.getName()+" must be specified in the right side.",loc);
+						//TODO WARNING or Error?
+						//throw SemanticError(
+						warns.emplace_back("The internal/lnk state of the site "+psite->getName()+
+								" in agent "+sign.getName()+" should be specified in the right side.",loc);
 					}
 				}catch(std::out_of_range &e){
 					try{
@@ -361,7 +373,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		for(auto& s : rhs_ag){
 			auto lnk = rhs->follow(cc_ag_id.first,cc_ag_id.second,s.first);
 			if(!s.second.isEmptySite())
-				newNodes[j-i]->setState(s.first,s.second.state);
+				newNodes[j-i]->setState(s.first,s.second.label);
 			switch(s.second.link_type){
 			case Mixture::FREE:break;
 			case Mixture::BIND:{
@@ -404,10 +416,10 @@ const vector<state::Node*>& Rule::getNewNodes() const{
 bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,const Environment& env) const {
 	map<small_id,small_id> visited;
+	auto& rhs_cc = rhs->getComponent(rhs_cc_id);
 	while(to_test.size()){//test connected agents of emb
 		if(to_test.front().first.second != to_test.front().second.second)
 			return false;//not connected to the same site
-		auto& rhs_cc = rhs->getComponent(rhs_cc_id);
 		auto rhs_ag_id = to_test.front().first.first;
 		auto test_ag_id = to_test.front().second.first;
 		to_test.pop_front();
@@ -425,15 +437,15 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		if(news.count(make_pair(rhs_cc_id,rhs_ag_id))){//testing for new node
 			for(auto id_site : test_ag){
 				auto& test_site = id_site.second;
-				try{
+				try{//TODO valued sites
 					auto& rhs_site = rhs_ag.getSite(id_site.first);
-					if(id_site.second.isEmptySite() ){//compare with default
-						if(!test_site.isEmptySite() &&
-								env.getSignature(rhs_ag.getId()).getSite(id_site.first).
-								getDefaultValue() != test_site.state)
+					if(!test_site.isEmptySite()){//new agent's site value is defalut
+						if(env.getSignature(rhs_ag.getId()).getSite(id_site.first).
+								getDefaultValue().smallVal != test_site.label)
 							return false;
-					} else
-						if(!test_site.isEmptySite() && id_site.second.state != test_site.state)
+					}
+					else
+						if(rhs_site.label != test_site.label)
 							return false;
 					if(rhs_site.link_type == Pattern::LinkType::BIND){
 						auto lnk = rhs_cc.getGraph().at(ag_st_id(rhs_ag_id,id_site.first));
@@ -471,7 +483,7 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 				}
 				catch(out_of_range& ex){//test_site must have default values and be free
 					if(!test_site.isEmptySite() && env.getSignature(rhs_ag.getId()).getSite(id_site.first).
-							getDefaultValue() != test_site.state)
+							getDefaultValue().smallVal != test_site.label)
 						return false;
 					if(test_site.link_type > Pattern::WILD)//TODO warning for path
 						return false;
@@ -481,8 +493,8 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		else{//testing for conserved node
 			try{
 				set<small_id> done;
-				test_cc.getAgent(test_ag_id).compare(rhs_cc.getAgent(rhs_ag_id),done);
-				for(auto id_site : rhs_cc.getAgent(rhs_ag_id)){
+				test_ag.compare(rhs_ag,done);
+				for(auto id_site : rhs_ag){
 					try{
 						auto lnk = rhs_cc.getGraph().at(make_pair(rhs_ag_id,id_site.first));
 						if(test_cc.getAgent(test_ag_id).getSite(id_site.first).link_type !=
@@ -607,7 +619,7 @@ void Rule::checkInfluence(const Environment& env) {
 				try{
 					/*auto& site = */new_ag.getSite(id_site.first);
 					if(id_site.second.isEmptySite() ||
-							id_site.second.state == newNodes[i]->getInternalState(id_site.first)){
+							id_site.second.label == newNodes[i]->getInternalState(id_site.first).smallVal){
 					//		!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
 						/*TODO test for link
 						switch(id_site.second.link_type){
@@ -622,7 +634,7 @@ void Rule::checkInfluence(const Environment& env) {
 				}
 				catch(std::out_of_range &ex){
 					if( (id_site.second.isEmptySite() ||
-							id_site.second.state == newNodes[i]->getInternalState(id_site.first))
+							id_site.second.label == newNodes[i]->getInternalState(id_site.first).smallVal)
 							&& id_site.second.link_type == Pattern::FREE)
 						continue;//ok
 				}

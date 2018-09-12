@@ -7,6 +7,7 @@
 
 #include "SiteGraph.h"
 #include "../pattern/Environment.h"
+#include "State.h"
 //#include <cstring>
 
 namespace state {
@@ -23,20 +24,24 @@ SiteGraph::~SiteGraph() {
 }
 
 #define MAX_CC_SIZE 10	//TODO
-#define MULTINODE_LIM 9999999 //TODO
+#define MULTINODE_LIM 500000 //TODO
 void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
-		const pattern::Environment& env) {
+		const State& state) {
 	Node* buff_nodes[MAX_CC_SIZE];
 	unsigned i = 0;
 	if(n < MULTINODE_LIM) {//=> n = 1
 		while(n--){
 			i=0;
 			for(auto p_ag : cc){
-				auto node = new Node(env.getSignature(p_ag->getId()));
+				auto node = new Node(state.getEnv().getSignature(p_ag->getId()));
 				//node->setCount(n);
 				for(auto id_site : *p_ag){
-					if(!id_site.second.isEmptySite())
-						node->setState(id_site.first,id_site.second.state);
+					if(!id_site.second.isEmptySite()){
+						if(id_site.second.values[1])
+							node->setState(id_site.first,id_site.second.values[1]->getValue(state));
+						else
+							node->setState(id_site.first, id_site.second.label);
+					}
 				}
 				this->allocate(node);
 				buff_nodes[i] = node;
@@ -49,10 +54,14 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 	} else {
 		auto multi = new MultiNode(cc.size(),n);
 		for(auto p_ag : cc){
-			auto node = new SubNode(env.getSignature(p_ag->getId()),*multi);
+			auto node = new SubNode(state.getEnv().getSignature(p_ag->getId()),*multi);
 			for(auto id_site : *p_ag){
-				if(!id_site.second.isEmptySite())
-					node->setState(id_site.first,id_site.second.state);
+				if(!id_site.second.isEmptySite()){
+					if(id_site.second.values[1])
+						node->setState(id_site.first,id_site.second.values[1]->getValue(state));
+					else
+						node->setState(id_site.first, id_site.second.label);
+				}
 			}
 			this->allocate(node);
 			buff_nodes[i] = node;

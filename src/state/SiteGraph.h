@@ -32,7 +32,7 @@ public:
 	~SiteGraph();
 
 	void addComponents(unsigned n,const pattern::Mixture::Component& cc,
-			const pattern::Environment& env);
+			const State& state);
 
 	/** \brief Put a node in the sitegraph.
 	 * Put a node in the sitegraph, set its address,

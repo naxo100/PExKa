@@ -48,7 +48,7 @@ MaskedBinaryRandomTree<Container>::~MaskedBinaryRandomTree() {
 template<template <typename,typename...> class Container>
 void MaskedBinaryRandomTree<Container>::initLayer(int k,int current_layer,int layer_end)
 {
-	if (k > sizetree)
+	if (k > size)
 		return;
 	else if (k>layer_end)
 		initLayer(k,current_layer+1,2*layer_end+1);
@@ -111,7 +111,7 @@ pair<int,FL_TYPE> MaskedBinaryRandomTree<Container>::chooseRandom()
 		else{
 			//generamos un numero random "r"
 			std::uniform_real_distribution<FL_TYPE> distribution(0.0,a);
-			FL_TYPE r = distribution(generator);
+			FL_TYPE r = a/2;//distribution(generator);
 			//partimos de la posicion 1 (nodo root)  del arbol
 			int i=1;//position in the tree
 			do
@@ -121,8 +121,8 @@ pair<int,FL_TYPE> MaskedBinaryRandomTree<Container>::chooseRandom()
 				if(r<=nodes[2*i-1])  return pair<int,FL_TYPE>(unmask[2*i-1],weights[2*i-1]);
 				if(r<=nodes[2*i])    return pair<int,FL_TYPE>(unmask[2*i],weights[2*i]);
 				//si no pertence, chequeamo si pertenece al intervalo de la rama (hijo) izquierda
-				i=i*2;                     //indice rama hijo izquierdo.
 				r = r-nodes[i];            //random number respecto al intervalo del hijo izquierdo.
+				i=i*2;                     //indice rama hijo izquierdo. (cambiado de linea por la de arriba)
 				FL_TYPE left = subtrees[i];  //longitud total del hijo izquierdo.
 				//si pertenece a esta rama continuamos la busqueda en este intervalo.
 				if( r <= left ) continue;

@@ -8,7 +8,8 @@
 #include "State.h"
 #include "../pattern/Environment.h"
 #include "../matching/Injection.h"
-#include "../data_structs/MaskedBinaryRandomTree.h"
+#include "../matching/InjRandSet.h"
+#include "../data_structs/MyMaskedBinaryRandomTree.h"
 #include "../simulation/Plot.h"
 #include <cmath>
 
@@ -27,6 +28,14 @@ State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		ev.emb[i] = new Node*[12];
 	ev.fresh_emb = new Node*[5];
 }
+
+//const State empty = State(0,std::vector<Variable*>(),new Constant<float>(1.0),
+//		simulation::Plot(),pattern::Environment::empty)
+
+const pattern::Environment& State::getEnv() const{
+	return env;
+}
+
 
 State::~State() {
 	delete[] tokens;
@@ -55,7 +64,7 @@ void State::addNodes(unsigned n,const pattern::Mixture& mix){
 	if(n == 0)//test?
 		return;
 	for(auto comp_p : mix){
-		graph.addComponents(n,*comp_p,env);
+		graph.addComponents(n,*comp_p,*this);
 	}
 }
 
@@ -63,7 +72,7 @@ UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
 	//auto& mix = env.getMixtures().front();
 	UINT_TYPE  count = 1;
 	for(auto cc : mix){
-		count *= injections[cc->getId()].count();
+		count *= injections[cc->getId()]->count();
 	}
 	return count;
 }
@@ -140,6 +149,18 @@ void State::modify(const simulation::Rule::Action& a){
 	node->changeIntState(ev,injections,get<2>(a.trgt1),get<0>(a.trgt2));
 }
 
+void State::assign(const simulation::Rule::Action& a){
+	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
+	auto val = a.value->getValue(*this);//TODO aux_values
+	try{
+		auto new_node = ev.new_cc.at(node);
+		if(new_node)
+			new_node->assign(ev,injections,get<2>(a.trgt1),val);
+	}
+	catch(std::out_of_range &ex){}
+	node->assign(ev,injections,get<2>(a.trgt1),val);
+}
+
 void State::del(const simulation::Rule::Action& a){
 	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
 	node->removeFrom(ev,injections,graph);
@@ -151,6 +172,14 @@ void (State::*State::action[4])(const simulation::Rule::Action&) =
 void State::apply(const simulation::Rule& r){
 	//ADD action first
 	//ev.fresh_emb = new Node*[r.getNewNodes().size()];//maybe not!
+
+	//set aux vars from emb
+	for(auto& aux : r.getLHS().getAux()){
+		ev.aux_map[aux.first] =
+				ev.emb[get<0>(aux.second)][get<1>(aux.second)]->
+				getInternalState(get<2>(aux.second)).valueAs<FL_TYPE>();
+	}
+
 	int i = 0;
 	for(auto n : r.getNewNodes()){
 		auto node = new Node(*n,ev.new_cc);
@@ -198,8 +227,8 @@ void State::positiveUpdate(const simulation::Rule& r){
 				}catch(out_of_range &ex) {}//not in new_cc
 			//if(cc->getAgent(cc_ag_root.second).getId() != node->getId())
 			//	continue;
-			two<std::list<Node::Internal*> > port_lists;
-			matching::Injection* inj_p = injections[cc->getId()].emplace(*cc,*node,port_lists,cc_ag_root.second);
+			two<std::list<Internal*> > port_lists;
+			matching::Injection* inj_p = injections[cc->getId()]->emplace(*node,port_lists,cc_ag_root.second);
 			if(inj_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
@@ -223,8 +252,8 @@ void State::positiveUpdate(const simulation::Rule& r){
 			//if(cc_ag.first->getAgent(cc_ag.second).getId() != side_eff.first->getId())
 			//	continue;
 
-			two<std::list<Node::Internal*> > port_lists;
-			matching::Injection* inj_p = injections[cc_ag.first->getId()].emplace(*cc_ag.first,*side_eff.first,port_lists,cc_ag.second);
+			two<std::list<Internal*> > port_lists;
+			matching::Injection* inj_p = injections[cc_ag.first->getId()]->emplace(*side_eff.first,port_lists,cc_ag.second);
 			if(inj_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
@@ -260,18 +289,11 @@ void State::selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const {
 	//map<int,SiteGraph::Node*> total_inj;
 	//SiteGraph::Node*** total_inj = new SiteGraph::Node**[mix.compsCount()];
 	//ev->emb = new Node**[mix.compsCount()];
-	ev.side_effects.clear();
-	ev.pert_ids.clear();
-	ev.new_cc.clear();
-	ev.inj_mask.clear();
-	ev.to_update.clear();
-	ev.rule_ids.clear();
-	ev.warns = 0;
-	ev.cc_count = mix.compsCount();
+	ev.clear(mix.compsCount());
 	int i = 0;
 	for(auto cc : mix){
 		//ev->emb[i] = new Node*[cc->size()];
-		auto& inj = injections[cc->getId()].chooseRandom(randGen);
+		auto& inj = injections[cc->getId()]->chooseRandom(randGen);
 		try{
 			inj.codomain(ev.emb[i],total_cod);
 		}
@@ -349,9 +371,9 @@ const simulation::Rule& State::drawRule(){
 }
 
 FL_TYPE State::event() {
-	/*if(counter.getEvent() == 234463)
-		cout << "aca!!!"
-				<< endl;*/
+	//if(counter.getEvent() == 27511)
+	//	cout << "aca!!!"
+	//			<< endl;
 	FL_TYPE dt,act;
 	act = activityTree->total();
 	if(act < 0.)
@@ -387,10 +409,13 @@ FL_TYPE State::event() {
 			ev.rule_ids.emplace(r_id);
 	}
 	//total update
+	//cout << "rules to update: ";
 	for(auto r_id : ev.rule_ids){
+		//cout << env.getRules()[r_id].getName() << ", ";
 		auto act = evalActivity(env.getRules()[r_id]);
 		activityTree->add(r_id,act.first+act.second);
 	}
+	//cout << endl;
 	counter.incNullActions(ev.warns);
 	return dt;
 
@@ -417,7 +442,9 @@ void State::updateDeps(const Deps::Dependency& d){
 void State::initInjections() {
 	if(injections)
 		delete[] injections;
-	injections = new matching::InjRandSet[env.size<pattern::Mixture::Component>()];
+	injections = (matching::InjRandSet**)(new matching::MultiInjSet*[env.size<pattern::Mixture::Component>()]);
+	for(auto& cc : env.getComponents())
+		injections[cc.getId()] = new matching::MultiInjSet(cc);//TODO or InjTree
 	for(auto node_p : graph){
 		//map<const Node*,bool> visits;
 		//cout << node_p->toString(env,true,&visits) << endl;
@@ -425,8 +452,8 @@ void State::initInjections() {
 			if(comp.getAgent(0).getId() != node_p->getId())//very little speed-up
 				continue;
 			//cout << comp.toString(env) << endl;
-			two<std::list<Node::Internal*> > port_lists;
-			matching::Injection* inj_p = injections[comp.getId()].emplace(comp,*node_p,port_lists);
+			two<std::list<Internal*> > port_lists;
+			matching::Injection* inj_p = injections[comp.getId()]->emplace(*node_p,port_lists);
 			if(inj_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
@@ -442,18 +469,21 @@ void State::initInjections() {
 void State::initActTree() {
 	if(activityTree)
 		delete activityTree;
-	activityTree = new data_structs::MaskedBinaryRandomTree<stack>(env.size<simulation::Rule>(),randGen);
-	unsigned i = 0;
+	activityTree = new data_structs::MyMaskedBinaryRandomTree<stack>(env.size<simulation::Rule>(),randGen);
 #ifdef DEBUG
-	cout << "Initial activity tree" << endl;
+	cout << "[Initial activity tree]" << endl;
 #endif
-	for(auto& rule : env.getRules()){
+	list<const simulation::Rule*> rules;
+	for(auto& rule : env.getRules())
+		rules.emplace_back(&rule);
+	rules.sort([](const simulation::Rule * a, const simulation::Rule* b) { return a->getName() < b->getName(); });
+	for(auto rule_p : rules){
+		auto& rule = *rule_p;
 		auto act_pr = evalActivity(rule);
-		activityTree->add(i,act_pr.first+act_pr.second);
+		activityTree->add(rule.getId(),act_pr.first+act_pr.second);
 #ifdef DEBUG
-		cout << "\t" << rule.getName() << "\t" << (act_pr.first+act_pr.second) << endl;
+		printf("\t%s\t%.6f\n", rule.getName().c_str(),(act_pr.first+act_pr.second));
 #endif
-		i++;
 	}
 }
 
@@ -461,11 +491,11 @@ void State::initActTree() {
 void State::print() const {
 	cout << "state with {SiteGraph.size() = " << graph.getPopulation();
 	//cout << "\n\tvolume = " << volume.getValue().valueAs<FL_TYPE>();
-	cout << "\n\tInjectionsss {\n";
+	cout << "\n\tInjections {\n";
 	int i = 0;
 	for(auto& cc : env.getComponents()){
-		if(injections[i].count())
-			cout << "\t"<< i <<"\t" << injections[i].count() << " injs of " << cc.toString(env) << endl;
+		if(injections[i]->count())
+			cout << "\t"<< i <<"\t" << injections[i]->count() << " injs of " << cc.toString(env) << endl;
 		i++;
 	}
 	cout << "\t}\n}" << endl;

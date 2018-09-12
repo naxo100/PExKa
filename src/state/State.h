@@ -18,6 +18,7 @@
 #include "../simulation/Rule.h"
 #include "../data_structs/RandomTree.h"
 #include "../pattern/Dependencies.h"
+#include "../matching/InjRandSet.h"
 
 namespace simulation {
 	class Plot;
@@ -42,7 +43,7 @@ class State {
 	float* tokens;
 
 	data_structs::RandomTree* activityTree;
-	matching::InjRandSet* injections;
+	matching::InjRandSet** injections;
 
 	mutable default_random_engine randGen;
 	simulation::LocalCounter counter;
@@ -66,6 +67,7 @@ class State {
 	void free(const simulation::Rule::Action& act);
 	void modify(const simulation::Rule::Action& act);
 	void del(const simulation::Rule::Action& act);
+	void assign(const simulation::Rule::Action& act);
 	//void add(const simulation::Rule::Action& a);
 	void positiveUpdate(const simulation::Rule& r);
 
@@ -128,9 +130,13 @@ public:
 	void initInjections();
 	void initActTree();
 
+	const pattern::Environment& getEnv() const;
+
 	/** \brief Print the state for debugging purposes.
 	 **/
 	void print() const;
+
+	static const State empty;
 };
 
 

@@ -220,9 +220,12 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 		break;
 	case AUX:
 		if(flags & AUX_ALLOW)
-			expr = new state::Auxiliar(name.getString());
+			if( (flags & LHS) || (flags & RHS) )
+				expr = new state::Auxiliar<FL_TYPE>(name.getString());
+			else//is compartment
+				expr = new state::Auxiliar<int>(name.getString());
 		else
-			throw SemanticError("You can not assign a AUX in a variable or constant", loc);
+			throw SemanticError("You can not assign an AUX in a %var or %const declaration.", loc);
 		break;
 	case TOKEN:
 		try {

@@ -80,6 +80,8 @@ public:
 	void setId(short_id id);
 	short_id getId() const override;
 
+	void setAux(string id,small_id ag,small_id site);
+
 	/** \brief Add a new agent to the mixture.
 	 * Add a new agent to the mixture from a pointer to
 	 * an agent in environment.
@@ -122,6 +124,8 @@ public:
 
 	const Component& getComponent(small_id) const;
 
+	const map<string,tuple<small_id,small_id,small_id>>& getAux() const;
+
 	ag_st_id follow(small_id cc_id,small_id ag_id,small_id site) const;
 
 	/** \brief returns the agent counter.
@@ -146,6 +150,7 @@ private:
 	bool declaredComps;
 	Agent** agents;
 	vector<Component*>* comps;
+	map<string,tuple<small_id,small_id,small_id>> auxiliars;
 
 	size_t agentCount;
 	size_t siteCount;
@@ -154,6 +159,7 @@ private:
 	//link (agent<,site)->(agent>,site)
 	map< ag_st_id , ag_st_id> links;
 	short_id id;
+
 };
 
 typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;
@@ -166,11 +172,17 @@ typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;
  * declared site of an agent mixture.
  */
 struct Pattern::Site {
-	state::SomeValue state;
+	const static small_id EMPTY = small_id(-1);
+	const static small_id AUX = small_id(-2);
+	small_id label;//small_id(-2) -> aux
 
 	LinkType link_type;
 	//only valid if type is BIND_TO
 	ag_st_id lnk_ptrn;//agent,site (-1,-1)
+
+	//string aux_id;//if "" then no aux
+	const state::BaseExpression* values[3];//[smaller=,value,greater=]
+
 
 	bool operator==(const Site &s) const;
 	int compare(const Site &s) const;
@@ -181,6 +193,20 @@ struct Pattern::Site {
 	 */
 	Site();
 	int compareLinkPtrn(ag_st_id ptrn) const;
+	bool isEmptySite() const;
+	bool isExpression() const;
+	bool isBindToAny() const;
+	bool testValue(const state::SomeValue& val,
+			const state::State& state) const;
+};
+
+template <typename T>
+class RangedSite : public Pattern::Site {
+	T max,min;
+
+public:
+	bool operator==(const Site &s) const;
+	int compare(const Site &s) const;
 	bool isEmptySite() const;//TODO inline???
 	bool isBindToAny() const;
 };
@@ -210,6 +236,11 @@ public:
 	void setSiteValue(small_id mix_site,small_id label);
 	void setSiteValue(small_id mix_site,int val);
 	void setSiteValue(small_id mix_site,FL_TYPE val);
+	void setSiteExpr(small_id mix_site,const state::BaseExpression* expr);
+	void setSiteAux(small_id mix_site);
+	void setSiteMinExpr(small_id mix_site,const state::BaseExpression* expr);
+	void setSiteMaxExpr(small_id mix_site,const state::BaseExpression* expr);
+
 
 	//void setSiteLink(short mix_site,LinkType l);
 	void setLinkPtrn(small_id trgt_site,small_id ag_ptrn,small_id site_ptrn);

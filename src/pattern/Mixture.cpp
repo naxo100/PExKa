@@ -8,6 +8,7 @@
 #include <cstring>
 #include "Mixture.h"
 #include "Environment.h"
+#include "../util/Warning.h"
 
 
 namespace pattern {
@@ -251,6 +252,11 @@ vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 	for(unsigned i = 0; i < order_mask.size(); i++)
 		order_mask[i].first = comps_order[order_mask[i].first].second;
 	links.clear();
+	for(auto elem : auxiliars){
+		auto cc_ag = order_mask[get<1>(elem.second)];
+		get<0>(elem.second) = cc_ag.first;
+		get<1>(elem.second) = cc_ag.second;
+	}
 	return order_mask;
 }
 
@@ -297,6 +303,10 @@ const Mixture::Component& Mixture::getComponent(small_id id) const {
 	return *(*comps)[id];
 }
 
+const map<string,tuple<small_id,small_id,small_id>>& Mixture::getAux() const{
+	return auxiliars;
+}
+
 void Mixture::addInclude(small_id r_id) {
 	if(!comps)
 		throw std::invalid_argument("Cannot call addInclude() on a uninitialized Mixture");
@@ -314,6 +324,14 @@ const vector<Mixture::Component*>::iterator Mixture::begin() const {
 }
 const vector<Mixture::Component*>::iterator Mixture::end() const {
 	return comps->end();
+}
+
+void Mixture::setAux(string id,small_id ag,small_id site){
+	if(declaredComps)
+		throw std::invalid_argument("Cannot call setAux() on an initialized mixture.");
+	if(auxiliars.count(id))
+		throw SemanticError("The auxiliar "+id+"is already used in this mixture.",yy::location());
+	auxiliars[id] = make_tuple(small_id(-1),ag,site);
 }
 
 string Mixture::toString(const Environment& env) const {
@@ -340,9 +358,7 @@ string Mixture::toString(const Environment& env,const vector<ag_st_id>& mask) co
 /*************** Class Agent ********************/
 
 Mixture::Agent::Agent(short_id sign_id) : signId(sign_id){}
-Mixture::Agent::~Agent(){
-	1;
-};
+Mixture::Agent::~Agent(){};
 
 Mixture::Site& Mixture::Agent::addSite(small_id env_site){
 	return interface[env_site] = Site();
@@ -436,12 +452,35 @@ int Mixture::Agent::compare(const Agent &a,set<small_id>& already_done) const {
 
 void Mixture::Agent::setSiteValue(small_id site_id,small_id lbl_id){
 	//interface[site_id].val_type = ValueType::LABEL;
-	interface[site_id].state.set(lbl_id);
+	interface[site_id].label = lbl_id;
 }
 void Mixture::Agent::setSiteValue(small_id site_id,FL_TYPE val){
 	//interface[site_id].val_type = ValueType::LABEL;
-	interface[site_id].state.set(val);
+	//interface[site_id].label = Site::AUX;
 }
+void Mixture::Agent::setSiteValue(small_id site_id,int val){
+	//interface[site_id].val_type = ValueType::LABEL;/
+	//interface[site_id].label = Site::AUX;
+}
+
+void Mixture::Agent::setSiteExpr(small_id mix_site,const state::BaseExpression* expr){
+	interface[mix_site].values[1] = expr;
+	interface[mix_site].label = Site::AUX;//Expression site TODO
+}
+void Mixture::Agent::setSiteAux(small_id mix_site){
+	//interface[mix_site].aux_id = id;
+	interface[mix_site].label = Site::AUX;//expression site
+}
+void Mixture::Agent::setSiteMinExpr(small_id mix_site,const state::BaseExpression* expr){
+	interface[mix_site].values[0] = expr;
+}
+void Mixture::Agent::setSiteMaxExpr(small_id mix_site,const state::BaseExpression* expr){
+	interface[mix_site].values[2] = expr;
+}
+
+
+
+
 void Mixture::Agent::setLinkPtrn(small_id trgt_site,small_id ag_ptrn,small_id site_ptrn){
 	interface.at(trgt_site).lnk_ptrn = make_pair(ag_ptrn,site_ptrn);
 }
@@ -511,19 +550,22 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 		//out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
 		out += site.getName(); //site name
 
-		switch(it->second.state.t) {
-			case state::BaseExpression::SMALL_ID:
-				labelSite = dynamic_cast<const Signature::LabelSite*>(& site);
-				if(labelSite && !it->second.isEmptySite())//is not an empty site
-					out += "~" + labelSite->getLabel(it->second.state.smallVal); //value of site
-				break;
-			case state::BaseExpression::INT :
-				break;
-			case state::BaseExpression::FLOAT :
-				//TODO if NAN EmptySite;deprecated
-				break;
-			default:
-				throw std::invalid_argument("Mixture::Agent::toString(): not a valid state type.");
+		if(it->second.label != Site::AUX) {
+			labelSite = dynamic_cast<const Signature::LabelSite*>(& site);
+			if(labelSite && !it->second.isEmptySite())//is not an empty site
+				out += "~" + labelSite->getLabel(it->second.label); //value of site
+				//throw std::invalid_argument("Mixture::Agent::toString(): not a valid state type.");
+		}
+		else{
+			out += "~{ ";
+			/*if(it->second.values[0])
+				out += it->second.values[0]->toString()+ "<=";
+			if(it->second.values[1])
+				out += it->second.values[1]->toString();
+			if(it->second.values[2])
+				out += "<=" + it->second.values[2]->toString();*/
+			out += "}";
+
 		}
 
 		switch(it->second.link_type) {
@@ -568,20 +610,54 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 }
 
 /************** class Site *********************/
-Mixture::Site::Site() : state((small_id)-1),link_type(FREE),lnk_ptrn(-1,-1) {}
+Mixture::Site::Site() : label(EMPTY),link_type(FREE),lnk_ptrn(-1,-1),
+		values({nullptr,nullptr,nullptr}){}
 
 bool Mixture::Site::isEmptySite() const{
-	static auto empty = (small_id)-1;
-	return state.smallVal == empty;
+	return label == EMPTY && values[1] == nullptr;
 }
+bool Mixture::Site::isExpression() const{
+	return label == AUX || values[1];
+}
+
+//test if mix_site match with value
+bool Mixture::Site::testValue(const state::SomeValue& val,const state::State& state) const {
+	if(val.t == state::BaseExpression::SMALL_ID)
+		return val.smallVal == label;
+	else
+		if(values[1])
+			try{
+				return values[1]->getValue(state) == val;
+			}
+			catch(exception &e){
+				return false;
+			}
+	return true;
+}
+
 bool Mixture::Site::operator ==(const Site &s) const{
-	if(memcmp(&state,&s.state,sizeof(state::SomeValue))) //only valid if union in state is cleaned at constructor
-		return false;
+	if(label != s.label){
+		if(int(label) + int(s.label) == EMPTY + AUX){
+			for(int i = 0; i < 3; i++)
+				if(values[i] != s.values[i])
+					if(*values[i] == *s.values[i])
+						return false;
+		}
+		else
+			return false;
+	}
 	if(s.link_type == link_type){
 		if(link_type >= LinkType::BIND && s.lnk_ptrn != lnk_ptrn)//bind or bind_to //TODO PATH
 			return false;
 	}
 	else return false;
+
+
+	if(label == AUX)
+		for(int i = 0; i < 3; i++)
+			if(values[i] != s.values[i])
+				if(*values[i] == *s.values[i])
+					return false;
 	return true;
 }
 int Mixture::Site::compare(const Site &s) const{
@@ -592,7 +668,14 @@ int Mixture::Site::compare(const Site &s) const{
 		cout << (unsigned)((char*)(&state))[i] << "-" << (unsigned)((char*)(&s.state))[i] << " ";
 	cout << endl;*/
 	//if(memcmp(&state,&s.state,sizeof(state::SomeValue))){ //only valid if union in state is cleaned at constructor
-	if(state.fVal != s.state.fVal || state.t != s.state.t){
+
+	if(label == AUX || s.label == AUX)
+		for(int i = 0; i < 3; i++)
+			if(values[i] != s.values[i])
+				if(values[i] || s.values[i] || *values[i] == *s.values[i])
+					throw False();
+
+	if(label != s.label){
 		if(isEmptySite())
 			ret = 1;
 		else{

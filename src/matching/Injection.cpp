@@ -5,9 +5,10 @@
  *      Author: naxo
  */
 
-#include "Injection.h"
 #include <queue>
 #include <iostream>
+#include "Injection.h"
+#include "../state/Node.h"
 
 namespace matching {
 
@@ -21,6 +22,10 @@ Injection::~Injection() {}
 
 void Injection::alloc(size_t addr){
 	address = addr;
+}
+
+size_t Injection::getAddress() const {
+	return address;
 }
 
 
@@ -44,7 +49,7 @@ CcInjection::CcInjection(const pattern::Mixture::Component& _cc)
 }
 
 bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
-		two<std::list<state::Node::Internal*> >& port_list,small_id root) {
+		two<std::list<state::Internal*> >& port_list,small_id root) {
 	//ccAgToNode.clear();
 	for(auto& n : ccAgToNode)
 		n = nullptr;
@@ -138,123 +143,6 @@ bool CcInjection::operator==(const Injection& inj) const{
 
 //----------------------------------
 
-/********* InjRandSet ********************/
-
-InjRandSet::InjRandSet() : counter(0),multiCount(0) {
-	container.reserve(100);
-}
-
-InjRandSet::~InjRandSet(){
-	for(auto inj : freeInjs)
-		delete inj;
-	for(auto inj : container)
-		delete inj;
-}
-
-//TODO better way to count?
-size_t InjRandSet::count() const {
-	unsigned c = 0;
-	for(size_t i = 0; i < multiCount; i++)
-		c += container[i]->count();
-	return c + container.size() - multiCount;
-}
-
-//TODO
-const Injection& InjRandSet::chooseRandom(default_random_engine& randGen) const{
-	auto uni = uniform_int_distribution<size_t>(0,count()-1);
-	auto selection = uni(randGen);
-	if(selection < container.size() - multiCount)
-		return *container[selection + multiCount];
-	else{
-		selection -= container.size() - multiCount;
-		auto it = container.begin();
-		while(selection > (*it)->count()){
-			selection -= (*it)->count();
-			it++;
-		}
-		return **it;
-	}
-}
-
-void InjRandSet::insert(CcInjection* inj){
-	inj->alloc(container.size());
-	container.push_back(inj);
-}
-
-Injection* InjRandSet::emplace(const pattern::Mixture::Component& cc,Node& node,
-		two<std::list<Node::Internal*> > &port_lists,small_id root) {
-	CcInjection* inj;
-	if(freeInjs.empty()){
-		inj = new CcInjection(cc);
-		freeInjs.push_back(inj);
-	}
-	else {
-		inj = freeInjs.front();
-	}
-	if(inj->reuse(cc,node,port_lists,root) == false)
-		return nullptr;
-	insert(inj);
-	freeInjs.pop_front();
-	if(inj->count() > 1){
-		counter += inj->count();
-		multiCount++;
-	}
-	else
-		counter++;
-	return inj;
-}
-
-Injection* InjRandSet::emplace(Injection* base_inj,map<Node*,Node*>& mask){
-	CcInjection* inj;
-	if(freeInjs.empty()){
-		inj = static_cast<CcInjection*>(base_inj->clone(mask));
-		insert(inj);
-	}
-	else
-		inj = freeInjs.front();
-
-	inj->copy(container[base_inj->address],mask);
-	container[inj->address];
-	freeInjs.pop_front();
-
-	if(inj->count() > 1){
-		counter += inj->count();
-		multiCount++;
-	}
-	else
-		counter++;
-
-/*#if DEBUG
-	for(auto inj2 : container)
-		if(inj != inj2 && *inj == *inj2)
-			throw invalid_argument("InjSet cannot contain the same injection twice.");
-#endif*/
-	return inj;
-}
-
-void InjRandSet::erase(Injection* inj){
-	//if(container.empty())
-	//	throw invalid_argument("InjRandSet is empty, what injection are you trying to delete?");
-	if(inj->address < multiCount)
-		multiCount--;
-	freeInjs.push_back(static_cast<CcInjection*>(inj));
-	if(container.size() > 1){
-		container.back()->alloc(inj->address);
-		container[inj->address] = container.back();
-	}
-	inj->alloc(size_t(-1));//dealloc
-	container.pop_back();
-	counter -= inj->count();
-}
-
-
-vector<CcInjection*>::iterator InjRandSet::begin(){
-	return container.begin();
-}
-
-vector<CcInjection*>::iterator InjRandSet::end(){
-	return container.end();
-}
 
 
 } /* namespace simulation */

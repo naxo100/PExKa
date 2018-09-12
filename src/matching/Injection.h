@@ -15,9 +15,13 @@
 #include <list>
 #include <random>
 #include "../util/params.h"
-#include "../state/SiteGraph.h"
+//#include "../state/SiteGraph.h"
 #include "../pattern/Mixture.h"
 
+namespace state {
+	class Node;
+	struct Internal;
+}
 
 namespace matching {
 
@@ -27,21 +31,21 @@ using Node = state::Node;
 
 class InjRandSet;
 
-struct try_match {
+/*struct try_match {
 	const pattern::Mixture::Component* comp;
 	Node* node;
-	two<list<Node::Internal*> > port_lists;
+	two<list<Internal*> > port_lists;
 	small_id root;
-};
+};*/
 
 
 class Injection {
 	friend class InjRandSet;
 	const pattern::Pattern& ptrn;
 	size_t address;
-	virtual Injection* clone(const map<Node*,Node*>& mask) const = 0;
 public:
 	Injection(const pattern::Pattern& ptrn);
+	virtual Injection* clone(const map<Node*,Node*>& mask) const = 0;
 	virtual ~Injection();
 	virtual const vector<Node*>& getEmbedding() const = 0;
 
@@ -54,6 +58,7 @@ public:
 	const pattern::Pattern& pattern() const;
 
 	void alloc(size_t addr);
+	size_t getAddress() const;
 
 	//bool operator< (const Injection& inj) const;
 	virtual bool operator==(const Injection& inj) const = 0;
@@ -66,15 +71,15 @@ class CcInjection : public Injection {
 	vector<Node*> ccAgToNode;
 	//const pattern::Mixture::Component& cc;//cc_id
 
+public:
 	CcInjection(const pattern::Pattern& _cc);
 	CcInjection(const pattern::Mixture::Component& cc);
 	Injection* clone(const map<Node*,Node*>& mask) const override;
 	void copy(const CcInjection* inj,const map<Node*,Node*>& mask);
-public:
 	~CcInjection();
 
 	bool reuse(const pattern::Mixture::Component& cc,Node& node,
-			two<list<state::Node::Internal*> >& port_list,small_id root = 0);
+			two<list<state::Internal*> >& port_list,small_id root = 0);
 
 	const vector<Node*>& getEmbedding() const override;
 
@@ -111,26 +116,7 @@ public:
 
 };*/
 
-class InjRandSet {
-	size_t counter;
-	size_t multiCount;
-	list<CcInjection*> freeInjs;
-	vector<CcInjection*> container;
-	void insert(CcInjection* inj);
-public:
-	InjRandSet();
-	~InjRandSet();
-	const Injection& chooseRandom(default_random_engine& randGen) const;
-	size_t count() const;
 
-	Injection* emplace(const pattern::Mixture::Component& cc,Node& node,
-			two<std::list<Node::Internal*> > &port_lists,small_id root = 0);
-	Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask);
-	void erase(Injection* inj);
-
-	vector<CcInjection*>::iterator begin();
-	vector<CcInjection*>::iterator end();
-};
 
 } /* namespace simulation */
 

@@ -15,18 +15,13 @@
 #include "../pattern/Mixture.h"
 #include "../data_structs/SimpleSet.h"
 #include <unordered_set>
-//#include "../matching/Injection.h"
+#include "../matching/InjRandSet.h"
 //#include <boost/fusion/container/set.hpp>
 //#include <boost/fusion/include/set.hpp>
 //#include <boost/fusion/container/set/set_fwd.hpp>
 //#include <boost/fusion/include/set_fwd.hpp>
 
 
-namespace matching {
-	//class InjSet;
-	class InjRandSet;
-	class Injection;
-}
 
 //typedef data_structs::SimpleSet<matching::Injection*> InjSet;
 typedef set<matching::Injection*> InjSet;
@@ -41,9 +36,8 @@ struct EventInfo;
 using namespace std;
 
 class Node {
-public:
-	struct Internal;
 protected:
+	friend struct Internal;
 	short_id signId;
 	big_id address;
 	Internal *interface;
@@ -58,7 +52,7 @@ public:
 	Node(const Node& node,const map<Node*,Node*>& mask);
 	virtual ~Node();
 
-	void copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs);//unsafe
+	void copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet** injs);//unsafe
 	void alloc(big_id addr);
 	big_id getAddress() const;
 
@@ -67,10 +61,11 @@ public:
 	void setLink(small_id site_src,Node* lnk,small_id site_trgt);
 
 
-	virtual void removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph);
-	virtual void changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value);
-	virtual void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff = false);
-	virtual void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,small_id trgt_site,bool side_eff = false);
+	virtual void removeFrom(EventInfo& ev,matching::InjRandSet** injs,SiteGraph& graph);
+	virtual void changeIntState(EventInfo& ev,matching::InjRandSet** injs,small_id id,small_id value);
+	virtual void assign(EventInfo& ev,matching::InjRandSet** injs,small_id id,const SomeValue& val);
+	virtual void unbind(EventInfo& ev,matching::InjRandSet** injs,small_id id,bool side_eff = false);
+	virtual void bind(EventInfo& ev,matching::InjRandSet** injs,small_id id,Node* trgt_node,small_id trgt_site,bool side_eff = false);
 
 
 	//inline?? TODO
@@ -103,7 +98,7 @@ public:
 
 };
 
-struct Node::Internal {
+struct Internal {
 	SomeValue val;
 	pair<Node*,small_id> link;
 	//for value, for link //TODO refs????
@@ -111,8 +106,8 @@ struct Node::Internal {
 	Internal();
 	~Internal();
 
-	void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs);
-	static void negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,InjSet* deps);
+	void negativeUpdate(EventInfo& ev,matching::InjRandSet** injs);
+	static void negativeUpdate(EventInfo& ev,matching::InjRandSet** injs,InjSet* deps);
 
 
 	string toString(const pattern::Signature::Site& s,bool show_binds = false,map<const Node*,bool> *visit = nullptr) const;
@@ -130,11 +125,12 @@ public:
 	pop_size getCount() const override;
 
 
-	void removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph) override;
+	void removeFrom(EventInfo& ev,matching::InjRandSet** injs,SiteGraph& graph) override;
 
-	void changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value) override;
-	void unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff = false) override;
-	void bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,
+	void changeIntState(EventInfo& ev,matching::InjRandSet** injs,small_id id,small_id value) override;
+	void assign(EventInfo& ev,matching::InjRandSet** injs,small_id id,const SomeValue& value) override;
+	void unbind(EventInfo& ev,matching::InjRandSet** injs,small_id id,bool side_eff = false) override;
+	void bind(EventInfo& ev,matching::InjRandSet** injs,small_id id,
 			Node* trgt_node,small_id trgt_site,bool side_eff = false) override;
 
 	/*bool test(const pair<small_id,pattern::Mixture::Site>& id_site,
@@ -183,12 +179,16 @@ struct EventInfo {
 	map<Node*,Node*> new_cc;
 	//mask for new injections, nullptr are erased injs
 	map<matching::Injection*,matching::Injection*> inj_mask;
+	//aux_values
+	map<string,FL_TYPE> aux_map;
 
 	set<const pattern::Pattern*> to_update;
 	set<small_id> rule_ids;
 
 	EventInfo();
 	~EventInfo();
+
+	void clear(small_id cc_count);
 
 };
 

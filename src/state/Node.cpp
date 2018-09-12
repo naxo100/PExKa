@@ -25,7 +25,8 @@ Node::Node(const pattern::Signature& sign) : signId(sign.getId()),address(-1),
 	}
 }
 
-Node::Node(const Node& node){
+Node::Node(const Node& node) : signId(),address(-1),
+		intfSize(0),deps(nullptr),interface(nullptr){//useless
 	throw invalid_argument("do not call basic copy constructor of node.");
 }
 
@@ -62,7 +63,7 @@ Node::~Node() {
 	delete deps;
 }
 
-void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs) {
+void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet** injs) {
 	for(small_id i = 0; i < intfSize; i++){
 		for(auto inj : *node.interface[i].deps.first){
 			matching::Injection* new_inj;
@@ -70,7 +71,7 @@ void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs) {
 				new_inj = ev.inj_mask.at(inj);
 			}
 			catch(out_of_range &ex){
-				new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()].emplace(inj,ev.new_cc);
+				new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()]->emplace(inj,ev.new_cc);
 			}
 			if(new_inj){
 				interface[i].deps.first->emplace(new_inj);
@@ -83,7 +84,7 @@ void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs) {
 				new_inj = ev.inj_mask.at(inj);
 			}
 			catch(out_of_range &ex){
-				new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()].emplace(inj,ev.new_cc);
+				new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()]->emplace(inj,ev.new_cc);
 			}
 			if(new_inj){
 				interface[i].deps.second->emplace(new_inj);
@@ -97,7 +98,7 @@ void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet* injs) {
 			new_inj = ev.inj_mask.at(inj);
 		}
 		catch(out_of_range &ex){
-			new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()].emplace(inj,ev.new_cc);
+			new_inj = ev.inj_mask[inj] = injs[inj->pattern().getId()]->emplace(inj,ev.new_cc);
 		}
 		if(new_inj){
 			deps->emplace(new_inj);
@@ -130,11 +131,21 @@ bool Node::test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site
 		two<list<Internal*> > &port_list) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
-		//if(memcmp(&port.val,&id_site.second.state,sizeof(state::SomeValue)))
-		if(port.val.fVal != id_site.second.state.fVal || port.val.t != id_site.second.state.t )
-			return false;
-		else
-			port_list.first.emplace_back(&port);
+		switch(port.val.t){
+		case BaseExpression::SMALL_ID:
+			if(port.val.smallVal != id_site.second.label)
+				return false;
+			break;
+		case BaseExpression::FLOAT:
+			if(port.val.fVal != id_site.second.label)//TODO eval expression!
+				return false;
+			break;
+		case BaseExpression::INT:
+			if(port.val.iVal != id_site.second.label)//TODO eval expression!
+				return false;
+			break;
+		}
+		port_list.first.emplace_back(&port);
 	}
 	switch(id_site.second.link_type){
 	case pattern::Mixture::WILD:
@@ -197,7 +208,7 @@ void Node::setLink(small_id site_src,Node* lnk,small_id site_trgt){
 
 
 
-void Node::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph) {
+void Node::removeFrom(EventInfo& ev,matching::InjRandSet** injs,SiteGraph& graph) {
 	graph.remove(this);
 	for(small_id i = 0; i < intfSize; i++){
 		interface[i].negativeUpdate(ev,injs);
@@ -213,7 +224,7 @@ void Node::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph)
 	delete this;//TODO do not delete, reuse nodes
 }
 
-void Node::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value){
+void Node::changeIntState(EventInfo& ev,matching::InjRandSet** injs,small_id id,small_id value){
 	if(interface[id].val.smallVal == value){
 		ev.warns++;
 	}
@@ -222,7 +233,18 @@ void Node::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,s
 		interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
 	}
 }
-void Node::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff){
+
+void Node::assign(EventInfo& ev,matching::InjRandSet** injs,small_id id,const SomeValue& val){
+	if(interface[id].val == val){
+		ev.warns++;
+	}
+	else{
+		interface[id].val = val;//TODO opertor= ??
+		interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
+	}
+}
+
+void Node::unbind(EventInfo& ev,matching::InjRandSet** injs,small_id id,bool side_eff){
 	auto& inter = interface[id];
 	if(inter.link.first){
 		if(side_eff)
@@ -236,7 +258,7 @@ void Node::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side
 	else
 		ev.warns++;
 }
-void Node::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,
+void Node::bind(EventInfo& ev,matching::InjRandSet** injs,small_id id,Node* trgt_node,
 		small_id trgt_site,bool side_eff){
 	//auto lnk2 = trgt_node->getLinkState(trgt_site);
 	auto& lnk1 = interface[id].link;
@@ -254,10 +276,10 @@ void Node::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_
 	lnk1.first->bind(ev,injs,trgt_site,this,id,side_eff);
 }
 
-Node::Internal* Node::begin(){
+Internal* Node::begin(){
 	return interface;
 }
-Node::Internal* Node::end(){
+Internal* Node::end(){
 	return interface+intfSize;
 }
 
@@ -331,7 +353,7 @@ pop_size SubNode::getCount() const {
 	return cc.getPopulation();
 }
 
-void SubNode::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& graph){
+void SubNode::removeFrom(EventInfo& ev,matching::InjRandSet** injs,SiteGraph& graph){
 	if(!ev.new_cc.count(this))
 		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
 			Node::removeFrom(ev,injs,graph);
@@ -371,7 +393,7 @@ void SubNode::removeFrom(EventInfo& ev,matching::InjRandSet* injs,SiteGraph& gra
 		ev.inj_mask[dep] = nullptr;
 }
 
-void SubNode::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id id,small_id value){
+void SubNode::changeIntState(EventInfo& ev,matching::InjRandSet** injs,small_id id,small_id value){
 	if(!ev.new_cc.count(this))
 		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
 			Node::changeIntState(ev,injs,id,value);
@@ -388,7 +410,26 @@ void SubNode::changeIntState(EventInfo& ev,matching::InjRandSet* injs,small_id i
 	for(auto dep : *interface[id].deps.first)
 		ev.inj_mask[dep] = nullptr;
 }
-void SubNode::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool side_eff){
+
+void SubNode::assign(EventInfo& ev,matching::InjRandSet** injs,small_id id,const SomeValue& value){
+	if(!ev.new_cc.count(this))
+		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
+			Node::assign(ev,injs,id,value);
+			return;
+		}
+	auto& new_node = ev.new_cc.at(this);
+	if(new_node == nullptr)
+		new_node = new Node(*this,ev.new_cc);
+	if(interface[id].val == value){
+		ev.warns++;
+	}
+	else
+		new_node->setState(id,value);
+	for(auto dep : *interface[id].deps.first)
+		ev.inj_mask[dep] = nullptr;
+}
+
+void SubNode::unbind(EventInfo& ev,matching::InjRandSet** injs,small_id id,bool side_eff){
 	//unbind must be inside cc
 	auto& lnk = this->interface[id].link;
 	if(!lnk.first){
@@ -415,7 +456,7 @@ void SubNode::unbind(EventInfo& ev,matching::InjRandSet* injs,small_id id,bool s
 	for(auto dep : *lnk.first->getLifts(lnk.second).second)
 		ev.inj_mask[dep] = nullptr;
 }
-void SubNode::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* trgt_node,
+void SubNode::bind(EventInfo& ev,matching::InjRandSet** injs,small_id id,Node* trgt_node,
 		small_id trgt_site,bool side_eff){
 	if(!ev.new_cc.count(this))
 		try { cc.dec(ev); } catch(MultiNode::OutOfInstances &ex){
@@ -457,10 +498,10 @@ void SubNode::bind(EventInfo& ev,matching::InjRandSet* injs,small_id id,Node* tr
 
 /********** Internal struct ************/
 
-Node::Internal::Internal() : val(small_id(-1)),link(nullptr,0),
+Internal::Internal() : val(small_id(-1)),link(nullptr,0),
 		deps(new InjSet(),new InjSet()){}
 
-Node::Internal::~Internal(){
+Internal::~Internal(){
 	//cout << "deps count: " << deps.first->size() << " - " << deps.second->size() << endl;
 	delete deps.first;
 	delete deps.second;
@@ -468,12 +509,12 @@ Node::Internal::~Internal(){
 	deps.second = nullptr;
 }
 
-void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs){
+void Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet** injs){
 	negativeUpdate(ev,injs,deps.first);
 	negativeUpdate(ev,injs,deps.second);
 }
 
-void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,InjSet* deps){
+void Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet** injs,InjSet* deps){
 	auto dep_it = deps->begin();
 	auto nxt = dep_it;
 	auto end = deps->end();
@@ -494,18 +535,12 @@ void Node::Internal::negativeUpdate(EventInfo& ev,matching::InjRandSet* injs,Inj
 				for(auto& id_site : mix_ag){
 					if(id_site.second.link_type != pattern::Pattern::WILD)
 						/*m++,n += */emb[i]->getLifts(id_site.first).second->erase(inj);
-					switch(id_site.second.state.t){
-					case BaseExpression::SMALL_ID:
-						if(!id_site.second.isEmptySite())
-							/*m++,n += */emb[i]->getLifts(id_site.first).first->erase(inj);
-						break;
-					default:
-						break;//TODO other types of values
-					}
+					if(!id_site.second.isEmptySite())
+						/*m++,n += */emb[i]->getLifts(id_site.first).first->erase(inj);
 				}
 				//cout << "erase calls = " << m << " || erased elems = " << n << endl;
 			}
-			injs[cc.getId()].erase(inj);
+			injs[cc.getId()]->erase(inj);
 			//delete *dep_it;//TODO reuse injections
 			ev.to_update.emplace(&cc);
 		}
@@ -536,7 +571,7 @@ string SubNode::toString(const pattern::Environment &env,bool show_binds,map<con
 	return to_string(cc.getPopulation())+" " + Node::toString(env,show_binds,visit);
 }
 
-string Node::Internal::toString(const pattern::Signature::Site& sit,bool show_binds,map<const Node*,bool> *visit) const {
+string Internal::toString(const pattern::Signature::Site& sit,bool show_binds,map<const Node*,bool> *visit) const {
 	string s(sit.getName());
 	try{
 		dynamic_cast<const pattern::Signature::EmptySite&>(sit);
@@ -584,6 +619,18 @@ EventInfo::~EventInfo(){
 	}
 	if(fresh_emb)
 		delete[] fresh_emb;
+}
+
+void EventInfo::clear(small_id _cc_count){
+	side_effects.clear();
+	pert_ids.clear();
+	new_cc.clear();
+	inj_mask.clear();
+	to_update.clear();
+	rule_ids.clear();
+	aux_map.clear();
+	warns = 0;
+	cc_count = _cc_count;
 }
 
 

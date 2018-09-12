@@ -20,6 +20,8 @@ class State;
 
 class SomeValue;
 
+typedef std::unordered_map<std::string,FL_TYPE> AuxMap;
+
 /** \brief Base class for algebraic and every number-evaluated expression.
  *
  *
@@ -41,7 +43,8 @@ public:
 	struct EnumType {static const Type t = FLOAT;};
 
 	virtual SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
-	virtual SomeValue getValue(const state::State& state) const = 0;
+	virtual SomeValue getValue(const state::State& state,
+			const AuxMap&& aux_values = AuxMap()) const = 0;
 
 	/** \brief Return an int vector that represents this expression
 	 * as an equation on auxiliars.
@@ -49,7 +52,9 @@ public:
 	 */
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const = 0;
 
-	virtual std::set<std::string> getAuxiliars() const;
+	//virtual std::set<std::string> getAuxiliars() const = 0;
+	virtual bool operator==(const BaseExpression& exp) const = 0;
+	virtual bool operator!=(const BaseExpression& exp) const;
 
 	template <bool isBool>
 	static BaseExpression* makeBinaryExpression(const BaseExpression *ex1,const BaseExpression *ex2,
@@ -76,10 +81,11 @@ public:
 	AlgExpression();
 	virtual ~AlgExpression() = 0;
 	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const = 0;
-	virtual T evaluate(const state::State& state) const = 0;
+	virtual T evaluate(const state::State& state,const AuxMap& aux_values) const = 0;
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override = 0;
 	virtual SomeValue getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	virtual SomeValue getValue(const state::State& state) const override;
+	virtual SomeValue getValue(const state::State& state,const AuxMap&& aux_values = AuxMap()) const override;
+	virtual bool operator==(const BaseExpression& exp) const override = 0;
 };
 
 /*
@@ -137,8 +143,9 @@ class Constant : public AlgExpression<T> {
 public:
 	Constant(T v);
 	T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	T evaluate(const state::State& state) const override;
+	T evaluate(const state::State& state,const AuxMap& aux_values) const override;
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
+	bool operator==(const BaseExpression& exp) const override;
 };
 
 template<typename R,typename T1,typename T2>
@@ -150,12 +157,13 @@ class BinaryOperation : public AlgExpression<R> {
 	const char op;
 public:
 	R evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	R evaluate(const state::State& state) const override;
+	R evaluate(const state::State& state,const AuxMap& aux_values) const override;
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
-	std::set<std::string> getAuxiliars() const override;
+	//std::set<std::string> getAuxiliars() const override;
+	bool operator==(const BaseExpression& exp) const override;
 	~BinaryOperation();
-	BinaryOperation
-			(const BaseExpression *ex1,const BaseExpression *ex2,const short op);
+	BinaryOperation(const BaseExpression *ex1,
+			const BaseExpression *ex2,const short op);
 };
 
 template <typename R>
@@ -165,8 +173,9 @@ class VarLabel : public AlgExpression<R> {
 public:
 	VarLabel(BaseExpression* expr);
 	R evaluate(std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	R evaluate(const state::State& state) const override;
+	R evaluate(const state::State& state,const AuxMap& aux_values) const override;
 	int auxFactors(std::unordered_map<std::string,int> &factor) const override;
+	bool operator==(const BaseExpression& exp) const override;
 };
 
 class TokenVar : public AlgExpression<FL_TYPE> {
@@ -174,21 +183,23 @@ class TokenVar : public AlgExpression<FL_TYPE> {
 public:
 	TokenVar(unsigned _id);
 	FL_TYPE evaluate(const std::unordered_map<std::string,int> *aux_values) const override;
-	FL_TYPE evaluate(const state::State& state) const override;
+	FL_TYPE evaluate(const state::State& state,const AuxMap& aux_values) const override;
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
+
+	bool operator==(const state::BaseExpression& exp) const override;
 };
 
-
-class Auxiliar : public AlgExpression<int> {
+template <typename R>
+class Auxiliar : public AlgExpression<R> {
 	std::string name;
 public:
 	Auxiliar(const std::string &nme);
 	~Auxiliar();
-	int evaluate(const std::unordered_map<std::string,int> *aux_values) const override;
-	int evaluate(const state::State& state) const override;
+	R evaluate(const std::unordered_map<std::string,int> *aux_values) const override;
+	R evaluate(const state::State& state,const AuxMap& aux_values) const override;
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
-
-	std::set<std::string> getAuxiliars() const override;
+	bool operator==(const BaseExpression& exp) const;
+	//std::set<std::string> getAuxiliars() const override;
 };
 
 

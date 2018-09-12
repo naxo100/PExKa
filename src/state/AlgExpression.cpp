@@ -26,9 +26,13 @@ const BaseExpression::Type BaseExpression::getType() const{
 	return t;
 }
 
-std::set<std::string> BaseExpression::getAuxiliars() const {
-	return std::set<std::string>();
+bool BaseExpression::operator!=(const BaseExpression& exp) const {
+	return ! ( (*this) == exp);
 }
+
+/*std::set<std::string> BaseExpression::getAuxiliars() const {
+	return std::set<std::string>();
+}*/
 
 BaseExpression::~BaseExpression(){};
 
@@ -46,7 +50,7 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 	BaseExpression::Type type2 = ex2->getType();
 	typedef typename std::conditional<isBool,bool,FL_TYPE>::type BoolOrFloat;
 	typedef typename std::conditional<isBool,bool,int>::type BoolOrInt;
-	BaseExpression* bin_op;
+	BaseExpression* bin_op = nullptr;
 
 	switch(type1){
 	case BaseExpression::FLOAT:
@@ -60,6 +64,8 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 		case BaseExpression::BOOL:
 			bin_op = new BinaryOperation<BoolOrFloat,FL_TYPE,bool>(ex1,ex2,op);
 			break;
+		default:
+			SemanticError("Not a valid value for a binary operation",yy::location());
 		}
 		break;
 	case BaseExpression::INT:
@@ -73,6 +79,8 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 		case BaseExpression::BOOL:
 			bin_op = new BinaryOperation<BoolOrInt,int,bool>(ex1,ex2,op);
 			break;
+		default:
+			SemanticError("Not a valid value for a binary operation",yy::location());
 		}
 		break;
 	case BaseExpression::BOOL:
@@ -86,8 +94,12 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,c
 		case BaseExpression::BOOL:
 			bin_op = new BinaryOperation<bool,bool,bool>(ex1,ex2,op);
 			break;
+		default:
+			SemanticError("Not a valid value for a binary operation",yy::location());
 		}
 		break;
+	default:
+		SemanticError("Not a valid value for a binary operation",yy::location());
 	}
 
 	return bin_op;
@@ -174,8 +186,8 @@ SomeValue AlgExpression<T>::getValue(const std::unordered_map<std::string,int> *
 	return SomeValue(this->evaluate(aux_values));
 }
 template <typename T>
-SomeValue AlgExpression<T>::getValue(const state::State& state) const{
-	return SomeValue(this->evaluate(state));
+SomeValue AlgExpression<T>::getValue(const state::State& state,const std::unordered_map<std::string,FL_TYPE>&& aux) const{
+	return SomeValue(this->evaluate(state,aux));
 }
 
 template class AlgExpression<FL_TYPE>;
@@ -191,13 +203,23 @@ T Constant<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) c
 	return val;
 }
 template <typename T>
-T Constant<T>::evaluate(const state::State& state) const{
+T Constant<T>::evaluate(const state::State& state,const AuxMap& aux_values) const{
 	return val;
 }
 //TODO
 template <typename T>
 FL_TYPE Constant<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux_values) const{
 	return (int)val;
+}
+
+template <typename T>
+bool Constant<T>::operator==(const BaseExpression& exp) const{
+	try{
+		auto& const_exp = dynamic_cast<const Constant<T>&>(exp);
+		return const_exp.val == val;
+	}
+	catch(bad_cast &ex){	}
+	return false;
 }
 
 template class Constant<FL_TYPE>;
@@ -239,9 +261,9 @@ R BinaryOperation< R, T1, T2>::evaluate(const std::unordered_map<std::string,int
 	return func(a,b);
 }
 template <typename R,typename T1,typename T2>
-R BinaryOperation< R, T1, T2>::evaluate(const state::State& state) const {
-	auto a = exp1->evaluate(state);
-	auto b = exp2->evaluate(state);
+R BinaryOperation< R, T1, T2>::evaluate(const state::State& state,const AuxMap& aux_values) const {
+	auto a = exp1->evaluate(state,aux_values);
+	auto b = exp2->evaluate(state,aux_values);
 	return func(a,b);
 }
 
@@ -291,19 +313,44 @@ FL_TYPE BinaryOperation<R,T1,T2>::auxFactors(std::unordered_map<std::string,FL_T
 	return func(val1,val2);
 }
 
-template <typename R,typename T1,typename T2>
+/*template <typename R,typename T1,typename T2>
 std::set<std::string> BinaryOperation<R,T1,T2>::getAuxiliars() const{
 	auto l1 = exp1->getAuxiliars();
 	auto l2 = exp2->getAuxiliars();
 	l1.insert(l2.begin(),l2.end());
 	return l1;
+}*/
+
+template <typename R,typename T1,typename T2>
+bool BinaryOperation<R,T1,T2>::operator==(const BaseExpression& exp) const{
+	try{
+		auto& binary_exp = dynamic_cast<const BinaryOperation<R,T1,T2>&>(exp);
+		if(binary_exp.op == op)
+			return (*binary_exp.exp1) == (*exp1) && (*binary_exp.exp2) == (*exp2);
+	}
+	catch(bad_cast &ex){	}
+	return false;
 }
 
 
+template class BinaryOperation<int,int,int>;
+//template class BinaryOperation<int,int,FL_TYPE>;
+//template class BinaryOperation<int,FL_TYPE,int>;
+//template class BinaryOperation<int,FL_TYPE,FL_TYPE>;
+//template class BinaryOperation<FL_TYPE,int,int>;
+template class BinaryOperation<FL_TYPE,int,FL_TYPE>;
+template class BinaryOperation<FL_TYPE,FL_TYPE,int>;
+template class BinaryOperation<FL_TYPE,FL_TYPE,FL_TYPE>;
+
 /*********** Class Auxiliar ***********/
-Auxiliar::Auxiliar(const std::string &nme) : name(nme){}
-Auxiliar::~Auxiliar(){}
-int Auxiliar::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
+template <typename R>
+Auxiliar<R>::Auxiliar(const std::string &nme) : name(nme){}
+
+template <typename R>
+Auxiliar<R>::~Auxiliar(){}
+
+template <typename R>
+R Auxiliar<R>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
 	try{
 		if(aux_values)
 			return aux_values->at(name);
@@ -318,18 +365,40 @@ int Auxiliar::evaluate(const std::unordered_map<std::string,int> *aux_values) co
 	return 0;
 }
 
-int Auxiliar::evaluate(const state::State& state) const{
-	throw std::invalid_argument("Cannot call Auxiliar::evaluate() without aux-map");
+template <typename R>
+R Auxiliar<R>::evaluate(const state::State& state,const AuxMap& aux_values) const{
+	try{
+		return aux_values.at(name);
+	}
+	catch(out_of_range& ex){
+		throw ex;//TODO throw better exception
+	}
 }
 
-FL_TYPE Auxiliar::auxFactors(std::unordered_map<std::string,FL_TYPE> &var_factors) const{
+template <typename R>
+FL_TYPE Auxiliar<R>::auxFactors(std::unordered_map<std::string,FL_TYPE> &var_factors) const{
 	var_factors[name] = 1;
 	return 0;
 }
 
-std::set<std::string> Auxiliar::getAuxiliars() const{
+/*template <typename R>
+std::set<std::string> Auxiliar<R>::getAuxiliars() const{
 	return std::set<std::string>(&name,&name+1);
+}*/
+
+template <typename T>
+bool Auxiliar<T>::operator==(const BaseExpression& exp) const{
+	try{
+		auto& aux_exp = dynamic_cast<const Auxiliar<T>&>(exp);
+		if(aux_exp.name == name)
+			return true;
+	}
+	catch(bad_cast &ex){	}
+	return false;
 }
+
+template class Auxiliar<int>;
+template class Auxiliar<FL_TYPE>;
 
 /********************************************/
 /************** class VarLabel **************/
@@ -341,13 +410,25 @@ R VarLabel<R>::evaluate(std::unordered_map<std::string,int> *aux_values) const {
 	throw std::invalid_argument("This should never been used");
 }
 template <typename R>
-R VarLabel<R>::evaluate(const state::State& state) const {
+R VarLabel<R>::evaluate(const state::State& state,const AuxMap& aux_values) const {
 	throw std::invalid_argument("This should never been used");
 }
 template <typename R>
 int VarLabel<R>::auxFactors(std::unordered_map<std::string,int> &factor) const {
 	throw std::invalid_argument("This should never been used");
 }
+
+template <typename T>
+bool VarLabel<T>::operator==(const BaseExpression& exp) const{
+	try{
+		auto& var_exp = dynamic_cast<const VarLabel<T>&>(exp);
+		return var_exp.var == var;
+	}
+	catch(bad_cast &ex){	}
+	return false;
+}
+
+
 
 /**************************/
 /****** class Token *******/
@@ -357,11 +438,21 @@ TokenVar::TokenVar(unsigned _id) : id(_id) {}
 FL_TYPE TokenVar::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
 	throw std::invalid_argument("Cannot call Token::evaluate() without state.");
 }
-FL_TYPE TokenVar::evaluate(const state::State& state) const{
+FL_TYPE TokenVar::evaluate(const state::State& state,const AuxMap& aux_values) const{
 	return state.getTokenValue(id);
 }
 FL_TYPE TokenVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
 	throw std::invalid_argument("Cannot use tokens in this expression.");
+}
+
+
+bool TokenVar::operator==(const BaseExpression& exp) const{
+	try{
+		auto& tok_exp = dynamic_cast<const TokenVar&>(exp);
+		return tok_exp.id == id;
+	}
+	catch(bad_cast &ex){	}
+	return false;
 }
 
 

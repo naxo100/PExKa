@@ -49,17 +49,23 @@ protected:
 class SiteState : public Node{
 public:
 	enum {EMPTY,LABEL,RANGE,AUX,EXPR} type;
+	enum {MIN_EQUAL=1,MAX_EQUAL=2};
 	//union {
 		list<Id> labels;
 		Id aux;
 		const Expression* val;
 		const Expression* range[3];//{min,default,max}
+		char flag;
 	//};
 	SiteState();
 	SiteState(const location& loc, const list<Id> &labs);
 	SiteState(const location& loc, const Expression* min,
 			const Expression* max,const Expression* def=nullptr);
-	SiteState(const location& loc,const Id &aux);
+	SiteState(const location& loc,const Expression* value);
+	SiteState(const location& loc,const Id &aux,
+			const Expression* equal = nullptr);
+	SiteState(const location& loc,const Id &aux,char _flag,
+			const Expression* min=nullptr,const Expression* max=nullptr);
 	~SiteState();
 
 	/** \brief return a vector of the site labels.
@@ -84,9 +90,9 @@ public:
 	Site();
 	Site(const location &l,const Id &id,const SiteState &s,const Link &lnk);
 	void eval(pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Signature &agent) const;
-	void eval(const pattern::Environment &env,const vector<state::Variable*> &consts,
+	pair<small_id,Id> eval(const pattern::Environment &env,const vector<state::Variable*> &consts,
 			pair<short,pattern::Mixture::Agent&> id_agent,
-			unordered_map<unsigned,list<pair<short,short> > > &m) const;
+			unordered_map<unsigned,list<two<short> > > &m,char ptrn_flag = 0) const;
 	//const Link& getLink();
 	void show( string tabs = "" ) const;
 protected:
@@ -103,7 +109,7 @@ public:
 
 	void eval(pattern::Environment &env,const vector<state::Variable*> &consts) const;
 	void eval(const pattern::Environment &env,const vector<state::Variable*> &consts,pattern::Mixture &mix,
-			unordered_map<unsigned,list <pair<short,short> > > &lnks, bool is_pattern) const;
+			unordered_map<unsigned,list <two<short> > > &lnks, char ptrn_flag) const;
 
 	void show( string tabs = "" ) const;
 
@@ -117,10 +123,12 @@ class Mixture : public Node {
 protected:
 	list<Agent>  agents;
 public:
+	//enum {PATTERN=1,LHS=2,RHS=4};
+	using Info = Expression::Info;
 	Mixture();
 	Mixture(const location &l,const list<Agent> &m);
 	virtual pattern::Mixture* eval(const pattern::Environment &env,
-			const vector<Variable*> &vars,bool is_pattern = true) const;
+			const vector<Variable*> &vars,char ptrn_flag = true) const;
 	void show(string tabs = "") const;
 	virtual ~Mixture();
 };

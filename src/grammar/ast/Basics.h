@@ -56,7 +56,7 @@ public:
 class Expression : public Node {
 public:
 	typedef vector<state::Variable*> VAR;
-	enum FLAGS {FORCE=1,AUX_ALLOW=2,CONST=4};
+	enum Info {FORCE=1,AUX_ALLOW=2,CONST=4,PATTERN=8,LHS=16,RHS=32};
 	Expression();
 	Expression(const location &l);
 	using Node::Node;

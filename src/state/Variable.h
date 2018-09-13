@@ -48,19 +48,19 @@ public:
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	virtual T evaluate(const state::State& state) const override;
+	virtual T evaluate(const state::State& state,const AuxMap& aux_values) const override;
 
+	virtual bool operator==(const BaseExpression& exp) const override;
 };
 
 template <typename T>
-class ConstantVar : public Variable, public AlgExpression<T> {
-	const T val;
+class ConstantVar : public Variable, public Constant<T> {
 public:
 	ConstantVar(const short var_id, const std::string &name, const AlgExpression<T> *exp);
 
-	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
-	T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	T evaluate(const state::State& state) const override;
+	//FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
+	//T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	//T evaluate(const state::State& state,const AuxMap& aux_values) const override;
 };
 
 class KappaVar : public AlgExpression<int>, public Variable {
@@ -71,8 +71,10 @@ public:
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	virtual int evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	virtual int evaluate(const state::State& state) const override;
+	virtual int evaluate(const state::State& state,const AuxMap& aux_values) const override;
 
+
+	virtual bool operator==(const BaseExpression& exp) const override;
 	const pattern::Mixture& getMix() const;
 
 };

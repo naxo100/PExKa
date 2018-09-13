@@ -31,13 +31,18 @@ T AlgebraicVar<T>::evaluate(const std::unordered_map<std::string,int> *aux_value
 	return expression->evaluate(aux_values);
 }
 template <typename T>
-T AlgebraicVar<T>::evaluate(const state::State& state) const{
-	return expression->evaluate(state);
+T AlgebraicVar<T>::evaluate(const state::State& state,const AuxMap& aux_values) const{
+	return expression->evaluate(state,aux_values);
 }
 template <typename T>
 FL_TYPE AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux_values) const{
 	return expression->auxFactors(aux_values);
 }
+template <typename T>
+bool AlgebraicVar<T>::operator==(const BaseExpression& exp) const {
+	return *expression == exp;
+}
+
 
 template class AlgebraicVar<FL_TYPE>;
 template class AlgebraicVar<int>;
@@ -47,21 +52,21 @@ template class AlgebraicVar<bool>;
 /******* class ConstantVar *************/
 template <typename T>
 ConstantVar<T>::ConstantVar(const short var_id, const std::string &nme,const AlgExpression<T> *exp):
-		BaseExpression(), Variable(var_id,nme),val(exp->evaluate(nullptr)) {
+		Variable(var_id,nme),Constant<T>(exp->evaluate(nullptr)) {
 	delete exp;
-}
+}/*
 template <typename T>
 T ConstantVar<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
 	return val;
 }
 template <typename T>
-T ConstantVar<T>::evaluate(const state::State& state) const{
+T ConstantVar<T>::evaluate(const state::State& state,const AuxMap& aux_values) const{
 	return val;
 }
 template <typename T>
 FL_TYPE ConstantVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux_values) const{
 	return val;
-}
+}*/
 
 template class ConstantVar<FL_TYPE>;
 template class ConstantVar<int>;
@@ -84,12 +89,21 @@ FL_TYPE KappaVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) co
 int KappaVar::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
 	throw std::invalid_argument("Cannot call KappaVar::evaluate() without state.");
 }
-int KappaVar::evaluate(const state::State& state) const {
+int KappaVar::evaluate(const state::State& state,const AuxMap& aux_values) const {
 	return state.mixInstances(mixture);
 }
 
 const pattern::Mixture& KappaVar::getMix() const {
 	return mixture;
+}
+
+bool KappaVar::operator==(const BaseExpression& exp) const {
+	try{
+		auto& kappa_exp = dynamic_cast<const KappaVar&>(exp);
+		return kappa_exp.mixture == mixture;
+	}
+	catch(bad_cast &ex){	}
+	return false;
 }
 
 } /* namespace state */

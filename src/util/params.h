@@ -2,7 +2,7 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
-//#define DEBUG false //in make command
+//#define DEBUG true //in make command
 
 typedef float FL_TYPE;
 typedef long INT_TYPE;

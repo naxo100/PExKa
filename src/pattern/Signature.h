@@ -29,7 +29,6 @@ public:
 	class LabelSite;
 	template <typename T>
 	class RangeSite;
-	//class IntRangeSite;
 	class Value;
 
 	Signature(const string &name);

@@ -31,10 +31,10 @@ vector<short> CompExpression::evalDimensions(const pattern::Environment &env,
 		int tmp = 0;
 
 		switch( (index->eval(env,vars))->getType() ) {
-		case state::BaseExpression::FLOAT:
+		case FLOAT:
 			tmp = (index->eval(env,vars))->getValue().fVal;
 			break;
-		case state::BaseExpression::INT:
+		case INT:
 			tmp = (index->eval(env,vars))->getValue().iVal;
 			break;
 		default:break;
@@ -58,7 +58,7 @@ const Id& CompExpression::evalName(const pattern::Environment &env,bool declare)
 	}
 	return name;
 }
-list<const state::BaseExpression*> CompExpression::evalExpression(const pattern::Environment &env,
+list<const BaseExpression*> CompExpression::evalExpression(const pattern::Environment &env,
 			small_id comp_id,const vector<Variable*> &vars) const {
 	list<const state::BaseExpression*> ret;
 	auto& dims = env.getCompartment(comp_id).getDimensions();
@@ -91,7 +91,7 @@ void Compartment::eval(pattern::Environment &env,const vector<Variable*> &vars){
 	const Id& name = comp.evalName(env,true);
 	pattern::Compartment& c = env.declareCompartment(name);
 	vector<short> dims = comp.evalDimensions(env,vars);
-	state::BaseExpression* vol = volume->eval(env,vars,nullptr,Expression::CONST);
+	BaseExpression* vol = volume->eval(env,vars,nullptr,Expression::CONST);
 	c.setDimensions(dims);
 	c.setVolume(vol);
 	return;
@@ -115,7 +115,7 @@ void Channel::eval(pattern::Environment &env,
 	src_id = env.getCompartmentId(source.evalName(env,false).getString());
 	trgt_id = env.getCompartmentId(target.evalName(env,false).getString());
 
-	list<const state::BaseExpression*> src_index,trgt_index;
+	list<const BaseExpression*> src_index,trgt_index;
 	src_index = source.evalExpression(env,src_id,vars);
 	trgt_index = target.evalExpression(env,trgt_id,vars);
 
@@ -168,7 +168,7 @@ void Use::eval(pattern::Environment &env, const Expression::VAR &consts) const {
 	auto& use_expr = env.declareUseExpression(id,compartments.size());
 	for(auto& comp : compartments){
 		short comp_id = env.getCompartmentId(comp.evalName(env,false).getString());
-		list<const state::BaseExpression*> index_list = comp.evalExpression(env,comp_id,consts);
+		list<const BaseExpression*> index_list = comp.evalExpression(env,comp_id,consts);
 		try{
 			use_expr.emplace_back(env.getCompartment(comp_id),index_list);
 		}catch(std::invalid_argument &e){

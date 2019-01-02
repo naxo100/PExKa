@@ -7,6 +7,7 @@
 
 #include "Dynamics.h"
 #include "../../util/Warning.h"
+#include "../../expressions/BinaryOperation.h"
 
 namespace ast {
 
@@ -129,7 +130,7 @@ void SiteState::evalLabels(pattern::Signature::LabelSite& site) const{
 }
 
 bool SiteState::evalRange(pattern::Environment &env,const vector<state::Variable*> &consts,
-		BaseExpression** expr_values) const{
+		expressions::BaseExpression** expr_values) const{
 	//using ast::Expression::VAR;
 	//using ast::Expression::FLAGS;
 	expr_values[0] = range[0]->eval(env,consts,nullptr,
@@ -145,9 +146,9 @@ bool SiteState::evalRange(pattern::Environment &env,const vector<state::Variable
 	bool isInt = true;
 	for(int i = 0; i < 3; i++)
 		switch(expr_values[i]->getType()){
-		case BaseExpression::BOOL:
+		case expressions::BOOL:
 			throw SemanticError("Not a valid value to define a range.",range[i]->loc);
-		case BaseExpression::FLOAT:
+		case expressions::FLOAT:
 			isInt = false;
 			break;
 		default:break;
@@ -289,19 +290,19 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 			if(stateInfo.range[0]){
 				if(stateInfo.flag & SiteState::MIN_EQUAL)
 					agent.setSiteMinExpr(site_id,stateInfo.range[0]->
-							eval(env, consts, nullptr, Expression::AUX_ALLOW));
+							eval(env, consts, nullptr, ptrn_flag));
 				else
-					agent.setSiteMinExpr(site_id,new BinaryOperation<int,int,int>(
-							stateInfo.range[0]->eval(env, consts, nullptr, Expression::AUX_ALLOW),
+					agent.setSiteMinExpr(site_id,BaseExpression::makeBinaryExpression<false>(
+							stateInfo.range[0]->eval(env, consts, nullptr, ptrn_flag),
 							new Constant<int>(1),BaseExpression::SUM));
 			}
 			if(stateInfo.range[2]){
 				if(stateInfo.flag & SiteState::MAX_EQUAL)
 					agent.setSiteMaxExpr(site_id,stateInfo.range[2]->
-							eval(env, consts, nullptr, Expression::AUX_ALLOW));
+							eval(env, consts, nullptr, ptrn_flag));
 				else
-					agent.setSiteMaxExpr(site_id,new BinaryOperation<int,int,int>(
-							stateInfo.range[2]->eval(env, consts, nullptr, Expression::AUX_ALLOW),
+					agent.setSiteMaxExpr(site_id,BaseExpression::makeBinaryExpression<false>(
+							stateInfo.range[2]->eval(env, consts, nullptr, ptrn_flag),
 							new Constant<int>(-1),BaseExpression::SUM));
 			}
 		}catch(std::bad_cast &e){try{
@@ -309,20 +310,20 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 			if(stateInfo.range[0]){
 				if(stateInfo.flag & SiteState::MIN_EQUAL)
 					agent.setSiteMinExpr(site_id,stateInfo.range[0]->
-							eval(env, consts, nullptr, Expression::AUX_ALLOW));
+							eval(env, consts, nullptr, ptrn_flag));
 				else
-					agent.setSiteMinExpr(site_id,new BinaryOperation<FL_TYPE,FL_TYPE,FL_TYPE>(
-							stateInfo.range[0]->eval(env, consts, nullptr, Expression::AUX_ALLOW),
+					agent.setSiteMinExpr(site_id,BaseExpression::makeBinaryExpression<false>(
+							stateInfo.range[0]->eval(env, consts, nullptr, ptrn_flag),
 							new Constant<FL_TYPE>(std::numeric_limits<FL_TYPE>::epsilon()),
 								BaseExpression::SUM));
 			}
 			if(stateInfo.range[2]){
 				if(stateInfo.flag & SiteState::MAX_EQUAL)
 					agent.setSiteMaxExpr(site_id,stateInfo.range[2]->
-							eval(env, consts, nullptr, Expression::AUX_ALLOW));
+							eval(env, consts, nullptr, ptrn_flag));
 				else
-					agent.setSiteMaxExpr(site_id,new BinaryOperation<FL_TYPE,FL_TYPE,FL_TYPE>(
-							stateInfo.range[2]->eval(env, consts, nullptr, Expression::AUX_ALLOW),
+					agent.setSiteMaxExpr(site_id,BaseExpression::makeBinaryExpression<false>(
+							stateInfo.range[2]->eval(env, consts, nullptr, ptrn_flag),
 							new Constant<FL_TYPE>(-std::numeric_limits<FL_TYPE>::epsilon()),
 								BaseExpression::SUM));
 			}
@@ -337,10 +338,10 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 		else {
 			if(stateInfo.range[1])
 				agent.setSiteExpr(site_id,stateInfo.range[1]->eval
-						(env,consts,nullptr,Expression::CONST + Expression::FORCE));
+						(env,consts,nullptr,ptrn_flag|Expression::FORCE));
 			else
 				agent.setSiteExpr(site_id,Var(stateInfo.aux.loc,Var::AUX,stateInfo.aux).eval
-						(env, consts, nullptr, Var::AUX_ALLOW));
+						(env, consts, nullptr, ptrn_flag));
 			break;
 		}
 		break;
@@ -353,9 +354,9 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 			throw SemanticError("Only valued sites can assign expressions.",stateInfo.loc);
 		}}
 		if(ptrn_flag & Mixture::Info::RHS)
-			num = stateInfo.val->eval(env,consts,nullptr,Expression::AUX_ALLOW);
+			num = stateInfo.val->eval(env,consts,nullptr,ptrn_flag);
 		else //LHS
-			num = stateInfo.val->eval(env,consts,nullptr,Expression::CONST | Expression::AUX_ALLOW);
+			num = stateInfo.val->eval(env,consts,nullptr,Expression::CONST | ptrn_flag);
 		try{
 			if(! sign->getSite(site_id).isPossibleValue(num->getValue()))
 				throw SemanticError("This value is not included in range declaration of site",loc);
@@ -407,7 +408,7 @@ void Agent::eval(const pattern::Environment &env,const vector<state::Variable*> 
 	pair<short,pattern::Mixture::Agent&> id_ag(mix.size(),*a_buff);
 	for(auto &site : sites){
 		auto aux = site.eval(env,consts,id_ag,lnks,ptrn_flag);
-		if(aux.second.getString() != "")
+		if(aux.second.getString() != "" && (ptrn_flag & Mixture::Info::PATTERN))
 			mix.setAux(aux.second.getString(), mix.size(), aux.first);
 	}
 
@@ -667,7 +668,7 @@ const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulati
 		const vector<state::Variable*> &vars,two<pattern::DepSet> &deps,bool is_bi) const {
 	if(!base)
 		throw std::invalid_argument("Base rate cannot be null.");
-	auto base_rate = base->eval(env,vars,&deps.first,Expression::AUX_ALLOW);
+	auto base_rate = base->eval(env,vars,&deps.first,Expression::AUX_ALLOW+Expression::RHS);//TODO enum rate?
 	r.setRate(base_rate);
 	if(is_bi){
 		if(unary)
@@ -756,7 +757,8 @@ Rule& Rule::operator=(const Rule& r){
 void Rule::eval(pattern::Environment& env,
 		const vector<state::Variable*> &vars) const{
 	//TODO eval name...
-	auto lhs_mix_p = lhs.agents.eval(env,vars,Expression::PATTERN + Expression::LHS);
+	auto lhs_mix_p = lhs.agents.eval(env,vars,
+			Expression::PATTERN + Expression::LHS + Expression::AUX_ALLOW);//TODO do not allow aux?
 	lhs_mix_p->declareAgents(env);
 	auto lhs_mask = lhs_mix_p->setAndDeclareComponents(env);
 	auto& lhs_mix = env.declareMixture(*lhs_mix_p);
@@ -764,9 +766,18 @@ void Rule::eval(pattern::Environment& env,
 	auto& rule = env.declareRule(label,lhs_mix);
 
 	lhs_mix.addInclude(rule.getId());
-	two<pattern::DepSet> deps;
+	two<pattern::DepSet> deps;//first-> | second<-
 	auto reverse = rate.eval(env,rule,vars,deps,bi);
-	auto rhs_mix_p = rhs.agents.eval(env,vars,Expression::PATTERN + Expression::RHS);
+	for(auto dep : deps.first){
+		if(dep.type == pattern::Dependencies::AUX){
+			auto cc_id = get<0>(lhs_mix.getAux().at(dep.aux));
+			lhs_mix.getComponent(cc_id).addRateDep(rule,cc_id);
+		}
+	}
+
+
+	auto rhs_mix_p = rhs.agents.eval(env,vars,
+			Expression::RHS + Expression::AUX_ALLOW);
 	vector<pattern::ag_st_id> rhs_mask;
 	for(auto& t : lhs.tokens)
 		rule.addTokenChange(t.eval(env,vars,true));

@@ -62,7 +62,7 @@ public:
 	using Node::Node;
 	virtual ~Expression()=0;
 
-	virtual state::BaseExpression* eval(const pattern::Environment& env,
+	virtual expressions::BaseExpression* eval(const pattern::Environment& env,
 			const VAR &vars,pattern::DepSet* deps = nullptr,
 			const char flags = 0) const;
 	virtual bool isConstant();

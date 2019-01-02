@@ -106,15 +106,15 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		char flag = constant ? Expression::CONST : 0;
 		BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
 		switch(b_expr->getType()){
-		case BaseExpression::FLOAT:
+		case FLOAT:
 			var = new state::AlgebraicVar<FL_TYPE>(id,name.getString(),false,
 				dynamic_cast<AlgExpression<FL_TYPE>*>(b_expr));
 			break;
-		case BaseExpression::INT:
+		case INT:
 			var = new state::AlgebraicVar<int>(id,name.getString(),false,
 				dynamic_cast<AlgExpression<int>*>(b_expr));
 			break;
-		case BaseExpression::BOOL:
+		case BOOL:
 			var = new state::AlgebraicVar<bool>(id,name.getString(),false,
 				dynamic_cast<AlgExpression<bool>*>(b_expr));
 			break;
@@ -139,15 +139,15 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 		char flag = constant ? Expression::CONST : 0;
 		BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
 		switch(b_expr->getType()){
-		case BaseExpression::FLOAT:
+		case FLOAT:
 			var = new state::ConstantVar<FL_TYPE>(id,name.getString(),
 				dynamic_cast<AlgExpression<FL_TYPE>*>(b_expr));
 			break;
-		case BaseExpression::INT:
+		case INT:
 			var = new state::ConstantVar<int>(id,name.getString(),
 				dynamic_cast<AlgExpression<int>*>(b_expr));
 			break;
-		case BaseExpression::BOOL:
+		case BOOL:
 			var = new state::ConstantVar<bool>(id,name.getString(),
 				dynamic_cast<AlgExpression<bool>*>(b_expr));
 			break;

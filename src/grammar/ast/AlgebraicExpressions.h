@@ -16,6 +16,7 @@
 namespace ast {
 
 using namespace state;
+using namespace expressions;
 
 /** \brief Constants in a Math Expression or Rate value
  *

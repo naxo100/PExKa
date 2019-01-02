@@ -7,6 +7,8 @@
 
 #include "AlgebraicExpressions.h"
 #include "../../state/Variable.h"
+#include "../../expressions/Constant.h"
+#include "../../expressions/Vars.h"
 
 #include <limits>
 #include <type_traits>
@@ -66,25 +68,25 @@ BaseExpression* Const::eval(const pattern::Environment& env,
 	BaseExpression* cons;
 	switch(type){
 	case FLOAT:
-		cons = new state::Constant<FL_TYPE>(f);
+		cons = new Constant<FL_TYPE>(f);
 		break;
 	case INTEGER:
-		cons = new state::Constant<int>(n);
+		cons = new Constant<int>(n);
 		break;
 	case BOOL:
-		cons = new state::Constant<bool>(b);
+		cons = new Constant<bool>(b);
 		break;
 	case INF:
-		cons = new state::Constant<FL_TYPE>(std::numeric_limits<FL_TYPE>::infinity());
+		cons = new Constant<FL_TYPE>(std::numeric_limits<FL_TYPE>::infinity());
 		break;
 	case INF_NEG:
-		cons = new state::Constant<FL_TYPE>(-std::numeric_limits<FL_TYPE>::infinity());
+		cons = new Constant<FL_TYPE>(-std::numeric_limits<FL_TYPE>::infinity());
 		break;
 	case TMAX:
-		cons = new state::Constant<int>(-1);
+		cons = new Constant<int>(-1);
 		break;
 	case ConstType::EMAX:
-		cons = new state::Constant<int>(-1);
+		cons = new Constant<int>(-1);
 		break;
 	}
 	return cons;
@@ -219,11 +221,15 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 		}
 		break;
 	case AUX:
-		if(flags & AUX_ALLOW)
-			if( (flags & LHS) || (flags & RHS) )
-				expr = new state::Auxiliar<FL_TYPE>(name.getString());
+		if(flags & AUX_ALLOW){
+			if( (flags & LHS) || (flags & RHS) ){
+				expr = new Auxiliar<FL_TYPE>(name.getString());
+				if(deps)//TODO set deps
+					deps->emplace(name.getString());
+			}
 			else//is compartment
-				expr = new state::Auxiliar<int>(name.getString());
+				expr = new Auxiliar<int>(name.getString());
+		}
 		else
 			throw SemanticError("You can not assign an AUX in a %var or %const declaration.", loc);
 		break;

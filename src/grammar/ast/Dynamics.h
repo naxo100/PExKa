@@ -80,7 +80,7 @@ public:
 	 *
 	 */
 	bool evalRange(pattern::Environment &env,const vector<state::Variable*> &consts,
-			BaseExpression** expr_values) const;
+			expressions::BaseExpression** expr_values) const;
 
 	void show( string tabs = "" ) const;
 };

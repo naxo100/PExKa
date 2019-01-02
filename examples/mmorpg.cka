@@ -14,7 +14,7 @@
 
 #begins a battle if PJ's hp > 50%, similar levels have higher chance
 'battle-start' PJ(battle,hp~{0.5 < h},lvl~{plvl}),Monster(battle,lvl~{mlvl}) -> \
-		PJ(battle!1,hp~{h},lvl~{plvl}),Monster(battle!1,lvl~{mlvl}) @ 1/((mlvl-plvl)*(mlvl-plvl))
+		PJ(battle!1,hp~{h},lvl~{plvl}),Monster(battle!1,lvl~{mlvl}) @ 1/((mlvl-plvl)*(mlvl-plvl)+1)
 		
 #ends a battle, adds exp, do damage, duration depends on level difference
 'battle-end' PJ(battle!1,lvl~{plvl},exp~{x},hp~{h}),Monster(battle!1,lvl~{mlvl}) -> \
@@ -29,5 +29,13 @@
 #every 15m recover 20% hp
 'recover' PJ(hp~{H < 1}) -> PJ(hp~{H + 0.2}) @ 4 
 
+#monster spawn
+'spawn' PJ(lvl~{L}) -> PJ(lvl~{L}),Monster(lvl~{L}) @ 1
+
+
+#inits:
+
+%init: 10 PJ(hp~{1.0})
+%init: 100 Monster()
 
 

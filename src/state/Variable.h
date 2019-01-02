@@ -10,12 +10,14 @@
 
 #include <string>
 
-#include "AlgExpression.h"
+//#include "../expressions/AlgExpression.h"
+#include "../expressions/Constant.h"
 #include "../pattern/Mixture.h"
 //#include "State.h"
 
 namespace state {
 
+using namespace expressions;
 /** \brief Declared variables using '%var:' in Kappa
  *
  *
@@ -35,7 +37,8 @@ public:
 	//virtual SomeValue getValue(/*const State &state*/) const = 0;
 	//virtual int getValue() const = 0;
 	//virtual bool getValue() const = 0;
-	const std::string& getName() const;
+	//const std::string& getName() const;
+	virtual std::string toString() const override;
 
 };
 
@@ -58,6 +61,8 @@ class ConstantVar : public Variable, public Constant<T> {
 public:
 	ConstantVar(const short var_id, const std::string &name, const AlgExpression<T> *exp);
 
+	std::string toString() const override;
+
 	//FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 	//T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
 	//T evaluate(const state::State& state,const AuxMap& aux_values) const override;
@@ -79,7 +84,38 @@ public:
 
 };
 
+//template <typename FL_TYPE>
+class RateVar : public Variable, public AlgExpression<FL_TYPE> {
+	const AlgExpression<FL_TYPE>* expression;
+	list<int> cc_deps;
+public:
+	RateVar(const short var_id, const std::string &nme,const bool is_obs,
+			const AlgExpression<FL_TYPE> *exp);
 
+	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
+	virtual FL_TYPE evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual FL_TYPE evaluate(const state::State& state,const AuxMap& aux_values) const override;
+
+	virtual bool operator==(const BaseExpression& exp) const override;
+};
+
+class TokenVar: public AlgExpression<FL_TYPE> {
+	unsigned id;
+public:
+	TokenVar(unsigned _id);
+	FL_TYPE evaluate(
+			const std::unordered_map<std::string, int> *aux_values) const
+					override;
+	FL_TYPE evaluate(const state::State& state, const AuxMap& aux_values) const
+			override;
+	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const
+			override;
+
+	bool operator==(const BaseExpression& exp) const override;
+
+	//virtual void getNeutralAuxMap(
+	//		std::unordered_map<std::string, FL_TYPE>& aux_map) const;
+};
 
 } /* namespace state */
 

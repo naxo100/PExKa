@@ -14,7 +14,6 @@
 #include <map>
 #include <utility>
 #include "Compartment.h"
-#include "../state/AlgExpression.h"
 
 namespace pattern {
 

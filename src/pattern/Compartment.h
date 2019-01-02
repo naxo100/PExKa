@@ -14,7 +14,6 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include "../state/AlgExpression.h"
 #include "../state/Variable.h"
 
 namespace pattern {
@@ -25,7 +24,7 @@ class Compartment {
 	std::string name;
 	std::vector<short> dimensions;//[dims];
 	int cellsCount;
-	const state::BaseExpression* volume;
+	const expressions::BaseExpression* volume;
 
 	int firstCell;
 
@@ -34,10 +33,10 @@ public:
 	~Compartment();
 
 	void setDimensions(const std::vector<short> &dims);
-	void setVolume(const state::BaseExpression* vol);
+	void setVolume(const expressions::BaseExpression* vol);
 
 	const std::string& getName() const;
-	const state::BaseExpression& getVolume() const;
+	const expressions::BaseExpression& getVolume() const;
 
 	void getCellIndex(int cell_id,std::vector<short> &index) const;
 	int getCellId(const std::vector<short> &cell_index) const;
@@ -70,7 +69,7 @@ struct Cell {
 
 class CompartmentExpr {
 	const Compartment& comp;
-	const std::list<const state::BaseExpression*> cellExpr;
+	const std::list<const expressions::BaseExpression*> cellExpr;
 	std::vector<std::string> varOrder;
 	boost::numeric::ublas::matrix<FL_TYPE> A,inverseA,transA;
 	boost::numeric::ublas::vector<FL_TYPE> b;
@@ -78,7 +77,7 @@ class CompartmentExpr {
 	void cellIds(std::list<int>& cell_list,
 			std::list<short> *cell_values,std::vector<short> &cell_index,unsigned int dim) const;
 public:
-	CompartmentExpr(const Compartment& c,const std::list<const state::BaseExpression*> &expr);
+	CompartmentExpr(const Compartment& c,const std::list<const expressions::BaseExpression*> &expr);
 
 
 	//bool nextCell(std::vector<short>& cell) const;
@@ -111,12 +110,12 @@ class UseExpression : std::vector<CompartmentExpr> {
 	//short id;
 	//std::list<CompartmentExpr> comps;
 	//const state::BaseExpression* filter;
-	const state::AlgExpression<bool> *filter;
+	const expressions::AlgExpression<bool> *filter;
 	std::set<int> *cells;
 	bool isComplete;
 	static std::set<int> ALL_CELLS;
 public:
-	UseExpression(size_t comps_count,const state::BaseExpression* where = nullptr);
+	UseExpression(size_t comps_count,const expressions::BaseExpression* where = nullptr);
 	~UseExpression();
 
 

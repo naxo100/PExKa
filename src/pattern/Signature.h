@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "../state/AlgExpression.h"
+#include "../expressions/AlgExpression.h"
 #include "../util/params.h"
 
 namespace ast {
@@ -77,8 +77,8 @@ public:
 	/** \brief Test whether @val is a valid value for this site and
 	 * returns id for labeled sites.
 	 */
-	virtual bool isPossibleValue(const state::SomeValue &val) const = 0;
-	virtual state::SomeValue getDefaultValue() const = 0;
+	virtual bool isPossibleValue(const expressions::SomeValue &val) const = 0;
+	virtual expressions::SomeValue getDefaultValue() const = 0;
 	virtual ~Site();
 
 	const string& getName() const;
@@ -86,33 +86,33 @@ public:
 };
 
 class Signature::EmptySite : public Site {
-	virtual bool isPossibleValue(const state::SomeValue &val) const override;
+	virtual bool isPossibleValue(const expressions::SomeValue &val) const override;
 public:
 	EmptySite(const string &nme);
-	state::SomeValue getDefaultValue() const override;
+	expressions::SomeValue getDefaultValue() const override;
 };
 
 class Signature::LabelSite : public Site {
 	vector<string> labels;
 	unordered_map<string,small_id> label_ids;
 
-	virtual bool isPossibleValue(const state::SomeValue &val) const override;
+	virtual bool isPossibleValue(const expressions::SomeValue &val) const override;
 public:
 	LabelSite(const string &name);
 	void addLabel(const ast::Id& name_loc);
 	const string& getLabel( small_id id ) const;
 	small_id getLabelId(const string& s) const;
-	state::SomeValue getDefaultValue() const override;
+	expressions::SomeValue getDefaultValue() const override;
 };
 
 template <typename T>
 class Signature::RangeSite : public Site {
 	T min,max,byDefault;
-	virtual bool isPossibleValue(const state::SomeValue &val) const override;
+	virtual bool isPossibleValue(const expressions::SomeValue &val) const override;
 public:
 	RangeSite(const string &nme);
 	void setBoundaries(T mn,T mx, T def);
-	state::SomeValue getDefaultValue() const override;
+	expressions::SomeValue getDefaultValue() const override;
 };
 
 //class Token {};

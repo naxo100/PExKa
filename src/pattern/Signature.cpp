@@ -11,6 +11,8 @@
 
 namespace pattern {
 
+using namespace expressions;
+
 /************** class Signature *******************/
 
 Signature::Signature(const string &nme) : id((short_id)-1),name(nme) {}
@@ -114,7 +116,7 @@ state::SomeValue Signature::LabelSite::getDefaultValue() const {
 }
 
 bool Signature::LabelSite::isPossibleValue(const state::SomeValue &val) const {
-	return val.t == state::BaseExpression::SMALL_ID && val.smallVal < labels.size();
+	return val.t == SMALL_ID && val.smallVal < labels.size();
 }
 
 
@@ -140,11 +142,11 @@ state::SomeValue Signature::RangeSite<T>::getDefaultValue() const {
 
 template <>
 bool Signature::RangeSite<FL_TYPE>::isPossibleValue(const state::SomeValue &val) const {
-	return val.t == state::BaseExpression::FLOAT && val.fVal >= min && val.fVal <= max;
+	return val.t == FLOAT && val.fVal >= min && val.fVal <= max;
 }
 template <>
 bool Signature::RangeSite<int>::isPossibleValue(const state::SomeValue &val) const {
-	return val.t == state::BaseExpression::INT && val.iVal >= min && val.iVal <= max;
+	return val.t == INT && val.iVal >= min && val.iVal <= max;
 }
 
 template void Signature::RangeSite<FL_TYPE>::setBoundaries(FL_TYPE,FL_TYPE,FL_TYPE);

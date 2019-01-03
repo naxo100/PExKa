@@ -12,17 +12,22 @@
 #include <set>
 #include <vector>
 #include <list>
+#include "../util/params.h"
 
 namespace pattern {
 
 using namespace std;
 class Dependencies {
 public:
-	enum Dep : char {TIME,EVENT,KAPPA,TOK,VAR,RULE,PERT};
+	enum Dep : char {TIME,EVENT,KAPPA,TOK,VAR,RULE,PERT,AUX};
 	struct Dependency {
 		Dep type;
-		unsigned int id;
+		//union{
+			big_id id;
+			string aux;
+		//};
 		Dependency(Dep d,unsigned i);
+		Dependency(string _aux);
 		bool operator<(const Dependency& d) const;
 	};
 	struct DepSet2 {

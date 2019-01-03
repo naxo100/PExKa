@@ -17,17 +17,11 @@ namespace state {
 using Deps = pattern::Dependencies;
 
 State::State(size_t tok_count,const std::vector<Variable*>& _vars,
-		const state::BaseExpression& vol,simulation::Plot& _plot,
+		const BaseExpression& vol,simulation::Plot& _plot,
 		const pattern::Environment& _env) :
 	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]),
 	activityTree(nullptr),injections(nullptr),randGen(0/*TODO seed*/),
-	plot(_plot){
-	//TODO these numbers are arbitrary!!
-	ev.emb = new Node**[4];
-	for(int i = 0; i < 4 ; i++)
-		ev.emb[i] = new Node*[12];
-	ev.fresh_emb = new Node*[5];
-}
+	plot(_plot){}
 
 //const State empty = State(0,std::vector<Variable*>(),new Constant<float>(1.0),
 //		simulation::Plot(),pattern::Environment::empty)
@@ -151,7 +145,7 @@ void State::modify(const simulation::Rule::Action& a){
 
 void State::assign(const simulation::Rule::Action& a){
 	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
-	auto val = a.value->getValue(*this);//TODO aux_values
+	auto val = a.value->getValue(*this,move(ev.aux_map));//TODO aux_values
 	try{
 		auto new_node = ev.new_cc.at(node);
 		if(new_node)
@@ -201,7 +195,7 @@ void State::apply(const simulation::Rule& r){
 	//copy deps and alloc
 	for(auto& node_pair : ev.new_cc){
 		if(node_pair.first != node_pair.second){
-			node_pair.second->copyDeps(*node_pair.first,ev,injections);
+			node_pair.second->copyDeps(*node_pair.first,ev,injections,*this);
 			graph.allocate(node_pair.second);
 		}
 	}
@@ -228,15 +222,17 @@ void State::positiveUpdate(const simulation::Rule& r){
 			//if(cc->getAgent(cc_ag_root.second).getId() != node->getId())
 			//	continue;
 			two<std::list<Internal*> > port_lists;
-			matching::Injection* inj_p = injections[cc->getId()]->emplace(*node,port_lists,cc_ag_root.second);
-			if(inj_p){
+			const list<matching::Injection*>* injs_p = &injections[cc->getId()]->emplace(*node,port_lists,*this,cc_ag_root.second);
+			for(auto inj_p : *injs_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
 				if(port_lists.first.empty() && port_lists.second.empty())
-					node->addDep(inj_p);
+					node->addDep(inj_p);//TODO check if it is right after injs_p
+			}
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
+			if(injs_p->size()){
 				ev.to_update.emplace(cc);
 				updateDeps(Deps::Dependency(Deps::KAPPA,cc->getId()));
 			}
@@ -253,17 +249,18 @@ void State::positiveUpdate(const simulation::Rule& r){
 			//	continue;
 
 			two<std::list<Internal*> > port_lists;
-			matching::Injection* inj_p = injections[cc_ag.first->getId()]->emplace(*side_eff.first,port_lists,cc_ag.second);
-			if(inj_p){
+			const list<matching::Injection*>* injs_p = &injections[cc_ag.first->getId()]->emplace(*side_eff.first,port_lists,*this,cc_ag.second);
+			for(auto inj_p : *injs_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
 				if(port_lists.first.empty() && port_lists.second.empty())
-					side_eff.first->addDep(inj_p);
+					side_eff.first->addDep(inj_p);//TODO check too
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
-				ev.to_update.emplace(cc_ag.first);
 			}
+			if(injs_p->size())
+				ev.to_update.emplace(cc_ag.first);
 		}
 	}
 }
@@ -346,7 +343,7 @@ const simulation::Rule& State::drawRule(){
 	auto rid_alpha = activityTree->chooseRandom();
 	auto& rule = env.getRules()[rid_alpha.first];
 
-	auto a1a2 = evalActivity(rule);
+	auto a1a2 = rule.evalActivity(injections);
 	auto alpha = a1a2.first + a1a2.second;
 
 	//*?
@@ -412,7 +409,7 @@ FL_TYPE State::event() {
 	//cout << "rules to update: ";
 	for(auto r_id : ev.rule_ids){
 		//cout << env.getRules()[r_id].getName() << ", ";
-		auto act = evalActivity(env.getRules()[r_id]);
+		auto act = env.getRules()[r_id].evalActivity(injections);
 		activityTree->add(r_id,act.first+act.second);
 	}
 	//cout << endl;
@@ -442,9 +439,12 @@ void State::updateDeps(const Deps::Dependency& d){
 void State::initInjections() {
 	if(injections)
 		delete[] injections;
-	injections = (matching::InjRandSet**)(new matching::MultiInjSet*[env.size<pattern::Mixture::Component>()]);
+	injections = (matching::InjRandContainer**)(new matching::InjRandContainer*[env.size<pattern::Mixture::Component>()]);
 	for(auto& cc : env.getComponents())
-		injections[cc.getId()] = new matching::MultiInjSet(cc);//TODO or InjTree
+		if(cc.getRateDeps().size())
+			injections[cc.getId()] = new matching::InjRandTree(cc);
+		else
+			injections[cc.getId()] = new matching::InjRandSet(cc);
 	for(auto node_p : graph){
 		//map<const Node*,bool> visits;
 		//cout << node_p->toString(env,true,&visits) << endl;
@@ -453,14 +453,14 @@ void State::initInjections() {
 				continue;
 			//cout << comp.toString(env) << endl;
 			two<std::list<Internal*> > port_lists;
-			matching::Injection* inj_p = injections[comp.getId()]->emplace(*node_p,port_lists);
-			if(inj_p){
+			const list<matching::Injection*>* injs_p = &injections[comp.getId()]->emplace(*node_p,port_lists,*this);
+			for(auto inj_p : *injs_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
 				if(port_lists.first.empty() && port_lists.second.empty())
-					node_p->addDep(inj_p);
+					node_p->addDep(inj_p);//TODO check too
 			}
 		}
 	}
@@ -479,7 +479,8 @@ void State::initActTree() {
 	rules.sort([](const simulation::Rule * a, const simulation::Rule* b) { return a->getName() < b->getName(); });
 	for(auto rule_p : rules){
 		auto& rule = *rule_p;
-		auto act_pr = evalActivity(rule);
+		//auto act_pr = evalActivity(rule);
+		auto act_pr = rule.evalActivity(injections);
 		activityTree->add(rule.getId(),act_pr.first+act_pr.second);
 #ifdef DEBUG
 		printf("\t%s\t%.6f\n", rule.getName().c_str(),(act_pr.first+act_pr.second));

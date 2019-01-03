@@ -49,7 +49,7 @@ CcInjection::CcInjection(const pattern::Mixture::Component& _cc)
 }
 
 bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
-		two<std::list<state::Internal*> >& port_list,small_id root) {
+		two<std::list<state::Internal*> >& port_list, const state::State& state,small_id root) {
 	//ccAgToNode.clear();
 	for(auto& n : ccAgToNode)
 		n = nullptr;
@@ -69,7 +69,7 @@ bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 		if(ag->getId() != curr_node->getId())
 			return false;
 		for(auto& id_site : *ag){
-			if(curr_node->test(next_node.second,id_site,port_list)){
+			if(curr_node->test(next_node.second,id_site,port_list,state)){
 				if(next_node.second){
 					next_node.first = _cc.follow(q.front().first,id_site.first).first;
 					//need to check site of links?? TODO No
@@ -104,7 +104,7 @@ void CcInjection::codomain(Node* injs[],set<Node*> cod) const {
 	int i = 0;
 	for(auto node_p : ccAgToNode){
 		if(cod.find(node_p) != cod.end())
-			throw False();
+			throw False();//TODO do not throw
 		cod.emplace(node_p);
 		injs[i] = node_p;
 		i++;
@@ -135,6 +135,21 @@ bool CcInjection::operator==(const Injection& inj) const{
 		if(ccAgToNode[i] != cc_inj.ccAgToNode[i])
 			return false;
 	return true;
+}
+
+
+/********** CcValueInj *******************/
+
+CcValueInj::CcValueInj(const pattern::Mixture::Component& _cc) : CcInjection(_cc), container(nullptr) {}
+
+CcValueInj::CcValueInj(const CcInjection& inj) : CcInjection(inj), container(nullptr) {};
+
+void CcValueInj::setContainer(distribution_tree::DistributionTree<CcValueInj>* cont){
+	container = cont;
+}
+
+void CcValueInj::selfRemove(){
+	container->erase(this);
 }
 
 

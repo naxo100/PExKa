@@ -30,7 +30,7 @@ Mixture::Mixture(short agent_count) : declaredComps(false),agentCount(0),
 	agents = new Agent*[agent_count];
 }
 
-Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),
+Mixture::Mixture(const Mixture& m) : declaredComps(m.declaredComps),auxiliars(m.auxiliars),
 		agentCount(m.agentCount),siteCount(m.siteCount),compCount(m.compCount),id(-1){
 	if(m.comps){
 		agents = nullptr;
@@ -252,7 +252,7 @@ vector<ag_st_id> Mixture::setAndDeclareComponents(Environment &env){
 	for(unsigned i = 0; i < order_mask.size(); i++)
 		order_mask[i].first = comps_order[order_mask[i].first].second;
 	links.clear();
-	for(auto elem : auxiliars){
+	for(auto& elem : auxiliars){
 		auto cc_ag = order_mask[get<1>(elem.second)];
 		get<0>(elem.second) = cc_ag.first;
 		get<1>(elem.second) = cc_ag.second;
@@ -302,6 +302,9 @@ const Mixture::Agent& Mixture::getAgent(small_id ag_id) const {
 const Mixture::Component& Mixture::getComponent(small_id id) const {
 	return *(*comps)[id];
 }
+Mixture::Component& Mixture::getComponent(small_id id) {
+	return *(*comps)[id];
+}
 
 const map<string,tuple<small_id,small_id,small_id>>& Mixture::getAux() const{
 	return auxiliars;
@@ -330,7 +333,7 @@ void Mixture::setAux(string id,small_id ag,small_id site){
 	if(declaredComps)
 		throw std::invalid_argument("Cannot call setAux() on an initialized mixture.");
 	if(auxiliars.count(id))
-		throw SemanticError("The auxiliar "+id+"is already used in this mixture.",yy::location());
+		throw SemanticError("The auxiliar "+id+" is already used in this mixture.",yy::location());
 	auxiliars[id] = make_tuple(small_id(-1),ag,site);
 }
 
@@ -558,13 +561,15 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 		}
 		else{
 			out += "~{ ";
-			/*if(it->second.values[0])
-				out += it->second.values[0]->toString()+ "<=";
+			if(it->second.values[0])
+				out += it->second.values[0]->toString()+ " <= ";
 			if(it->second.values[1])
 				out += it->second.values[1]->toString();
+			else
+				out += "AUX";
 			if(it->second.values[2])
-				out += "<=" + it->second.values[2]->toString();*/
-			out += "}";
+				out += " <= " + it->second.values[2]->toString();
+			out += " }";
 
 		}
 
@@ -611,7 +616,7 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 
 /************** class Site *********************/
 Mixture::Site::Site() : label(EMPTY),link_type(FREE),lnk_ptrn(-1,-1),
-		values({nullptr,nullptr,nullptr}){}
+		values{nullptr,nullptr,nullptr}{}
 
 bool Mixture::Site::isEmptySite() const{
 	return label == EMPTY && values[1] == nullptr;
@@ -620,11 +625,11 @@ bool Mixture::Site::isExpression() const{
 	return label == AUX || values[1];
 }
 
-//test if mix_site match with value
+//test if mix_site match with value or inequation
 bool Mixture::Site::testValue(const state::SomeValue& val,const state::State& state) const {
-	if(val.t == state::BaseExpression::SMALL_ID)
+	if(val.t == expressions::SMALL_ID)
 		return val.smallVal == label;
-	else
+	else{
 		if(values[1])
 			try{
 				return values[1]->getValue(state) == val;
@@ -632,6 +637,15 @@ bool Mixture::Site::testValue(const state::SomeValue& val,const state::State& st
 			catch(exception &e){
 				return false;
 			}
+		else {
+			auto fl_val = val.valueAs<FL_TYPE>();
+			if(values[0] && values[0]->getValue(state).valueAs<FL_TYPE>() > fl_val)
+				return false;
+			if(values[2] && values[2]->getValue(state).valueAs<FL_TYPE>() < fl_val)
+				return false;
+		}
+
+	}
 	return true;
 }
 
@@ -669,12 +683,17 @@ int Mixture::Site::compare(const Site &s) const{
 	cout << endl;*/
 	//if(memcmp(&state,&s.state,sizeof(state::SomeValue))){ //only valid if union in state is cleaned at constructor
 
-	if(label == AUX || s.label == AUX)
+	/*if(label == AUX || s.label == AUX)
 		for(int i = 0; i < 3; i++)
-			if(values[i] != s.values[i])
-				if(values[i] || s.values[i] || *values[i] == *s.values[i])
-					throw False();
-
+			if(values[i] != s.values[i]){
+				if(values[i] == nullptr)
+					ret = ret < 0 ? throw False() : 1;
+				else if (s.values[i] == nullptr)
+					ret = ret > 0 ? throw False() : -1;
+				else if(*values[i] == *s.values[i])
+					ret = 0;
+				else throw False();
+			}*/
 	if(label != s.label){
 		if(isEmptySite())
 			ret = 1;
@@ -840,6 +859,14 @@ vector<small_id> Mixture::Component::setGraph() {
 	delete links;
 	graph = graph_ptr;
 	return mask;
+}
+
+void Mixture::Component::addRateDep(const simulation::Rule& dep,small_id cc){
+	deps.emplace_back(dep,cc);
+}
+
+const list<pair<const simulation::Rule&,small_id>>& Mixture::Component::getRateDeps() const{
+	return deps;
 }
 
 string Mixture::Component::toString(const Environment& env) const {

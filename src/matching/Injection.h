@@ -17,6 +17,7 @@
 #include "../util/params.h"
 //#include "../state/SiteGraph.h"
 #include "../pattern/Mixture.h"
+#include "../data_structs/DistributionTree.h"
 
 namespace state {
 	class Node;
@@ -79,7 +80,7 @@ public:
 	~CcInjection();
 
 	bool reuse(const pattern::Mixture::Component& cc,Node& node,
-			two<list<state::Internal*> >& port_list,small_id root = 0);
+			two<list<state::Internal*> >& port_list,const state::State& state,small_id root = 0);
 
 	const vector<Node*>& getEmbedding() const override;
 
@@ -88,6 +89,24 @@ public:
 	size_t count() const override;
 
 	bool operator==(const Injection& inj) const override;
+};
+
+
+/*namespace distribution_tree{
+	template <typename T>
+	class DistributionTree<T>;
+}*/
+
+class CcValueInj : public CcInjection {
+	distribution_tree::DistributionTree<CcValueInj>* container;
+	//FL_TYPE value;
+public:
+	CcValueInj(const pattern::Mixture::Component& _cc);
+	CcValueInj(const CcInjection& inj);
+
+	void setContainer(distribution_tree::DistributionTree<CcValueInj>* cont);
+	void selfRemove();
+
 };
 
 /*class MixInjection : Injection {

@@ -15,10 +15,14 @@
 #include <utility> //pair
 #include <string>
 #include "../util/params.h"
-#include "../state/AlgExpression.h"
+#include "../expressions/AlgExpression.h"
 
 
 using namespace std;
+
+namespace simulation {
+	class Rule;
+}
 
 namespace pattern {
 
@@ -123,6 +127,7 @@ public:
 	void addInclude(small_id id) override;
 
 	const Component& getComponent(small_id) const;
+	Component& getComponent(small_id);
 
 	const map<string,tuple<small_id,small_id,small_id>>& getAux() const;
 
@@ -181,7 +186,7 @@ struct Pattern::Site {
 	ag_st_id lnk_ptrn;//agent,site (-1,-1)
 
 	//string aux_id;//if "" then no aux
-	const state::BaseExpression* values[3];//[smaller=,value,greater=]
+	const expressions::BaseExpression* values[3];//[smaller=,value,greater=]
 
 
 	bool operator==(const Site &s) const;
@@ -196,7 +201,7 @@ struct Pattern::Site {
 	bool isEmptySite() const;
 	bool isExpression() const;
 	bool isBindToAny() const;
-	bool testValue(const state::SomeValue& val,
+	bool testValue(const expressions::SomeValue& val,
 			const state::State& state) const;
 };
 
@@ -236,10 +241,10 @@ public:
 	void setSiteValue(small_id mix_site,small_id label);
 	void setSiteValue(small_id mix_site,int val);
 	void setSiteValue(small_id mix_site,FL_TYPE val);
-	void setSiteExpr(small_id mix_site,const state::BaseExpression* expr);
+	void setSiteExpr(small_id mix_site,const expressions::BaseExpression* expr);
 	void setSiteAux(small_id mix_site);
-	void setSiteMinExpr(small_id mix_site,const state::BaseExpression* expr);
-	void setSiteMaxExpr(small_id mix_site,const state::BaseExpression* expr);
+	void setSiteMinExpr(small_id mix_site,const expressions::BaseExpression* expr);
+	void setSiteMaxExpr(small_id mix_site,const expressions::BaseExpression* expr);
 
 
 	//void setSiteLink(short mix_site,LinkType l);
@@ -288,6 +293,9 @@ class Mixture::Component : public Pattern {
 		map<ag_st_id,ag_st_id> *graph;
 	};
 
+	list<pair<const simulation::Rule&,small_id>> deps;
+	//map<big_id,ag_st_id> auxiliars;
+
 public:
 	Component();
 	Component(const Component& comp);
@@ -314,6 +322,9 @@ public:
 	ag_st_id follow(small_id ag_id,small_id site) const;
 
 	bool operator==(const Mixture::Component &m) const;
+
+	void addRateDep(const simulation::Rule& dep,small_id cc);
+	const list<pair<const simulation::Rule&,small_id>>& getRateDeps() const;
 };
 
 } /* namespace pattern */

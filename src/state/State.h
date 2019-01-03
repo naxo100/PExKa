@@ -36,6 +36,8 @@ struct EventInfo;
  * Kappa.
  */
 class State {
+	friend class RateVar;
+
 	const pattern::Environment& env;
 	SiteGraph graph;
 	const state::BaseExpression& volume;
@@ -43,7 +45,7 @@ class State {
 	float* tokens;
 
 	data_structs::RandomTree* activityTree;
-	matching::InjRandSet** injections;
+	matching::InjRandContainer** injections;
 
 	mutable default_random_engine randGen;
 	simulation::LocalCounter counter;
@@ -99,6 +101,8 @@ public:
 	void addTokens(float n,unsigned tok_id);
 
 	float getTokenValue(unsigned tok_id) const;
+
+	SomeValue getVarValue(short_id var_id) const;
 
 	/** \brief Add nodes to the SiteGraph using a fully described mixture.
 	 * @param n count of copies of the mixture.

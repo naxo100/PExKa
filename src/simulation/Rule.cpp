@@ -11,6 +11,7 @@
 #include "Rule.h"
 #include "../pattern/Environment.h"
 #include "../grammar/ast/Basics.h"
+#include "../expressions/Vars.h"
 
 namespace simulation {
 
@@ -40,7 +41,7 @@ const pattern::Mixture& Rule::getLHS() const {
 	return lhs;
 }
 
-const state::BaseExpression& Rule::getRate() const {
+const BaseExpression& Rule::getRate() const {
 	return *rate;
 }
 
@@ -48,18 +49,18 @@ void Rule::setRHS(const Mixture* mix,bool is_declared){
 	rhs = mix;
 	isRhsDeclared = is_declared;
 }
-void Rule::setRate(const state::BaseExpression* r){
+void Rule::setRate(const BaseExpression* r){
 	rate = r;
 }
-void Rule::setUnaryRate(pair<const state::BaseExpression*,int> u_rate ){
+void Rule::setUnaryRate(pair<const BaseExpression*,int> u_rate ){
 	unaryRate = u_rate;
 }
 
 
-const list<pair<unsigned,const state::BaseExpression*> > Rule::getTokenChanges() const{
+const list<pair<unsigned,const BaseExpression*> > Rule::getTokenChanges() const{
 	return tokenChanges;
 }
-void Rule::addTokenChange(pair<unsigned,const state::BaseExpression*> tok) {
+void Rule::addTokenChange(pair<unsigned,const BaseExpression*> tok) {
 	tokenChanges.emplace_back(tok);
 }
 
@@ -111,11 +112,18 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 								warns.emplace_back("Application of rule '"+name+
 										"' will induce a null event when applied to an agent '"+sign.getName()+
 										"' that have the same value ",loc);
-							if(rhs_site.isExpression()){
-								if(*rhs_site.values[1] != *lhs_site.values[1]){
-									a.t = ASSIGN;
-									a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-									a.value = rhs_site.values[1];
+							else if(rhs_site.isExpression()){
+								if(rhs_site.values[1]){
+									auto aux_exp = dynamic_cast<const Auxiliar<FL_TYPE>*>(rhs_site.values[1]);
+									auto cc_ag_st_aux = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j);
+									if(!aux_exp || ( aux_exp && lhs.getAux().at(aux_exp->toString()) != cc_ag_st_aux ) ){
+											a.t = ASSIGN;
+											a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+											a.value = rhs_site.values[1];
+											//TODO warning when lhs == nullptr ?
+											script.emplace_back(a);
+											changes[make_pair(rhs_unmask[i],false)].first.emplace_back(j);
+									}
 								}
 							}
 							else if(lhs_site.label != rhs_site.label){//TODO other type of value changes
@@ -684,7 +692,7 @@ const map<const pattern::Mixture::Component*,Rule::CandidateInfo>& Rule::getInfl
 
 /**** DEBUG ****/
 string Rule::toString(const pattern::Environment& env) const {
-	static string acts[] = {"CHANGE","BIND","FREE","DELETE","CREATE","TRANSPORT"};
+	static string acts[] = {"CHANGE","BIND","FREE","DELETE","CREATE","ASSIGN","TRANSPORT"};
 	string s = name+"'s actions:\n";
 	for(auto nn : newNodes){
 		s += "\tINSERT agent "+nn->toString(env)+"\n";
@@ -731,11 +739,34 @@ string Rule::toString(const pattern::Environment& env) const {
 				" and "+sign2->getName()+"."+sign2->getSite(get<2>(act.trgt2)).getName()+
 				(get<3>(act.trgt1) & Action::S_EFF ? " (" : " (no ")+ "side effects)\n";
 			break;
+		case ASSIGN:
+			sign1 = &env.getSignature(lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
+			s += acts[act.t] + " agent's site "+sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
+					" to expression ";
+			s += act.value->toString() + "\n";
+			break;
 		default: break;
 		}
 	}
 	return s;
 }
+
+
+two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs) const{
+	auto& auxs = lhs.getAux();
+	FL_TYPE a = 1.0;
+	if(auxs.size())
+		for(auto cc : lhs){
+			injs[cc->getId()]->selectRule(id, 0);
+			a *= injs[cc->getId()]->partialReactivity();
+		}
+	else{
+		for(auto cc : lhs)
+			a *= injs[cc->getId()]->partialReactivity();
+	}
+	return make_pair(a,0.0);
+}
+
 
 Rule::CandidateInfo::CandidateInfo() : is_valid(true),is_new(false) {};
 void Rule::CandidateInfo::set(small_id root,ag_st_id node){

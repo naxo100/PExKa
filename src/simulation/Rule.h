@@ -21,6 +21,7 @@ namespace simulation {
 
 using namespace std;
 using namespace pattern;
+using namespace expressions;
 
 
 /** \brief Basic unit of the simulation dynamics.
@@ -67,8 +68,8 @@ protected:
 	const Mixture *rhs;
 	bool isRhsDeclared;
 	vector<ag_st_id> lhsMask,rhsMask;//[order] -> (comp_id,ag_id)
-	const state::BaseExpression *rate;//basic rate
-	pair<const state::BaseExpression*,int> unaryRate;//rate,radius
+	const BaseExpression *rate;//basic rate
+	pair<const BaseExpression*,int> unaryRate;//rate,radius
 	list<Action> script;
 	vector<state::Node*> newNodes;
 	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
@@ -76,7 +77,7 @@ protected:
 	map<ag_st_id,small_id> news; //rhs(cc,ag) -> newNodes[i]
 	map<const pattern::Mixture::Component*,CandidateInfo> influence;
 	map<ag_st_id,ag_st_id> matches;//rhs-ag -> lhs-ag
-	list<pair<unsigned,const state::BaseExpression*> > tokenChanges;
+	list<pair<unsigned,const BaseExpression*> > tokenChanges;
 
 	bool test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,const Environment& env) const;
@@ -93,10 +94,12 @@ public:
 	const string& getName() const;
 	const Mixture& getLHS() const;
 	const Mixture& getRHS() const;
-	const state::BaseExpression& getRate() const;
-	const state::BaseExpression& getUnaryRate() const;
+	const BaseExpression& getRate() const;
+	const BaseExpression& getUnaryRate() const;
 	const map<const pattern::Mixture::Component*,CandidateInfo>& getInfluences() const;
-	const list<pair<unsigned,const state::BaseExpression*> > getTokenChanges() const;
+	const list<pair<unsigned,const BaseExpression*> > getTokenChanges() const;
+
+	two<FL_TYPE> evalActivity(const matching::InjRandContainer* const * injs) const;
 
 	/** \brief Set RHS of the rule.
 	 * If this is a reversible rule, mix is declared in env and should not be
@@ -106,12 +109,12 @@ public:
 	/** \brief Set basic rate for the rule.
 	 * @param r basic rate of the rule.
 	 */
-	void setRate(const state::BaseExpression* r);
+	void setRate(const BaseExpression* r);
 	/** \brief Set the unary rate for the rule.
 	 * @param u_rate pair of (rate,radius) for unary instances of a binary rule.
 	 * @param Radius indicate the range of search for connectivity.
 	 */
-	void setUnaryRate(pair<const state::BaseExpression*,int> u_rate = make_pair(nullptr,0));
+	void setUnaryRate(pair<const BaseExpression*,int> u_rate = make_pair(nullptr,0));
 
 	/** \brief Calculate actions to apply using the difference between LHS and RHS.
 	 * Actions could create, delete, bind or unbind nodes, and change internal state
@@ -124,7 +127,7 @@ public:
 	 */
 	void difference(const Environment& env,const vector<ag_st_id>& lhs_order,const vector<ag_st_id>& rhs_order);
 
-	void addTokenChange(pair<unsigned,const state::BaseExpression*> tok);
+	void addTokenChange(pair<unsigned,const BaseExpression*> tok);
 
 	const list<Action>& getScript() const;
 	const vector<state::Node*>& getNewNodes() const;

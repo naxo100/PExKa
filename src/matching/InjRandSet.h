@@ -9,73 +9,89 @@
 #define SRC_MATCHING_INJRANDSET_H_
 
 #include "Injection.h"
+#include "../data_structs/DistributionTree.h"
+
 
 namespace matching {
 
 //using Node = state::Node;
 
-class InjRandSet {
+class InjRandContainer {
+protected:
+	list<CcInjection*> freeInjs;
+	const pattern::Mixture::Component& cc;
+	virtual const list<Injection*>& insert(CcInjection* inj,const state::State& state) = 0;
+	virtual CcInjection* newInj() const = 0;
 
 public:
-	virtual ~InjRandSet();
-	virtual const Injection& chooseRandom(default_random_engine& randGen) const = 0;
-	virtual FL_TYPE count() const = 0;
 
-	virtual Injection* emplace(Node& node,two<std::list<state::Internal*> > &port_lists,
-			small_id root = 0) = 0;
-	virtual Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask) = 0;
+	InjRandContainer(const pattern::Mixture::Component& _cc);
+	virtual ~InjRandContainer();
+	virtual const Injection& chooseRandom(default_random_engine& randGen) const = 0;
+	virtual size_t count() const = 0;
+	virtual FL_TYPE partialReactivity() const = 0;
+
+	virtual const list<Injection*>& emplace(Node& node,two<std::list<state::Internal*> > &port_lists,
+			const state::State& state,small_id root = 0);
+	virtual const list<Injection*>& emplace(Injection* base_inj,map<Node*,Node*>& mask,
+			const state::State& state);
 	virtual void erase(Injection* inj) = 0;
 
+	virtual void selectRule(int rid,small_id cc) const;
 	//vector<CcInjection*>::iterator begin();
 	//vector<CcInjection*>::iterator end();
 };
 
 
-class MultiInjSet : public InjRandSet {
+class InjRandSet : public InjRandContainer {
 	size_t counter;
 	size_t multiCount;
-	list<CcInjection*> freeInjs;
 	vector<CcInjection*> container;
-	const pattern::Mixture::Component& cc;
-	void insert(CcInjection* inj);
+	const list<Injection*>& insert(CcInjection* inj,const state::State& state) override;
+	virtual CcInjection* newInj() const override;
 public:
-	MultiInjSet(const pattern::Mixture::Component& _cc);
-	~MultiInjSet();
+	InjRandSet(const pattern::Mixture::Component& _cc);
+	~InjRandSet();
 	const Injection& chooseRandom(default_random_engine& randGen) const override;
-	FL_TYPE count() const override;
+	size_t count() const override;
+	virtual FL_TYPE partialReactivity() const;
 
-	Injection* emplace(Node& node,two<std::list<state::Internal*> > &port_lists,
-			small_id root = 0) override;
-	Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask) override;
+	/*Injection* emplace(Node& node,two<std::list<state::Internal*> > &port_lists,
+			const state::State& state,small_id root = 0) override;*/
+	//Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask) override;
 	void erase(Injection* inj) override;
 
 	//vector<CcInjection*>::iterator begin();
 	//vector<CcInjection*>::iterator end();
 };
 
-template <class Cont,typename T>
-class InjTree : InjRandSet {
-	struct Node {
-		T value;
-		vector<Injection*> equals; //equals
-		Cont *smaller,*greater;//smaller,greater
-		Node *left,*right;
-	};
-	const pattern::Mixture::Component& cc;
-	Node root;
-	list<T> hints;
+
+class InjRandTree : public InjRandContainer {
+	//list<FL_TYPE> hints;
+
+	list<CcInjection*> freeInjs;
+	list<CcInjection*> infList;
+
+	FL_TYPE average;
+	unsigned counter;
+	map<int,map<small_id,distribution_tree::DistributionTree<CcValueInj>*> > roots;
+
+	mutable pair<int,small_id> selected_root;
+
+	const list<Injection*>& insert(CcInjection *inj,const state::State& state) override;
+	virtual CcInjection* newInj() const override;
 
 public:
-	InjTree(const pattern::Mixture::Component& cc);
+	InjRandTree(const pattern::Mixture::Component& cc);
 	const Injection& chooseRandom(default_random_engine& randGen) const override;
-	FL_TYPE count() const override;
+	size_t count() const override;
+	virtual FL_TYPE partialReactivity() const;
 
-	Injection* emplace(const pattern::Mixture::Component& cc,Node& node,
-			two<std::list<state::Internal*> > &port_lists,small_id root = 0) override;
-	Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask) override;
 	void erase(Injection* inj) override;
 
-	void addHint(T value);
+
+	void selectRule(int rid,small_id cc) const override;
+	//void addHint(FL_TYPE value);
 };
 
 }

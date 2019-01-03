@@ -34,6 +34,7 @@ class SiteGraph;
 struct EventInfo;
 
 using namespace std;
+using namespace expressions;
 
 class Node {
 protected:
@@ -52,7 +53,8 @@ public:
 	Node(const Node& node,const map<Node*,Node*>& mask);
 	virtual ~Node();
 
-	void copyDeps(const Node& node,EventInfo& ev,matching::InjRandSet** injs);//unsafe
+	void copyDeps(const Node& node,EventInfo& ev,matching::InjRandContainer** injs,
+			const state::State& state);//unsafe
 	void alloc(big_id addr);
 	big_id getAddress() const;
 
@@ -61,11 +63,16 @@ public:
 	void setLink(small_id site_src,Node* lnk,small_id site_trgt);
 
 
-	virtual void removeFrom(EventInfo& ev,matching::InjRandSet** injs,SiteGraph& graph);
-	virtual void changeIntState(EventInfo& ev,matching::InjRandSet** injs,small_id id,small_id value);
-	virtual void assign(EventInfo& ev,matching::InjRandSet** injs,small_id id,const SomeValue& val);
-	virtual void unbind(EventInfo& ev,matching::InjRandSet** injs,small_id id,bool side_eff = false);
-	virtual void bind(EventInfo& ev,matching::InjRandSet** injs,small_id id,Node* trgt_node,small_id trgt_site,bool side_eff = false);
+	virtual void removeFrom(EventInfo& ev,
+			matching::InjRandContainer** injs,SiteGraph& graph);
+	virtual void changeIntState(EventInfo& ev,
+			matching::InjRandContainer** injs,small_id id,small_id value);
+	virtual void assign(EventInfo& ev,matching::InjRandContainer** injs,
+			small_id id,const SomeValue& val);
+	virtual void unbind(EventInfo& ev,matching::InjRandContainer** injs,
+			small_id id,bool side_eff = false);
+	virtual void bind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,
+			Node* trgt_node,small_id trgt_site,bool side_eff = false);
 
 
 	//inline?? TODO
@@ -84,7 +91,7 @@ public:
 	 * (to_follow_,Node*) that will be matched later.
 	 */
 	bool test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site,
-			two<list<Internal*> > &port_list) const;
+			two<list<Internal*> > &port_list,const State& state) const;
 
 	//unsafe
 	const SomeValue& getInternalState(small_id);
@@ -106,8 +113,8 @@ struct Internal {
 	Internal();
 	~Internal();
 
-	void negativeUpdate(EventInfo& ev,matching::InjRandSet** injs);
-	static void negativeUpdate(EventInfo& ev,matching::InjRandSet** injs,InjSet* deps);
+	void negativeUpdate(EventInfo& ev,matching::InjRandContainer** injs);
+	static void negativeUpdate(EventInfo& ev,matching::InjRandContainer** injs,InjSet* deps);
 
 
 	string toString(const pattern::Signature::Site& s,bool show_binds = false,map<const Node*,bool> *visit = nullptr) const;
@@ -125,12 +132,12 @@ public:
 	pop_size getCount() const override;
 
 
-	void removeFrom(EventInfo& ev,matching::InjRandSet** injs,SiteGraph& graph) override;
+	void removeFrom(EventInfo& ev,matching::InjRandContainer** injs,SiteGraph& graph) override;
 
-	void changeIntState(EventInfo& ev,matching::InjRandSet** injs,small_id id,small_id value) override;
-	void assign(EventInfo& ev,matching::InjRandSet** injs,small_id id,const SomeValue& value) override;
-	void unbind(EventInfo& ev,matching::InjRandSet** injs,small_id id,bool side_eff = false) override;
-	void bind(EventInfo& ev,matching::InjRandSet** injs,small_id id,
+	void changeIntState(EventInfo& ev,matching::InjRandContainer** injs,small_id id,small_id value) override;
+	void assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id,const SomeValue& value) override;
+	void unbind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,bool side_eff = false) override;
+	void bind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,
 			Node* trgt_node,small_id trgt_site,bool side_eff = false) override;
 
 	/*bool test(const pair<small_id,pattern::Mixture::Site>& id_site,
@@ -178,9 +185,9 @@ struct EventInfo {
 	//new cc derived from multinode
 	map<Node*,Node*> new_cc;
 	//mask for new injections, nullptr are erased injs
-	map<matching::Injection*,matching::Injection*> inj_mask;
+	map<matching::Injection*,list<matching::Injection*>> inj_mask;
 	//aux_values
-	map<string,FL_TYPE> aux_map;
+	unordered_map<string,FL_TYPE> aux_map;
 
 	set<const pattern::Pattern*> to_update;
 	set<small_id> rule_ids;

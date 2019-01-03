@@ -14,7 +14,7 @@
 //#include "../pattern/Environment.h"
 #include "../util/params.h"
 #include "Node.h"
-#include "../state/AlgExpression.h"
+#include "../expressions/AlgExpression.h"
 #include "../pattern/Signature.h"
 #include "../pattern/Mixture.h"
 

@@ -33,6 +33,8 @@ int main(int argc, char* argv[]){
 	const string v_msg("PExKa "+version);
 	const string usage_msg("Simple usage is \n$ [mpirun* -np procs] PExKa ([-i] kappa_file)+ [-e events] -t time [-p points] -sync-t tau");
 
+	for(int i = 0; i < argc; i++) cout << argv[i] << " | "; cout << endl;
+
 	//Allowed options
 	options_description desc(v_msg + "\n" + usage_msg + "\n\nAllowed options");
 	desc.add_options()
@@ -107,7 +109,7 @@ int main(int argc, char* argv[]){
 	}
 
 #ifdef DEBUG
-	//env.show();
+	env.show();
 #endif
 	WarningStack::getStack().show();
 

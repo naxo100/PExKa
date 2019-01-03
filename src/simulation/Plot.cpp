@@ -21,7 +21,7 @@ Plot::Plot(const pattern::Environment& env) : nextPoint(0.),dT(0.) {
 	dT = params.limitTime() / params.plotPoints();
 	file << "#Time";
 	for(auto obs : env.getObservables())
-		file << "\t" << obs->getName();
+		file << "\t" << obs->toString();
 	file << endl;
 }
 

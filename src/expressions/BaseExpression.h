@@ -69,6 +69,9 @@ public:
 	static BaseExpression* makeBinaryExpression(const BaseExpression *ex1,
 			const BaseExpression *ex2, const int op);
 
+	static BaseExpression* makeUnaryExpression(const BaseExpression *ex, const int func);
+
+	static BaseExpression* makeNullaryExpression(const int func);
 
 	virtual std::string toString() const;
 

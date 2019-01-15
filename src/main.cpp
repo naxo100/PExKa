@@ -107,9 +107,12 @@ int main(int argc, char* argv[]){
 		cerr << "An exception found: " << e.what() << endl;
 		exit(1);
 	}
-
+	vector<simulation::Rule> rules = env.getRules();
+	for(unsigned int i=0; i < rules.size(); i++){
+		cout << "rate: " << rules[i].getRate().toString() << endl;
+	}
 #ifdef DEBUG
-	env.show();
+	//env.show();
 #endif
 	WarningStack::getStack().show();
 
@@ -176,7 +179,7 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
-	sim.print();
+	//sim.print();
 
 	cout << "finished!" << endl;
 

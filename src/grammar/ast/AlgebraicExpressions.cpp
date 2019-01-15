@@ -158,7 +158,8 @@ UnaryOperation::UnaryOperation(const location &l,const Expression *e,
 BaseExpression* UnaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
-	return new Constant<int>(0);
+	BaseExpression* ex = exp->eval(env,vars,deps,flags);
+	return BaseExpression::makeUnaryExpression(ex, func);
 }
 UnaryOperation* UnaryOperation::clone() const{
 	return new UnaryOperation(loc,exp->clone(),func);
@@ -178,7 +179,7 @@ void UnaryOperation::show( string tabs ) const {
 BaseExpression* NullaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
-	return new Constant<int>(0);
+	return BaseExpression::makeNullaryExpression(func);
 }
 NullaryOperation::NullaryOperation(const location &l,const BaseExpression::Nullary f):
 		 Expression(l), func(f){};

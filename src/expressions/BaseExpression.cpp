@@ -7,6 +7,8 @@
 
 #include "BaseExpression.h"
 #include "BinaryOperation.h"
+#include "UnaryOperation.h"
+#include "NullaryOperation.h"
 #include "../util/Exceptions.h" //semanticError
 
 namespace expressions {
@@ -118,6 +120,48 @@ template BaseExpression* BaseExpression::makeBinaryExpression<false>(
 		const BaseExpression *ex1, const BaseExpression *ex2, const int op);
 
 
+BaseExpression* BaseExpression::makeUnaryExpression(const BaseExpression *ex,
+		const int func) {
+	Type type = ex->getType();
+
+	BaseExpression* un_op = nullptr;
+
+	switch (type) {
+	case FLOAT:
+		un_op = new UnaryOperation<FL_TYPE, FL_TYPE>(ex, func);
+		break;
+	case INT:
+		un_op = new UnaryOperation<int, int>(ex, func);
+		break;
+	default:
+		SemanticError("Not a valid value for a unary operation",
+				yy::location());
+	}
+
+	return un_op;
+}
+
+BaseExpression* BaseExpression::makeNullaryExpression(const int func) {
+
+	BaseExpression* null_op = nullptr;
+
+	switch (func) {
+	case Nullary::TRUE:
+		null_op = new NullaryOperation<bool>(func);
+		break;
+	case Nullary::FALSE:
+		null_op = new NullaryOperation<bool>(func);
+		break;
+	case Nullary::RAND_1:
+		null_op = new NullaryOperation<FL_TYPE>(func);
+		break;
+	default:
+		SemanticError("Not a valid value for a nullary operation",
+				yy::location());
+	}
+
+	return null_op;
+}
 
 std::string BaseExpression::toString() const {
 	return std::string("BaseExpression");

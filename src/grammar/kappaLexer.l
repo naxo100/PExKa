@@ -142,8 +142,8 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "[T]"		return KappaParser::make_TIME(loc);
 "[Tsim]"	return KappaParser::make_CPUTIME(loc);
 "[log]"		return KappaParser::make_LOG(loc);
-"[sin]"		return KappaParser::make_SINUS(loc);
-"[cos]"		return KappaParser::make_COSINUS(loc);
+"[sin]"		return KappaParser::make_SINE(loc);
+"[cos]"		return KappaParser::make_COSINE(loc);
 "[tan]"		return KappaParser::make_TAN(loc);
 "[exp]"		return KappaParser::make_EXPONENT(loc);
 "[abs]"		return KappaParser::make_ABS(loc);

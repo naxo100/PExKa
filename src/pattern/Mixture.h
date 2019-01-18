@@ -202,7 +202,8 @@ struct Pattern::Site {
 	bool isExpression() const;
 	bool isBindToAny() const;
 	bool testValue(const expressions::SomeValue& val,
-			const state::State& state) const;
+			const state::State& state,
+			const expressions::AuxMap& aux_map) const;
 };
 
 template <typename T>
@@ -222,7 +223,7 @@ public:
  */
 class Pattern::Agent {
 	short_id signId; //signature ID
-	std::unordered_map<small_id,Site> interface;
+	std::map<small_id,Site> interface;//TODO using map because of possible dependency between sites.
 	map<small_id,list<Agent*> > parents;
 	map<small_id,list<Agent*> > childs;
 	mutable list<pair<const Mixture::Component*,small_id> > includedIn;
@@ -271,8 +272,8 @@ public:
 	void addCc(const Mixture::Component* cc,small_id id) const;
 	const list<pair<const Mixture::Component*,small_id> >& getIncludes() const;
 
-	const unordered_map<small_id,Site>::const_iterator begin() const;
-	const unordered_map<small_id,Site>::const_iterator end() const;
+	const map<small_id,Site>::const_iterator begin() const;
+	const map<small_id,Site>::const_iterator end() const;
 
 	string toString( const Environment& env, short mixAgId=-1,
 			map<ag_st_id,short> bindLabels = map<ag_st_id,short>() ) const;

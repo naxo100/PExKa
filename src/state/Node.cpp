@@ -132,10 +132,11 @@ short_id Node::getId() const{
 }
 
 bool Node::test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site,
-		two<list<Internal*> > &port_list, const State& state) const{
+		two<list<Internal*> > &port_list, const State& state,
+		const expressions::AuxMap& aux_map) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
-		if( id_site.second.testValue(port.val, state) )
+		if( id_site.second.testValue(port.val, state, aux_map) )
 			port_list.first.emplace_back(&port);
 		else
 			return false;
@@ -276,10 +277,10 @@ Internal* Node::end(){
 	return interface+intfSize;
 }
 
-const SomeValue& Node::getInternalState(small_id id){
+const SomeValue& Node::getInternalState(small_id id) const{
 	return interface[id].val;
 }
-const pair<Node*,small_id>& Node::getLinkState(small_id id){
+const pair<Node*,small_id>& Node::getLinkState(small_id id) const{
 	return interface[id].link;
 }
 
@@ -588,6 +589,9 @@ string Internal::toString(const pattern::Signature::Site& sit,bool show_binds,ma
 		case SMALL_ID:
 			s += dynamic_cast<const pattern::Signature::LabelSite&>(sit)
 					.getLabel(val.smallVal);
+			break;
+		case NONE:
+			s += "AUX";
 			break;
 		default:
 			s += "?";//TODO exception?

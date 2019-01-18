@@ -379,14 +379,25 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		newNodes.emplace_back(new state::Node(env.getSignature(rhs_ag.getId())));
 		news.emplace(cc_ag_id,j-i);
 		for(auto& s : rhs_ag){
-			auto lnk = rhs->follow(cc_ag_id.first,cc_ag_id.second,s.first);
-			if(!s.second.isEmptySite())
+			if(s.second.values[1]){
+				newNodes[j-i]->setState(s.first,SomeValue());
+				Action a;
+				a.t = ASSIGN;
+				a.trgt1 = make_tuple(cc_ag_id.first,j-i,s.first,true);
+				a.value = s.second.values[1];
+				//TODO warning when lhs == nullptr ?
+				script.emplace_back(a);
+				changes[make_pair(make_pair(cc_ag_id.first,j-i),true)].first.emplace_back(s.first);
+			}
+			else if(s.second.label != Mixture::Site::EMPTY)
 				newNodes[j-i]->setState(s.first,s.second.label);
+
+			auto lnk = rhs->follow(cc_ag_id.first,cc_ag_id.second,s.first);
 			switch(s.second.link_type){
 			case Mixture::FREE:break;
 			case Mixture::BIND:{
 				auto k =rhs_mask.at(make_pair(cc_ag_id.first,lnk.first));
-				if(k > j){
+				if(k > j){//only save this bind action if both agents new?
 					Action a;
 					a.t = LINK;a.trgt1 = make_tuple(cc_ag_id.first,j-i,s.first,true);
 					a.trgt2 = make_tuple(cc_ag_id.first,k-i,lnk.second,true);
@@ -524,7 +535,7 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 	return true;
 }
 
-void Rule::checkInfluence(const Environment& env) {
+void Rule::checkInfluence(const state::State& state,const Environment& env) {
 	//TODO changes of BIND_TO -> FREE
 	//TODO changes of semi-link -> free ???
 	try{
@@ -536,8 +547,10 @@ void Rule::checkInfluence(const Environment& env) {
 		for(auto& cc_agid : ag.getIncludes()){
 			candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
 		}
-		if(ag_changes.first.second){
-			//new
+		if(ag_changes.first.second){//new agent change, possibly assign of non const value
+			for(auto change : ag_changes.second.first){//for each site_value changes
+
+			}
 		}
 		else {
 			for(auto change : ag_changes.second.first){//for each site_value changes
@@ -618,33 +631,33 @@ void Rule::checkInfluence(const Environment& env) {
 		}
 	}
 
-	small_id i = 0;
+	//small_id i = 0;
+	expressions::AuxMap aux_map;
 	for(auto n : news){
 		auto& new_ag = rhs->getAgent(n.first);
 		for(auto& ag : env.getAgentPatterns(new_ag.getId())){
 			bool isEmb = true;
 			for(auto& id_site : ag){
 				try{
-					/*auto& site = */new_ag.getSite(id_site.first);
-					if(id_site.second.isEmptySite() ||
-							id_site.second.label == newNodes[i]->getInternalState(id_site.first).smallVal){
-					//		!memcmp(&id_site.second.state,&newNodes[i]->getInternalState(id_site.first),sizeof(state::SomeValue))){
-						/*TODO test for link
-						switch(id_site.second.link_type){
-						case Pattern::BIND:
-							if(id_site.second.isBindToAny()){
-
-							}
-
-						}*/
-						continue;
+					auto& site = new_ag.getSite(id_site.first);
+					if(changes.count(make_pair(n.first,true))){
+						isEmb = false;break;//TODO check
 					}
 				}
-				catch(std::out_of_range &ex){
+				catch(std::out_of_range &ex){//site not declared in new agent
 					if( (id_site.second.isEmptySite() ||
-							id_site.second.label == newNodes[i]->getInternalState(id_site.first).smallVal)
+							id_site.second.testValue(newNodes[/*i*/n.second]->getInternalState(id_site.first),state,aux_map) )
 							&& id_site.second.link_type == Pattern::FREE)
 						continue;//ok
+					isEmb = false;break;
+				}
+				try{//site declared in both agents
+					if(id_site.second.isEmptySite() ||
+							id_site.second.testValue(newNodes[n.second]->getInternalState(id_site.first),state,aux_map))
+						continue;
+				}
+				catch(std::out_of_range &e){
+					break;//cannot test-value, so yes
 				}
 				isEmb = false;break;
 			}
@@ -652,7 +665,7 @@ void Rule::checkInfluence(const Environment& env) {
 				for(auto cc_agid : ag.getIncludes())
 					candidates[cc_agid.first].set(cc_agid.second,n.first);//ag_st_id(-1,i));
 		}
-		i++;
+		//i++;
 	}
 	//Checking candidates
 	multimap<ag_st_id,ag_st_id> already_done;
@@ -740,10 +753,15 @@ string Rule::toString(const pattern::Environment& env) const {
 				(get<3>(act.trgt1) & Action::S_EFF ? " (" : " (no ")+ "side effects)\n";
 			break;
 		case ASSIGN:
-			sign1 = &env.getSignature(lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
-			s += acts[act.t] + " agent's site "+sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
-					" to expression ";
-			s += act.value->toString() + "\n";
+			if(get<3>(act.trgt1) & Action::NEW){//new node
+				sign1 = &env.getSignature(newNodes[get<1>(act.trgt1)]->getId());
+				s += acts[act.t] + " new-agent's site ";
+			}else{
+				sign1 = &env.getSignature(lhs.getAgent(get<0>(act.trgt1),get<1>(act.trgt1)).getId());
+				s += acts[act.t] + " agent's site ";
+			}
+			s += sign1->getName()+"."+sign1->getSite(get<2>(act.trgt1)).getName()+
+					" to expression "+act.value->toString() + "\n";
 			break;
 		default: break;
 		}

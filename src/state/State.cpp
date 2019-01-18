@@ -16,6 +16,10 @@
 namespace state {
 using Deps = pattern::Dependencies;
 
+
+void (State::*State::action[6])(const simulation::Rule::Action&) =
+		{&State::modify,&State::bind,&State::free,&State::del,nullptr,&State::assign};
+
 State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		const BaseExpression& vol,simulation::Plot& _plot,
 		const pattern::Environment& _env) :
@@ -144,7 +148,8 @@ void State::modify(const simulation::Rule::Action& a){
 }
 
 void State::assign(const simulation::Rule::Action& a){
-	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
+	using Action = simulation::Rule::Action;
+	auto node = (get<3>(a.trgt1) & Action::NEW ? ev.fresh_emb : ev.emb[get<0>(a.trgt1)])[get<1>(a.trgt1)];
 	auto val = a.value->getValue(*this,move(ev.aux_map));//TODO aux_values
 	try{
 		auto new_node = ev.new_cc.at(node);
@@ -159,9 +164,6 @@ void State::del(const simulation::Rule::Action& a){
 	auto node = ev.emb[get<0>(a.trgt1)][get<1>(a.trgt1)];
 	node->removeFrom(ev,injections,graph);
 }
-
-void (State::*State::action[4])(const simulation::Rule::Action&) =
-		{&State::modify,&State::bind,&State::free,&State::del};
 
 void State::apply(const simulation::Rule& r){
 	//ADD action first
@@ -330,7 +332,7 @@ void State::selectInjection(const pattern::Mixture& mix,two<FL_TYPE> bin_act,
 			return selectUnaryInj(mix);
 		else{
 			auto rd = uniform_real_distribution<FL_TYPE>(bin_act.first+un_act.first)(randGen);
-			if(rd > bin_act.first)
+			if(rd > un_act.first)
 				return selectBinaryInj(mix,true);
 			else
 				return selectUnaryInj(mix);
@@ -362,8 +364,8 @@ const simulation::Rule& State::drawRule(){
 	}
 	int radius = 0;//TODO
 	//EventInfo* ev_p;
-	selectInjection(rule.getLHS(),make_pair(a1a2.second,radius),
-			make_pair(a1a2.first,radius));
+	selectInjection(rule.getLHS(),make_pair(a1a2.first,radius),
+			make_pair(a1a2.second,radius));
 	return rule;
 }
 

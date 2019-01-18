@@ -91,11 +91,12 @@ public:
 	 * (to_follow_,Node*) that will be matched later.
 	 */
 	bool test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site,
-			two<list<Internal*> > &port_list,const State& state) const;
+			two<list<Internal*> > &port_list,const State& state,
+			const expressions::AuxMap& aux_map) const;
 
 	//unsafe
-	const SomeValue& getInternalState(small_id);
-	const pair<Node*,small_id>& getLinkState(small_id);
+	const SomeValue& getInternalState(small_id) const;
+	const pair<Node*,small_id>& getLinkState(small_id) const;
 
 	void addDep(matching::Injection* inj);
 	bool removeDep(matching::Injection* inj);

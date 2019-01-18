@@ -75,7 +75,7 @@ class State {
 
 	/** \brief static vector with the basic rule action methods.
 	 */
-	static void (State::*action[4])(const simulation::Rule::Action&);
+	static void (State::*action[6])(const simulation::Rule::Action&);
 
 	void selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const;
 	void selectUnaryInj(const pattern::Mixture& mix) const;

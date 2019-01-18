@@ -81,7 +81,7 @@ void KappaAst::evaluateRules(pattern::Environment &env,vector<Variable*> &vars){
 	env.reserve<simulation::Rule>(Rule::getCount());
 	for(auto& r : rules)
 		r.eval(env,vars);
-	env.buildInfluenceMap();
+	//env.buildInfluenceMap();do it later with defined state
 }
 
 void KappaAst::add(const Declaration &d){

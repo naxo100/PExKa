@@ -522,8 +522,8 @@ alg_expr:
 /**************************/
 | variable
 	{$$ = $1;}
-| bool_expr
-	{$$ = $1;}
+/*| bool_expr
+	{$$ = $1;}*/
 | alg_expr MULT alg_expr
 	{$$ = new AlgBinaryOperation(@$,$1,$3,BaseExpression::AlgebraicOp::MULT);}
 | alg_expr PLUS alg_expr
@@ -667,7 +667,7 @@ internal_state:
 | KAPPA_VALUE ID EQUAL alg_expr CL_CUR
 	{$$ = SiteState(@$,Id(@2,$2),$4);}
 | KAPPA_VALUE ID CL_CUR
-	{$$ = SiteState(@$,Id(@2,$2),'\0');}
+	{$$ = SiteState(@$,Id(@2,$2),nullptr);}
 | KAPPA_VALUE alg_expr CL_CUR
 	{$$ = SiteState(@$,$2);}
 

@@ -335,15 +335,15 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 			agent.setSiteAux(site_id);
 		else if(stateInfo.range[0] || stateInfo.range[2])
 			throw SemanticError("Can't use an inequation pattern at RHS.",stateInfo.loc);
-		else {
+		//else {
 			if(stateInfo.range[1])
 				agent.setSiteExpr(site_id,stateInfo.range[1]->eval
 						(env,consts,nullptr,ptrn_flag|Expression::FORCE));
 			else
 				agent.setSiteExpr(site_id,Var(stateInfo.aux.loc,Var::AUX,stateInfo.aux).eval
-						(env, consts, nullptr, ptrn_flag));
+						(env, consts, nullptr, ptrn_flag));//TODO is this mandatory???
 			break;
-		}
+		//}
 		break;
 	case SiteState::EXPR:
 		try{

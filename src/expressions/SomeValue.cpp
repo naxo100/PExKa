@@ -13,6 +13,7 @@ namespace expressions {
 
 
 /****** SomeValue ************/
+SomeValue::SomeValue() : t(NONE) {}
 SomeValue::SomeValue(FL_TYPE f) :
 		fVal(f), t(FLOAT) {
 }

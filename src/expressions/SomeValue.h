@@ -13,7 +13,7 @@
 namespace expressions {
 
 enum Type {
-	FLOAT, INT, BOOL, SMALL_ID, SHORT_ID, STR
+	FLOAT, INT, BOOL, SMALL_ID, SHORT_ID, NONE
 };
 
 class SomeValue {
@@ -29,6 +29,7 @@ public:
 	};
 	Type t;
 
+	SomeValue();
 	SomeValue(FL_TYPE f);
 	SomeValue(int i);
 	SomeValue(short_id id);

@@ -132,7 +132,7 @@ public:
 	const list<Action>& getScript() const;
 	const vector<state::Node*>& getNewNodes() const;
 
-	void checkInfluence(const Environment& env);
+	void checkInfluence(const state::State& state,const Environment& env);
 	string toString(const pattern::Environment& env) const;
 };
 

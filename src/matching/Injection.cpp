@@ -9,6 +9,7 @@
 #include <iostream>
 #include "Injection.h"
 #include "../state/Node.h"
+#include "../expressions/Vars.h"
 
 namespace matching {
 
@@ -55,6 +56,7 @@ bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 		n = nullptr;
 	//if(_cc.getAgent(root).getId() == node.getId()){
 	ccAgToNode.resize(_cc.size(),nullptr);
+
 	std::list<pair<small_id,Node*> > q;
 	q.emplace_back(root,&node);
 	const pattern::Mixture::Agent* ag;
@@ -63,13 +65,14 @@ bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 	//for(auto elem : _cc.getGraph())
 	//	printf("(%d,%d)->(%d,%d); ",elem.first.first,elem.first.second,elem.second.first,elem.second.second);
 	//cout << endl;
+	expressions::AuxMap aux_map;
 	while(!q.empty()){
 		ag = &_cc.getAgent(q.front().first);
 		curr_node = q.front().second;
 		if(ag->getId() != curr_node->getId())
 			return false;
 		for(auto& id_site : *ag){
-			if(curr_node->test(next_node.second,id_site,port_list,state)){
+			if(curr_node->test(next_node.second,id_site,port_list,state,aux_map)){
 				if(next_node.second){
 					next_node.first = _cc.follow(q.front().first,id_site.first).first;
 					//need to check site of links?? TODO No
@@ -82,6 +85,11 @@ bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 						ccAgToNode[next_node.first] = next_node.second;//todo review
 					}
 					next_node.second = nullptr;
+				}
+				if(id_site.second.label == pattern::Mixture::Site::AUX && id_site.second.values[1]){
+					auto aux_expr = dynamic_cast<const expressions::Auxiliar<FL_TYPE>*>(id_site.second.values[1]);
+					if(aux_expr)
+						aux_map[aux_expr->toString()] = curr_node->getInternalState(id_site.first).valueAs<FL_TYPE>();
 				}
 			}
 			else

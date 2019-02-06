@@ -176,9 +176,9 @@ void Environment::declareObservable(state::Variable* var){
 	observables.emplace_back(var);
 }
 
-void Environment::buildInfluenceMap() {
+void Environment::buildInfluenceMap(const state::State& state){
 	for(auto& r : rules)
-		r.checkInfluence(*this);
+		r.checkInfluence(state,*this);
 }
 void Environment::buildFreeSiteCC() {
 	for(auto& ag_class : agentPatterns){
@@ -352,7 +352,7 @@ void Environment::show() const {
 		for(auto& ag_list : agentPatterns)
 			count += ag_list.size();
 		cout << count << "]" << endl;
-		/*for(auto& ap_list : agentPatterns)
+		for(auto& ap_list : agentPatterns)
 			for(auto& ap : ap_list){
 				for(auto& site_ptrns : ap.getParentPatterns()){
 					cout << this->getSignature(ap.getId()).getSite(site_ptrns.first).getName()
@@ -370,7 +370,7 @@ void Environment::show() const {
 					cout << "}, ";
 				}
 				cout << endl;
-			}*/
+			}
 		cout << "\n\t\tComponents[" << components.size() << "]" << endl;
 		int i = 0;
 		for(auto& comp : components){

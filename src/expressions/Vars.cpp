@@ -45,7 +45,8 @@ R Auxiliar<R>::evaluate(const state::State& state,
 	try {
 		return aux_values.at(name);
 	} catch (std::out_of_range& ex) {
-		throw ex; //TODO throw better exception
+		throw std::out_of_range(
+			"Cannot find value for auxiliar "+name+". Try to reorder agent-signature sites if there is dependency.");
 	}
 }
 

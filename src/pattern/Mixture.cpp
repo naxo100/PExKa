@@ -9,6 +9,7 @@
 #include "Mixture.h"
 #include "Environment.h"
 #include "../util/Warning.h"
+#include "../expressions/Vars.h"
 
 
 namespace pattern {
@@ -376,10 +377,10 @@ short_id Mixture::Agent::getId() const {
 }
 
 
-const unordered_map<small_id,Mixture::Site>::const_iterator Mixture::Agent::begin() const{
+const map<small_id,Mixture::Site>::const_iterator Mixture::Agent::begin() const{
 	return interface.begin();
 }
-const unordered_map<small_id,Mixture::Site>::const_iterator Mixture::Agent::end() const{
+const map<small_id,Mixture::Site>::const_iterator Mixture::Agent::end() const{
 	return interface.end();
 }
 
@@ -626,25 +627,27 @@ bool Mixture::Site::isExpression() const{
 }
 
 //test if mix_site match with value or inequation
-bool Mixture::Site::testValue(const state::SomeValue& val,const state::State& state) const {
+bool Mixture::Site::testValue(const state::SomeValue& val,const state::State& state,
+		const expressions::AuxMap& aux_map) const {
+	//TODO ignore vars when using for check influence
 	if(val.t == expressions::SMALL_ID)
 		return val.smallVal == label;
 	else{
-		if(values[1])
-			try{
-				return values[1]->getValue(state) == val;
-			}
-			catch(exception &e){
-				return false;
-			}
-		else {
-			auto fl_val = val.valueAs<FL_TYPE>();
-			if(values[0] && values[0]->getValue(state).valueAs<FL_TYPE>() > fl_val)
-				return false;
-			if(values[2] && values[2]->getValue(state).valueAs<FL_TYPE>() < fl_val)
-				return false;
+		if(values[1]){
+			if(!dynamic_cast<const expressions::Auxiliar<FL_TYPE>*>(values[1]))//TODO only if aux expression are stored
+				//try{
+					return values[1]->getValue(state,std::move(aux_map)) == val;
+				//}
+				//catch(exception &e){
+				//	return false;
+				//}
 		}
 
+		auto fl_val = val.valueAs<FL_TYPE>();
+		if(values[0] && values[0]->getValue(state,move(aux_map)).valueAs<FL_TYPE>() > fl_val)
+			return false;
+		if(values[2] && values[2]->getValue(state,move(aux_map)).valueAs<FL_TYPE>() < fl_val)
+			return false;
 	}
 	return true;
 }
@@ -653,9 +656,14 @@ bool Mixture::Site::operator ==(const Site &s) const{
 	if(label != s.label){
 		if(int(label) + int(s.label) == EMPTY + AUX){
 			for(int i = 0; i < 3; i++)
-				if(values[i] != s.values[i])
-					if(*values[i] == *s.values[i])
+				if(values[i] != s.values[i]){
+					if(values[i] && s.values[i]){
+						if(*values[i] == *s.values[i])
+							return false;
+					}
+					else
 						return false;
+				}
 		}
 		else
 			return false;
@@ -669,9 +677,14 @@ bool Mixture::Site::operator ==(const Site &s) const{
 
 	if(label == AUX)
 		for(int i = 0; i < 3; i++)
-			if(values[i] != s.values[i])
-				if(*values[i] == *s.values[i])
+			if(values[i] != s.values[i]){
+				if(values[i] && s.values[i]){
+					if(*values[i] == *s.values[i])
+						return false;
+				}
+				else
 					return false;
+			}
 	return true;
 }
 int Mixture::Site::compare(const Site &s) const{
@@ -704,6 +717,16 @@ int Mixture::Site::compare(const Site &s) const{
 				throw False();
 		}
 	}
+	for(int i = 0; i < 3; i++)
+		if(values[i] != s.values[i]){
+			if( values[i] && s.values[i]){
+				if(*values[i] != *s.values[i])
+					ret = -100;
+			}
+			else
+				ret = -100;
+		}
+
 	if(s.link_type == link_type){
 		if(link_type == LinkType::BIND_TO && s.lnk_ptrn != lnk_ptrn)
 			throw False();

@@ -58,7 +58,7 @@ protected:
 	list<state::Variable*> observables;
 	mutable Dependencies deps;//mutable because [] accessing
 
-	//(ag_id,site) -> list { (cc,ag_id) }
+	//(ag_id,site) -> list { (cc,ag_id) } map to every freeSite for side-effect events?
 	unordered_map<int,list<pair<const Mixture::Component*,small_id> > > freeSiteCC;
 
 	bool exists(const string &name,const IdMap &map);
@@ -79,7 +79,7 @@ public:
 	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix);
 	void declareObservable(state::Variable* obs);
 
-	void buildInfluenceMap();
+	void buildInfluenceMap(const state::State& state);
 	void buildFreeSiteCC();
 	const list<pair<const Mixture::Component*,small_id> >& getFreeSiteCC(small_id ag,small_id site) const;
 

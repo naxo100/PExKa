@@ -18,12 +18,6 @@
 
 namespace expressions {
 
-struct Reduction {
-	FL_TYPE constant;
-	BaseExpression* factor_vars;
-	BaseExpression* aux;
-};
-
 template<typename T>
 class AlgExpression: public virtual BaseExpression {
 public:
@@ -36,6 +30,9 @@ public:
 	virtual FL_TYPE auxFactors(
 			std::unordered_map<std::string, FL_TYPE> &factor) const
 					override = 0;
+	virtual Reduction factorizeRate() const override = 0;
+	virtual BaseExpression* clone() const override = 0;
+	virtual DeleteAux deleteElement(std::string exp) const override = 0;
 	virtual SomeValue getValue(
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const
 					override;

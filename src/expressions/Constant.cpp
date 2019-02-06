@@ -34,6 +34,26 @@ FL_TYPE Constant<T>::auxFactors(
 }
 
 template<typename T>
+BaseExpression::Reduction Constant<T>::factorizeRate() const {
+	BaseExpression::Reduction r;
+	r.constant.push_back(val);
+	r.factorized_expression = new Constant<T>(*this);
+	return r;
+}
+
+template<typename T>
+BaseExpression* Constant<T>::clone() const {
+	return new Constant<T>(*this);
+}
+
+template<typename T>
+BaseExpression::DeleteAux Constant<T>::deleteElement(std::string exp) const{
+	BaseExpression::DeleteAux d;
+	d.deleted = false;
+	d.expression = this->clone();
+	return d;
+}
+template<typename T>
 bool Constant<T>::operator==(const BaseExpression& exp) const {
 	try {
 		auto& const_exp = dynamic_cast<const Constant<T>&>(exp);

@@ -7,8 +7,9 @@
 
 #include "BinaryOperation.h"
 #include "../state/Variable.h"
-
-
+#include <iostream>
+#include "Vars.h"
+#include "UnaryOperation.h"
 #include <cmath>		//std::pow
 #include <algorithm>	//std::max,std::min
 
@@ -161,6 +162,107 @@ FL_TYPE BinaryOperation<R, T1, T2>::auxFactors(
  }*/
 
 template<typename R, typename T1, typename T2>
+BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorizeRate() const {
+	BaseExpression::Reduction r;
+	BaseExpression::Reduction r1 = exp1->factorizeRate();
+	BaseExpression::Reduction r2 = exp2->factorizeRate();
+
+	this->auxCheck(r1.aux, r2.aux);
+	this->auxCheck(r1.factor_vars, r2.factor_vars);
+
+	r.constant.insert(r.constant.end(), r1.constant.begin(), r1.constant.end());
+	r.constant.insert(r.constant.end(), r2.constant.begin(), r2.constant.end());
+
+	r.aux.insert(r.aux.end(), r1.aux.begin(), r1.aux.end());
+	r.aux.insert(r.aux.end(), r2.aux.begin(), r2.aux.end());
+
+	r.factor_vars.insert(r.factor_vars.end(), r1.factor_vars.begin(), r1.factor_vars.end());
+	r.factor_vars.insert(r.factor_vars.end(), r2.factor_vars.begin(), r2.factor_vars.end());
+
+	vector<BaseExpression*> aux;
+	vector<string> aux_str;
+	for(int i = 0; i < r1.aux.size(); i++){
+		if(!(std::find(aux_str.begin(), aux_str.end(), (r1.aux[i]->toString())) != aux_str.end())){
+			aux_str.push_back(r1.aux[i]->toString());
+			aux.push_back(r1.aux[i]);
+		}
+	}
+
+	BaseExpression* ex;
+	if(aux_str.size() > 0){
+		if((op == 0) || (op == 1)){
+			BaseExpression* ex1 = exp1->deleteElement(aux[0]->toString()).expression;
+			BaseExpression* ex2 = exp2->deleteElement(aux[0]->toString()).expression;
+			ex = new BinaryOperation<R, T1, T2>(ex1, ex2, op);
+			ex = new BinaryOperation<R, T1, T2>(r1.aux[0], ex, 2);
+			int i = 1;
+			while(i < aux_str.size()){
+				ex1 = ex1->deleteElement(aux[i]->toString()).expression;
+				ex2 = ex2->deleteElement(aux[i]->toString()).expression;
+				ex = new BinaryOperation<R, T1, T2>(ex1, ex2, op);
+				i++;
+			}
+			for(int i=0; i< aux_str.size(); i++)
+				ex = new BinaryOperation<R, T1, T2>(aux[i], ex, 2);
+		}else{
+			ex = new BinaryOperation<R, T1, T2>(r1.factorized_expression, r2.factorized_expression, op);
+		}
+	}else
+		ex = new BinaryOperation<R, T1, T2>(r1.factorized_expression, r2.factorized_expression, op);
+
+
+	r.factorized_expression = ex;
+	return r;
+
+}
+
+template<typename R, typename T1, typename T2>
+void BinaryOperation<R, T1, T2>::auxCheck(std::vector<BaseExpression*> v1, std::vector<BaseExpression*> v2) const{
+	vector<string> aux1_str;
+	vector<string> aux2_str;
+	for(int i = 0; i < v1.size(); i++)
+		if(!(std::find(aux1_str.begin(), aux1_str.end(), (v1[i]->toString())) != aux1_str.end()))
+			aux1_str.push_back(v1[i]->toString());
+	for(int i = 0; i < v2.size(); i++)
+		if(!(std::find(aux2_str.begin(), aux2_str.end(), (v2[i]->toString())) != aux2_str.end()))
+			aux2_str.push_back(v2[i]->toString());
+
+	if((op == 0) || (op == 1)){
+		if(aux1_str.size() != aux2_str.size())
+			throw std::invalid_argument("cannot factorize expression");
+		else
+			for(int i=0; i < aux1_str.size(); i++)
+				if(!(std::find(aux2_str.begin(), aux2_str.end(), aux1_str[i])!=aux2_str.end()))
+					throw std::invalid_argument("cannot factorize expression");
+	}
+}
+
+template<typename R, typename T1, typename T2>
+BaseExpression* BinaryOperation<R, T1, T2>::clone() const{
+	return new BinaryOperation<R, T1, T2>(*this);
+}
+
+template<typename R, typename T1, typename T2>
+BaseExpression::DeleteAux BinaryOperation<R, T1, T2>::deleteElement(std::string exp) const{
+	BaseExpression::DeleteAux d;
+	BaseExpression::DeleteAux ex1 = exp1->deleteElement(exp);
+	if(ex1.deleted){
+		d.deleted = true;
+		d.expression = new BinaryOperation<R, T1, T2>(ex1.expression, exp2, op);
+		return d;
+	}
+	BaseExpression::DeleteAux ex2 = exp2->deleteElement(exp);
+	if(ex2.deleted){
+		d.deleted = true;
+		d.expression = new BinaryOperation<R, T1, T2>(exp1, ex2.expression, op);
+		return d;
+	}
+	d.deleted = false;
+	d.expression = this->clone();
+	return d;
+}
+
+template<typename R, typename T1, typename T2>
 bool BinaryOperation<R, T1, T2>::operator==(const BaseExpression& exp) const {
 	try {
 		auto& binary_exp = dynamic_cast<const BinaryOperation<R, T1, T2>&>(exp);
@@ -179,7 +281,11 @@ char BoolOpChar[] = "&|><=~";
 
 template<typename R, typename T1, typename T2>
 std::string BinaryOperation<R,T1,T2>::toString() const {
-	return exp1->toString() + AlgOpChar[op] + exp2->toString();
+	bool par = op != 2;
+	if(par)
+		return "(" + exp1->toString() + AlgOpChar[op] + exp2->toString() + ")";
+	else
+		return exp1->toString() + AlgOpChar[op] + exp2->toString();
 }
 
 /*template<bool, typename T1, typename T2>

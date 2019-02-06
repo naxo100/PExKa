@@ -39,6 +39,25 @@ FL_TYPE AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux
 	return expression->auxFactors(aux_values);
 }
 template <typename T>
+BaseExpression::Reduction AlgebraicVar<T>::factorizeRate() const {
+	BaseExpression::Reduction r;
+	AlgebraicVar* var = new AlgebraicVar<T>(*this);
+	r.factor_vars.push_back(var);
+	r.factorized_expression = var;
+	return r;
+}
+template <typename T>
+BaseExpression* AlgebraicVar<T>::clone() const {
+	return new AlgebraicVar<T>(*this);
+}
+template <typename T>
+BaseExpression::DeleteAux AlgebraicVar<T>::deleteElement(std::string exp) const{
+	BaseExpression::DeleteAux d;
+	d.deleted = false;
+	d.expression = this->clone();
+	return d;
+}
+template <typename T>
 bool AlgebraicVar<T>::operator==(const BaseExpression& exp) const {
 	return *expression == exp;
 }
@@ -91,7 +110,20 @@ KappaVar::KappaVar(const short id,const std::string &nme,const bool is_obs,
 FL_TYPE KappaVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
 	return 0;
 }
-
+BaseExpression::Reduction KappaVar::factorizeRate() const {
+	cout << "kappaVar" << endl;
+	BaseExpression::Reduction r;
+	return r;
+}
+BaseExpression* KappaVar::clone() const {
+	return new KappaVar(*this);
+}
+BaseExpression::DeleteAux KappaVar::deleteElement(std::string exp) const{
+	BaseExpression::DeleteAux d;
+	d.deleted = false;
+	d.expression = this->clone();
+	return d;
+}
 int KappaVar::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
 	throw std::invalid_argument("Cannot call KappaVar::evaluate() without state.");
 }

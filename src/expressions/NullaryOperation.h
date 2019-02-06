@@ -32,6 +32,9 @@ public:
 			override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const
 				override;
+	BaseExpression::Reduction factorizeRate() const override;
+	BaseExpression* clone() const override;
+	BaseExpression::DeleteAux deleteElement(std::string exp) const override;
 	//std::set<std::string> getAuxiliars() const override;
 	bool operator==(const BaseExpression& exp) const override;
 	~NullaryOperation();

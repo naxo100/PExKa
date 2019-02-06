@@ -11,7 +11,7 @@
 #include <unordered_map>
 //#include "../util/params.h"
 #include "SomeValue.h"
-
+#include <vector>
 
 namespace state {
 	class State;
@@ -28,6 +28,17 @@ typedef std::unordered_map<std::string, FL_TYPE> AuxMap;
  */
 class BaseExpression {
 public:
+	struct Reduction {
+		std::vector<FL_TYPE> constant;
+		std::vector<BaseExpression*> factor_vars;
+		std::vector<BaseExpression*> aux;
+		BaseExpression* factorized_expression;
+	};
+
+	struct DeleteAux{
+		BaseExpression* expression;
+		bool deleted;
+	};
 	enum AlgebraicOp {
 		SUM, MINUS, MULT, DIV, POW, MODULO, MAX, MIN
 	};
@@ -60,6 +71,11 @@ public:
 	 */
 	virtual FL_TYPE auxFactors(
 			std::unordered_map<std::string, FL_TYPE> &factor) const = 0;
+
+	virtual Reduction factorizeRate() const = 0;
+	virtual BaseExpression* clone() const = 0;
+	virtual DeleteAux deleteElement(std::string exp) const = 0;
+
 
 	//virtual std::set<std::string> getAuxiliars() const = 0;
 	virtual bool operator==(const BaseExpression& exp) const = 0;

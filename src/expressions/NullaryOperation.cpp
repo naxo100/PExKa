@@ -7,7 +7,7 @@
 
 #include "NullaryOperation.h"
 #include "../state/Variable.h"
-#include <math.h>       /* sqrt, exp, log, sin, cos, tan, atan, abs */
+#include <math.h>
 
 
 namespace expressions {
@@ -19,7 +19,7 @@ namespace expressions {
 
 template<>
 bool (*NullaryOperations<bool>::funcs[2])()= {
-	[]() {return true;}, // SQRT
+	[]() {return true;},
 	[]() {return false;}
 };
 
@@ -52,42 +52,25 @@ NullaryOperation<R>::~NullaryOperation() {}
 template<typename R>
 FL_TYPE NullaryOperation<R>::auxFactors(
 		std::unordered_map<std::string, FL_TYPE> &var_factors) const {return 0.0;}
-//	typedef std::unordered_map<std::string, FL_TYPE> var_map;
-//	var_map vars1, vars2;
-//	FL_TYPE val1 = exp1->auxFactors(vars1);
-//	FL_TYPE val2 = exp2->auxFactors(vars2);
-//	if (op < BaseExpression::MULT) { // + or -
-//		for (var_map::iterator it = vars1.begin(); it != vars1.end(); it++) {
-//			var_factors[it->first] = func(it->second, vars2[it->first]);
-//			vars2.erase(it->first);
-//		}
-//		for (var_map::iterator it = vars2.begin(); it != vars2.end(); it++)
-//			var_factors[it->first] = func(0, it->second);
-//	} else if (op < BaseExpression::POW) { // * or /
-//		if (vars1.size() > 0)
-//			if (vars2.size() > 0)
-//				throw std::invalid_argument(
-//						"Only linear equations can be used for auxiliars in compartment expressions.");
-//			else
-//				for (var_map::iterator it = vars1.begin(); it != vars1.end();
-//						it++)
-//					var_factors[it->first] = func(it->second, val2);
-//		else
-//			for (var_map::iterator it = vars2.begin(); it != vars2.end(); it++)
-//				var_factors[it->first] = func(val1, it->second);
-//
-//	}
-//	return func(val1, val2);
-//}
 
-/*template <typename R,typename T1,typename T2>
- std::set<std::string> UnaryOperation<R,T1,T2>::getAuxiliars() const{
- auto l1 = exp1->getAuxiliars();
- auto l2 = exp2->getAuxiliars();
- l1.insert(l2.begin(),l2.end());
- return l1;
- }*/
+template<typename R>
+BaseExpression::Reduction NullaryOperation<R>::factorizeRate() const {
+	BaseExpression::Reduction r;
+	return r;
+}
 
+template<typename R>
+BaseExpression* NullaryOperation<R>::clone() const {
+	return new NullaryOperation<R>(*this);
+}
+
+template<typename R>
+BaseExpression::DeleteAux NullaryOperation<R>::deleteElement(std::string exp) const {
+	BaseExpression::DeleteAux d;
+	d.deleted = false;
+	d.expression = this->clone();
+	return d;
+}
 template<typename R>
 bool NullaryOperation<R>::operator==(const BaseExpression& exp) const {
 	return false;

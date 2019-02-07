@@ -18,12 +18,6 @@
 
 namespace expressions {
 
-struct Reduction {
-	FL_TYPE constant;
-	BaseExpression* factor_vars;
-	BaseExpression* aux;
-};
-
 template<typename T>
 class AlgExpression: public virtual BaseExpression {
 public:

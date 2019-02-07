@@ -7,7 +7,7 @@
 
 #include "Vars.h"
 #include "Constant.h"
-
+#include <iostream>
 namespace expressions {
 
 
@@ -57,6 +57,33 @@ FL_TYPE Auxiliar<R>::auxFactors(
 	return 0;
 }
 
+template<typename R>
+BaseExpression::Reduction Auxiliar<R>::factorizeRate() const {
+	BaseExpression::Reduction r;
+	Auxiliar<R>* aux = new Auxiliar<R>(*this);
+	r.aux.push_back(aux);
+	r.factorized_expression = aux;
+
+	return r;
+}
+
+template<typename R>
+BaseExpression* Auxiliar<R>::clone() const {
+	return new Auxiliar<R>(*this);
+}
+
+template<typename R>
+BaseExpression::DeleteAux Auxiliar<R>::deleteElement(std::string exp) const{
+	BaseExpression::DeleteAux d;
+	d.deleted = false;
+	if(this->toString() == exp){
+		d.deleted = true;
+		d.expression = new Constant<FL_TYPE>(1);
+	}
+	else
+		d.expression = this->clone();
+	return d;
+}
 template<typename R>
 AlgExpression<R>* Auxiliar<R>::reduce(const state::State& state,
 		const AuxMap&& aux_values) const {

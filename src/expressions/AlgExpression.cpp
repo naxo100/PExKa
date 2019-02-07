@@ -39,9 +39,9 @@ AlgExpression<T>::~AlgExpression() {
 }
 
 template<typename T>
-SomeValue AlgExpression<T>::getValue(
+SomeValue AlgExpression<T>::getValue(const VarVector &consts,
 		const std::unordered_map<std::string, int> *aux_values) const {
-	return SomeValue(this->evaluate(aux_values));
+	return SomeValue(this->evaluate(consts,aux_values));
 }
 template<typename T>
 SomeValue AlgExpression<T>::getValue(const state::State& state,

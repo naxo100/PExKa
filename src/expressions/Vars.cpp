@@ -22,8 +22,8 @@ Auxiliar<R>::~Auxiliar() {
 }
 
 template<typename R>
-R Auxiliar<R>::evaluate(
-		const std::unordered_map<std::string, int> *aux_values) const {
+R Auxiliar<R>::evaluate(const VarVector &consts,
+		const unordered_map<string, int> *aux_values) const {
 	try {
 		if (aux_values)
 			return aux_values->at(name);
@@ -78,6 +78,12 @@ bool Auxiliar<T>::operator==(const BaseExpression& exp) const {
 }
 
 template <typename T>
+char Auxiliar<T>::getVarDeps() const{
+	return BaseExpression::AUX;
+}
+
+
+template <typename T>
 std::string Auxiliar<T>::toString() const {
 	return name;
 }
@@ -93,8 +99,8 @@ VarLabel<R>::VarLabel(BaseExpression* expr) :
 		var(expr) {
 }
 template<typename R>
-R VarLabel<R>::evaluate(
-		std::unordered_map<std::string, int> *aux_values) const {
+R VarLabel<R>::evaluate(const VarVector &consts,
+		unordered_map<string, int> *aux_values) const {
 	throw std::invalid_argument("This should never been used");
 }
 template<typename R>
@@ -122,6 +128,11 @@ bool VarLabel<T>::operator==(const BaseExpression& exp) const {
 	} catch (std::bad_cast &ex) {
 	}
 	return false;
+}
+
+template <typename T>
+char VarLabel<T>::getVarDeps() const{
+	return var->getVarDeps();
 }
 
 template <typename T>

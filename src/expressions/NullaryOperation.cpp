@@ -29,7 +29,7 @@ FL_TYPE (*NullaryOperations<FL_TYPE>::funcs[1])()= {
 };
 
 template<typename R>
-R NullaryOperation<R>::evaluate(
+R NullaryOperation<R>::evaluate(const VarVector &consts,
 		const std::unordered_map<std::string, int> *aux_values) const {
 	return func();
 }
@@ -94,6 +94,13 @@ bool NullaryOperation<R>::operator==(const BaseExpression& exp) const {
 }
 
 std::string n_ops[] = {"true", "false", "rand_1"};
+
+
+template <typename R>
+char NullaryOperation<R>::getVarDeps() const{
+	return '\0';
+}
+
 
 template<typename R>
 std::string NullaryOperation<R>::toString() const {

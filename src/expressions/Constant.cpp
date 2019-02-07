@@ -17,7 +17,7 @@ Constant<T>::Constant(T v) :
 }
 
 template<typename T>
-T Constant<T>::evaluate(
+T Constant<T>::evaluate(const VarVector &consts,
 		const std::unordered_map<std::string, int> *aux_values) const {
 	return val;
 }

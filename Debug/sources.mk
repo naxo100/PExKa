@@ -24,6 +24,7 @@ C_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 src/data_structs \
+src/expressions \
 src/grammar \
 src/grammar/ast \
 src \

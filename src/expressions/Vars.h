@@ -12,18 +12,21 @@
 
 namespace expressions {
 
+using namespace std;
+
 template<typename R>
 class VarLabel: public AlgExpression<R> {
 	AlgExpression<R>* var;
 
 public:
 	VarLabel(BaseExpression* expr);
-	R evaluate(std::unordered_map<std::string, int> *aux_values = nullptr) const
-			override;
-	R evaluate(const state::State& state, const AuxMap& aux_values) const
-			override;
+	R evaluate(const VarVector &consts,unordered_map<string, int> *aux_values = nullptr)
+			const override;
+	R evaluate(const state::State& state, const AuxMap& aux_values)
+			const override;
 	int auxFactors(std::unordered_map<std::string, int> &factor) const override;
 	bool operator==(const BaseExpression& exp) const override;
+	char getVarDeps() const override;
 	//AlgExpression<R>* reduce(const state::State& state,const AuxMap&& aux_values = AuxMap()) const ;
 	std::string toString() const override;
 };
@@ -35,10 +38,10 @@ class Auxiliar: public AlgExpression<R> {
 public:
 	Auxiliar(const std::string &nme);
 	~Auxiliar();
-	R evaluate(const std::unordered_map<std::string, int> *aux_values) const
-			override;
-	R evaluate(const state::State& state, const AuxMap& aux_values) const
-			override;
+	R evaluate(const VarVector &consts,const unordered_map<string, int> *aux_values)
+			const override;
+	R evaluate(const state::State& state, const AuxMap& aux_values)
+			const override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const
 			override;
 	bool operator==(const BaseExpression& exp) const;
@@ -46,8 +49,7 @@ public:
 	AlgExpression<R>* reduce(const state::State& state,
 			const AuxMap&& aux_values = AuxMap()) const;
 
-	//virtual void getNeutralAuxMap(
-	//		std::unordered_map<std::string, FL_TYPE>& aux_map) const;
+	char getVarDeps() const;
 
 	std::string toString() const override;
 };

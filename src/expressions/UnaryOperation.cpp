@@ -32,9 +32,9 @@ R (*UnaryOperations<R, T>::funcs[10])(T)= {
 };
 
 template<typename R, typename T>
-R UnaryOperation<R, T>::evaluate(
+R UnaryOperation<R, T>::evaluate(const VarVector &consts,
 		const std::unordered_map<std::string, int> *aux_values) const {
-	auto a = exp->evaluate(aux_values);
+	auto a = exp->evaluate(consts,aux_values);
 	return func(a);
 }
 

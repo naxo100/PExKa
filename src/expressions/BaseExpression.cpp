@@ -163,6 +163,11 @@ BaseExpression* BaseExpression::makeNullaryExpression(const int func) {
 	return null_op;
 }
 
+
+char BaseExpression::getVarDeps() const{
+	return '\0';
+}
+
 std::string BaseExpression::toString() const {
 	return std::string("BaseExpression");
 }

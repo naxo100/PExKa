@@ -25,7 +25,7 @@ class NullaryOperation: public AlgExpression<R> {
 	R (*func)();
 	const char op;
 public:
-	R evaluate(
+	R evaluate(const VarVector &consts,
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const
 					override;
 	R evaluate(const state::State& state, const AuxMap& aux_values) const
@@ -36,6 +36,9 @@ public:
 	bool operator==(const BaseExpression& exp) const override;
 	~NullaryOperation();
 	NullaryOperation(const short op);
+
+
+	char getVarDeps() const override;
 
 	virtual std::string toString() const override;
 };

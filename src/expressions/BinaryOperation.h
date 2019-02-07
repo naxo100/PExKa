@@ -33,7 +33,7 @@ class BinaryOperation: public AlgExpression<R> {
 	R (*func)(T1, T2);
 	const char op;
 public:
-	R evaluate(
+	R evaluate(const VarVector &consts,
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const
 					override;
 	R evaluate(const state::State& state, const AuxMap& aux_values) const
@@ -48,6 +48,9 @@ public:
 
 	void getNeutralAuxMap(
 			std::unordered_map<std::string, FL_TYPE>& aux_map) const;
+
+	//return a flag of VarDep
+	virtual char getVarDeps() const override;
 
 	virtual std::string toString() const override;
 };

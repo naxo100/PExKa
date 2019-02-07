@@ -43,10 +43,10 @@ R (*BinaryOperations<R, T1, T2>::funcs[10])(T1, T2)= {
 	};
 
 template<typename R, typename T1, typename T2>
-R BinaryOperation<R, T1, T2>::evaluate(
+R BinaryOperation<R, T1, T2>::evaluate(const VarVector &consts,
 		const std::unordered_map<std::string, int> *aux_values) const {
-	auto a = exp1->evaluate(aux_values);
-	auto b = exp2->evaluate(aux_values);
+	auto a = exp1->evaluate(consts,aux_values);
+	auto b = exp2->evaluate(consts,aux_values);
 	return func(a, b);
 }
 template<typename R, typename T1, typename T2>
@@ -172,7 +172,10 @@ bool BinaryOperation<R, T1, T2>::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
-
+template<typename R,typename T1,typename T2>
+char BinaryOperation<R,T1,T2>::getVarDeps() const{
+	return exp1->getVarDeps() | exp2->getVarDeps();
+}
 
 char AlgOpChar[] = "+-*/^%Mm";
 char BoolOpChar[] = "&|><=~";

@@ -18,16 +18,17 @@
 		
 #ends a battle, adds exp, do damage, duration depends on level difference
 'battle-end' PJ(battle!1,lvl~{plvl},exp~{x},hp~{h}),Monster(battle!1,lvl~{mlvl}) -> \
-		PJ(battle, lvl~{plvl}, exp~{x+mlvl}, hp~{h - 0.05*(mlvl-plvl+5)}) @ 10*plvl/mlvl/([sqrt] mlvl)
+		PJ(battle, lvl~{plvl}, exp~{x+mlvl}, hp~{h - 0.05*(mlvl-plvl+5)}) @ 10*plvl#/mlvl/([sqrt] mlvl)
 
 #level-up PJ with exp enough
 'lvl-up' PJ(battle, lvl~{L},exp~{L*(L/2+5) < X}) -> PJ(battle,lvl~{L+1}, exp~{X-L*(L/2+5)}) @ [inf]
 
 #instantly revive dead PJ, some exp is lost
-'revive' PJ(hp~{H <= 0}, exp~{X}) -> PJ(hp~{1}, exp~{9*X/10}) @ [inf]
+#'revive' PJ(hp~{H <= 0}, exp~{X}) -> PJ(hp~{1}, exp~{9*X/10}) @ [inf]
 
 #every 15m recover 20% hp
-'recover' PJ(hp~{H < 1}) -> PJ(hp~{H + 0.2}) @ 4 
+'recover1' PJ(battle,hp~{H < 0.8}) -> PJ(battle,hp~{H + 0.2}) @ 4
+'recover2' PJ(battle,hp~{0.8 < H < 1}) -> PJ(battle,hp~{1}) @ 4
 
 #monster spawn
 'spawn' PJ(lvl~{L}) -> PJ(lvl~{L}),Monster(lvl~{L}) @ 1

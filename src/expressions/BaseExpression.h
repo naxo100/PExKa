@@ -8,6 +8,7 @@
 #ifndef SRC_EXPRESSIONS_BASEEXPRESSION_H_
 #define SRC_EXPRESSIONS_BASEEXPRESSION_H_
 
+#include <vector>
 #include <unordered_map>
 //#include "../util/params.h"
 #include "SomeValue.h"
@@ -15,7 +16,10 @@
 
 namespace state {
 	class State;
+	class Variable;
 }
+
+typedef std::vector<state::Variable*> VarVector;
 
 namespace expressions {
 
@@ -40,6 +44,9 @@ public:
 	enum Nullary {
 		TRUE, FALSE, RAND_1
 	};
+	enum VarDep {
+		CONSTS = 1,AUX = 2,SPATIAL = 4,TIME = 8,EVENT = 16, RAND = 32
+	};
 
 	virtual ~BaseExpression() = 0;
 	const virtual Type getType() const;
@@ -49,7 +56,7 @@ public:
 		static const Type t = FLOAT;
 	};
 
-	virtual SomeValue getValue(
+	virtual SomeValue getValue(const VarVector &consts,
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const = 0;
 	virtual SomeValue getValue(const state::State& state,
 			const AuxMap&& aux_values = AuxMap()) const = 0;
@@ -72,6 +79,10 @@ public:
 	static BaseExpression* makeUnaryExpression(const BaseExpression *ex, const int func);
 
 	static BaseExpression* makeNullaryExpression(const int func);
+
+
+	//return a flag of VarDep
+	virtual char getVarDeps() const;
 
 	virtual std::string toString() const;
 

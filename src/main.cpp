@@ -108,11 +108,6 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
-#ifdef DEBUG
-	env.show();
-#endif
-	WarningStack::getStack().show();
-
 	auto& params = simulation::Parameters::getInstance();
 	if(vm.count("time")){
 		params.maxTime = vm["time"].as<float>();
@@ -168,6 +163,11 @@ int main(int argc, char* argv[]){
 	}
 	sim.initialize();
 	//sim.print();
+
+#ifdef DEBUG
+	env.show();
+#endif
+	WarningStack::getStack().show();
 
 	try{
 		sim.run(params);

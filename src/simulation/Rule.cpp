@@ -12,6 +12,8 @@
 #include "../pattern/Environment.h"
 #include "../grammar/ast/Basics.h"
 #include "../expressions/Vars.h"
+#include "../pattern/mixture/Agent.h"
+#include "../pattern/mixture/Component.h"
 
 namespace simulation {
 
@@ -64,7 +66,17 @@ void Rule::addTokenChange(pair<unsigned,const BaseExpression*> tok) {
 	tokenChanges.emplace_back(tok);
 }
 
-void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask,const vector<ag_st_id>& rhs_unmask){
+
+
+/** Rule::difference()
+ *
+ * translate difference between LHS and RHS to Actions
+ * Also produce Changes to calculate candidates for influence map
+ *
+ *
+ */
+void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask,
+		const vector<ag_st_id>& rhs_unmask,const VarVector& consts){
 	small_id i;
 	unsigned first_del = 9999;
 	auto& warns = WarningStack::getStack();
@@ -380,14 +392,18 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		news.emplace(cc_ag_id,j-i);
 		for(auto& s : rhs_ag){
 			if(s.second.values[1]){
-				newNodes[j-i]->setState(s.first,SomeValue());
-				Action a;
-				a.t = ASSIGN;
-				a.trgt1 = make_tuple(cc_ag_id.first,j-i,s.first,true);
-				a.value = s.second.values[1];
-				//TODO warning when lhs == nullptr ?
-				script.emplace_back(a);
-				changes[make_pair(make_pair(cc_ag_id.first,j-i),true)].first.emplace_back(s.first);
+				if(s.second.values[1]->getVarDeps() <= BaseExpression::CONSTS)
+					newNodes[j-i]->setState(s.first,s.second.values[1]->getValue(consts));
+				else{
+					newNodes[j-i]->setState(s.first,SomeValue());
+					Action a;
+					a.t = ASSIGN;
+					a.trgt1 = make_tuple(cc_ag_id.first,j-i,s.first,true);
+					a.value = s.second.values[1];
+					//TODO warning when lhs == nullptr ?
+					script.emplace_back(a);
+					changes[make_pair(make_pair(cc_ag_id.first,j-i),true)].first.emplace_back(s.first);
+				}
 			}
 			else if(s.second.label != Mixture::Site::EMPTY)
 				newNodes[j-i]->setState(s.first,s.second.label);
@@ -397,11 +413,13 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 			case Mixture::FREE:break;
 			case Mixture::BIND:{
 				auto k =rhs_mask.at(make_pair(cc_ag_id.first,lnk.first));
-				if(k > j){//only save this bind action if both agents new?
-					Action a;
+				if(k > i && k < j){//only bind if both agents new?
+					/*Action a;
 					a.t = LINK;a.trgt1 = make_tuple(cc_ag_id.first,j-i,s.first,true);
 					a.trgt2 = make_tuple(cc_ag_id.first,k-i,lnk.second,true);
-					script.emplace_back(a);
+					script.emplace_back(a);*/
+					newNodes[k-i]->setLink(s.first, newNodes[j-i], lnk.second);
+					newNodes[j-i]->setLink(lnk.second, newNodes[k-i], s.first);
 				}
 			};break;
 			default:
@@ -433,8 +451,10 @@ const vector<state::Node*>& Rule::getNewNodes() const{
 
 
 bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
-		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,const Environment& env) const {
+		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,
+		const state::State& state,const Environment& env) const {
 	map<small_id,small_id> visited;
+	expressions::AuxMap empty_aux;
 	auto& rhs_cc = rhs->getComponent(rhs_cc_id);
 	while(to_test.size()){//test connected agents of emb
 		if(to_test.front().first.second != to_test.front().second.second)
@@ -446,191 +466,125 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		//auto val = make_pair(rhs_cc_id,rhs_ag_id);
 		if(visited.count(test_ag_id))
 			if(visited[test_ag_id] == rhs_ag_id)
-				continue;
+				continue;//with 'to-test' agents
 			else
-				return false;
+				return false;//doesn't match with previous match
 		else
 			visited[test_ag_id] = rhs_ag_id;
 		auto& rhs_ag = rhs_cc.getAgent(rhs_ag_id);
 		auto& test_ag = test_cc.getAgent(test_ag_id);
 		if(news.count(make_pair(rhs_cc_id,rhs_ag_id))){//testing for new node
-			for(auto id_site : test_ag){
+			auto new_node = newNodes.at((int)news.at(make_pair(rhs_cc_id,rhs_ag_id)));
+			for(auto& id_site : test_ag){
 				auto& test_site = id_site.second;
-				try{//TODO valued sites
+				if(!test_site.testValue(new_node->getInternalState(id_site.first), state, empty_aux))
+					return false;
+				try{
 					auto& rhs_site = rhs_ag.getSite(id_site.first);
-					if(!test_site.isEmptySite()){//new agent's site value is defalut
-						if(env.getSignature(rhs_ag.getId()).getSite(id_site.first).
-								getDefaultValue().smallVal != test_site.label)
+					switch(test_site.link_type){
+					case Pattern::BIND_TO:
+						if(rhs_site.lnk_ptrn != test_site.lnk_ptrn)
 							return false;
-					}
-					else
-						if(rhs_site.label != test_site.label)
-							return false;
-					if(rhs_site.link_type == Pattern::LinkType::BIND){
-						auto lnk = rhs_cc.getGraph().at(ag_st_id(rhs_ag_id,id_site.first));
-						switch(test_site.link_type){
-						case Pattern::BIND_TO:{
-							if(lnk.second != test_site.lnk_ptrn.second ||
-									test_site.lnk_ptrn.first != rhs_cc.getAgent(lnk.first).getId())
-								return false;
-						};break;
-						case Pattern::FREE:
-							return false;
-						case Pattern::BIND:
-							if(!test_site.isBindToAny())
-								to_test.emplace_back(lnk,test_cc.getGraph().at(make_pair(test_ag_id,id_site.first)));
-							break;
-						case Pattern::PATH:
-							WarningStack::getStack().emplace_back("PATH is not implemented yet",loc);
-							break;
-						default://WILD
-							break;
+						break;
+					case Pattern::BIND:
+						if(rhs_site.link_type == Pattern::BIND){
+							auto lnk = rhs_cc.follow(rhs_ag_id,id_site.first);
+							to_test.emplace_back(lnk,test_cc.follow(test_ag_id,id_site.first));
 						}
-					}
-					else { //can only be free
-						switch(test_site.link_type){
-						case Pattern::BIND_TO:
-						case Pattern::BIND:
+						else
 							return false;
-						case Pattern::PATH:
-							WarningStack::getStack().emplace_back("PATH is not implemented yet",loc);
-							break;
-						default://WILD,FREE
-							break;
-						}
+						break;
+					case Pattern::FREE:
+						if(rhs_site.link_type != Pattern::FREE)
+							return false;
+						break;
+					case Pattern::PATH:
+						WarningStack::getStack().emplace_back("PATH is not implemented yet",loc);
+						break;
+					case Pattern::WILD:
+						break;
 					}
+
 				}
 				catch(out_of_range& ex){//test_site must have default values and be free
-					if(!test_site.isEmptySite() && env.getSignature(rhs_ag.getId()).getSite(id_site.first).
-							getDefaultValue().smallVal != test_site.label)
-						return false;
 					if(test_site.link_type > Pattern::WILD)//TODO warning for path
 						return false;
 				}
 			}
 		}
 		else{//testing for conserved node
-			try{
-				set<small_id> done;
-				test_ag.compare(rhs_ag,done);
-				for(auto id_site : rhs_ag){
-					try{
-						auto lnk = rhs_cc.getGraph().at(make_pair(rhs_ag_id,id_site.first));
-						if(test_cc.getAgent(test_ag_id).getSite(id_site.first).link_type !=
-								pattern::Mixture::WILD)//then is BIND
-							to_test.emplace_back(lnk,
-									test_cc.getGraph().at(make_pair(test_ag_id,id_site.first)));
-
-					}catch(std::out_of_range &ex){}
+			list<small_id> link_sites;
+			if(rhs_ag.testEmbed(test_ag,link_sites))
+				for(auto site_id : link_sites){
+					to_test.emplace_back(rhs_cc.follow(rhs_ag_id, site_id),
+							test_cc.follow(test_ag_id, site_id));
 				}
-			}
-			catch(False &ex){
-				return false;
-			}
 		}
-
 	}
 	for(auto elem : visited)
 		already_done.emplace(ag_st_id(test_cc.getId(),elem.first),ag_st_id(rhs_cc_id,elem.second));
 	return true;
 }
 
+
+void Rule::addAgentIncludes(CandidateMap &candidates,
+			const Pattern::Agent& ag,ag_st_id rhs_cc_ag){
+	for(auto& cc_agid : ag.getIncludes())//add Agent includes to candidates
+		candidates[cc_agid.first].set(cc_agid.second,rhs_cc_ag);
+
+}
+
+
 void Rule::checkInfluence(const state::State& state,const Environment& env) {
 	//TODO changes of BIND_TO -> FREE
 	//TODO changes of semi-link -> free ???
 	try{
-
-	map<const pattern::Mixture::Component*,CandidateInfo> candidates;
+	//we first check all candidates to avoid do complete evaluation of same CC twice
+	CandidateMap candidates;
 	for(auto& ag_changes : changes){//for each agent that changes
 		auto& change_cc = rhs->getComponent(ag_changes.first.first.first);
 		auto& ag = rhs->getAgent(ag_changes.first.first);
-		for(auto& cc_agid : ag.getIncludes()){
-			candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
-		}
-		if(ag_changes.first.second){//new agent change, possibly assign of non const value
-			for(auto change : ag_changes.second.first){//for each site_value changes
-
-			}
-		}
-		else {
-			for(auto change : ag_changes.second.first){//for each site_value changes
-				for(auto emb : ag.getParentPatterns(change)){//for each parent pattern in changed agent site
-					if(emb->getSite(change).isEmptySite())//if this pattern accept every value -> continue
-						continue;
-					for(auto& cc_agid : emb->getIncludes()){
-						candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
-					}
+		addAgentIncludes(candidates,ag,ag_changes.first.first);
+		if(ag_changes.first.second){//new node change, possibly assign of non const value
+			/*for(auto change : ag_changes.second.first){//for each site_value changes
+				for(auto& ag_ptrn : env.getAgentPatterns(ag.getId())){
+					//if(ag_ptrn == ag || ag_ptrn.getSite(change).isEmptySite())
+					//	continue;//because it's new
+					addAgentIncludes(candidates,ag_ptrn,ag_changes.first.first);
 				}
-				for(auto emb : ag.getChildPatterns(change)){
-					for(auto& cc_agid : emb->getIncludes()){
-						candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
-					}
+			}*/
+		}
+		else {//change of preserved node
+			for(auto change : ag_changes.second.first){//for each site_value changes
+				for(auto& ag_ptrn : env.getAgentPatterns(ag.getId())){
+					if(ag_ptrn == ag || ag_ptrn.getSiteSafe(change).isEmptySite())
+						continue;
+					//if testValue for site_ptrns
+					addAgentIncludes(candidates,ag_ptrn,ag_changes.first.first);
 				}
 			}
 			for(auto change : ag_changes.second.second){//for each link val/type changes
 				auto& rhs_graph = change_cc.getGraph();
 				ag_st_id rhs_lnk;
-				for(auto emb : ag.getParentPatterns(change)){
-					switch(emb->getSite(change).link_type){
-					case pattern::Pattern::FREE:
-						for(auto& cc_agid : emb->getIncludes())
-							candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
+				for(auto& emb : env.getAgentPatterns(ag.getId())){
+					switch(emb.getSiteSafe(change).link_type){
+					case Pattern::WILD:break;
+					case Pattern::FREE:
+						if(ag.getSite(change).link_type == Pattern::FREE)
+							addAgentIncludes(candidates,emb,ag_changes.first.first);
 						break;
-					//case pattern::Pattern::WILD://if this pattern accept every lnk-type -> continue
-						//break;//TODO remove if its in candidates??
-					case pattern::Pattern::BIND:
-					case pattern::Pattern::BIND_TO:
-						rhs_lnk = rhs_graph.at(make_pair(ag_changes.first.first.second,change));
-						for(auto& cc_agid : emb->getIncludes()){
-							auto lnk = cc_agid.first->getGraph().at(make_pair(cc_agid.second,change));
-							if(rhs_lnk.second == lnk.second)
-								try{
-									set<small_id> s;
-									rhs->getAgent(ag_changes.first.first.first,rhs_lnk.first).compare(
-											cc_agid.first->getAgent(lnk.first),s);
-									candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
-
-								}
-								catch(False& ex){
-									candidates[cc_agid.first].is_valid = false;
-								}
-							else
-								candidates[cc_agid.first].is_valid = false;
-						}
+					case Pattern::BIND:
+					case Pattern::BIND_TO:
+						if(ag.getSite(change).link_type == Pattern::BIND)
+							addAgentIncludes(candidates,emb,ag_changes.first.first);
 						break;
 					default:
 						break;
 					}
-
-				}
-				for(auto emb : ag.getChildPatterns(change)){
-					list<two<ag_st_id> > to_test;//rhs-lnk,cc_lnk
-					auto lt = emb->getSite(change).link_type;
-					if(lt != pattern::Mixture::WILD)
-						for(auto& cc_agid : emb->getIncludes())
-							candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
-					/*if(lt == pattern::Mixture::FREE){
-						for(auto& cc_agid : emb->getIncludes())
-							candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
-						continue;
-					}
-					if(lt == pattern::Mixture::WILD)
-						continue;
-					rhs_lnk =  rhs_graph.at(make_pair(ag_changes.first.first.second,change));
-					for(auto& cc_agid : emb->getIncludes()){
-						auto cc = cc_agid.first;
-						to_test.emplace_back(make_pair(rhs_lnk,cc->getGraph().at(//should not throw
-								make_pair(cc_agid.second,change))));
-						if(test_linked_agents(to_test,ag_changes.first.first.first,*cc,env))
-							candidates[cc_agid.first].set(cc_agid.second,ag_changes.first.first);
-						else
-							candidates[cc_agid.first].is_valid = false;
-					}*/
 				}
 			}
 		}
 	}
-
 	//small_id i = 0;
 	expressions::AuxMap aux_map;
 	for(auto n : news){
@@ -638,38 +592,43 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 		for(auto& ag : env.getAgentPatterns(new_ag.getId())){
 			bool isEmb = true;
 			for(auto& id_site : ag){
-				try{
+				auto& newNode_val = newNodes[/*i*/n.second]->getInternalState(id_site.first);
+				if(!id_site.second.testValue(newNode_val,state,aux_map))
+					isEmb=false;
+
+				try{//site is declared in new agent
 					auto& site = new_ag.getSite(id_site.first);
-					if(changes.count(make_pair(n.first,true))){
-						isEmb = false;break;//TODO check
+					switch(id_site.second.link_type){
+					case Pattern::FREE:
+						if(site.link_type != Pattern::FREE)
+							isEmb=false;
+						break;
+					case Pattern::BIND:
+					case Pattern::BIND_TO:
+						if(site.link_type != Pattern::BIND)
+							isEmb=false;
+						break;
+					default://WILD,PATH
+						break;
 					}
 				}
 				catch(std::out_of_range &ex){//site not declared in new agent
-					if( (id_site.second.isEmptySite() ||
-							id_site.second.testValue(newNodes[/*i*/n.second]->getInternalState(id_site.first),state,aux_map) )
-							&& id_site.second.link_type == Pattern::FREE)
-						continue;//ok
-					isEmb = false;break;
+					if(id_site.second.link_type != Pattern::FREE)
+						isEmb = false;
 				}
-				try{//site declared in both agents
-					if(id_site.second.isEmptySite() ||
-							id_site.second.testValue(newNodes[n.second]->getInternalState(id_site.first),state,aux_map))
-						continue;
-				}
-				catch(std::out_of_range &e){
-					break;//cannot test-value, so yes
-				}
-				isEmb = false;break;
+				if(!isEmb)
+					break;
 			}
 			if(isEmb)
-				for(auto cc_agid : ag.getIncludes())
-					candidates[cc_agid.first].set(cc_agid.second,n.first);//ag_st_id(-1,i));
+				addAgentIncludes(candidates,ag,n.first);
 		}
 		//i++;
 	}
 	//Checking candidates
 	multimap<ag_st_id,ag_st_id> already_done;
+	cout << "testing if rule " << this->getName() << " have influence on candidates CC:" << endl;
 	for(auto& cc_info : candidates){
+		cout << "\t" << cc_info.first->toString(env) << endl;
 		for(auto& info : cc_info.second.node_id){
 			bool rep = false;
 			auto key = make_pair(cc_info.first->getId(),info.second);
@@ -681,7 +640,7 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 				continue;
 			list<two<ag_st_id> > to_test;
 			to_test.emplace_back(ag_st_id(info.first.second,0),ag_st_id(info.second,0));
-			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,env))
+			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,state,env))
 				try{
 					influence[cc_info.first].set(info.second,ag_st_id(-1,news.at(info.first)));
 				} catch(out_of_range &ex){
@@ -693,11 +652,11 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 	}//end testing try TODO
 	catch(exception &ex){
 		cout << "cannot check influences for " << this->getName() << endl;
-		//throw ex;
+		throw ex;
 	}
 }
 
-const map<const pattern::Mixture::Component*,Rule::CandidateInfo>& Rule::getInfluences() const{
+const Rule::CandidateMap& Rule::getInfluences() const{
 	return influence;
 }
 

@@ -16,7 +16,6 @@
 #include "Node.h"
 #include "../expressions/AlgExpression.h"
 #include "../pattern/Signature.h"
-#include "../pattern/Mixture.h"
 
 
 namespace pattern {

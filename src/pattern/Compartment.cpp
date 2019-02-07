@@ -142,7 +142,7 @@ std::list<int> CompartmentExpr::getCells(const std::unordered_map<std::string,in
 	//iteration in cell index expressions
 	for(std::list<const state::BaseExpression*>::const_iterator it = cellExpr.cbegin();it != cellExpr.cend();it++){
 		try{
-			int index = (*it)->getValue(&var_values).iVal;
+			int index = (*it)->getValue(VarVector(),&var_values).iVal;//TODO use real VarVector
 			if(index < 0 || index >= comp.getDimensions()[dim])
 				return ret;
 			cell_values[dim].push_back(index);

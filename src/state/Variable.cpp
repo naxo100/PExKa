@@ -27,8 +27,8 @@ AlgebraicVar<T>::AlgebraicVar(const short var_id, const std::string &nme,
 		const bool is_obs,const AlgExpression<T> *exp):
 		BaseExpression(), Variable(var_id,nme,is_obs),expression(exp) {}
 template <typename T>
-T AlgebraicVar<T>::evaluate(const std::unordered_map<std::string,int> *aux_values) const{
-	return expression->evaluate(aux_values);
+T AlgebraicVar<T>::evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values) const{
+	return expression->evaluate(consts,aux_values);
 }
 template <typename T>
 T AlgebraicVar<T>::evaluate(const state::State& state,const AuxMap& aux_values) const{
@@ -52,7 +52,7 @@ template class AlgebraicVar<bool>;
 /******* class ConstantVar *************/
 template <typename T>
 ConstantVar<T>::ConstantVar(const short var_id, const std::string &nme,const AlgExpression<T> *exp):
-		Variable(var_id,nme),Constant<T>(exp->evaluate(nullptr)) {
+		Variable(var_id,nme),Constant<T>(exp->evaluate(VarVector(),nullptr)) {//TODO call with real VarVector
 	delete exp;
 }
 
@@ -92,7 +92,7 @@ FL_TYPE KappaVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) co
 	return 0;
 }
 
-int KappaVar::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
+int KappaVar::evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values) const {
 	throw std::invalid_argument("Cannot call KappaVar::evaluate() without state.");
 }
 int KappaVar::evaluate(const state::State& state,const AuxMap& aux_values) const {
@@ -126,7 +126,7 @@ FL_TYPE RateVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) con
 	return 0;
 }
 
-FL_TYPE RateVar::evaluate(const std::unordered_map<std::string,int> *aux_values) const {
+FL_TYPE RateVar::evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values) const {
 	throw std::invalid_argument("Cannot call RateVar::evaluate() without state.");
 }
 FL_TYPE RateVar::evaluate(const state::State& state,const AuxMap& aux_values) const {
@@ -157,8 +157,8 @@ bool RateVar::operator ==(const BaseExpression& exp) const {
 TokenVar::TokenVar(unsigned _id) :
 		id(_id) {
 }
-FL_TYPE TokenVar::evaluate(
-		const std::unordered_map<std::string, int> *aux_values) const {
+FL_TYPE TokenVar::evaluate(const VarVector& consts,
+		const unordered_map<string, int> *aux_values) const {
 	throw std::invalid_argument("Cannot call Token::evaluate() without state.");
 }
 FL_TYPE TokenVar::evaluate(const state::State& state,

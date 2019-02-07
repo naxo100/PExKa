@@ -10,6 +10,8 @@
 #include "Injection.h"
 #include "../state/Node.h"
 #include "../expressions/Vars.h"
+#include "../pattern/mixture/Component.h"
+#include "../pattern/mixture/Agent.h"
 
 namespace matching {
 

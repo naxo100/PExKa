@@ -10,6 +10,7 @@
 #include "SiteGraph.h"
 #include "../matching/Injection.h"
 #include "../pattern/Environment.h"
+#include "../pattern/mixture/Agent.h"
 
 namespace state {
 
@@ -136,11 +137,12 @@ bool Node::test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site
 		const expressions::AuxMap& aux_map) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
-		if( id_site.second.testValue(port.val, state, aux_map) )
+		if( id_site.second.testValueOpt(port.val, state, aux_map) )
 			port_list.first.emplace_back(&port);
 		else
 			return false;
 	}
+
 	switch(id_site.second.link_type){
 	case pattern::Mixture::WILD:
 		break;

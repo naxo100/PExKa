@@ -11,6 +11,9 @@
 #include "../matching/InjRandSet.h"
 #include "../data_structs/MyMaskedBinaryRandomTree.h"
 #include "../simulation/Plot.h"
+
+#include "../pattern/mixture/Component.h"
+#include "../pattern/mixture/Agent.h"
 #include <cmath>
 
 namespace state {
@@ -169,7 +172,7 @@ void State::apply(const simulation::Rule& r){
 	//ADD action first
 	//ev.fresh_emb = new Node*[r.getNewNodes().size()];//maybe not!
 
-	//set aux vars from emb
+	//set aux vars from emb TODO only if assing??
 	for(auto& aux : r.getLHS().getAux()){
 		ev.aux_map[aux.first] =
 				ev.emb[get<0>(aux.second)][get<1>(aux.second)]->
@@ -179,10 +182,12 @@ void State::apply(const simulation::Rule& r){
 	int i = 0;
 	for(auto n : r.getNewNodes()){
 		auto node = new Node(*n,ev.new_cc);
+		ev.new_cc[n] = node;
 		graph.allocate(node);
 		ev.fresh_emb[i] = node;
 		i++;
 	}
+	ev.new_cc.clear();
 	for(auto& act : r.getScript()){
 		(this->*(action)[act.t])(act);
 	}

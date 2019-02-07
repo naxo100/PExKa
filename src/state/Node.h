@@ -12,7 +12,6 @@
 #include <map>
 #include <queue>
 #include "../pattern/Signature.h"
-#include "../pattern/Mixture.h"
 #include "../data_structs/SimpleSet.h"
 #include <unordered_set>
 #include "../matching/InjRandSet.h"

@@ -16,7 +16,7 @@
 #include <random>
 #include "../util/params.h"
 //#include "../state/SiteGraph.h"
-#include "../pattern/Mixture.h"
+#include "../pattern/mixture/Mixture.h"
 #include "../data_structs/DistributionTree.h"
 
 namespace state {

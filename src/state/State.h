@@ -13,7 +13,6 @@
 #include <random>
 #include "Variable.h"
 #include "SiteGraph.h"
-#include "../pattern/Mixture.h"
 #include "../simulation/Counter.h"
 #include "../simulation/Rule.h"
 #include "../data_structs/RandomTree.h"

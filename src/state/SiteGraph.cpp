@@ -8,6 +8,8 @@
 #include "SiteGraph.h"
 #include "../pattern/Environment.h"
 #include "State.h"
+#include "../pattern/mixture/Agent.h"
+#include "../pattern/mixture/Component.h"
 //#include <cstring>
 
 namespace state {

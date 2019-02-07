@@ -12,12 +12,13 @@
 
 //#include "../expressions/AlgExpression.h"
 #include "../expressions/Constant.h"
-#include "../pattern/Mixture.h"
+#include "../pattern/mixture/Mixture.h"
 //#include "State.h"
 
 namespace state {
 
 using namespace expressions;
+using namespace std;
 /** \brief Declared variables using '%var:' in Kappa
  *
  *
@@ -50,7 +51,7 @@ public:
 			const AlgExpression<T> *exp);
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
-	virtual T evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual T evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values = nullptr) const override;
 	virtual T evaluate(const state::State& state,const AuxMap& aux_values) const override;
 
 	virtual bool operator==(const BaseExpression& exp) const override;
@@ -74,9 +75,9 @@ public:
 	KappaVar(const short var_id, const std::string &nme,const bool is_obs,
 			const pattern::Mixture &kappa);
 
-	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
-	virtual int evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
-	virtual int evaluate(const state::State& state,const AuxMap& aux_values) const override;
+	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
+	int evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values ) const override;
+	int evaluate(const state::State& state,const AuxMap& aux_values) const override;
 
 
 	virtual bool operator==(const BaseExpression& exp) const override;
@@ -93,7 +94,7 @@ public:
 			const AlgExpression<FL_TYPE> *exp);
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
-	virtual FL_TYPE evaluate(const std::unordered_map<std::string,int> *aux_values = nullptr) const override;
+	virtual FL_TYPE evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values = nullptr) const override;
 	virtual FL_TYPE evaluate(const state::State& state,const AuxMap& aux_values) const override;
 
 	virtual bool operator==(const BaseExpression& exp) const override;
@@ -103,9 +104,8 @@ class TokenVar: public AlgExpression<FL_TYPE> {
 	unsigned id;
 public:
 	TokenVar(unsigned _id);
-	FL_TYPE evaluate(
-			const std::unordered_map<std::string, int> *aux_values) const
-					override;
+	FL_TYPE evaluate(const VarVector &consts,
+			const unordered_map<string, int> *aux_values) const override;
 	FL_TYPE evaluate(const state::State& state, const AuxMap& aux_values) const
 			override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const

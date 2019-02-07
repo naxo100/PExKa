@@ -9,7 +9,7 @@
 #define SRC_SIMULATION_RULE_H_
 
 #include "../util/params.h"
-#include "../pattern/Mixture.h"
+#include "../pattern/mixture/Mixture.h"
 #include "../grammar/location.hh"
 #include "../state/SiteGraph.h"
 #include <list>
@@ -60,6 +60,7 @@ public:
 		CandidateInfo();
 		void set(small_id root,ag_st_id node);
 	};
+	typedef map<const pattern::Mixture::Component*,CandidateInfo> CandidateMap;
 protected:
 	yy::location loc;
 	int id;
@@ -75,12 +76,16 @@ protected:
 	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
 	list<ag_st_id> sideEffects;
 	map<ag_st_id,small_id> news; //rhs(cc,ag) -> newNodes[i]
-	map<const pattern::Mixture::Component*,CandidateInfo> influence;
+	CandidateMap influence;
 	map<ag_st_id,ag_st_id> matches;//rhs-ag -> lhs-ag
 	list<pair<unsigned,const BaseExpression*> > tokenChanges;
 
 	bool test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
-		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,const Environment& env) const;
+		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,
+		const state::State& state,const Environment& env) const;
+
+	static void addAgentIncludes(CandidateMap &m,
+			const Pattern::Agent& ag,ag_st_id rhs_cc_ag);
 
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.
@@ -96,7 +101,7 @@ public:
 	const Mixture& getRHS() const;
 	const BaseExpression& getRate() const;
 	const BaseExpression& getUnaryRate() const;
-	const map<const pattern::Mixture::Component*,CandidateInfo>& getInfluences() const;
+	const CandidateMap& getInfluences() const;
 	const list<pair<unsigned,const BaseExpression*> > getTokenChanges() const;
 
 	two<FL_TYPE> evalActivity(const matching::InjRandContainer* const * injs) const;
@@ -124,8 +129,10 @@ public:
 	 * @param env the environment of the simulation.
 	 * @param lhs_order initial order of LHS agents (obtained from Mixture::declare()).
 	 * @param rhs_order initial order of RHS agents.
+	 * @param consts to evaluate const-expressions.
 	 */
-	void difference(const Environment& env,const vector<ag_st_id>& lhs_order,const vector<ag_st_id>& rhs_order);
+	void difference(const Environment& env,const vector<ag_st_id>& lhs_order,
+			const vector<ag_st_id>& rhs_order, const VarVector& consts);
 
 	void addTokenChange(pair<unsigned,const BaseExpression*> tok);
 

@@ -14,18 +14,27 @@
 #include <list>
 #include <utility> //pair
 #include <string>
-#include "../util/params.h"
-#include "../expressions/AlgExpression.h"
+#include "../../util/params.h"
+#include "../../expressions/AlgExpression.h"
 
 
 using namespace std;
 
+//forward declaration of Rule
 namespace simulation {
 	class Rule;
 }
 
 namespace pattern {
 
+//Forward declaration needed for setComponents() and toString()
+class Environment;
+
+/* Abstract class Pattern *
+ *
+ * CCs and Mixtures are patterns.
+ * They are included in rule's LHSs.
+ */
 class Pattern {
 protected:
 	set<small_id> includes;
@@ -42,8 +51,7 @@ public:
 	virtual void addInclude(small_id id);
 };
 
-//Forward declaration needed for setComponents() and toString()
-class Environment;
+
 
 //pair of shorts used for (agent,agent) or (agent,site) ids.
 typedef pair<small_id,small_id> ag_st_id;
@@ -172,161 +180,9 @@ typedef pair<const Mixture&,const vector<ag_st_id&> >OrderedMixture;
 //bool (*f)(pair<short,short>,pair<short,short>) = [](pair<short,short>& p1,pair<short,short>& p2) {return p1.first < p2.first ? p1 : (p1.second < p2.second ? p1 : p2 );};
 
 
-/** \brief Structure of an agent site of a mixture.
- * It stores the site value and link state of kappa
- * declared site of an agent mixture.
- */
-struct Pattern::Site {
-	const static small_id EMPTY = small_id(-1);
-	const static small_id AUX = small_id(-2);
-	small_id label;//small_id(-2) -> aux
-
-	LinkType link_type;
-	//only valid if type is BIND_TO
-	ag_st_id lnk_ptrn;//agent,site (-1,-1)
-
-	//string aux_id;//if "" then no aux
-	const expressions::BaseExpression* values[3];//[smaller=,value,greater=]
 
 
-	bool operator==(const Site &s) const;
-	int compare(const Site &s) const;
 
-	/** \brief Constructs an empty site.
-	 * Default state value is (small_id)-1 and
-	 * default link_type is FREE.
-	 */
-	Site();
-	int compareLinkPtrn(ag_st_id ptrn) const;
-	bool isEmptySite() const;
-	bool isExpression() const;
-	bool isBindToAny() const;
-	bool testValue(const expressions::SomeValue& val,
-			const state::State& state,
-			const expressions::AuxMap& aux_map) const;
-};
-
-template <typename T>
-class RangedSite : public Pattern::Site {
-	T max,min;
-
-public:
-	bool operator==(const Site &s) const;
-	int compare(const Site &s) const;
-	bool isEmptySite() const;//TODO inline???
-	bool isBindToAny() const;
-};
-
-/** \brief Class of an agent declared in a mixture.
- * Stores all site information of a kappa declared
- * agent in a mixture.
- */
-class Pattern::Agent {
-	short_id signId; //signature ID
-	std::map<small_id,Site> interface;//TODO using map because of possible dependency between sites.
-	map<small_id,list<Agent*> > parents;
-	map<small_id,list<Agent*> > childs;
-	mutable list<pair<const Mixture::Component*,small_id> > includedIn;
-
-public:
-	Agent(short_id name_id);
-	~Agent();
-
-	short_id getId() const;
-	/** \brief Includes the site with id name_id in this agent.
-	 * The new site is added to a map with the default values,
-	 * like it has no declared value or link status. i.e.
-	 * (small_id)-1 and FREE.
-	 */
-	Site& addSite(small_id name_id);
-	void setSiteValue(small_id mix_site,small_id label);
-	void setSiteValue(small_id mix_site,int val);
-	void setSiteValue(small_id mix_site,FL_TYPE val);
-	void setSiteExpr(small_id mix_site,const expressions::BaseExpression* expr);
-	void setSiteAux(small_id mix_site);
-	void setSiteMinExpr(small_id mix_site,const expressions::BaseExpression* expr);
-	void setSiteMaxExpr(small_id mix_site,const expressions::BaseExpression* expr);
-
-
-	//void setSiteLink(short mix_site,LinkType l);
-	void setLinkPtrn(small_id trgt_site,small_id ag_ptrn,small_id site_ptrn);
-
-	const Site& getSite(small_id id) const;
-	bool operator==(const Agent& a) const;
-
-	/** \brief Compare two agents.
-	 * @return 0 if equal, 1 if this contains 'a',
-	 * -1 if 'a' contains this, throws False if none.
-	 */
-	int compare(const Agent& a,set<small_id>& already_done) const;
-
-	void addParent(small_id id,Agent *a);
-	void addParents(small_id id,const list<Agent*>& la);
-	void addChild(small_id id,Agent *a);
-	void addChilds(small_id id,const list<Agent*>& la);
-	const list<Agent*>& getParentPatterns(small_id id) const;
-	const list<Agent*>& getChildPatterns(small_id id) const;
-	const map<small_id,list<Agent*> >& getParentPatterns() const;
-	const map<small_id,list<Agent*> >& getChildPatterns() const;
-
-	void addCc(const Mixture::Component* cc,small_id id) const;
-	const list<pair<const Mixture::Component*,small_id> >& getIncludes() const;
-
-	const map<small_id,Site>::const_iterator begin() const;
-	const map<small_id,Site>::const_iterator end() const;
-
-	string toString( const Environment& env, short mixAgId=-1,
-			map<ag_st_id,short> bindLabels = map<ag_st_id,short>() ) const;
-};
-
-/** \brief Defines a set of agents that are explicitly connected by sites.
- * Class Mixture is initialized empty and then filled with agents and links.
- * After that, setGraph() must be called to reorder agents and produce graph,
- * making the mixture comparable and ready to be declared in the environment.
- *
- */
-class Mixture::Component : public Pattern {
-	short_id id;
-	vector<Agent*> agents;
-	union {
-		list<ag_st_id> *links;
-		//(comp_ag_id,site_id) -> (comp_ag_id,site_id)
-		map<ag_st_id,ag_st_id> *graph;
-	};
-
-	list<pair<const simulation::Rule&,small_id>> deps;
-	//map<big_id,ag_st_id> auxiliars;
-
-public:
-	Component();
-	Component(const Component& comp);
-	~Component();
-	bool contains(const Mixture::Agent* a);
-	short addAgent(Mixture::Agent* a);
-	void addLink(const pair<ag_st_id,ag_st_id> &lnk,const map<short,short> &mask);
-
-	size_t size() const override;
-	void setId(short_id i);
-	short_id getId() const;
-
-	const vector<Agent*>::const_iterator begin() const;
-	const vector<Agent*>::const_iterator end() const;
-
-	vector<small_id> setGraph();
-	const map<ag_st_id,ag_st_id>& getGraph() const;
-	string toString(const Environment& env) const;
-
-	const Agent& getAgent(small_id ag_id ) const override;
-
-	/** \brief Returns agent and site ids of site-link
-	 */
-	ag_st_id follow(small_id ag_id,small_id site) const;
-
-	bool operator==(const Mixture::Component &m) const;
-
-	void addRateDep(const simulation::Rule& dep,small_id cc);
-	const list<pair<const simulation::Rule&,small_id>>& getRateDeps() const;
-};
 
 } /* namespace pattern */
 

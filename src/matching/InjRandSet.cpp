@@ -10,6 +10,8 @@
 #include "../simulation/Rule.h"
 #include "../state/State.h"
 #include "../pattern/Environment.h"
+#include "../pattern/mixture/Component.h"
+#include "../pattern/mixture/Agent.h"
 
 namespace matching {
 
@@ -166,7 +168,7 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 }
 
 const list<Injection*>& InjRandTree::insert(CcInjection* inj,const state::State& state) {
-	static list<Injection*> injs; //be careful
+	static list<Injection*> injs; //be careful TODO test with new
 	injs.clear();
 	for(auto& rid_ccnode : roots){
 		for(auto& cc_node : rid_ccnode.second){

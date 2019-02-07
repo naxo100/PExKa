@@ -9,6 +9,7 @@
 #include "../../state/Variable.h"
 #include "../../expressions/Constant.h"
 #include "../../expressions/Vars.h"
+#include "../../pattern/mixture/Component.h"
 
 #include <limits>
 #include <type_traits>

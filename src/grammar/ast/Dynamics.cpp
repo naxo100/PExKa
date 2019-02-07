@@ -8,6 +8,8 @@
 #include "Dynamics.h"
 #include "../../util/Warning.h"
 #include "../../expressions/BinaryOperation.h"
+#include "../../pattern/mixture/Agent.h"
+#include "../../pattern/mixture/Component.h"
 
 namespace ast {
 
@@ -75,6 +77,8 @@ void Link::eval(const pattern::Environment &env,
 		if(!allow_pattern)
 			throw SemanticError("Patterns are not allowed here.",loc);
 		mix_site.link_type = pattern::Mixture::WILD;
+		if(mix_site.isEmptySite())
+			WarningStack::getStack().emplace_back("A site declared as 'bind to any' and 'any value' can be omitted.",loc);
 		break;
 	case SOME:
 		if(!allow_pattern)
@@ -193,18 +197,19 @@ void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts
 		break;
 	case SiteState::RANGE:
 		try{
+			VarVector consts;//TODO use a real VarVector
 			BaseExpression* range[3];
 			if(!stateInfo.evalRange(env,consts,range)){
 				site = &sign.addSite<pattern::Signature::RangeSite<FL_TYPE> >(name);
 				static_cast<pattern::Signature::RangeSite<FL_TYPE>*>
-					(site)->setBoundaries(range[0]->getValue().valueAs<FL_TYPE>(),
-						range[2]->getValue().valueAs<FL_TYPE>(),range[1]->getValue().valueAs<FL_TYPE>());
+					(site)->setBoundaries(range[0]->getValue(consts).valueAs<FL_TYPE>(),
+						range[2]->getValue(consts).valueAs<FL_TYPE>(),range[1]->getValue(consts).valueAs<FL_TYPE>());
 			}
 			else{
 				site = &sign.addSite<pattern::Signature::RangeSite<int> >(name);
 				static_cast<pattern::Signature::RangeSite<int>*>
-					(site)->setBoundaries(range[0]->getValue().valueAs<int>(),
-						range[2]->getValue().valueAs<int>(),range[1]->getValue().valueAs<int>());
+					(site)->setBoundaries(range[0]->getValue(consts).valueAs<int>(),
+						range[2]->getValue(consts).valueAs<int>(),range[1]->getValue(consts).valueAs<int>());
 			}
 		}
 		catch(std::out_of_range &e){
@@ -358,7 +363,7 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 		else //LHS
 			num = stateInfo.val->eval(env,consts,nullptr,Expression::CONST | ptrn_flag);
 		try{
-			if(! sign->getSite(site_id).isPossibleValue(num->getValue()))
+			if(! sign->getSite(site_id).isPossibleValue(num->getValue(VarVector())))//TODO use a real VarVector
 				throw SemanticError("This value is not included in range declaration of site",loc);
 		}
 		catch(exception &e){}//TODO check which exceptions
@@ -413,6 +418,7 @@ void Agent::eval(const pattern::Environment &env,const vector<state::Variable*> 
 	}
 
 	//auto& a = env.declareAgentPattern(a_buff);
+	a_buff->setLoc(loc);
 	mix.addAgent(a_buff);
 }
 
@@ -448,7 +454,7 @@ pattern::Mixture* Mixture::eval(const pattern::Environment &env,
 		if(n_link.second.size() == 1)
 			throw SemanticError("Edge identifier "+to_string(n_link.first)+
 					" is not paired in mixture.",loc);
-		mix->addLink(n_link.second.front(),*(++n_link.second.begin()),env);
+		mix->addLink(n_link.second.front(),n_link.second.back(),env);
 	}
 	//mix->setComponents();
 	return mix;
@@ -688,7 +694,7 @@ const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulati
 			int radius = 0;
 			if(unary->opt){
 				radius = unary->opt->eval(env,vars,&deps.first,Expression::CONST + Expression::AUX_ALLOW)->
-						getValue().valueAs<int>();
+						getValue(vars).valueAs<int>();//TODO check if vars is only consts
 			}
 			r.setUnaryRate(make_pair(un_rate,radius));
 		}
@@ -755,7 +761,7 @@ Rule& Rule::operator=(const Rule& r){
 }
 
 void Rule::eval(pattern::Environment& env,
-		const vector<state::Variable*> &vars) const{
+		const VarVector &vars) const{
 	//TODO eval name...
 	auto lhs_mix_p = lhs.agents.eval(env,vars,
 			Expression::PATTERN + Expression::LHS + Expression::AUX_ALLOW);//TODO do not allow aux?
@@ -792,7 +798,7 @@ void Rule::eval(pattern::Environment& env,
 		auto reverse_label = label.getString()+" @bckwrds";
 		auto& inverse_rule = env.declareRule(Id(label.loc,reverse_label),rhs_mix);
 		inverse_rule.setRHS(&lhs_mix,bi);
-		inverse_rule.difference(env,rhs_mask,lhs_mask);
+		inverse_rule.difference(env,rhs_mask,lhs_mask,vars);
 		inverse_rule.setRate(reverse);
 		rhs_mix.addInclude(inverse_rule.getId());
 		for(auto& t : rhs.tokens)
@@ -808,7 +814,7 @@ void Rule::eval(pattern::Environment& env,
 		rule.setRHS(rhs_mix_p,bi);
 	}
 	//DEBUG cout << lhs_mix.toString(env,lhs_mask) << " -> " << rhs_mix_p->toString(env,rhs_mask) << endl;
-	rule.difference(env,lhs_mask,rhs_mask);
+	rule.difference(env,lhs_mask,rhs_mask,vars);
 	for(auto& dep : deps.first)
 		env.addDependency(dep,pattern::Dependencies::RULE,rule.getId());
 }

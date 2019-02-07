@@ -222,7 +222,7 @@ Init& Init::operator=(const Init &init) {
 	return *this;
 }
 
-void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
+void Init::eval(const pattern::Environment &env,const VarVector &vars,
 		simulation::Simulation &sim){
 	auto& use_expr = env.getUseExpression(this->getUseId());
 	auto &cells = use_expr.getCells();
@@ -231,8 +231,8 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		short tok_id;
 		if(alg == nullptr)
 			throw std::invalid_argument("Null value for token init.");
-		else
-			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue().valueAs<FL_TYPE>();
+		else//TODO check if vars is only consts
+			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue(vars).valueAs<FL_TYPE>();
 		tok_id = env.getTokenId(token.getString());
 		sim.addTokens(cells,tok_id,n);
 	}
@@ -241,7 +241,7 @@ void Init::eval(const pattern::Environment &env,const Expression::VAR &vars,
 		if(alg == nullptr)
 			throw std::invalid_argument("Null value for mix init.");
 		else
-			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue().valueAs<int>();
+			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue(vars).valueAs<int>();
 		auto mix = mixture.eval(env,vars,false);
 		mix->setComponents();
 		sim.addAgents(cells,n,*mix);

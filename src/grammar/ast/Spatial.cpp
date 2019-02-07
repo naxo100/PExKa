@@ -31,11 +31,11 @@ vector<short> CompExpression::evalDimensions(const pattern::Environment &env,
 		int tmp = 0;
 
 		switch( (index->eval(env,vars))->getType() ) {
-		case FLOAT:
-			tmp = (index->eval(env,vars))->getValue().fVal;
+		case FLOAT://TODO check if vars is only consts
+			tmp = (index->eval(env,vars))->getValue(vars).fVal;
 			break;
 		case INT:
-			tmp = (index->eval(env,vars))->getValue().iVal;
+			tmp = (index->eval(env,vars))->getValue(vars).iVal;
 			break;
 		default:break;
 		}
@@ -59,14 +59,14 @@ const Id& CompExpression::evalName(const pattern::Environment &env,bool declare)
 	return name;
 }
 list<const BaseExpression*> CompExpression::evalExpression(const pattern::Environment &env,
-			small_id comp_id,const vector<Variable*> &vars) const {
+			small_id comp_id,const VarVector &vars) const {
 	list<const state::BaseExpression*> ret;
 	auto& dims = env.getCompartment(comp_id).getDimensions();
 	int i = 0;
 	for(auto index : indexList){
 		auto expr = index->eval(env,vars,nullptr,Expression::AUX_ALLOW);
-		try{
-			int d = expr->getValue().valueAs<int>();
+		try{//TODO check if vars is only consts
+			int d = expr->getValue(vars).valueAs<int>();
 			if(d < 0 || d >= dims[i])
 				throw SemanticError("Index out of limits for compartments expression.",index->loc);
 		}

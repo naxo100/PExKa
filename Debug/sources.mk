@@ -30,6 +30,7 @@ src/grammar/ast \
 src \
 src/matching \
 src/pattern \
+src/pattern/mixture \
 src/simulation \
 src/state \
 src/util \

@@ -9,7 +9,7 @@
 #define SRC_EXPRESSIONS_BINARYOPERATION_H_
 
 #include "AlgExpression.h"
-
+#include <vector>
 
 namespace expressions {
 
@@ -40,6 +40,14 @@ public:
 			override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const
 			override;
+	BaseExpression::Reduction factorizeRate() const override;
+	BaseExpression* clone() const override;
+	BaseExpression::DeleteAux deleteElement(std::string exp) const override;
+
+	// function to check if a BinaryOperation can be factorized
+	// checks if there is the same expression at both sides of an operation
+	void auxCheck(std::vector<BaseExpression*> v1, std::vector<BaseExpression*> v2) const;
+
 	//std::set<std::string> getAuxiliars() const override;
 	bool operator==(const BaseExpression& exp) const override;
 	~BinaryOperation();

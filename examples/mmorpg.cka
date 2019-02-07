@@ -28,7 +28,7 @@
 
 #every 15m recover 20% hp
 'recover1' PJ(battle,hp~{H < 0.8}) -> PJ(battle,hp~{H + 0.2}) @ 4
-'recover2' PJ(battle,hp~{0.8 < H < 1}) -> PJ(battle,hp~{1}) @ 4
+'recover2' PJ(battle,hp~{0.8 <= H < 1}) -> PJ(battle,hp~{1}) @ 4
 
 #monster spawn
 'spawn' PJ(lvl~{L}) -> PJ(lvl~{L}),Monster(lvl~{L}) @ 1
@@ -36,7 +36,7 @@
 
 #inits:
 
-%init: 10 PJ(hp~{1.0})
-%init: 100 Monster()
+%init: 5 PJ(hp~{1.0})
+%init: 3 Monster()
 
 

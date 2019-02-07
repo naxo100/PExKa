@@ -15,7 +15,7 @@
 #include "Signature.h"
 #include "Compartment.h"
 #include "Channel.h"
-#include "Mixture.h"
+#include "mixture/Mixture.h"
 #include "Dependencies.h"
 #include "../simulation/Rule.h"
 //#include "../state/AlgExpression.h"

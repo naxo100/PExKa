@@ -7,6 +7,9 @@
 
 #include "Environment.h"
 #include "../grammar/ast/Basics.h"
+#include "mixture/Agent.h"
+#include "mixture/Component.h"
+#include "../util/Warning.h"
 
 using namespace std;
 
@@ -110,7 +113,7 @@ Mixture::Component& Environment::declareComponent(const Mixture::Component& new_
 	return cc;
 }
 
-Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bool is_lhs){
+/*Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bool is_lhs){
 	list<pair<set<small_id>,Mixture::Agent*> > greater;
 	list<pair<set<small_id>,Mixture::Agent*> > less;
 	//cout << "Declaring agent pattern " << new_ag->toString(*this) << endl;
@@ -138,7 +141,7 @@ Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bo
 			}
 		}
 		catch(False& ex){
-			//cout << "not compatible patterns: " << ag.toString(*this) << endl;/*different patterns*/
+			//cout << "not compatible patterns: " << ag.toString(*this) << endl;//different patterns
 		}
 	}
 	agentPatterns[new_ag->getId()].emplace_back(*new_ag);
@@ -155,6 +158,30 @@ Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bo
 				sites_ag.second->addChild(site,&new_agent);
 			new_agent.addParent(site,sites_ag.second);
 		}
+	delete new_ag;
+	return new_agent;
+}*/
+
+Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bool is_lhs){
+	for(auto &ag : agentPatterns[new_ag->getId()] ){
+		if(new_ag->operator==(ag)){
+			if(new_ag->getAuxNames() == ag.getAuxNames()){
+				//cout << "Same agent pattern was declared before: " << ag.toString(*this) << endl;
+				delete new_ag;
+				return ag;
+			}
+			else{
+				stringstream loc;
+				loc << ag.getLoc();
+				WarningStack::getStack().emplace_back(
+					"Same agent pattern declared before ("+loc.str()+
+					") but with different aux names. Try to normalize name to improve performance.",new_ag->getLoc());
+			}
+		}
+	}
+
+	agentPatterns[new_ag->getId()].emplace_back(*new_ag);
+	auto& new_agent = agentPatterns[new_ag->getId()].back();
 	delete new_ag;
 	return new_agent;
 }
@@ -349,7 +376,7 @@ void Environment::show() const {
 		}
 		cout << "\n\t\tAgentPatterns[" ;
 		int count = 0;
-		for(auto& ag_list : agentPatterns)
+		/*for(auto& ag_list : agentPatterns)
 			count += ag_list.size();
 		cout << count << "]" << endl;
 		for(auto& ap_list : agentPatterns)
@@ -370,7 +397,7 @@ void Environment::show() const {
 					cout << "}, ";
 				}
 				cout << endl;
-			}
+			}*/
 		cout << "\n\t\tComponents[" << components.size() << "]" << endl;
 		int i = 0;
 		for(auto& comp : components){
@@ -388,7 +415,7 @@ void Environment::show() const {
 			cout << "influence-cc: (" << rul.getInfluences().size() << ")" << endl;
 			for(auto& inf : rul.getInfluences()){
 				cout << "\t" << inf.first->toString(*this);
-				cout << "  (" << inf.second.node_id.size() << ") ;";
+				cout << "  (" << inf.second.node_id.size() << ") \n";
 			}
 			cout << endl;
 			i++;

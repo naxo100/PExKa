@@ -72,8 +72,15 @@ public:
 	virtual FL_TYPE auxFactors(
 			std::unordered_map<std::string, FL_TYPE> &factor) const = 0;
 
+	/** \brief Returns a factorized expression
+	 *
+	 */
 	virtual Reduction factorizeRate() const = 0;
 	virtual BaseExpression* clone() const = 0;
+
+	/** \brief Deletes exp from the expression
+	 *
+	 */
 	virtual DeleteAux deleteElement(std::string exp) const = 0;
 
 

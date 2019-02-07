@@ -167,9 +167,12 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorizeRate() const {
 	BaseExpression::Reduction r1 = exp1->factorizeRate();
 	BaseExpression::Reduction r2 = exp2->factorizeRate();
 
+	// check if auxiliars can be factorized
 	this->auxCheck(r1.aux, r2.aux);
+	// check if variables can be factorized
 	this->auxCheck(r1.factor_vars, r2.factor_vars);
 
+	// put exp1 and exp2 values in vectors
 	r.constant.insert(r.constant.end(), r1.constant.begin(), r1.constant.end());
 	r.constant.insert(r.constant.end(), r2.constant.begin(), r2.constant.end());
 
@@ -179,6 +182,7 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorizeRate() const {
 	r.factor_vars.insert(r.factor_vars.end(), r1.factor_vars.begin(), r1.factor_vars.end());
 	r.factor_vars.insert(r.factor_vars.end(), r2.factor_vars.begin(), r2.factor_vars.end());
 
+	// put the different auxiliar in a vector
 	vector<BaseExpression*> aux;
 	vector<string> aux_str;
 	for(int i = 0; i < r1.aux.size(); i++){
@@ -190,12 +194,15 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorizeRate() const {
 
 	BaseExpression* ex;
 	if(aux_str.size() > 0){
-		if((op == 0) || (op == 1)){
+		if((op == 0) || (op == 1)){ // sum or diff
+			// delete an auxiliar from exp1 and exp2
 			BaseExpression* ex1 = exp1->deleteElement(aux[0]->toString()).expression;
 			BaseExpression* ex2 = exp2->deleteElement(aux[0]->toString()).expression;
+			// create the factorized expression
 			ex = new BinaryOperation<R, T1, T2>(ex1, ex2, op);
 			ex = new BinaryOperation<R, T1, T2>(r1.aux[0], ex, 2);
 			int i = 1;
+			// factorize with the others auxiliars
 			while(i < aux_str.size()){
 				ex1 = ex1->deleteElement(aux[i]->toString()).expression;
 				ex2 = ex2->deleteElement(aux[i]->toString()).expression;
@@ -218,6 +225,7 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorizeRate() const {
 
 template<typename R, typename T1, typename T2>
 void BinaryOperation<R, T1, T2>::auxCheck(std::vector<BaseExpression*> v1, std::vector<BaseExpression*> v2) const{
+	// create vectors with de different elements of v1 and v2
 	vector<string> aux1_str;
 	vector<string> aux2_str;
 	for(int i = 0; i < v1.size(); i++)
@@ -227,6 +235,8 @@ void BinaryOperation<R, T1, T2>::auxCheck(std::vector<BaseExpression*> v1, std::
 		if(!(std::find(aux2_str.begin(), aux2_str.end(), (v2[i]->toString())) != aux2_str.end()))
 			aux2_str.push_back(v2[i]->toString());
 
+	// op 0 = sum, op 1 = diff
+	// if there is an expression in one side and not in the other, then the expression cannot be factorized
 	if((op == 0) || (op == 1)){
 		if(aux1_str.size() != aux2_str.size())
 			throw std::invalid_argument("cannot factorize expression");
@@ -244,6 +254,7 @@ BaseExpression* BinaryOperation<R, T1, T2>::clone() const{
 
 template<typename R, typename T1, typename T2>
 BaseExpression::DeleteAux BinaryOperation<R, T1, T2>::deleteElement(std::string exp) const{
+	// tries to delete the expression in exp1
 	BaseExpression::DeleteAux d;
 	BaseExpression::DeleteAux ex1 = exp1->deleteElement(exp);
 	if(ex1.deleted){
@@ -251,12 +262,15 @@ BaseExpression::DeleteAux BinaryOperation<R, T1, T2>::deleteElement(std::string 
 		d.expression = new BinaryOperation<R, T1, T2>(ex1.expression, exp2, op);
 		return d;
 	}
+	// if the expression is not in exp1, tries to delete it in exp2
 	BaseExpression::DeleteAux ex2 = exp2->deleteElement(exp);
 	if(ex2.deleted){
 		d.deleted = true;
 		d.expression = new BinaryOperation<R, T1, T2>(exp1, ex2.expression, op);
 		return d;
 	}
+
+	// if the expression is not in the BinaryOperation, then returns a clone
 	d.deleted = false;
 	d.expression = this->clone();
 	return d;

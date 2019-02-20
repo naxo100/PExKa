@@ -52,7 +52,7 @@ CcInjection::CcInjection(const pattern::Mixture::Component& _cc)
 }
 
 bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
-		two<std::list<state::Internal*> >& port_list, const state::State& state,small_id root) {
+		two<std::set<state::Internal*> >& port_list, const state::State& state,small_id root) {
 	//ccAgToNode.clear();
 	for(auto& n : ccAgToNode)
 		n = nullptr;

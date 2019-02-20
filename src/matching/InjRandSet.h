@@ -31,7 +31,7 @@ public:
 	virtual size_t count() const = 0;
 	virtual FL_TYPE partialReactivity() const = 0;
 
-	virtual const list<Injection*>& emplace(Node& node,two<std::list<state::Internal*> > &port_lists,
+	virtual const list<Injection*>& emplace(Node& node,two<std::set<state::Internal*> > &port_lists,
 			const state::State& state,small_id root = 0);
 	virtual const list<Injection*>& emplace(Injection* base_inj,map<Node*,Node*>& mask,
 			const state::State& state);

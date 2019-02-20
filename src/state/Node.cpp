@@ -133,12 +133,12 @@ short_id Node::getId() const{
 }
 
 bool Node::test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site,
-		two<list<Internal*> > &port_list, const State& state,
+		two<set<Internal*> > &port_list, const State& state,
 		const expressions::AuxMap& aux_map) const{
 	auto& port = interface[id_site.first];
 	if(!id_site.second.isEmptySite()){
 		if( id_site.second.testValueOpt(port.val, state, aux_map) )
-			port_list.first.emplace_back(&port);
+			port_list.first.emplace(&port);
 		else
 			return false;
 	}
@@ -150,13 +150,13 @@ bool Node::test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site
 		if(port.link.first)
 			return false;
 		//else
-		port_list.second.emplace_back(&port);
+		port_list.second.emplace(&port);
 		break;
 	case pattern::Mixture::BIND:
 		if(!port.link.first)
 			return false;
 		//else
-		port_list.second.emplace_back(&port);
+		port_list.second.emplace(&port);
 		/* Do not test for site_id ptrn, it's obvious that they are ok*/
 		//else if(port.link.first->getLinkState(id_site.second.lnk_ptrn.second).second == id_site.first)//bind-node lnk-ptrn*/
 		if(id_site.second.lnk_ptrn.first != small_id(-1))//ptrn is not bind to any
@@ -169,7 +169,7 @@ bool Node::test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site
 				return false;
 		} else
 			return false;
-		port_list.second.emplace_back(&port);
+		port_list.second.emplace(&port);
 		break;
 	case pattern::Mixture::PATH:
 		//TODO

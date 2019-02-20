@@ -80,7 +80,7 @@ public:
 	~CcInjection();
 
 	bool reuse(const pattern::Mixture::Component& cc,Node& node,
-			two<list<state::Internal*> >& port_list,const state::State& state,small_id root = 0);
+			two<set<state::Internal*> >& port_list,const state::State& state,small_id root = 0);
 
 	const vector<Node*>& getEmbedding() const override;
 

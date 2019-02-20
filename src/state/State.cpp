@@ -228,15 +228,17 @@ void State::positiveUpdate(const simulation::Rule& r){
 				}catch(out_of_range &ex) {}//not in new_cc
 			//if(cc->getAgent(cc_ag_root.second).getId() != node->getId())
 			//	continue;
-			two<std::list<Internal*> > port_lists;
+			two<std::set<Internal*> > port_lists;
 			const list<matching::Injection*>* injs_p = &injections[cc->getId()]->emplace(*node,port_lists,*this,cc_ag_root.second);
-			for(auto inj_p : *injs_p){
+
+			if(port_lists.first.empty() && port_lists.second.empty())
+				for(auto inj_p : *injs_p)
+					node->addDep(inj_p);
+			else{
 				for(auto port : port_lists.first)
-					port->deps.first->emplace(inj_p);
+					port->deps.first->insert(injs_p->begin(),injs_p->end());
 				for(auto port : port_lists.second)
-					port->deps.second->emplace(inj_p);
-				if(port_lists.first.empty() && port_lists.second.empty())
-					node->addDep(inj_p);//TODO check if it is right after injs_p
+					port->deps.second->insert(injs_p->begin(),injs_p->end());
 			}
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
 			if(injs_p->size()){
@@ -245,26 +247,18 @@ void State::positiveUpdate(const simulation::Rule& r){
 			}
 		}
 	}
-	for(auto side_eff : ev.side_effects){
-		/*for(auto& ag : env.getAgentPatterns(side_eff.first->getId())){
-			try {
-				if(ag.getSite(side_eff.second).link_type == pattern::Pattern::FREE){
-					for(auto& cc_ag : ag.getIncludes()){*/
+	for(auto side_eff : ev.side_effects){//trying to create injection for side-effects
 		for(auto& cc_ag : env.getFreeSiteCC(side_eff.first->getId(),side_eff.second)){
-
-			//if(cc_ag.first->getAgent(cc_ag.second).getId() != side_eff.first->getId())
-			//	continue;
-
-			two<std::list<Internal*> > port_lists;
+			two<std::set<Internal*> > port_lists;
 			const list<matching::Injection*>* injs_p = &injections[cc_ag.first->getId()]->emplace(*side_eff.first,port_lists,*this,cc_ag.second);
-			for(auto inj_p : *injs_p){
+			if(port_lists.first.empty() && port_lists.second.empty())
+				for(auto inj_p : *injs_p)
+					side_eff.first->addDep(inj_p);
+			else{
 				for(auto port : port_lists.first)
-					port->deps.first->emplace(inj_p);
+					port->deps.first->insert(injs_p->begin(),injs_p->end());
 				for(auto port : port_lists.second)
-					port->deps.second->emplace(inj_p);
-				if(port_lists.first.empty() && port_lists.second.empty())
-					side_eff.first->addDep(inj_p);//TODO check too
-				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
+					port->deps.second->insert(injs_p->begin(),injs_p->end());
 			}
 			if(injs_p->size())
 				ev.to_update.emplace(cc_ag.first);
@@ -459,16 +453,17 @@ void State::initInjections() {
 			if(comp.getAgent(0).getId() != node_p->getId())//very little speed-up
 				continue;
 			//cout << comp.toString(env) << endl;
-			two<std::list<Internal*> > port_lists;
+			two<std::set<Internal*> > port_lists;
 			const list<matching::Injection*>* injs_p = &injections[comp.getId()]->emplace(*node_p,port_lists,*this);
 			for(auto inj_p : *injs_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
+			}
+			for(auto inj_p : *injs_p)
 				if(port_lists.first.empty() && port_lists.second.empty())
 					node_p->addDep(inj_p);//TODO check too
-			}
 		}
 	}
 }

@@ -23,7 +23,7 @@ InjRandContainer::~InjRandContainer(){
 }
 
 const list<Injection*>& InjRandContainer::emplace(Node& node,
-		two<std::list<state::Internal*> > &port_lists,const state::State& state,small_id root) {
+		two<std::set<state::Internal*> > &port_lists,const state::State& state,small_id root) {
 	CcInjection* inj;
 	static list<Injection*> empty;
 	if(freeInjs.empty()){
@@ -157,7 +157,7 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 		InjRandContainer(_cc),average(0),counter(0),selected_root(0,0){
 	auto& deps = cc.getRateDeps();
 	for(auto r_cc : deps){
-		roots[r_cc.first.getId()][r_cc.second] = new distribution_tree::Node<CcValueInj>();
+		roots[r_cc.first.getId()][r_cc.second] = new distribution_tree::Node<CcValueInj>(1.0);
 	}
 
 	for(auto agent : cc){

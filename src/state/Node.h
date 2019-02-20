@@ -90,7 +90,7 @@ public:
 	 * (to_follow_,Node*) that will be matched later.
 	 */
 	bool test(Node* &node,const pair<small_id,pattern::Mixture::Site>& id_site,
-			two<list<Internal*> > &port_list,const State& state,
+			two<set<Internal*> > &port_list,const State& state,
 			const expressions::AuxMap& aux_map) const;
 
 	//unsafe

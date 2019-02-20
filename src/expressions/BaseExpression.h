@@ -13,6 +13,8 @@
 //#include "../util/params.h"
 #include "SomeValue.h"
 #include <vector>
+#include <map>
+
 
 namespace state {
 	class State;
@@ -36,13 +38,10 @@ public:
 		std::vector<FL_TYPE> constant;
 		std::vector<BaseExpression*> factor_vars;
 		std::vector<BaseExpression*> aux;
+		std::map<std::string, BaseExpression*> aux_functions;
 		BaseExpression* factorized_expression;
 	};
 
-	struct DeleteAux{
-		BaseExpression* expression;
-		bool deleted;
-	};
 	enum AlgebraicOp {
 		SUM, MINUS, MULT, DIV, POW, MODULO, MAX, MIN
 	};
@@ -82,13 +81,13 @@ public:
 	/** \brief Returns a factorized expression
 	 *
 	 */
-	virtual Reduction factorizeRate() const = 0;
+	virtual Reduction factorize() const = 0;
 	virtual BaseExpression* clone() const = 0;
 
 	/** \brief Deletes exp from the expression
 	 *
 	 */
-	virtual DeleteAux deleteElement(std::string exp) const = 0;
+	virtual BaseExpression* deleteElement(BaseExpression* exp) const = 0;
 
 
 	//virtual std::set<std::string> getAuxiliars() const = 0;

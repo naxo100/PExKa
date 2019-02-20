@@ -58,12 +58,12 @@ FL_TYPE Auxiliar<R>::auxFactors(
 }
 
 template<typename R>
-BaseExpression::Reduction Auxiliar<R>::factorizeRate() const {
+BaseExpression::Reduction Auxiliar<R>::factorize() const {
 	BaseExpression::Reduction r;
 	Auxiliar<R>* aux = new Auxiliar<R>(*this);
 	r.aux.push_back(aux);
 	r.factorized_expression = aux;
-
+	r.aux_functions[aux->toString()] = aux;
 	return r;
 }
 
@@ -73,16 +73,11 @@ BaseExpression* Auxiliar<R>::clone() const {
 }
 
 template<typename R>
-BaseExpression::DeleteAux Auxiliar<R>::deleteElement(std::string exp) const{
-	BaseExpression::DeleteAux d;
-	d.deleted = false;
-	if(this->toString() == exp){
-		d.deleted = true;
-		d.expression = new Constant<FL_TYPE>(1);
-	}
-	else
-		d.expression = this->clone();
-	return d;
+BaseExpression* Auxiliar<R>::deleteElement(BaseExpression* exp) const{
+	BaseExpression* ex = this->clone();
+	if(*ex == *exp)
+		return new Constant<FL_TYPE>(1);
+	return ex;
 }
 template<typename R>
 AlgExpression<R>* Auxiliar<R>::reduce(const state::State& state,

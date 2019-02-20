@@ -95,7 +95,10 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		throw ex;
 	}
 	if(type){
-		auto p_mix = mixture->eval(env,vars);
+		if(constant)
+			throw SemanticError("Constants cannot be Kappa Expressions.",loc);
+		char flag = Expression::AUX_ALLOW | Expression::PATTERN;
+		auto p_mix = mixture->eval(env,vars,flag);
 		p_mix->declareAgents(env);
 		p_mix->setAndDeclareComponents(env);
 		auto& mix = env.declareMixture(*p_mix);
@@ -118,6 +121,8 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 			var = new state::AlgebraicVar<bool>(id,name.getString(),false,
 				dynamic_cast<AlgExpression<bool>*>(b_expr));
 			break;
+		case NONE:
+			throw invalid_argument("Cannot return None value.");
 		}
 	}
 	return var;

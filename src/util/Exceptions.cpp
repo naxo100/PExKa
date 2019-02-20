@@ -20,9 +20,11 @@ SemanticError::SemanticError(const string &str,const yy::location &l)
 const char* SemanticError::what() const _GLIBCXX_USE_NOEXCEPT {
 	static char c[150] ;//TODO??
 
-	sprintf(c,"Semantic error in file \"%s\", line %d, characters %d-%d:\n%s",
+	if(loc.begin.filename == nullptr)
+		sprintf(c,"Semantic error in file (no-location):\n%s",msg);
+	else
+		sprintf(c,"Semantic error in file \"%s\", line %d, characters %d-%d:\n%s",
 	        loc.begin.filename->c_str(),loc.begin.line,loc.begin.column,loc.end.column,msg);
-
 	return c;
 }
 

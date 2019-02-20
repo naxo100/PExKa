@@ -117,7 +117,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						if(rhs_site.isEmptySite()){
 							if(!lhs_site.isEmptySite())
 								throw SemanticError("The state of site "+ sign.getSite(j).getName()+
-									" in agent "+sign.getName()+" is underspecified on the right hand side.",loc);
+									" in agent "+sign.getName()+" is underspecified on the right side.",loc);
 						}
 						else{
 							if(lhs_site.isEmptySite())
@@ -345,8 +345,8 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						//auto rhs_site =
 						rhs_ag.getSite(j);
 						//WARNING
-						throw SemanticError("The internal state of agent "+sign.getName()+
-								", site "+psite->getName()+" in the left side is underspecified.",loc);
+						throw SemanticError("The state of site "+ sign.getSite(j).getName()+
+							" in agent "+sign.getName()+" is underspecified on the left side.",loc);
 					}
 					catch(std::out_of_range &e){
 						//it's ok, omitted in both sides.

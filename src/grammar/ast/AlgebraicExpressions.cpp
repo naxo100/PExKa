@@ -233,7 +233,7 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 				expr = new Auxiliar<int>(name.getString());
 		}
 		else
-			throw SemanticError("You can not assign an AUX in a %var or %const declaration.", loc);
+			throw SemanticError("The auxiliar '"+name.getString()+"' can not be used here.", loc);
 		break;
 	case TOKEN:
 		try {

@@ -27,7 +27,7 @@
 #'revive' PJ(hp~{H <= 0}, exp~{X}) -> PJ(hp~{1}, exp~{9*X/10}) @ [inf]
 
 #every 15m recover 20% hp
-'recover1' PJ(battle,hp~{H < 0.8}) -> PJ(battle,hp~{H + 0.2}) @ 4
+'recover1' PJ(battle,hp~{0.1 < H < 0.8}) -> PJ(battle,hp~{H + 0.2}) @ 4
 'recover2' PJ(battle,hp~{0.8 <= H < 1}) -> PJ(battle,hp~{1}) @ 4
 
 #monster spawn

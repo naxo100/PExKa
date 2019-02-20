@@ -388,7 +388,7 @@ bool_expr:
 | alg_expr EQUAL alg_expr 
 	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::EQUAL);}
 | alg_expr DIFF alg_expr  
-	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::DIFF);}
+	{$$ = new BoolBinaryOperation(@$,$1,$3,BaseExpression::BoolOp::NOT_EQUAL);}
 | TRUE
 	{$$ = new Const(@$,true);}
 | FALSE
@@ -477,7 +477,7 @@ rule_expression:
 	}
 | rule_label lhs_rhs arrow lhs_rhs where_expr
 	{
-		cout << "Warning: Rule has no kinetics. Default rate of 0.0 is assumed.\n" << endl;
+		cout << "Warning: Rule has no kinetics. Default rate of 0.0 is assumed. (" << @$ << ")\n" << endl;
 		Rate rate(yy::location(),new Const(yy::location(),0.0f),false);
 		$$=ast::Rule(@$,$1,$2,$4,$3,$5,rate);;
 	}

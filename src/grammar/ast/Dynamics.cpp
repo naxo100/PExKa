@@ -118,11 +118,11 @@ SiteState::SiteState(const location& loc, const Expression* min,
 	if(!def)
 		range[1] = min;
 }
-SiteState::SiteState(const location& loc, const Expression* value) :
-		Node(loc),type(EXPR),val(value),flag(0){}
+SiteState::SiteState(const location& loc, const Expression* value) :Node(loc),
+		type(EXPR),val(value),flag(0){}
 SiteState::SiteState(const location& loc, const Id &_aux,
 		const Expression* equal) : Node(loc),
-		type(AUX),aux(_aux),val(equal),flag(0){}
+		type(AUX),aux(_aux),val(equal),range{nullptr,nullptr,nullptr},flag(0){}
 SiteState::SiteState(const location& loc, const Id &_aux,char _flag,
 		const Expression* min,const Expression* max) : Node(loc),
 		type(AUX),aux(_aux),val(nullptr),range{min,nullptr,max},flag(_flag){}
@@ -336,7 +336,7 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 			throw SemanticError("Only valued sites can assign auxiliar.",stateInfo.loc);
 		}}//double try
 
-		if(ptrn_flag & Mixture::Info::LHS)
+		if(ptrn_flag & Mixture::Info::PATTERN)
 			agent.setSiteAux(site_id);
 		else if(stateInfo.range[0] || stateInfo.range[2])
 			throw SemanticError("Can't use an inequation pattern at RHS.",stateInfo.loc);
@@ -414,7 +414,13 @@ void Agent::eval(const pattern::Environment &env,const vector<state::Variable*> 
 	for(auto &site : sites){
 		auto aux = site.eval(env,consts,id_ag,lnks,ptrn_flag);
 		if(aux.second.getString() != "" && (ptrn_flag & Mixture::Info::PATTERN))
-			mix.setAux(aux.second.getString(), mix.size(), aux.first);
+			try{
+				mix.setAux(aux.second.getString(), mix.size(), aux.first);
+			}
+			catch(SemanticError& e){
+				e.setLocation(aux.second.loc);
+				throw e;
+			}
 	}
 
 	//auto& a = env.declareAgentPattern(a_buff);

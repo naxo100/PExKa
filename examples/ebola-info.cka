@@ -1,0 +1,77 @@
+
+
+%agent: P(s~S~E~I~R,info~[0,[inf]]([inf]), fake~[0,[inf]]([inf]))
+%agent: D(buried~false~true)
+
+%agent: Info()
+%agent: Fake()
+
+
+#constants
+%const: 'alfa_i' 0.7
+%const: 'alfa_f' 0.5
+%const: 'p_i' 0.7
+%const: 'p_f' 0.8
+%const: 'k_expose' 0.005
+%const: 'k_expose D' 0.2
+%const: 'k_infect' 0.15
+%const: 'k_die' 0.1
+%const: 'k_recover' 0.05
+%const: 'k_bury' 0.12
+
+
+
+#infect-rules
+'expose'	P(s~I), P(s~S,info~{i},fake~{f}) -> P(s~I), P(s~E,info~{i},fake~{f})  \
+				@  'k_expose' * (1 - 'alfa_i'*'p_i'^i) / (1-'alfa_f'*'p_f'^f)
+		
+'expose-corp' P(s~S,info~{i},fake~{f}), D(buried~false) -> P(s~E,info~{i},fake~{f}),D(buried~false) \
+				@ 'k_expose D' * (1 - 'alfa_i'*'p_i'^i) / (1-'alfa_f'*'p_f'^f)
+		
+'infect' 	P(s~E) -> P(s~I) @ 'k_infect'
+
+'die' 		P(s~I) -> D(buried~false) @ 'k_die'
+
+'bury'		D(buried~false) -> D(buried~true) @ 'k_bury'
+'recover'	P(s~I) -> P(s~R) @ 'k_recover'
+
+
+#info-rules
+#'inform'	P(s~S,info~{ i },fake~{ (i) < f }),Info() -> P(s~S,info~{0},fake~{f}),Info() @ 1.0
+#'inform I'	P(s~I,info~{ 0 < i },fake~{ f }) -> P(s~I,info~{ i-1 },fake~{ f+1 }) @ 1.0
+#'disinform'	P(s~S,info~{ i },fake~{ f < (i) }),Fake() -> P(s~S,info~{0},fake~{f}),Info() @ 1.0
+
+
+#'forget-info S'	P(s~S,info~{i}) -> P(s~S,info~{i+1}) @ 1.0
+#'forget-info E'	P(s~E,info~{i}) -> P(s~E,info~{i+1}) @ 1.0
+
+#'forget S'	P(s~S,info~{i},fake~{f}) -> P(s~S,info~{i+1},fake~{f+1}) @ 0.3
+#'forget E'	P(s~E,info~{i},fake~{f}) -> P(s~E,info~{i+1},fake~{f+1}) @ 0.3
+
+
+#'show info' -> Info() @ 0.3
+#'hide info'	Info() -> @ 12
+
+
+#'debate'	P(info~{i1}),P(info~{i2}) -> P(info~{[min] i1 i2}),P(info~{[min] i1 i2}) @ 0.00001
+#'gossip'	P(fake~{i1}),P(fake~{i2}) -> P(fake~{[min] i1 i2}),P(fake~{[min] i1 i2}) @ 0.00011
+
+
+
+#init
+
+%init: 100 P(s~S)
+%init: 1 P(s~I)
+
+#OBS
+%obs: 'Suceptible'	P(s~S)
+%obs: 'Infected'	P(s~I)
+%obs: 'Inmune'		P(s~R)
+%obs: 'Dead'		D()
+%obs: 'Informed'	P(info~{i < 2})
+%obs: 'Idiots'		P(fake~{i < 2})
+
+
+
+
+

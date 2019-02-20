@@ -7,23 +7,20 @@
 
 #include "DistributionTree.h"
 #include "../matching/Injection.h"
+#include <iostream>
+#include <string>
+#include <algorithm>
+
 
 namespace distribution_tree {
 
 template <typename T>
-DistributionTree<T>::DistributionTree(DistributionTree<T>* _parent,FL_TYPE val) : parent(_parent),
+DistributionTree<T>::DistributionTree(Node<T>* _parent,FL_TYPE val) : parent(_parent),
 		level(_parent ?_parent->level+1 : 0),value(val),sum(0.0){}
 
 template <typename T>
 FL_TYPE DistributionTree<T>::total() const {
 	return sum;
-}
-
-template <typename T>
-void DistributionTree<T>::decrease(FL_TYPE val){
-	sum -= val;
-	if(parent)
-		parent->decrease(val);
 }
 
 template <typename T>
@@ -41,14 +38,16 @@ Node<T>::Node(FL_TYPE val) : DistributionTree<T>(nullptr,val),counter(0) {
 }
 
 template <typename T>
-Node<T>::Node(Leaf<T>* leaf) : DistributionTree<T>(leaf->parent),counter(0){
-	auto node_parent = static_cast<Node<T>*>(this->parent);
+Node<T>::Node(Leaf<T>* leaf,FL_TYPE val) : DistributionTree<T>(leaf->parent),counter(0){
+	this->value = val;
+	/*auto node_parent = static_cast<Node<T>*>(this->parent);
 	if(node_parent->value > this->value)
 		node_parent->smaller = this;
 	else
-		node_parent->greater = this;
+		node_parent->greater = this;*/
 	this->sum = leaf->total();
 	leaf->parent = this;
+	leaf->level = this->level+1;
 	this->value = leaf->sum / leaf->injs.size();
 	smaller = leaf;
 	auto _greater = new Leaf<T>(this);
@@ -69,23 +68,38 @@ Node<T>::~Node(){
 
 template <typename T>
 void Node<T>::push(T* inj,FL_TYPE val){
-	if(val > this->value)
-		greater->push(inj,val);
-	else if(val < this->value)
-		smaller->push(inj, val);
+	if(val > this->value){
+		try{
+			greater->push(inj,val);
+		}
+		catch(bad_alloc &e){
+			balance(static_cast<Leaf<T>*>(greater),smaller);
+			this->push(inj, val);
+			return;
+		}
+	}
+	else if(val < this->value){
+		try{
+			smaller->push(inj,val);
+		}
+		catch(bad_alloc &e){
+			balance(static_cast<Leaf<T>*>(smaller),greater);
+			this->push(inj, val);
+			return;
+		}
+	}
 	else{
 		if(inj->count() > 1){
 			inj->alloc(multi_injs.size());
 			multi_injs.emplace_back(inj);
-			counter += inj->count();
 		}
 		else{
 			inj->alloc(injs.size());
 			injs.emplace_back(inj);
-			counter++;
 		}
 		inj->setContainer(this);
 	}
+	counter += inj->count();
 	this->sum += val*inj->count();
 }
 
@@ -102,7 +116,15 @@ void Node<T>::erase(T* elem){
 		injs.pop_back();
 	}
 	elem->alloc(size_t(-1));
-	this->decrease(this->value);
+	this->decrease(this->value*elem->count(),elem->count());
+}
+
+template <typename T>
+void Node<T>::decrease(FL_TYPE val,unsigned n){
+	this->sum -= val;
+	counter -= n;
+	if(this->parent)
+		this->parent->decrease(val,n);
 }
 
 template <typename T>
@@ -114,7 +136,7 @@ const T& Node<T>::choose(FL_TYPE sel) const {
 			sel -= smaller->total();
 	}
 	//auto s = value*count();
-	auto r_node = this->count()*this->value;
+	auto r_node = (counter - smaller->count()-greater->count())*this->value;
 	if(sel < r_node){
 		for(auto inj : multi_injs){
 			auto r_multi = inj->count()*this->value;
@@ -130,15 +152,51 @@ const T& Node<T>::choose(FL_TYPE sel) const {
 }
 
 template <typename T>
+const pair<T*,FL_TYPE>& Node<T>::choose(unsigned sel) const {
+	throw std::invalid_argument("not available");
+}
+
+template <typename T>
 unsigned Node<T>::count() const{
 	return counter;
 }
 
 
+
+template <typename T>
+void Node<T>::balance(Leaf<T>* full,DistributionTree<T>* n) {
+	if(counter > 1){
+		auto new_node = new Node<T>(full,full->total()/full->count());
+		if(smaller == full)
+			smaller = new_node;
+		else
+			greater = new_node;
+		return;
+	}
+
+	auto leaf = static_cast<Leaf<T>*>(n);
+	if( leaf && leaf->count() < (Leaf<T>::MAX_LVL0 << this->level)){//second node is leaf and not half-full
+		leaf->sort();
+		full->sort();
+		auto median = (leaf->count() + full->count())/2;
+		if(full == smaller){
+			this->value = smaller->choose(median).second;
+			full->share(leaf,this->value);
+		}
+		else{
+			this->value = greater->choose(median).second;
+			full->share(leaf,- this->value);
+		}
+
+	}
+}
+
+
+
 /*********** class InjRandTree::Leaf **********/
 
 template <typename T>
-Leaf<T>::Leaf(DistributionTree<T>* _parent) : DistributionTree<T>(_parent) {}
+Leaf<T>::Leaf(Node<T>* _parent) : DistributionTree<T>(_parent) {}
 
 template <typename T>
 Leaf<T>::~Leaf(){
@@ -147,31 +205,47 @@ Leaf<T>::~Leaf(){
 }
 
 template <typename T>
-void Leaf<T>::share(Leaf* great,FL_TYPE val){
+void Leaf<T>::share(Leaf* sister,FL_TYPE val){//negative val for smaller sister
+	auto abs_val = fabs(val);
+	int i = 0;
 	for(auto it = injs.begin(); it != injs.end();){
-		if(it->second > val){
-			great->push(it->first, it->second);
+		if(val < 0 ? it->second < abs_val : it->second > abs_val){
+			sister->push(it->first, it->second);
 			this->sum -= it->second;
 			it = injs.erase(it);//TODO problems with erase in for?
 		}
-		else if(it->second == val){
+		else if(it->second == abs_val){
 			this->parent->push(it->first, it->second);
-			this->sum -= it->second;
 			it = injs.erase(it);//TODO problems with erase in for?
+			this->decrease(it->second);
 		}
-		else
-			it++;
+		else{
+			it->first->alloc(i);
+			it++;i++;
+		}
 	}
 }
 
+template <typename T>
+void Leaf<T>::sort(){
+	static auto is_less = [](const pair<T*,FL_TYPE> &a,const pair<T*,FL_TYPE> &b) {return a.second < b.second;};
+	std::sort(injs.begin(),injs.end(),is_less);
+}
 
 
 template <typename T>
 void Leaf<T>::push(T* inj,FL_TYPE val){
-	if(injs.size() == MAX_PER_LVL*this->level || inj->count() > 1){
-		auto new_node = new Node<T>(this);
+	if(inj->count() > 1){
+		auto new_node = new Node<T>(this,val);
+		if(this == this->parent->smaller)
+			this->parent->smaller = new_node;
+		else
+			this->parent->greater = new_node;
 		new_node->push(inj,val);
+		return;
 	}
+	if(injs.size() == (this->MAX_LVL0 << this->level) )
+		throw bad_alloc();
 	else{
 		inj->alloc(injs.size());
 		injs.emplace_back(inj,val);//TODO maybe ordered??
@@ -179,6 +253,14 @@ void Leaf<T>::push(T* inj,FL_TYPE val){
 		this->sum += val;
 	}
 }
+
+//dont need to ask if parent is null
+template <typename T>
+void Leaf<T>::decrease(FL_TYPE val,unsigned n){
+	this->sum -= val;
+	this->parent->decrease(val);
+}
+
 
 template <typename T>
 void Leaf<T>::erase(T* elem){
@@ -190,7 +272,18 @@ void Leaf<T>::erase(T* elem){
 
 template <typename T>
 const T& Leaf<T>::choose(FL_TYPE sel) const {
+	auto p = injs[int(count() * sel / this->sum)].first;
+	if(p == nullptr){
+		std::cout << "BAD!!!" << std::endl;
+	}
 	return *injs[int(count() * sel / this->sum)].first;
+}
+
+
+
+template <typename T>
+const pair<T*,FL_TYPE>& Leaf<T>::choose(unsigned i) const {
+	return injs[i];
 }
 
 template <typename T>

@@ -64,7 +64,7 @@ FL_TYPE UnaryOperation<R, T>::auxFactors(
 		std::unordered_map<std::string, FL_TYPE> &var_factors) const {return 0.0;}
 
 template<typename R, typename T>
-BaseExpression::Reduction UnaryOperation<R, T>::factorizeRate() const {
+BaseExpression::Reduction UnaryOperation<R, T>::factorize() const {
 	throw std::invalid_argument("cannot factorize unary operations");
 	BaseExpression::Reduction r;
 	return r;
@@ -76,11 +76,8 @@ BaseExpression* UnaryOperation<R, T>::clone() const {
 }
 
 template<typename R, typename T>
-BaseExpression::DeleteAux UnaryOperation<R, T>::deleteElement(std::string exp) const{
-	BaseExpression::DeleteAux d;
-	d.deleted = false;
-	d.expression = this->clone();
-	return d;
+BaseExpression* UnaryOperation<R, T>::deleteElement(BaseExpression* exp) const{
+	return this->clone();
 }
 template<typename R, typename T>
 bool UnaryOperation<R, T>::operator==(const BaseExpression& exp) const {

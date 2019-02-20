@@ -54,7 +54,7 @@ FL_TYPE NullaryOperation<R>::auxFactors(
 		std::unordered_map<std::string, FL_TYPE> &var_factors) const {return 0.0;}
 
 template<typename R>
-BaseExpression::Reduction NullaryOperation<R>::factorizeRate() const {
+BaseExpression::Reduction NullaryOperation<R>::factorize() const {
 	BaseExpression::Reduction r;
 	return r;
 }
@@ -65,11 +65,8 @@ BaseExpression* NullaryOperation<R>::clone() const {
 }
 
 template<typename R>
-BaseExpression::DeleteAux NullaryOperation<R>::deleteElement(std::string exp) const {
-	BaseExpression::DeleteAux d;
-	d.deleted = false;
-	d.expression = this->clone();
-	return d;
+BaseExpression* NullaryOperation<R>::deleteElement(BaseExpression* exp) const {
+	return this->clone();
 }
 template<typename R>
 bool NullaryOperation<R>::operator==(const BaseExpression& exp) const {

@@ -36,8 +36,7 @@ FL_TYPE Constant<T>::auxFactors(
 template<typename T>
 BaseExpression::Reduction Constant<T>::factorize() const {
 	BaseExpression::Reduction r;
-	r.constant.push_back(val);
-	r.factorized_expression = new Constant<T>(*this);
+	r.factors.push_back(this->clone());
 	return r;
 }
 
@@ -46,10 +45,6 @@ BaseExpression* Constant<T>::clone() const {
 	return new Constant<T>(*this);
 }
 
-template<typename T>
-BaseExpression* Constant<T>::deleteElement(BaseExpression* exp) const{
-	return this->clone();
-}
 template<typename T>
 bool Constant<T>::operator==(const BaseExpression& exp) const {
 	try {

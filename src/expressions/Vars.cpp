@@ -61,8 +61,6 @@ template<typename R>
 BaseExpression::Reduction Auxiliar<R>::factorize() const {
 	BaseExpression::Reduction r;
 	Auxiliar<R>* aux = new Auxiliar<R>(*this);
-	r.aux.push_back(aux);
-	r.factorized_expression = aux;
 	r.aux_functions[aux->toString()] = aux;
 	return r;
 }
@@ -72,13 +70,6 @@ BaseExpression* Auxiliar<R>::clone() const {
 	return new Auxiliar<R>(*this);
 }
 
-template<typename R>
-BaseExpression* Auxiliar<R>::deleteElement(BaseExpression* exp) const{
-	BaseExpression* ex = this->clone();
-	if(*ex == *exp)
-		return new Constant<FL_TYPE>(1);
-	return ex;
-}
 template<typename R>
 AlgExpression<R>* Auxiliar<R>::reduce(const state::State& state,
 		const AuxMap&& aux_values) const {

@@ -65,10 +65,6 @@ BaseExpression* NullaryOperation<R>::clone() const {
 }
 
 template<typename R>
-BaseExpression* NullaryOperation<R>::deleteElement(BaseExpression* exp) const {
-	return this->clone();
-}
-template<typename R>
 bool NullaryOperation<R>::operator==(const BaseExpression& exp) const {
 	return false;
 }

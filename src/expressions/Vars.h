@@ -48,8 +48,6 @@ public:
 			override;
 	BaseExpression* clone() const
 			override;
-	BaseExpression* deleteElement(BaseExpression* exp) const
-			override;
 	bool operator==(const BaseExpression& exp) const;
 	//std::set<std::string> getAuxiliars() const override;
 	AlgExpression<R>* reduce(const state::State& state,

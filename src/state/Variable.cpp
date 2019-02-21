@@ -41,19 +41,14 @@ FL_TYPE AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux
 template <typename T>
 BaseExpression::Reduction AlgebraicVar<T>::factorize() const {
 	BaseExpression::Reduction r;
-	AlgebraicVar* var = new AlgebraicVar<T>(*this);
-	r.factor_vars.push_back(var);
-	r.factorized_expression = var;
+	r.factors.push_back(this->clone());
 	return r;
 }
 template <typename T>
 BaseExpression* AlgebraicVar<T>::clone() const {
 	return new AlgebraicVar<T>(*this);
 }
-template <typename T>
-BaseExpression* AlgebraicVar<T>::deleteElement(BaseExpression* exp) const{
-	return this->clone();
-}
+
 template <typename T>
 bool AlgebraicVar<T>::operator==(const BaseExpression& exp) const {
 	return *expression == exp;
@@ -109,15 +104,12 @@ FL_TYPE KappaVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) co
 }
 
 BaseExpression::Reduction KappaVar::factorize() const {
-	cout << "kappaVar" << endl;
 	BaseExpression::Reduction r;
+	r.factors.push_back(this->clone());
 	return r;
 }
 BaseExpression* KappaVar::clone() const {
 	return new KappaVar(*this);
-}
-BaseExpression* KappaVar::deleteElement(BaseExpression* exp) const{
-	return this->clone();
 }
 
 int KappaVar::evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values) const {

@@ -42,11 +42,6 @@ public:
 			override;
 	BaseExpression::Reduction factorize() const override;
 	BaseExpression* clone() const override;
-	BaseExpression* deleteElement(BaseExpression* exp) const override;
-
-	// function to check if a BinaryOperation can be factorized
-	// checks if there is the same expression at both sides of an operation
-	std::vector<BaseExpression*> getFactorizableElements(std::vector<BaseExpression*> v1, std::vector<BaseExpression*> v2) const;
 
 	//std::set<std::string> getAuxiliars() const override;
 	bool operator==(const BaseExpression& exp) const override;

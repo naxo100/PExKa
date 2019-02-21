@@ -34,7 +34,6 @@ public:
 				override;
 	BaseExpression::Reduction factorize() const override;
 	BaseExpression* clone() const override;
-	BaseExpression* deleteElement(BaseExpression* exp) const override;
 	//std::set<std::string> getAuxiliars() const override;
 	bool operator==(const BaseExpression& exp) const override;
 	~NullaryOperation();

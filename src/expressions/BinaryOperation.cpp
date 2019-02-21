@@ -167,8 +167,14 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 	BaseExpression::Reduction r1 = exp1->factorize();
 	BaseExpression::Reduction r2 = exp2->factorize();
 
-	// get the vector of factorizable expressions
-	vector<BaseExpression*> fac_list = this->getFactorizableElements(r1.aux, r2.aux);
+	r.factors.insert(r.factors.end(), r1.factors.begin(), r1.factors.end());
+	if(op == BaseExpression::DIV){
+		for(unsigned int i = 0; i < r2.factors.size(); i++){
+			r.factors.push_back(BaseExpression::makeBinaryExpression<false>(new Constant<FL_TYPE>(1), r2.factors[i], op));
+		}
+	}else
+		r.factors.insert(r.factors.end(), r2.factors.begin(), r2.factors.end());
+
 
 	map<string, BaseExpression*> m1 = r1.aux_functions;
 	map<string, BaseExpression*> m2 = r2.aux_functions;
@@ -186,9 +192,8 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 					if(m2[m1.begin()->first])
 						r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, m2[m1.begin()->first], BaseExpression::SUM);
 					else
-						throw std::invalid_argument("cant factorize");
+						throw std::invalid_argument("cant factorize expression (SUM)");
 				}
-
 			}else{
 				break;
 			}
@@ -205,7 +210,7 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 					if(m2[m1.begin()->first])
 						r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, m2[m1.begin()->first], BaseExpression::MINUS);
 					else
-						throw std::invalid_argument("cant factorize");
+						throw std::invalid_argument("cant factorize expression (MINUS)");
 				}
 			}else{
 				break;
@@ -224,9 +229,9 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 						r.aux_functions[it->first] = m2[it->first];
 				}
 			}else if(m1.size() > 0 && m2.size() == 0){
-				r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, exp2, BaseExpression::MULT);
+				r.aux_functions[m1.begin()->first] = m1.begin()->second;
 			}else if(m1.size() == 0 && m2.size() > 0){
-				r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, m2.begin()->second, BaseExpression::MULT);
+				r.aux_functions[m2.begin()->first] = m2.begin()->second;
 			}else{
 				break;
 			}
@@ -244,9 +249,9 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 						r.aux_functions[it->first] = new BinaryOperation(new Constant<FL_TYPE>(1), m2[it->first], BaseExpression::DIV);
 				}
 			}else if(m1.size() > 0 && m2.size() == 0){
-				r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, new BinaryOperation(new Constant<FL_TYPE>(1), exp2, BaseExpression::DIV), BaseExpression::MULT);
+				r.aux_functions[m1.begin()->first] = m1.begin()->second;
 			}else if(m1.size() == 0 && m2.size() > 0){
-				r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, new BinaryOperation(new Constant<FL_TYPE>(1), m2.begin()->second, BaseExpression::DIV), BaseExpression::MULT);
+				r.aux_functions[m2.begin()->first] = new BinaryOperation(new Constant<FL_TYPE>(1), m2.begin()->second, BaseExpression::DIV);
 			}else{
 				break;
 			}
@@ -261,111 +266,17 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 				for(it = m2.begin(); it != m2.end(); it++)
 					r.aux_functions[it->first] = new BinaryOperation(exp1, it->second, BaseExpression::POW);
 			else
-				throw std::invalid_argument("cannot factorize expression");
+				throw std::invalid_argument("cannot factorize expression (POW)");
 			break;
 		default:
 			break;
 	}
-
-	// put exp1 and exp2 values in vectors
-	r.constant.insert(r.constant.end(), r1.constant.begin(), r1.constant.end());
-	r.constant.insert(r.constant.end(), r2.constant.begin(), r2.constant.end());
-
-	// cannot factorize exp2 elements of a division
-	if(op == BaseExpression::DIV)
-		r.aux.insert(r.aux.end(), r1.aux.begin(), r1.aux.end());
-	else{
-		r.aux.insert(r.aux.end(), r1.aux.begin(), r1.aux.end());
-		r.aux.insert(r.aux.end(), r2.aux.begin(), r2.aux.end());
-	}
-
-
-	r.factor_vars.insert(r.factor_vars.end(), r1.factor_vars.begin(), r1.factor_vars.end());
-	r.factor_vars.insert(r.factor_vars.end(), r2.factor_vars.begin(), r2.factor_vars.end());
-
-
-	BaseExpression* ex;
-	if(fac_list.size() > 0){
-		if((op == BaseExpression::SUM) || (op == BaseExpression::MINUS)){
-			BaseExpression* ex1 = r1.factorized_expression;
-			BaseExpression* ex2 = r2.factorized_expression;
-			unsigned int i = 0;
-			// delete the auxiliars from both expressions
-			while(i < fac_list.size()){
-				ex1 = ex1->deleteElement(fac_list[i]);
-				ex2 = ex2->deleteElement(fac_list[i]);
-				i++;
-			}
-			// create the factorized expression
-			ex = new BinaryOperation<R, T1, T2>(ex1, ex2, op);
-			// multiply the expression with the auxiliars
-			for(unsigned int i=0; i< fac_list.size(); i++)
-				ex = new BinaryOperation<R, T1, T2>(fac_list[i], ex, BaseExpression::MULT);
-		}else{
-			ex = new BinaryOperation<R, T1, T2>(r1.factorized_expression, r2.factorized_expression, op);
-		}
-	}else
-		ex = new BinaryOperation<R, T1, T2>(r1.factorized_expression, r2.factorized_expression, op);
-
-	r.factorized_expression = ex;
 	return r;
-
-}
-
-template<typename R, typename T1, typename T2>
-vector<BaseExpression*> BinaryOperation<R, T1, T2>::getFactorizableElements(std::vector<BaseExpression*> v1, std::vector<BaseExpression*> v2) const{
-	// create vectors with the different elements of v1 and v2
-	vector<string> v1_str; // elements of v1 as strings
-	vector<string> v2_str; // elements of v2 as strings
-	vector<string> aux1_str; // different elements of v1 as strings
-	vector<BaseExpression*> aux1_exp; // different elements of v1 as expressions
-	vector<BaseExpression*> res; // factorizable elements of the expression
-	for(unsigned int i = 0; i < v1.size(); i++){
-		v1_str.push_back(v1[i]->toString());
-		if(!(std::find(aux1_str.begin(), aux1_str.end(), (v1[i]->toString())) != aux1_str.end())){
-			aux1_str.push_back(v1[i]->toString());
-			aux1_exp.push_back(v1[i]);
-		}
-	}
-	for(unsigned int i = 0; i < v2.size(); i++)
-		v2_str.push_back(v2[i]->toString());
-
-	// for each different expression, add to res the ones that are present in v1 and v2
-	if((op == BaseExpression::SUM) || (op == BaseExpression::MINUS)){
-		for (unsigned int i = 0; i < aux1_str.size(); i++) {
-			int c1 = std::count(v1_str.begin(), v1_str.end(), aux1_str[i]);
-			int c2 = std::count(v2_str.begin(), v2_str.end(), aux1_str[i]);
-			int j = 0;
-			while(j < std::min(c1, c2)){
-				res.push_back(aux1_exp[i]);
-				j++;
-			}
-		}
-	}
-	return res;
 }
 
 template<typename R, typename T1, typename T2>
 BaseExpression* BinaryOperation<R, T1, T2>::clone() const{
 	return new BinaryOperation<R, T1, T2>(*this);
-}
-
-template<typename R, typename T1, typename T2>
-BaseExpression* BinaryOperation<R, T1, T2>::deleteElement(BaseExpression* exp) const{
-	// tries to delete the expression in exp1p
-	BaseExpression* ex1 = exp1->deleteElement(exp);
-	//if the expression changes, then the element was deleted, and returns the new expression
-	if(*ex1 != *exp1)
-		return new BinaryOperation<R, T1, T2>(ex1, exp2, op);
-
-	if(op != BaseExpression::DIV){
-		// if the expression is not in exp1, tries to delete it in exp2
-		BaseExpression* ex2 = exp2->deleteElement(exp);
-		if(*ex2 != *exp2)
-			return new BinaryOperation<R, T1, T2>(exp1, ex2, op);
-	}
-	// if the expression is not in the BinaryOperation, then returns a clone
-	return this->clone();
 }
 
 template<typename R, typename T1, typename T2>

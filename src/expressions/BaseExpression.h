@@ -35,11 +35,8 @@ typedef std::unordered_map<std::string, FL_TYPE> AuxMap;
 class BaseExpression {
 public:
 	struct Reduction {
-		std::vector<FL_TYPE> constant;
-		std::vector<BaseExpression*> factor_vars;
-		std::vector<BaseExpression*> aux;
+		std::vector<BaseExpression*> factors;
 		std::map<std::string, BaseExpression*> aux_functions;
-		BaseExpression* factorized_expression;
 	};
 
 	enum AlgebraicOp {
@@ -83,12 +80,6 @@ public:
 	 */
 	virtual Reduction factorize() const = 0;
 	virtual BaseExpression* clone() const = 0;
-
-	/** \brief Deletes exp from the expression
-	 *
-	 */
-	virtual BaseExpression* deleteElement(BaseExpression* exp) const = 0;
-
 
 	//virtual std::set<std::string> getAuxiliars() const = 0;
 	virtual bool operator==(const BaseExpression& exp) const = 0;

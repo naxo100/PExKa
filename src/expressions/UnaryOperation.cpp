@@ -65,9 +65,21 @@ FL_TYPE UnaryOperation<R, T>::auxFactors(
 
 template<typename R, typename T>
 BaseExpression::Reduction UnaryOperation<R, T>::factorize() const {
-	throw std::invalid_argument("cannot factorize unary operations");
-	BaseExpression::Reduction r;
-	return r;
+	//throw std::invalid_argument("cannot factorize unary operations");
+	BaseExpression::Reduction res;
+	BaseExpression::Reduction r = exp->factorize();
+	map<string, BaseExpression*> m = r.aux_functions;
+	std::map<string, BaseExpression*>::iterator it;
+	switch(op){
+		case(BaseExpression::SQRT):
+			for(it = m.begin(); it != m.end(); it++)
+				res.aux_functions[it->first] = new UnaryOperation(it->second, BaseExpression::SQRT);
+			break;
+		default:
+			throw std::invalid_argument("cant factorize Unary Operation");
+			break;
+	}
+	return res;
 }
 
 template<typename R, typename T>
@@ -75,10 +87,6 @@ BaseExpression* UnaryOperation<R, T>::clone() const {
 	return new UnaryOperation<R, T>(*this);
 }
 
-template<typename R, typename T>
-BaseExpression* UnaryOperation<R, T>::deleteElement(BaseExpression* exp) const{
-	return this->clone();
-}
 template<typename R, typename T>
 bool UnaryOperation<R, T>::operator==(const BaseExpression& exp) const {
 	try {

@@ -54,7 +54,6 @@ public:
 
 	BaseExpression::Reduction factorize() const override;
 	BaseExpression* clone() const override;
-	BaseExpression* deleteElement(BaseExpression* exp) const override;
 
 	virtual T evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values = nullptr) const override;
 	virtual T evaluate(const state::State& state,const AuxMap& aux_values) const override;
@@ -81,10 +80,9 @@ public:
 			const pattern::Mixture &kappa);
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
-	
+
 	BaseExpression::Reduction factorize() const override;
 	BaseExpression* clone() const override;
-	BaseExpression* deleteElement(BaseExpression* exp) const override;
 	
 	int evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values ) const override;
 	int evaluate(const state::State& state,const AuxMap& aux_values) const override;

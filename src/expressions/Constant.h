@@ -22,7 +22,6 @@ public:
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const override;
 	BaseExpression::Reduction factorize() const override;
 	BaseExpression* clone() const override;
-	BaseExpression* deleteElement(BaseExpression* exp) const override;
 	bool operator==(const BaseExpression& exp) const override;
 
 	std::string toString() const override;

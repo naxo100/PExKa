@@ -156,19 +156,18 @@ vector<CcInjection*>::iterator InjRandSet::end(){
 InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 		InjRandContainer(_cc),average(0),counter(0),selected_root(0,0){
 	auto& deps = cc.getRateDeps();
+	distribution_tree::Node<CcValueInj>* pointer = nullptr;
 	for(auto r_cc : deps){
-		roots[r_cc.first.getId()][r_cc.second] = new distribution_tree::Node<CcValueInj>(1.0);
+		if(r_cc.first.getReduction().aux_functions.size())
+			roots[r_cc.first.getId()][r_cc.second] = new distribution_tree::Node<CcValueInj>(1.0);
+		else
+			roots[r_cc.first.getId()][r_cc.second] = nullptr;
 	}
 
-	for(auto agent : cc){
-		for(auto& id_site : *agent){
-
-		}
-	}
 }
 
 const list<Injection*>& InjRandTree::insert(CcInjection* inj,const state::State& state) {
-	static list<Injection*> injs; //be careful TODO test with new
+	static list<Injection*> injs; //be careful TODO test performance using new
 	injs.clear();
 	for(auto& rid_ccnode : roots){
 		for(auto& cc_node : rid_ccnode.second){
@@ -182,7 +181,10 @@ const list<Injection*>& InjRandTree::insert(CcInjection* inj,const state::State&
 				else
 					aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux
 			}
-			auto val = r.getRate().getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+			auto val = 1.0;
+			for(auto& aux_val : aux_values)
+				val *= r.getReduction().aux_functions.at(aux_val.first)->
+						getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 			auto new_inj = new CcValueInj(*inj);
 			injs.push_back(new_inj);
 			cc_node.second->push(new_inj,val);//TODO static cast?
@@ -195,15 +197,29 @@ const list<Injection*>& InjRandTree::insert(CcInjection* inj,const state::State&
 
 
 const Injection& InjRandTree::chooseRandom(default_random_engine& randGen) const {
-	auto uni = uniform_real_distribution<FL_TYPE>(0,partialReactivity());
-	auto selection = uni(randGen);
-	for(auto& cc_node : roots.at(selected_root.first)){
+	distribution_tree::DistributionTree<CcValueInj> *root = nullptr;
+	if(roots.count(selected_root.first)){
+		auto& root_map = roots.at(selected_root.first);
+		if(root_map.count(selected_root.second))
+			root = root_map.at(selected_root.second);
+	}
+
+	if(root){
+		auto uni = uniform_real_distribution<FL_TYPE>(0,partialReactivity());
+		auto selection = uni(randGen);
+		return root->choose(selection);
+		/*for(auto& cc_node : roots.at(selected_root.first)){
 		if(selection > cc_node.second->total())
 			selection -= cc_node.second->total();
 		else
-			return cc_node.second->choose(selection);
+			return cc_node.second->choose(selection);*/
 	}
-	throw std::out_of_range("Selected injection out of range. [InjRandTree::chooseRandom()]");
+	else{
+		auto uni = uniform_int_distribution<unsigned int>(0,count());
+		auto selection = uni(randGen);
+		return *root->choose(selection).first;
+	}
+	//throw std::out_of_range("Selected injection out of range. [InjRandTree::chooseRandom()]");
 }
 
 void InjRandTree::erase(Injection* inj){
@@ -218,16 +234,21 @@ CcInjection* InjRandTree::newInj() const{
 }
 
 size_t InjRandTree::count() const {
-	return counter;
+	return roots.begin()->second.begin()->second->total();
 }
 
 
 FL_TYPE InjRandTree::partialReactivity() const {
-	FL_TYPE t(0.0);
-	for(auto& cc_node : roots.at(selected_root.first)){
-		t += cc_node.second->total();
+	distribution_tree::DistributionTree<CcValueInj> *root = nullptr;
+	if(roots.count(selected_root.first)){
+		auto& root_map = roots.at(selected_root.first);
+		if(root_map.count(selected_root.second))
+			root = root_map.at(selected_root.second);
 	}
-	return t;
+	if(root)
+		return root->total();
+	else
+		return count();
 }
 
 

@@ -95,6 +95,7 @@ public:
 
 };
 
+/*
 //template <typename FL_TYPE>
 class RateVar : public Variable, public AlgExpression<FL_TYPE> {
 	const AlgExpression<FL_TYPE>* expression;
@@ -109,7 +110,7 @@ public:
 
 	virtual bool operator==(const BaseExpression& exp) const override;
 };
-
+*/
 class TokenVar: public AlgExpression<FL_TYPE> {
 	unsigned id;
 public:

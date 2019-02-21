@@ -78,13 +78,13 @@ UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
 	return count;
 }
 
-two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
+/*two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
 	two<FL_TYPE> act;
 	act.first = mixInstances(r.getLHS()) * r.getRate().getValue(*this).valueAs<FL_TYPE>();
 	//TODO act.second = ...
 	act.second = 0.;
 	return act;
-}
+}*/
 /*
 template <int n> //for both
 void State::negativeUpdate(SiteGraph::Internal& intf){
@@ -282,36 +282,34 @@ void State::advanceUntil(FL_TYPE sync_t) {
 	}
 }
 
-void State::selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const {
+void State::selectBinaryInj(const simulation::Rule& r,bool clsh_if_un) const {
 	set<Node*> total_cod;
 	//map<int,SiteGraph::Node*> total_inj;
 	//SiteGraph::Node*** total_inj = new SiteGraph::Node**[mix.compsCount()];
 	//ev->emb = new Node**[mix.compsCount()];
+	auto& mix = r.getLHS();
 	ev.clear(mix.compsCount());
-	int i = 0;
-	for(auto cc : mix){
-		//ev->emb[i] = new Node*[cc->size()];
-		auto& inj = injections[cc->getId()]->chooseRandom(randGen);
+	for(auto i = 0 ; i < mix.size() ; i++){
+		auto& cc = mix.getComponent(i);
+		injections[cc.getId()]->selectRule(r.getId(), i);
+		auto& inj = injections[cc.getId()]->chooseRandom(randGen);
 		try{
 			inj.codomain(ev.emb[i],total_cod);
 		}
 		catch(False& ex){
-			//delete[] ev->emb;
-			//delete ev;
 			throw NullEvent(2);//overlapped codomains
 		}
-		i++;
 	}
 	if(clsh_if_un)
 		return;//TODO
 	return;
 }
 
-void State::selectUnaryInj(const pattern::Mixture& mix) const {
+void State::selectUnaryInj(const simulation::Rule& mix) const {
 	return;
 }
 
-void State::selectInjection(const pattern::Mixture& mix,two<FL_TYPE> bin_act,
+void State::selectInjection(const simulation::Rule& r,two<FL_TYPE> bin_act,
 		two<FL_TYPE> un_act) {
 	//if mix.is empty TODO
 	//if mix.unary -> select_binary
@@ -319,22 +317,22 @@ void State::selectInjection(const pattern::Mixture& mix,two<FL_TYPE> bin_act,
 		if(std::isinf(un_act.first)){
 			auto rd = uniform_int_distribution<int>(1)(randGen);
 			if(rd)
-				return selectBinaryInj(mix,true);
+				return selectBinaryInj(r,true);
 			else
-				return selectUnaryInj(mix);
+				return selectUnaryInj(r);
 		}
 		else
-			return selectBinaryInj(mix,true);
+			return selectBinaryInj(r,true);
 	}
 	else{
 		if(std::isinf(un_act.first))
-			return selectUnaryInj(mix);
+			return selectUnaryInj(r);
 		else{
 			auto rd = uniform_real_distribution<FL_TYPE>(bin_act.first+un_act.first)(randGen);
 			if(rd > un_act.first)
-				return selectBinaryInj(mix,true);
+				return selectBinaryInj(r,true);
 			else
-				return selectUnaryInj(mix);
+				return selectUnaryInj(r);
 		}
 	}
 	return;
@@ -344,7 +342,7 @@ const simulation::Rule& State::drawRule(){
 	auto rid_alpha = activityTree->chooseRandom();
 	auto& rule = env.getRules()[rid_alpha.first];
 
-	auto a1a2 = rule.evalActivity(injections);
+	auto a1a2 = rule.evalActivity(injections,vars);
 	auto alpha = a1a2.first + a1a2.second;
 
 	//*?
@@ -363,7 +361,7 @@ const simulation::Rule& State::drawRule(){
 	}
 	int radius = 0;//TODO
 	//EventInfo* ev_p;
-	selectInjection(rule.getLHS(),make_pair(a1a2.first,radius),
+	selectInjection(rule,make_pair(a1a2.first,radius),
 			make_pair(a1a2.second,radius));
 	return rule;
 }
@@ -410,7 +408,7 @@ FL_TYPE State::event() {
 	//cout << "rules to update: ";
 	for(auto r_id : ev.rule_ids){
 		//cout << env.getRules()[r_id].getName() << ", ";
-		auto act = env.getRules()[r_id].evalActivity(injections);
+		auto act = env.getRules()[r_id].evalActivity(injections,vars);
 		activityTree->add(r_id,act.first+act.second);
 	}
 	//cout << endl;
@@ -482,7 +480,7 @@ void State::initActTree() {
 	for(auto rule_p : rules){
 		auto& rule = *rule_p;
 		//auto act_pr = evalActivity(rule);
-		auto act_pr = rule.evalActivity(injections);
+		auto act_pr = rule.evalActivity(injections,vars);
 		activityTree->add(rule.getId(),act_pr.first+act_pr.second);
 #ifdef DEBUG
 		printf("\t%s\t%.6f\n", rule.getName().c_str(),(act_pr.first+act_pr.second));
@@ -498,10 +496,17 @@ void State::print() const {
 	int i = 0;
 	for(auto& cc : env.getComponents()){
 		if(injections[i]->count())
-			cout << "\t"<< i <<"\t" << injections[i]->count() << " injs of " << cc.toString(env) << endl;
+			cout << "\t("<< i <<")\t" << injections[i]->count() <<
+			" injs of " << cc.toString(env) << endl;
 		i++;
 	}
-	cout << "\t}\n}" << endl;
+	cout << "\t}\n\tRules {\n";
+	for(auto& r : env.getRules()){
+		auto act = r.evalActivity(injections,vars);
+		cout << "\t(" << r.getId() << ")\t" << r.getName() << "\t("
+			<< act.first << " , " << act.second << ")" << endl;
+	}
+	cout << "\t}\n}\n";
 	cout << counter.toString() << endl;
 	cout << graph.toString(env) << endl;
 }

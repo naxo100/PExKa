@@ -143,7 +143,7 @@ bool KappaVar::operator==(const BaseExpression& exp) const {
 
 
 /******* class RateVar ****************/
-RateVar::RateVar(const short id,const std::string &nme,const bool is_obs,
+/*RateVar::RateVar(const short id,const std::string &nme,const bool is_obs,
 		const AlgExpression<FL_TYPE> *exp ) :
 				AlgExpression<FL_TYPE>(),
 				Variable(id,nme,is_obs),
@@ -176,7 +176,7 @@ bool RateVar::operator ==(const BaseExpression& exp) const {
 	catch(bad_cast &ex){	}
 	return false;
 }
-
+*/
 
 /**************************/
 /****** class Token *******/

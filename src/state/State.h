@@ -76,8 +76,8 @@ class State {
 	 */
 	static void (State::*action[6])(const simulation::Rule::Action&);
 
-	void selectBinaryInj(const pattern::Mixture& mix,bool clsh_if_un) const;
-	void selectUnaryInj(const pattern::Mixture& mix) const;
+	void selectBinaryInj(const simulation::Rule& mix,bool clsh_if_un) const;
+	void selectUnaryInj(const simulation::Rule& mix) const;
 
 
 public:
@@ -112,7 +112,7 @@ public:
 
 	UINT_TYPE mixInstances(const pattern::Mixture& mix) const;
 
-	two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
+	//two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
 
 	/** \brief Apply actions described by r to the state.
 	 * @param r rule to apply.
@@ -125,7 +125,7 @@ public:
 	void updateDeps(const pattern::Dependencies::Dependency& dep);
 
 
-	void selectInjection(const pattern::Mixture &mix,two<FL_TYPE> bin_act,
+	void selectInjection(const simulation::Rule &r,two<FL_TYPE> bin_act,
 			two<FL_TYPE> un_act);
 	const simulation::Rule& drawRule();
 	FL_TYPE event();

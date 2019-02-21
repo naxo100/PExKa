@@ -71,6 +71,7 @@ protected:
 	vector<ag_st_id> lhsMask,rhsMask;//[order] -> (comp_id,ag_id)
 	const BaseExpression *rate;//basic rate
 	pair<const BaseExpression*,int> unaryRate;//rate,radius
+	BaseExpression::Reduction basic,unary;
 	list<Action> script;
 	vector<state::Node*> newNodes;
 	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
@@ -100,11 +101,13 @@ public:
 	const Mixture& getLHS() const;
 	const Mixture& getRHS() const;
 	const BaseExpression& getRate() const;
+	const BaseExpression::Reduction& getReduction() const;
 	const BaseExpression& getUnaryRate() const;
+	const BaseExpression::Reduction& getUnaryReduction() const;
 	const CandidateMap& getInfluences() const;
 	const list<pair<unsigned,const BaseExpression*> > getTokenChanges() const;
 
-	two<FL_TYPE> evalActivity(const matching::InjRandContainer* const * injs) const;
+	two<FL_TYPE> evalActivity(const matching::InjRandContainer* const * injs,const VarVector& vars) const;
 
 	/** \brief Set RHS of the rule.
 	 * If this is a reversible rule, mix is declared in env and should not be

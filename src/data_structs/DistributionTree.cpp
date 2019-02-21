@@ -165,7 +165,7 @@ unsigned Node<T>::count() const{
 
 template <typename T>
 void Node<T>::balance(Leaf<T>* full,DistributionTree<T>* n) {
-	if(counter > 1){
+	if(injs.size() || multi_injs.size()){//TODO size > 5
 		auto new_node = new Node<T>(full,full->total()/full->count());
 		if(smaller == full)
 			smaller = new_node;

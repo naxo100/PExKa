@@ -46,6 +46,12 @@ const pattern::Mixture& Rule::getLHS() const {
 const BaseExpression& Rule::getRate() const {
 	return *rate;
 }
+const BaseExpression::Reduction& Rule::getReduction() const {
+	return basic;
+}
+const BaseExpression::Reduction& Rule::getUnaryReduction() const {
+	return unary;
+}
 
 void Rule::setRHS(const Mixture* mix,bool is_declared){
 	rhs = mix;
@@ -53,9 +59,13 @@ void Rule::setRHS(const Mixture* mix,bool is_declared){
 }
 void Rule::setRate(const BaseExpression* r){
 	rate = r;
+	if(r->getVarDeps() & BaseExpression::AUX)
+		basic = r->factorize();
 }
 void Rule::setUnaryRate(pair<const BaseExpression*,int> u_rate ){
 	unaryRate = u_rate;
+	if(u_rate.first->getVarDeps() & BaseExpression::AUX)
+		unary = u_rate.first->factorize();
 }
 
 
@@ -729,17 +739,16 @@ string Rule::toString(const pattern::Environment& env) const {
 }
 
 
-two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs) const{
+two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs,
+		const VarVector& vars) const{
 	auto& auxs = lhs.getAux();
 	FL_TYPE a = 1.0;
-	if(auxs.size())
-		for(auto cc : lhs){
-			injs[cc->getId()]->selectRule(id, 0);
-			a *= injs[cc->getId()]->partialReactivity();
-		}
-	else{
-		for(auto cc : lhs)
-			a *= injs[cc->getId()]->partialReactivity();
+	for(auto i = 0 ; i < lhs.size() ; i++){
+		auto& cc = lhs.getComponent(i);
+		injs[cc.getId()]->selectRule(id, i);
+		a *= injs[cc.getId()]->partialReactivity();
+		if(!auxs.size())
+			a *= rate->getValue(vars).valueAs<FL_TYPE>();
 	}
 	return make_pair(a,0.0);
 }

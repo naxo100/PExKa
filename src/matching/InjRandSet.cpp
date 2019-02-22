@@ -178,8 +178,8 @@ const list<Injection*>& InjRandTree::insert(CcInjection* inj,const state::State&
 					aux_values[aux.first] =
 							inj->getEmbedding()[get<1>(aux.second)]->
 							getInternalState(get<2>(aux.second)).valueAs<FL_TYPE>();
-				else
-					aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux
+				/*else
+					aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux*/
 			}
 			auto val = 1.0;
 			for(auto& aux_val : aux_values)

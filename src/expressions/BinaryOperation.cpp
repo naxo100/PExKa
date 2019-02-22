@@ -313,8 +313,8 @@ char BoolOpChar[] = "&|><=~";
 
 template<typename R, typename T1, typename T2>
 std::string BinaryOperation<R,T1,T2>::toString() const {
-	bool par = op != BaseExpression::MULT;
-	if(par)
+	//bool par = op != BaseExpression::MULT;
+	if(op < BaseExpression::MULT)
 		return "(" + exp1->toString() + AlgOpChar[op] + exp2->toString() + ")";
 	else
 		return exp1->toString() + AlgOpChar[op] + exp2->toString();

@@ -749,6 +749,9 @@ two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs,
 		a *= injs[cc.getId()]->partialReactivity();
 		if(!auxs.size())
 			a *= rate->getValue(vars).valueAs<FL_TYPE>();
+		else
+			for(auto factor : basic.factors)
+				a *= factor->getValue(vars).valueAs<FL_TYPE>();
 	}
 	return make_pair(a,0.0);
 }

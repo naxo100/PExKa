@@ -167,102 +167,114 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 	BaseExpression::Reduction r1 = exp1->factorize();
 	BaseExpression::Reduction r2 = exp2->factorize();
 
-	r.factors.insert(r.factors.end(), r1.factors.begin(), r1.factors.end());
-	if(op == BaseExpression::DIV){
-		for(unsigned int i = 0; i < r2.factors.size(); i++){
-			r.factors.push_back(BaseExpression::makeBinaryExpression<false>(new Constant<FL_TYPE>(1), r2.factors[i], op));
-		}
-	}else
-		r.factors.insert(r.factors.end(), r2.factors.begin(), r2.factors.end());
-
-
+	// create the auxiliar functions from the current operation with
+	// the functions of the expressions (exp1 and exp2)
 	map<string, BaseExpression*> m1 = r1.aux_functions;
 	map<string, BaseExpression*> m2 = r2.aux_functions;
 	std::map<string, BaseExpression*>::iterator it;
 	switch(op){
 		case (BaseExpression::SUM):
-			if(m1.size() > 0 && m2.size() == 0){
-				for(it = m1.begin(); it != m1.end(); it++)
-					r.aux_functions[it->first] = new BinaryOperation(m1[it->first], exp2, BaseExpression::SUM);
-			}else if(m1.size() == 0 && m2.size() > 0){
-				for(it = m2.begin(); it != m2.end(); it++)
-					r.aux_functions[it->first] = new BinaryOperation(exp1, m2[it->first], BaseExpression::SUM);
-			}else if(m1.size() > 0 && m2.size() > 0){
-				if(m1.size()==1 && m2.size()==1){
-					if(m2[m1.begin()->first])
+			if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) + constant|variable)
+				if(m1.size() == 1)
+					r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, exp2, BaseExpression::SUM);
+				else
+					throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) + constant|variable)");
+			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable + f(aux1)*.....*g(auxn)
+				if(m2.size() == 1)
+					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, m2.begin()->second, BaseExpression::SUM);
+				else
+					throw std::invalid_argument("cant factorize expression (constant|variable + f(aux1)*.....*g(auxn))");
+			}else if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) + f'(aux1')*.....*g'(auxn')
+				if(m1.size()==1 && m2.size()==1){ // f(aux1) + f'(aux1')
+					if(m2[m1.begin()->first]) // aux1 = aux1' => f(aux1) + f'(aux1') = g(aux1)
 						r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, m2[m1.begin()->first], BaseExpression::SUM);
 					else
-						throw std::invalid_argument("cant factorize expression (SUM)");
+						throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) + f'(aux1')*.....*g'(auxn'))");
 				}
 			}else{
 				break;
 			}
 			break;
 		case (BaseExpression::MINUS):
-			if(m1.size() > 0 && m2.size() == 0){
-				for(it = m1.begin(); it != m1.end(); it++)
-					r.aux_functions[it->first] = new BinaryOperation(m1[it->first], exp2, BaseExpression::MINUS);
-			}else if(m1.size() == 0 && m2.size() > 0){
-				for(it = m2.begin(); it != m2.end(); it++)
-					r.aux_functions[it->first] = new BinaryOperation(exp1, m2[it->first], BaseExpression::MINUS);
-			}else if(m1.size() > 0 && m2.size() > 0){
-				if(m1.size()==1 && m2.size()==1){
-					if(m2[m1.begin()->first])
+			if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) - constant|variable)
+				if(m1.size() == 1)
+					r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, exp2, BaseExpression::MINUS);
+				else
+					throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) - constant|variable)");
+			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable - f(aux1)*.....*g(auxn)
+				if(m2.size() == 1)
+					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, m2.begin()->second, BaseExpression::MINUS);
+				else
+					throw std::invalid_argument("cant factorize expression (constant|variable - f(aux1)*.....*g(auxn))");
+			}else if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) - f'(aux1')*.....*g'(auxn')
+				if(m1.size()==1 && m2.size()==1){ // f(aux1) - f'(aux1')
+					if(m2[m1.begin()->first]) // aux1 = aux1' => f(aux1) + f'(aux1') = g(aux1)
 						r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, m2[m1.begin()->first], BaseExpression::MINUS);
 					else
-						throw std::invalid_argument("cant factorize expression (MINUS)");
+						throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) - f'(aux1')*.....*g'(auxn'))");
 				}
 			}else{
 				break;
 			}
 			break;
 		case (BaseExpression::MULT):
-			if(m1.size() > 0 && m2.size() > 0){
+			// add the constants and variables to the response factors
+			r.factors.insert(r.factors.end(), r1.factors.begin(), r1.factors.end());
+			r.factors.insert(r.factors.end(), r2.factors.begin(), r2.factors.end());
+			if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) * f'(aux1')*.....*g'(auxn')
 				for(it = m1.begin(); it != m1.end(); it++){
-					if(m2[it->first])
+					if(m2[it->first]) // add the auxiliars that are in m1 and m2
 						r.aux_functions[it->first] = new BinaryOperation(m1[it->first], m2[it->first], BaseExpression::MULT);
-					else
+					else // add the auxiliars that are in m1 but not in m2
 						r.aux_functions[it->first] = it->second;
 				}
 				for(it = m2.begin(); it != m2.end(); it++){
-					if(!m1[it->first])
-						r.aux_functions[it->first] = m2[it->first];
+					if(!m1[it->first]) // add the auxiliars that are in m2 but not in m1
+						r.aux_functions[it->first] = it->second;
 				}
-			}else if(m1.size() > 0 && m2.size() == 0){
-				r.aux_functions[m1.begin()->first] = m1.begin()->second;
-			}else if(m1.size() == 0 && m2.size() > 0){
+			}else if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) * constant|variable)
+				r.aux_functions[m1.begin()->first] = m1.begin()->second; // add only the auxiliar functions, the constants|variables are in r.factors
+			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable) * f(aux1)*.....*g(auxn)
 				r.aux_functions[m2.begin()->first] = m2.begin()->second;
 			}else{
 				break;
 			}
 			break;
 		case (BaseExpression::DIV):
-			if(m1.size() > 0 && m2.size() > 0){
+			// add the constants and variables to the response factors
+			r.factors.insert(r.factors.end(), r1.factors.begin(), r1.factors.end());
+			if(op == BaseExpression::DIV){
+				for(unsigned int i = 0; i < r2.factors.size(); i++)
+					r.factors.push_back(BaseExpression::makeBinaryExpression<false>(new Constant<FL_TYPE>(1), r2.factors[i], op));
+			}else
+				r.factors.insert(r.factors.end(), r2.factors.begin(), r2.factors.end());
+
+			if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) / f'(aux1')*.....*g'(auxn')
 				for(it = m1.begin(); it != m1.end(); it++){
-					if(m2[it->first])
+					if(m2[it->first]) // add the auxiliars that are in m1 and m2, convert division to * 1/m2
 						r.aux_functions[it->first] = new BinaryOperation(m1[it->first], new BinaryOperation(new Constant<FL_TYPE>(1), m2[it->first], BaseExpression::DIV), BaseExpression::MULT);
-					else
+					else // add the auxiliars that are in m1 but not in m2
 						r.aux_functions[it->first] = it->second;
 				}
 				for(it = m2.begin(); it != m2.end(); it++){
-					if(!m1[it->first])
+					if(!m1[it->first]) // add the auxiliars that are in m2 but not in m1 (1/m2)
 						r.aux_functions[it->first] = new BinaryOperation(new Constant<FL_TYPE>(1), m2[it->first], BaseExpression::DIV);
 				}
-			}else if(m1.size() > 0 && m2.size() == 0){
+			}else if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) / constant|variable)
 				r.aux_functions[m1.begin()->first] = m1.begin()->second;
-			}else if(m1.size() == 0 && m2.size() > 0){
+			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable) / f(aux1)*.....*g(auxn)
 				r.aux_functions[m2.begin()->first] = new BinaryOperation(new Constant<FL_TYPE>(1), m2.begin()->second, BaseExpression::DIV);
 			}else{
 				break;
 			}
 			break;
 		case (BaseExpression::POW):
-			if(m1.size()>1 && m2.size()>0)
-				throw std::invalid_argument("cannot factorize, multiple auxiliars ^ one or more auxiliars");
-			else if(m1.size()>0 && m2.size() == 0)
+			if(m1.size()>0 && m2.size()>0) // f(aux1)*.....*g(auxn) ^ f'(aux1')*.....*g'(auxn')
+				throw std::invalid_argument("cannot factorize, one or more auxiliars ^ one or more auxiliars");
+			else if(m1.size()>0 && m2.size() == 0) // f(aux1)*.....*g(auxn) ^ constant|variable
 				for(it = m1.begin(); it != m1.end(); it++)
 					r.aux_functions[it->first] = new BinaryOperation(it->second, exp2, BaseExpression::POW);
-			else if(m1.size()==0 && m2.size() > 0)
+			else if(m1.size()==0 && m2.size() > 0) // constant|variable ^ f(aux1)*.....*g(auxn)
 				for(it = m2.begin(); it != m2.end(); it++)
 					r.aux_functions[it->first] = new BinaryOperation(exp1, it->second, BaseExpression::POW);
 			else

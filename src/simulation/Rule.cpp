@@ -743,16 +743,16 @@ two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs,
 		const VarVector& vars) const{
 	auto& auxs = lhs.getAux();
 	FL_TYPE a = 1.0;
-	for(auto i = 0 ; i < lhs.size() ; i++){
+	for(unsigned i = 0 ; i < lhs.size() ; i++){
 		auto& cc = lhs.getComponent(i);
 		injs[cc.getId()]->selectRule(id, i);
 		a *= injs[cc.getId()]->partialReactivity();
-		if(!auxs.size())
-			a *= rate->getValue(vars).valueAs<FL_TYPE>();
-		else
-			for(auto factor : basic.factors)
-				a *= factor->getValue(vars).valueAs<FL_TYPE>();
 	}
+	if(auxs.size())
+		for(auto factor : basic.factors)
+			a *= factor->getValue(vars).valueAs<FL_TYPE>();
+	else
+		a *= rate->getValue(vars).valueAs<FL_TYPE>();
 	return make_pair(a,0.0);
 }
 

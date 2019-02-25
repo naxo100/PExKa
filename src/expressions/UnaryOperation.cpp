@@ -70,15 +70,8 @@ BaseExpression::Reduction UnaryOperation<R, T>::factorize() const {
 	BaseExpression::Reduction r = exp->factorize();
 	map<string, BaseExpression*> m = r.aux_functions;
 	std::map<string, BaseExpression*>::iterator it;
-	switch(op){
-		case(BaseExpression::SQRT):
-			for(it = m.begin(); it != m.end(); it++)
-				res.aux_functions[it->first] = new UnaryOperation(it->second, BaseExpression::SQRT);
-			break;
-		default:
-			throw std::invalid_argument("cant factorize Unary Operation");
-			break;
-	}
+	for(it = m.begin(); it != m.end(); it++)
+		res.aux_functions[it->first] = new UnaryOperation(it->second, BaseExpression::SQRT);
 	return res;
 }
 

@@ -38,6 +38,7 @@ public:
 		// factorized expression = multiplications of all elements in factors * multiplications of all elements in aux_functions
 		std::vector<BaseExpression*> factors; // constants and variables of the expression
 		std::map<std::string, BaseExpression*> aux_functions; // functions of each auxiliar
+		BaseExpression* aux;
 	};
 
 	enum AlgebraicOp {

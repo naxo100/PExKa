@@ -176,19 +176,19 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 		case (BaseExpression::SUM):
 			if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) + constant|variable)
 				if(m1.size() == 1){
-					if(r1.aux)
-						r.aux_functions[m1.begin()->first] = new BinaryOperation(BaseExpression::makeBinaryExpression<false>(r1.aux, m1.begin()->second, BaseExpression::MULT), exp2, BaseExpression::SUM);
-					else
-						r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, exp2, BaseExpression::SUM);
+					BaseExpression* ex = m1.begin()->second;
+					for(auto fac : r1.factors)
+						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
+					r.aux_functions[m1.begin()->first] = new BinaryOperation(ex, exp2, BaseExpression::SUM);
 				}
 				else
 					throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) + constant|variable)");
 			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable + f(aux1)*.....*g(auxn)
 				if(m2.size() == 1){
-					if(r2.aux)
-						r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, BaseExpression::makeBinaryExpression<false>(r2.aux, m2.begin()->second, BaseExpression::MULT), BaseExpression::SUM);
-					else
-						r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, m2.begin()->second, BaseExpression::SUM);
+					BaseExpression* ex = m2.begin()->second;
+					for(auto fac : r2.factors)
+						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
+					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, ex, BaseExpression::SUM);
 				}
 				else
 					throw std::invalid_argument("cant factorize expression (constant|variable + f(aux1)*.....*g(auxn))");
@@ -197,10 +197,10 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 					BaseExpression* ex1 = m1.begin()->second;
 					BaseExpression* ex2 = m2[m1.begin()->first];
 					if(m2[m1.begin()->first]){ // aux1 = aux1' => f(aux1) + f'(aux1') = g(aux1)
-						if(r1.aux)
-							ex1 = BaseExpression::makeBinaryExpression<false>(r1.aux, ex1, BaseExpression::MULT);
-						if(r2.aux)
-							ex2 = BaseExpression::makeBinaryExpression<false>(r2.aux, ex2, BaseExpression::MULT);
+						for(auto fac : r1.factors)
+							ex1 = BaseExpression::makeBinaryExpression<false>(fac, ex1, BaseExpression::MULT);
+						for(auto fac : r2.factors)
+							ex2 = BaseExpression::makeBinaryExpression<false>(fac, ex2, BaseExpression::MULT);
 						r.aux_functions[m1.begin()->first] = new BinaryOperation(ex1, ex2, BaseExpression::SUM);
 					}
 					else
@@ -213,19 +213,19 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 		case (BaseExpression::MINUS):
 			if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) - constant|variable)
 				if(m1.size() == 1){
-					if(r1.aux)
-						r.aux_functions[m1.begin()->first] = new BinaryOperation(BaseExpression::makeBinaryExpression<false>(r1.aux, m1.begin()->second, BaseExpression::MULT), exp2, BaseExpression::SUM);
-					else
-						r.aux_functions[m1.begin()->first] = new BinaryOperation(m1.begin()->second, exp2, BaseExpression::SUM);
+					BaseExpression* ex = m1.begin()->second;
+					for(auto fac : r1.factors)
+						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
+					r.aux_functions[m1.begin()->first] = new BinaryOperation(ex, exp2, BaseExpression::MINUS);
 				}
 				else
 					throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) - constant|variable)");
 			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable - f(aux1)*.....*g(auxn)
 				if(m2.size() == 1){
-					if(r2.aux)
-						r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, BaseExpression::makeBinaryExpression<false>(r2.aux, m2.begin()->second, BaseExpression::MULT), BaseExpression::SUM);
-					else
-						r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, m2.begin()->second, BaseExpression::SUM);
+					BaseExpression* ex = m2.begin()->second;
+					for(auto fac : r2.factors)
+						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
+					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, ex, BaseExpression::MINUS);
 				}
 				else
 					throw std::invalid_argument("cant factorize expression (constant|variable - f(aux1)*.....*g(auxn))");
@@ -233,12 +233,12 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 				if(m1.size()==1 && m2.size()==1){ // f(aux1) - f'(aux1')
 					BaseExpression* ex1 = m1.begin()->second;
 					BaseExpression* ex2 = m2[m1.begin()->first];
-					if(m2[m1.begin()->first]){ // aux1 = aux1' => f(aux1) - f'(aux1') = g(aux1)
-						if(r1.aux)
-							ex1 = BaseExpression::makeBinaryExpression<false>(r1.aux, ex1, BaseExpression::MULT);
-						if(r2.aux)
-							ex2 = BaseExpression::makeBinaryExpression<false>(r2.aux, ex2, BaseExpression::MULT);
-						r.aux_functions[m1.begin()->first] = new BinaryOperation(ex1, ex2, BaseExpression::SUM);
+					if(m2[m1.begin()->first]){ // aux1 = aux1' => f(aux1) + f'(aux1') = g(aux1)
+						for(auto fac : r1.factors)
+							ex1 = BaseExpression::makeBinaryExpression<false>(fac, ex1, BaseExpression::MULT);
+						for(auto fac : r2.factors)
+							ex2 = BaseExpression::makeBinaryExpression<false>(fac, ex2, BaseExpression::MULT);
+						r.aux_functions[m1.begin()->first] = new BinaryOperation(ex1, ex2, BaseExpression::MINUS);
 					}
 					else
 						throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) + f'(aux1')*.....*g'(auxn'))");
@@ -264,10 +264,8 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 				}
 			}else if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) * constant|variable)
 				r.aux_functions[m1.begin()->first] = m1.begin()->second;
-				r.aux = exp2->clone();
 			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable) * f(aux1)*.....*g(auxn)
 				r.aux_functions[m2.begin()->first] = m2.begin()->second;
-				r.aux = exp1->clone();
 			}else{
 				break;
 			}
@@ -294,10 +292,8 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 				}
 			}else if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) / constant|variable)
 				r.aux_functions[m1.begin()->first] = m1.begin()->second;
-				r.aux = new BinaryOperation(new Constant<FL_TYPE>(1), exp2, BaseExpression::DIV);
 			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable) / f(aux1)*.....*g(auxn)
 				r.aux_functions[m2.begin()->first] = new BinaryOperation(new Constant<FL_TYPE>(1), m2.begin()->second, BaseExpression::DIV);
-				r.aux = exp1->clone();
 			}else{
 				break;
 			}
@@ -308,17 +304,20 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 			else if(m1.size()>0 && m2.size() == 0) // f(aux1)*.....*g(auxn) ^ constant|variable
 				for(it = m1.begin(); it != m1.end(); it++)
 					r.aux_functions[it->first] = new BinaryOperation(it->second, exp2, BaseExpression::POW);
-			else if(m1.size()==0 && m2.size() > 0) // constant|variable ^ f(aux1)*.....*g(auxn)
-				for(it = m2.begin(); it != m2.end(); it++)
-					r.aux_functions[it->first] = new BinaryOperation(exp1, it->second, BaseExpression::POW);
-			else
-				throw std::invalid_argument("cannot factorize expression (POW)");
+			else if(m1.size()==0 && m2.size() > 0){ // constant|variable ^ f(aux1)*.....*g(auxn)
+				if(m2.size() == 1)
+					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, m2.begin()->second, BaseExpression::POW);
+				else
+					throw std::invalid_argument("cannot factorize expression constant|variable ^ multiple auxiliars");
+			}else
+				break;
 			break;
 		default:
 			break;
 	}
 
 	return r;
+
 //	vector<BaseExpression*> fac_list = this->getFactorizableElements(r1.aux, r2.aux);
 //
 //	// put exp1 and exp2 values in vectors

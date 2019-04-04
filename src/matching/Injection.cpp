@@ -23,11 +23,11 @@ Injection::~Injection() {}
 	return this->getEmbedding() < inj.getEmbedding();
 }*/
 
-void Injection::alloc(size_t addr){
+void Injection::alloc(int addr){
 	address = addr;
 }
 
-size_t Injection::getAddress() const {
+int Injection::getAddress() const {
 	return address;
 }
 
@@ -110,7 +110,7 @@ const vector<Node*>& CcInjection::getEmbedding() const {
 	return ccAgToNode;
 }
 
-void CcInjection::codomain(Node* injs[],set<Node*> cod) const {
+void CcInjection::codomain(Node* injs[],set<Node*>& cod) const {
 	int i = 0;
 	for(auto node_p : ccAgToNode){
 		if(cod.find(node_p) != cod.end())
@@ -150,16 +150,27 @@ bool CcInjection::operator==(const Injection& inj) const{
 
 /********** CcValueInj *******************/
 
-CcValueInj::CcValueInj(const pattern::Mixture::Component& _cc) : CcInjection(_cc), container(nullptr) {}
+CcValueInj::CcValueInj(const pattern::Mixture::Component& _cc) : CcInjection(_cc) {}
 
-CcValueInj::CcValueInj(const CcInjection& inj) : CcInjection(inj), container(nullptr) {};
+CcValueInj::CcValueInj(const CcInjection& inj) : CcInjection(inj) {};
 
-void CcValueInj::setContainer(distribution_tree::DistributionTree<CcValueInj>* cont){
-	container = cont;
+/*void CcValueInj::alloc(int address){
+	containers.at(address) =
+}*/
+
+
+void CcValueInj::addContainer(distribution_tree::DistributionTree<CcValueInj>& cont,int address){
+	containers[&cont] = address;
+}
+
+void CcValueInj::removeContainer(distribution_tree::DistributionTree<CcValueInj>& cont){
+	containers.erase(&cont);
 }
 
 void CcValueInj::selfRemove(){
-	container->erase(this);
+	for(auto cont_addr : containers)
+		cont_addr.first->erase(cont_addr.second);
+	containers.clear();//TODO is mandatory?
 }
 
 

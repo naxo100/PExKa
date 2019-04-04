@@ -22,10 +22,9 @@ InjRandContainer::~InjRandContainer(){
 		delete inj;
 }
 
-const list<Injection*>& InjRandContainer::emplace(Node& node,
+Injection* InjRandContainer::emplace(Node& node,
 		two<std::set<state::Internal*> > &port_lists,const state::State& state,small_id root) {
 	CcInjection* inj;
-	static list<Injection*> empty;
 	if(freeInjs.empty()){
 		inj = newInj();
 		freeInjs.push_back(inj);
@@ -34,13 +33,13 @@ const list<Injection*>& InjRandContainer::emplace(Node& node,
 		inj = freeInjs.front();
 	}
 	if(inj->reuse(cc,node,port_lists,state,root) == false)
-		return empty;
-	auto& injs = insert(inj,state);
+		return nullptr;
+	insert(inj,state);
 	freeInjs.pop_front();
-	return injs;
+	return inj;
 }
 
-const list<Injection*>& InjRandContainer::emplace(Injection* base_inj,map<Node*,Node*>& mask,const state::State& state){
+Injection* InjRandContainer::emplace(Injection* base_inj,map<Node*,Node*>& mask,const state::State& state){
 	CcInjection* inj;
 	if(freeInjs.empty()){
 		inj = static_cast<CcInjection*>(base_inj->clone(mask));
@@ -51,7 +50,7 @@ const list<Injection*>& InjRandContainer::emplace(Injection* base_inj,map<Node*,
 
 	inj->copy(static_cast<CcInjection*>(base_inj),mask);//TODO static_cast??
 	//container[inj->address];
-	auto& injs = insert(inj,state);
+	insert(inj,state);
 	freeInjs.pop_front();
 
 /*#if DEBUG
@@ -59,7 +58,7 @@ const list<Injection*>& InjRandContainer::emplace(Injection* base_inj,map<Node*,
 		if(inj != inj2 && *inj == *inj2)
 			throw invalid_argument("InjSet cannot contain the same injection twice.");
 #endif*/
-	return injs;
+	return inj;
 }
 
 void InjRandContainer::selectRule(int rid,small_id cc) const {/*do nothing*/};
@@ -101,9 +100,7 @@ const Injection& InjRandSet::chooseRandom(default_random_engine& randGen) const{
 	}
 }
 
-const list<Injection*>& InjRandSet::insert(CcInjection* inj,const state::State& state){
-	static list<Injection*> ret;
-	ret.clear();
+void InjRandSet::insert(CcInjection* inj,const state::State& state){
 	inj->alloc(container.size());
 	container.push_back(inj);
 	if(inj->count() > 1){
@@ -112,8 +109,6 @@ const list<Injection*>& InjRandSet::insert(CcInjection* inj,const state::State& 
 	}
 	else
 		counter++;
-	ret.push_back(inj);
-	return ret;
 }
 
 void InjRandSet::erase(Injection* inj){
@@ -166,9 +161,8 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 
 }
 
-const list<Injection*>& InjRandTree::insert(CcInjection* inj,const state::State& state) {
-	static list<Injection*> injs; //be careful TODO test performance using new
-	injs.clear();
+void InjRandTree::insert(CcInjection* inj,const state::State& state) {
+	auto ccval_inj = static_cast<CcValueInj*>(inj);
 	for(auto& rid_ccnode : roots){
 		for(auto& cc_node : rid_ccnode.second){
 			auto& r = state.getEnv().getRules()[rid_ccnode.first];
@@ -185,14 +179,10 @@ const list<Injection*>& InjRandTree::insert(CcInjection* inj,const state::State&
 			for(auto& aux_val : aux_values)
 				val *= r.getReduction().aux_functions.at(aux_val.first)->
 						getValue(state, move(aux_values)).valueAs<FL_TYPE>();
-			auto new_inj = new CcValueInj(*inj);
-			injs.push_back(new_inj);
-			cc_node.second->push(new_inj,val);//TODO static cast?
+			cc_node.second->push(ccval_inj,val);//TODO static cast?
 		}
 	}
 	counter += inj->count();
-	delete inj;//TODO do not delete
-	return injs;
 }
 
 

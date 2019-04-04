@@ -9,6 +9,7 @@
 #define SRC_UTIL_WARNING_H_
 
 #include <list>
+#include <map>
 #include "../grammar/location.hh"
 
 
@@ -20,19 +21,23 @@ public:
 	Warning(const std::string& msg,const yy::location& loc);
 	~Warning();
 
-	const std::string& what() const;
+	const std::string what() const;
 };
 
 
-class WarningStack : std::list<Warning> {
+class WarningStack : std::multimap<int,Warning> {
 	static WarningStack stack;
+	static const int MAX_WARNS = 3;
+	static int global_id;
 	WarningStack();
 	WarningStack(const WarningStack&);
 public:
 	static WarningStack& getStack();
-	using std::list<Warning>::emplace_back;
+	int add(int id,const std::string& msg,const yy::location loc = yy::location());
 	void show() const;
 };
 
+
+#define ADD_WARN(msg,loc) {static int id = 0;id = WarningStack::getStack().add(id,msg,loc);}
 
 #endif /* SRC_UTIL_WARNING_H_ */

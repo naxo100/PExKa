@@ -188,10 +188,10 @@ NullaryOperation* NullaryOperation::clone() const{
 	return new NullaryOperation(*this);
 }
 void NullaryOperation::show( string tabs ) const {
-	string ar_type[] = {"TRUE","FALSE","RAND_1"};
+	static string n_ops[] = {"Rand(1)","TIME","EVENT","NULL_EVENT","PROD_EVENT","CPUTIME","ACTIVITY"};
 	tabs += "   ";
 
-	cout << endl << tabs << "NullaryOperation: (" << ar_type[func] << ")";
+	cout << endl << tabs << "NullaryOperation: (" << n_ops[func] << ")";
 }
 
 
@@ -202,7 +202,7 @@ Var::Var(const location &l,const VarType &t,const Id &label):
 BaseExpression* Var::eval(const pattern::Environment& env,
 		const Expression::VAR &vars,pattern::DepSet* deps,
 		const char flags) const {
-	BaseExpression* expr;
+	BaseExpression* expr =nullptr;
 	switch(type){
 	case VAR:
 		try {
@@ -240,19 +240,13 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 			auto id = env.getTokenId(name.getString());
 			if(deps)
 				deps->emplace(pattern::Dependencies::TOK,id);
+			expr = new state::TokenVar(id);
 		}
 		catch(const std::out_of_range &e){
 			throw SemanticError("Token '"+name.getString()+
 					"' was not defined.",loc);
 		}
 		break;
-	case TIME:break;
-	case EVENT:break;
-	case NULL_EVENT:break;
-	case PROD_EVENT:break;
-	case CPUTIME:break;
-	case ACTIVITY:break;
-	default:break;
 	}
 	return expr;
 }

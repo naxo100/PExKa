@@ -186,7 +186,7 @@ struct EventInfo {
 	//new cc derived from multinode
 	map<Node*,Node*> new_cc;
 	//mask for new injections, nullptr are erased injs
-	map<matching::Injection*,list<matching::Injection*>> inj_mask;
+	map<matching::Injection*,matching::Injection*> inj_mask;
 	//aux_values
 	unordered_map<string,FL_TYPE> aux_map;
 

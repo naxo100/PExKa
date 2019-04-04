@@ -16,13 +16,13 @@ namespace expressions {
 
 template<typename R>
 struct NullaryOperations {
-	static R (*funcs[])();
+	static R (*funcs[])(const state::State&);
 };
 
 
 template<typename R>
 class NullaryOperation: public AlgExpression<R> {
-	R (*func)();
+	R (*func)(const state::State&);
 	const char op;
 public:
 	R evaluate(const VarVector &consts,
@@ -42,7 +42,7 @@ public:
 
 	char getVarDeps() const override;
 
-	virtual std::string toString() const override;
+	std::string toString() const override;
 };
 
 } /* namespace expression */

@@ -95,6 +95,11 @@ char Auxiliar<T>::getVarDeps() const{
 	return BaseExpression::AUX;
 }
 
+template <typename T>
+bool Auxiliar<T>::isAux() const {
+	return true;
+}
+
 
 template <typename T>
 std::string Auxiliar<T>::toString() const {

@@ -122,6 +122,9 @@ public:
 
 	bool operator==(const BaseExpression& exp) const override;
 
+	BaseExpression::Reduction factorize() const override;
+	BaseExpression* clone() const override;
+
 	//virtual void getNeutralAuxMap(
 	//		std::unordered_map<std::string, FL_TYPE>& aux_map) const;
 };

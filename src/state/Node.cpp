@@ -68,47 +68,41 @@ void Node::copyDeps(const Node& node,EventInfo& ev,matching::InjRandContainer** 
 		const state::State& state) {
 	for(small_id i = 0; i < intfSize; i++){
 		for(auto inj : *node.interface[i].deps.first){
-			const list<matching::Injection*>* new_injs;
+			matching::Injection* new_inj;
 			try {
-				new_injs = &(ev.inj_mask.at(inj));
+				new_inj = ev.inj_mask.at(inj);
 			}
 			catch(out_of_range &ex){
-				new_injs = &(injs[inj->pattern().getId()]->emplace(inj,ev.new_cc,state));
-				ev.inj_mask[inj] = *new_injs;
+				new_inj = injs[inj->pattern().getId()]->emplace(inj,ev.new_cc,state);
+				ev.inj_mask[inj] = new_inj;
 			}
-			for(auto new_inj : *new_injs){
-				interface[i].deps.first->emplace(new_inj);
-				ev.to_update.emplace(&new_inj->pattern());
-			}
+			interface[i].deps.first->emplace(new_inj);
+			ev.to_update.emplace(&new_inj->pattern());
 		}
 		for(auto inj : *node.interface[i].deps.second){
-			const list<matching::Injection*>* new_injs;
+			matching::Injection* new_inj;
 			try {
-				new_injs = &ev.inj_mask.at(inj);
+				new_inj = ev.inj_mask.at(inj);
 			}
 			catch(out_of_range &ex){
-				new_injs = &injs[inj->pattern().getId()]->emplace(inj,ev.new_cc,state);
-				ev.inj_mask[inj] = *new_injs;
+				new_inj = injs[inj->pattern().getId()]->emplace(inj,ev.new_cc,state);
+				ev.inj_mask[inj] = new_inj;
 			}
-			for(auto new_inj : *new_injs){
-				interface[i].deps.second->emplace(new_inj);
-				ev.to_update.emplace(&new_inj->pattern());
-			}
+			interface[i].deps.second->emplace(new_inj);
+			ev.to_update.emplace(&new_inj->pattern());
 		}
 	}
 	for(auto inj : *node.deps){
-		const list<matching::Injection*>* new_injs;
+		matching::Injection* new_inj;
 		try {
-			new_injs = &ev.inj_mask.at(inj);
+			new_inj = ev.inj_mask.at(inj);
 		}
 		catch(out_of_range &ex){
-			new_injs = &injs[inj->pattern().getId()]->emplace(inj,ev.new_cc,state);
-			ev.inj_mask[inj] = *new_injs;
+			new_inj = injs[inj->pattern().getId()]->emplace(inj,ev.new_cc,state);
+			ev.inj_mask[inj] = new_inj;
 		}
-		for(auto new_inj : *new_injs){
-			deps->emplace(new_inj);
-			ev.to_update.emplace(&new_inj->pattern());
-		}
+		deps->emplace(new_inj);
+		ev.to_update.emplace(&new_inj->pattern());
 	}
 }
 
@@ -238,6 +232,9 @@ void Node::assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id,co
 		interface[id].val = val;//TODO opertor= ??
 		interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
 	//}
+#ifdef DEBUG
+		cout << "value changed to: " << val.valueAs<FL_TYPE>() << endl;
+#endif
 }
 
 void Node::unbind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,bool side_eff){
@@ -369,9 +366,9 @@ void SubNode::removeFrom(EventInfo& ev,matching::InjRandContainer** injs,SiteGra
 	graph.decPopulation();
 	for(auto i = 0; i < intfSize; i++){
 		for(auto dep : *interface[i].deps.first)//necessary? TODO
-			ev.inj_mask[dep].clear();
+			ev.inj_mask[dep] = nullptr;
 		for(auto dep : *interface[i].deps.second)
-			ev.inj_mask[dep].clear();
+			ev.inj_mask[dep] = nullptr;
 		auto lnk = interface[i].link;
 		if(lnk.first){
 			auto& opt_lnkd_node = ev.new_cc[lnk.first];
@@ -380,7 +377,7 @@ void SubNode::removeFrom(EventInfo& ev,matching::InjRandContainer** injs,SiteGra
 			}
 			else{
 				for(auto dep : *lnk.first->getLifts(lnk.second).second)//TODO review
-					ev.inj_mask[dep].clear();
+					ev.inj_mask[dep] = nullptr;
 				if(opt_lnkd_node == nullptr)
 					opt_lnkd_node = new Node(*lnk.first,ev.new_cc);
 				ev.side_effects.emplace(opt_lnkd_node,i);
@@ -389,7 +386,7 @@ void SubNode::removeFrom(EventInfo& ev,matching::InjRandContainer** injs,SiteGra
 		}
 	}
 	for(auto dep : *deps)
-		ev.inj_mask[dep].clear();
+		ev.inj_mask[dep] = nullptr;
 }
 
 void SubNode::changeIntState(EventInfo& ev,matching::InjRandContainer** injs,small_id id,small_id value){
@@ -406,7 +403,7 @@ void SubNode::changeIntState(EventInfo& ev,matching::InjRandContainer** injs,sma
 	//else
 		new_node->setState(id,value);
 	for(auto dep : *interface[id].deps.first)
-		ev.inj_mask[dep].clear();
+		ev.inj_mask[dep] = nullptr;
 }
 
 void SubNode::assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id,const SomeValue& value){
@@ -423,14 +420,14 @@ void SubNode::assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id
 	//else
 		new_node->setState(id,value);
 	for(auto dep : *interface[id].deps.first)
-		ev.inj_mask[dep].clear();
+		ev.inj_mask[dep] = nullptr;
 }
 
 void SubNode::unbind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,bool side_eff){
 	//unbind must be inside cc
 	auto& lnk = this->interface[id].link;
 	if(!lnk.first){
-		ev.warns;//ev.null_actions.emplace(this,-id);
+		ev.warns++;//ev.null_actions.emplace(this,-id);
 		return;//null_event
 	}
 	if(!ev.new_cc.count(this))
@@ -449,9 +446,9 @@ void SubNode::unbind(EventInfo& ev,matching::InjRandContainer** injs,small_id id
 	node1->setLink(id,nullptr,0);
 	node2->setLink(lnk.second,nullptr,0);
 	for(auto dep : *interface[id].deps.second)
-		ev.inj_mask[dep].clear();
+		ev.inj_mask[dep] = nullptr;
 	for(auto dep : *lnk.first->getLifts(lnk.second).second)
-		ev.inj_mask[dep].clear();
+		ev.inj_mask[dep] = nullptr;
 }
 
 void SubNode::bind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,Node* trgt_node,
@@ -486,10 +483,10 @@ void SubNode::bind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,N
 		new_node->Node::bind(ev,injs,id,trgt_node,trgt_site,side_eff);
 	}
 	for(auto dep : *interface[id].deps.second)
-		ev.inj_mask[dep].clear();
+		ev.inj_mask[dep] = nullptr;
 	if(interface[id].link.first){
 		for(auto dep : *interface[id].link.first->getLifts(trgt_site).second)
-			ev.inj_mask[dep].clear();
+			ev.inj_mask[dep] = nullptr;
 	}
 
 }

@@ -61,6 +61,15 @@ float State::getTokenValue(unsigned tok_id) const{
 	return tokens[tok_id];
 }
 
+FL_TYPE State::getTotalActivity() const {
+	return activityTree->total();
+}
+
+default_random_engine& State::getRandomGenerator() const{
+	return randGen;
+}
+
+
 void State::addNodes(unsigned n,const pattern::Mixture& mix){
 	if(n == 0)//test?
 		return;
@@ -208,7 +217,7 @@ void State::apply(const simulation::Rule& r){
 	}
 	//apply token changes
 	for(auto& change : r.getTokenChanges())
-		tokens[change.first] += change.second->getValue(*this).valueAs<FL_TYPE>();
+		tokens[change.first] += change.second->getValue(*this,move(ev.aux_map)).valueAs<FL_TYPE>();
 }
 
 void State::positiveUpdate(const simulation::Rule& r){
@@ -228,56 +237,58 @@ void State::positiveUpdate(const simulation::Rule& r){
 				}catch(out_of_range &ex) {}//not in new_cc
 			//if(cc->getAgent(cc_ag_root.second).getId() != node->getId())
 			//	continue;
-			bool b=true;//TODO this is WROOOOONGGGG!!
-			/*for(auto elem : info.infl_by)
+			/*bool b=true;//TODO this is WROOOOONGGGG!!
+			for(auto elem : info.infl_by)
 				if(ev.null_actions.count(make_pair(static_cast<const Node*>(node),elem)) == 0){
 					b=false;break;
 				}
 			if(b)
 				continue;*/
 			two<std::set<Internal*> > port_lists;
-			const list<matching::Injection*>* injs_p = &injections[cc->getId()]->emplace(*node,port_lists,*this,cc_ag_root.second);
+			auto inj_p = injections[cc->getId()]->emplace(*node,port_lists,*this,cc_ag_root.second);
 
-			if(port_lists.first.empty() && port_lists.second.empty())
-				for(auto inj_p : *injs_p)
+			if(inj_p){
+				if(port_lists.first.empty() && port_lists.second.empty())
 					node->addDep(inj_p);
-			else{
-				for(auto port : port_lists.first)
-					port->deps.first->insert(injs_p->begin(),injs_p->end());
-				for(auto port : port_lists.second)
-					port->deps.second->insert(injs_p->begin(),injs_p->end());
-			}
+				else{
+					for(auto port : port_lists.first)
+						port->deps.first->emplace(inj_p);
+					for(auto port : port_lists.second)
+						port->deps.second->emplace(inj_p);
+				}
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
-			if(injs_p->size()){
 				ev.to_update.emplace(cc);
 				updateDeps(Deps::Dependency(Deps::KAPPA,cc->getId()));
+
 			}
 		}
 	}
 	for(auto side_eff : ev.side_effects){//trying to create injection for side-effects
 		for(auto& cc_ag : env.getFreeSiteCC(side_eff.first->getId(),side_eff.second)){
 			two<std::set<Internal*> > port_lists;
-			const list<matching::Injection*>* injs_p = &injections[cc_ag.first->getId()]->emplace(*side_eff.first,port_lists,*this,cc_ag.second);
-			if(port_lists.first.empty() && port_lists.second.empty())
-				for(auto inj_p : *injs_p)
+			auto inj_p = injections[cc_ag.first->getId()]->emplace(*side_eff.first,port_lists,*this,cc_ag.second);
+			if(inj_p){
+				if(port_lists.first.empty() && port_lists.second.empty())
 					side_eff.first->addDep(inj_p);
-			else{
-				for(auto port : port_lists.first)
-					port->deps.first->insert(injs_p->begin(),injs_p->end());
-				for(auto port : port_lists.second)
-					port->deps.second->insert(injs_p->begin(),injs_p->end());
-			}
-			if(injs_p->size())
+				else{
+					for(auto port : port_lists.first)
+						port->deps.first->emplace(inj_p);
+					for(auto port : port_lists.second)
+						port->deps.second->emplace(inj_p);
+				}
 				ev.to_update.emplace(cc_ag.first);
+			}
 		}
 	}
 }
 
 void State::advanceUntil(FL_TYPE sync_t) {
+	counter.next_sync_at = sync_t;
+	plot.fill(*this,env);
 	while(counter.getTime() < sync_t){
-		plot.fill(*this,env);
+		FL_TYPE dt = 0;
 		try{
-			counter.advanceTime(event());
+			dt = event();
 			counter.incEvents();
 		}
 		catch(NullEvent &ex){
@@ -287,6 +298,7 @@ void State::advanceUntil(FL_TYPE sync_t) {
 			counter.incNullEvents(ex.error);
 		}
 	}
+	plot.fill(*this,env);
 }
 
 void State::selectBinaryInj(const simulation::Rule& r,bool clsh_if_un) const {
@@ -296,7 +308,7 @@ void State::selectBinaryInj(const simulation::Rule& r,bool clsh_if_un) const {
 	//ev->emb = new Node**[mix.compsCount()];
 	auto& mix = r.getLHS();
 	ev.clear(mix.compsCount());
-	for(auto i = 0 ; i < mix.size() ; i++){
+	for(unsigned i = 0 ; i < mix.compsCount() ; i++){
 		auto& cc = mix.getComponent(i);
 		injections[cc.getId()]->selectRule(r.getId(), i);
 		auto& inj = injections[cc.getId()]->chooseRandom(randGen);
@@ -384,16 +396,23 @@ FL_TYPE State::event() {
 	auto exp_distr = exponential_distribution<FL_TYPE>(act);
 	dt = exp_distr(randGen);
 	if(act == 0 || std::isinf(dt)){
+		counter.advanceTime(dt);
+		plot.fill(*this,env);
 		return dt;//TODO
 	}
+
 	//TODO perts
 
 	#ifdef DEBUG
-		printf("Event %3lu",counter.getEvent());
-		printf(" act = %f\t dt = %3.6f",act,dt);
+		printf("Event %3lu | Time %.4f \t  act = %.4f",
+				counter.getEvent(),counter.getTime()+dt,act);
 	#endif
 	//EventInfo* ev = nullptr;
 	auto& rule = drawRule();
+
+	counter.advanceTime(dt);
+	plot.fill(*this,env);
+
 	#ifdef DEBUG
 		printf( "  | Rule: %-11.11s",rule.getName().c_str());
 		cout << "  Root-node: ";
@@ -433,6 +452,8 @@ void State::updateDeps(const Deps::Dependency& d){
 		case Deps::RULE:
 			ev.rule_ids.emplace(dep.id);
 			break;
+		case Deps::KAPPA:
+			break;
 			//auto act = evalActivity(env.getRules()[dep.id]);
 			//activityTree->add(dep.id,act.first+act.second);
 		}
@@ -459,16 +480,15 @@ void State::initInjections() {
 				continue;
 			//cout << comp.toString(env) << endl;
 			two<std::set<Internal*> > port_lists;
-			const list<matching::Injection*>* injs_p = &injections[comp.getId()]->emplace(*node_p,port_lists,*this);
-			for(auto inj_p : *injs_p){
+			auto inj_p = injections[comp.getId()]->emplace(*node_p,port_lists,*this);
+			if(inj_p){
 				for(auto port : port_lists.first)
 					port->deps.first->emplace(inj_p);
 				for(auto port : port_lists.second)
 					port->deps.second->emplace(inj_p);
-			}
-			for(auto inj_p : *injs_p)
 				if(port_lists.first.empty() && port_lists.second.empty())
-					node_p->addDep(inj_p);//TODO check too
+					node_p->addDep(inj_p);
+			}
 		}
 	}
 }

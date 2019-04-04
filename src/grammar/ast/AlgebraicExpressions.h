@@ -111,7 +111,7 @@ public:
  */
 class Var : public Expression {
 public:
-	enum VarType {VAR,TOKEN,AUX,TIME,EVENT,NULL_EVENT,PROD_EVENT,CPUTIME,ACTIVITY};
+	enum VarType {VAR,TOKEN,AUX};
 	Var(const location &loc,const VarType &t,const Id &label=Id());
 	BaseExpression* eval(const pattern::Environment& env,
 			const Expression::VAR &vars,pattern::DepSet* deps = nullptr,

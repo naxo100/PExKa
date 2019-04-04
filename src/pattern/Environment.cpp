@@ -173,8 +173,7 @@ Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bo
 			else{
 				stringstream loc;
 				loc << ag.getLoc();
-				WarningStack::getStack().emplace_back(
-					"Same agent pattern declared before ("+loc.str()+
+				ADD_WARN("Same agent pattern declared before ("+loc.str()+
 					") but with different aux names. Try to normalize name to improve performance.",new_ag->getLoc());
 			}
 		}
@@ -351,7 +350,7 @@ std::string Environment::cellIdToString(unsigned int cell_id) const {
 }
 
 void Environment::show() const {
-	try{
+	//try{
 		cout << "This is the environment content" << endl;
 		cout << "\t\tCompartments[" << compartments.size() << "]" << endl;
 		for(unsigned int i = 0; i < compartments.size() ; i++)
@@ -421,10 +420,10 @@ void Environment::show() const {
 			i++;
 		}
 
-	}
+	/*}
 	catch(exception &e){
 		cout << "error: " << e.what() << endl;
-	}
+	}*/
 	cout << "end of env.show()" << endl;
 
 }

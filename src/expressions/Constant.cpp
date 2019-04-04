@@ -66,6 +66,18 @@ template class Constant<FL_TYPE> ;
 template class Constant<int> ;
 template class Constant<bool> ;
 
+Constant<FL_TYPE> INF(std::numeric_limits<FL_TYPE>::infinity());
+const BaseExpression* INF_EXPR = &INF;
+Constant<FL_TYPE> NEG_INF(-std::numeric_limits<FL_TYPE>::infinity());
+const BaseExpression* NEG_INF_EXPR = &NEG_INF;
+Constant<FL_TYPE> MAX_FL(std::numeric_limits<FL_TYPE>::max());
+const BaseExpression* MAX_FL_EXPR = &MAX_FL;
+Constant<FL_TYPE> MIN_FL(std::numeric_limits<FL_TYPE>::min());
+const BaseExpression* MIN_FL_EXPR = &MIN_FL;
+Constant<FL_TYPE> MAX_INT(std::numeric_limits<int>::max());
+const BaseExpression* MAX_INT_EXPR = &MAX_INT;
+Constant<FL_TYPE> MIN_INT(std::numeric_limits<int>::min());
+const BaseExpression* MIN_INT_EXPR = &MIN_INT;
 
 
 } /* namespace expressio */

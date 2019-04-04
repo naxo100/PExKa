@@ -239,7 +239,7 @@ void Init::eval(const pattern::Environment &env,const VarVector &vars,
 		else//TODO check if vars is only consts
 			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue(vars).valueAs<FL_TYPE>();
 		tok_id = env.getTokenId(token.getString());
-		sim.addTokens(cells,tok_id,n);
+		sim.addTokens(cells,n,tok_id);
 	}
 	else { //MIX
 		int n;

@@ -37,6 +37,7 @@ Node<T>::Node(FL_TYPE val) : DistributionTree<T>(nullptr,val),counter(0) {
 	greater = new Leaf<T>(this);
 }
 
+//this leaf is always smaller
 template <typename T>
 Node<T>::Node(Leaf<T>* leaf,FL_TYPE val) : DistributionTree<T>(leaf->parent),counter(leaf->count()){
 	this->value = val;
@@ -84,14 +85,15 @@ void Node<T>::push(T* inj,FL_TYPE val){
 	}
 	else{
 		if(inj->count() > 1){
-			inj->alloc(multi_injs.size());
+			inj->alloc(multi_injs.size());//not useful
+			inj->addContainer(*this,-multi_injs.size()-1);//negative address for multi injs
 			multi_injs.emplace_back(inj);
 		}
 		else{
-			inj->alloc(injs.size());
+			inj->alloc(injs.size());//not useful
+			inj->addContainer(*this,injs.size());
 			injs.emplace_back(inj);
 		}
-		inj->setContainer(this);
 	}
 	counter += inj->count();
 	this->sum += val*inj->count();
@@ -100,13 +102,33 @@ void Node<T>::push(T* inj,FL_TYPE val){
 template <typename T>
 void Node<T>::erase(T* elem){
 	if(elem->count() != 1){
-		multi_injs.back()->alloc(elem->getAddress());
+		multi_injs.back()->addContainer(*this,elem->getAddress());
 		multi_injs[elem->getAddress()] = multi_injs.back();
 		multi_injs.pop_back();
 	}
 	else{
-		injs.back()->alloc(elem->getAddress());
+		injs.back()->addContainer(*this,elem->getAddress());
 		injs[elem->getAddress()] = injs.back();
+		injs.pop_back();
+	}
+	elem->alloc(size_t(-1));
+	this->decrease(this->value*elem->count(),elem->count());
+}
+
+template <typename T>
+void Node<T>::erase(int address){
+	T* elem;
+	if(address < 0){
+		address = -address + 1;
+		elem = multi_injs[address];
+		multi_injs.back()->addContainer(*this,address);
+		multi_injs[address] = multi_injs.back();
+		multi_injs.pop_back();
+	}
+	else{
+		elem = injs[address];
+		injs.back()->addContainer(*this,address);
+		injs[address] = injs.back();
 		injs.pop_back();
 	}
 	elem->alloc(size_t(-1));
@@ -147,7 +169,7 @@ const T& Node<T>::choose(FL_TYPE sel) const {
 
 template <typename T>
 const pair<T*,FL_TYPE>& Node<T>::choose(unsigned sel) const {
-	throw std::invalid_argument("not available");
+	throw std::invalid_argument("Node<T>::choose() not available");
 }
 
 template <typename T>
@@ -160,7 +182,8 @@ unsigned Node<T>::count() const{
 template <typename T>
 void Node<T>::balance(Leaf<T>* full,DistributionTree<T>* n) {
 	if(injs.size() || multi_injs.size()){//TODO size > 5
-		auto new_node = new Node<T>(full,full->total()/full->count());
+		full->sort();
+		auto new_node = new Node<T>(full,full->choose(full->count()/2).second);
 		if(smaller == full)
 			smaller = new_node;
 		else
@@ -171,20 +194,21 @@ void Node<T>::balance(Leaf<T>* full,DistributionTree<T>* n) {
 	auto leaf = static_cast<Leaf<T>*>(n);
 	if( leaf && leaf->count() < (Leaf<T>::MAX_LVL0 << this->level)){//second node is leaf and not half-full
 		leaf->sort();
-		full->sort();
+		full->sort();//this let invalid containers of CcValueInj
 		auto median = (leaf->count() + full->count())/2;
 		if(full == smaller){
 			this->value = smaller->choose(median).second;
-			full->share(leaf,this->value);
+			full->share(leaf,this->value);//this should validate containers
 		}
 		else{
-			this->value = greater->choose(median).second;
+			this->value = greater->choose(median-leaf->count()).second;
 			full->share(leaf,- this->value);
 		}
 
 	}
 	else{
-		auto new_node = new Node<T>(full,full->total()/full->count());
+		full->sort();
+		auto new_node = new Node<T>(full,full->choose(full->count()/2).second);
 		if(smaller == full)
 			smaller = new_node;
 		else
@@ -212,19 +236,21 @@ void Leaf<T>::share(Leaf* sister,FL_TYPE val){//negative val for smaller sister
 	int i = 0;
 	for(auto it = injs.begin(); it != injs.end();){
 		if(val < 0 ? it->second < abs_val : it->second > abs_val){
+			it->first->removeContainer(*this);
 			sister->push(it->first, it->second);
 			this->sum -= it->second;
 			it = injs.erase(it);//TODO problems with erase in for?
 		}
 		else if(it->second == abs_val){
+			it->first->removeContainer(*this);
 			this->parent->push(it->first, it->second);
-			it = injs.erase(it);//TODO problems with erase in for?
 			this->sum -= it->second;
 			this->parent->sum -= it->second;
 			this->parent->counter --;
+			it = injs.erase(it);//TODO problems with erase in for?
 		}
 		else{
-			it->first->alloc(i);
+			it->first->addContainer(*this,i);
 			it++;i++;
 		}
 	}
@@ -234,12 +260,14 @@ template <typename T>
 void Leaf<T>::sort(){
 	static auto is_less = [](const pair<T*,FL_TYPE> &a,const pair<T*,FL_TYPE> &b) {return a.second < b.second;};
 	std::sort(injs.begin(),injs.end(),is_less);
+	/*for(unsigned i = 0; i < injs.size(); i++)//not useful ???
+		injs[i].first->addContainer(*this,i);*/
 }
 
 
 template <typename T>
 void Leaf<T>::push(T* inj,FL_TYPE val){
-	if(inj->count() > 1){
+	if(inj->count() > 1){// TODO BUUUUGGG HERE (cannot set node child)
 		auto new_node = new Node<T>(this,val);
 		if(this == this->parent->smaller)
 			this->parent->smaller = new_node;
@@ -251,9 +279,9 @@ void Leaf<T>::push(T* inj,FL_TYPE val){
 	if(injs.size() == (this->MAX_LVL0 << this->level) )
 		throw bad_alloc();
 	else{
-		inj->alloc(injs.size());
+		inj->alloc(injs.size());//not useful
+		inj->addContainer(*this,injs.size());
 		injs.emplace_back(inj,val);//TODO maybe ordered??
-		inj->setContainer(this);
 		this->sum += val;
 	}
 }
@@ -269,17 +297,27 @@ void Leaf<T>::decrease(FL_TYPE val,unsigned n){
 template <typename T>
 void Leaf<T>::erase(T* elem){
 	this->decrease(injs[elem->getAddress()].second);
-	injs.back().first->alloc(elem->getAddress());
+	injs.back().first->addContainer(*this,elem->getAddress());
 	injs[elem->getAddress()] = injs.back();
+	injs.pop_back();
+}
+template <typename T>
+void Leaf<T>::erase(int address){
+	if(address > injs.size())
+		throw std::out_of_range("This injection is not here!");
+	pair<T*,FL_TYPE> elem_val = injs[address];
+	this->decrease(elem_val.second);
+	injs.back().first->addContainer(*this,address);
+	injs[address] = injs.back();
 	injs.pop_back();
 }
 
 template <typename T>
 const T& Leaf<T>::choose(FL_TYPE sel) const {
-	auto p = injs[int(count() * sel / this->sum)].first;
+	/*auto p = injs[int(count() * sel / this->sum)].first;
 	if(p == nullptr){
 		std::cout << "BAD!!!" << std::endl;
-	}
+	}*/
 	return *injs[int(count() * sel / this->sum)].first;
 }
 

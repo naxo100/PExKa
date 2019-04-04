@@ -54,6 +54,7 @@ public:
 			const AuxMap&& aux_values = AuxMap()) const;
 
 	char getVarDeps() const;
+	bool isAux() const override;
 
 	std::string toString() const override;
 };

@@ -25,7 +25,15 @@ public:
 	bool operator==(const BaseExpression& exp) const override;
 
 	std::string toString() const override;
+
 };
+
+extern const BaseExpression* INF_EXPR;
+extern const BaseExpression* NEG_INF_EXPR;
+extern const BaseExpression* MAX_FL_EXPR;
+extern const BaseExpression* MIN_FL_EXPR;
+extern const BaseExpression* MAX_INT_EXPR;
+extern const BaseExpression* MIN_INT_EXPR;
 
 } /* namespace expressio */
 

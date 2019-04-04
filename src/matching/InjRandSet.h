@@ -20,7 +20,7 @@ class InjRandContainer {
 protected:
 	list<CcInjection*> freeInjs;
 	const pattern::Mixture::Component& cc;
-	virtual const list<Injection*>& insert(CcInjection* inj,const state::State& state) = 0;
+	virtual void insert(CcInjection* inj,const state::State& state) = 0;
 	virtual CcInjection* newInj() const = 0;
 
 public:
@@ -31,9 +31,9 @@ public:
 	virtual size_t count() const = 0;
 	virtual FL_TYPE partialReactivity() const = 0;
 
-	virtual const list<Injection*>& emplace(Node& node,two<std::set<state::Internal*> > &port_lists,
+	virtual Injection* emplace(Node& node,two<std::set<state::Internal*> > &port_lists,
 			const state::State& state,small_id root = 0);
-	virtual const list<Injection*>& emplace(Injection* base_inj,map<Node*,Node*>& mask,
+	virtual Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask,
 			const state::State& state);
 	virtual void erase(Injection* inj) = 0;
 
@@ -47,7 +47,7 @@ class InjRandSet : public InjRandContainer {
 	size_t counter;
 	size_t multiCount;
 	vector<CcInjection*> container;
-	const list<Injection*>& insert(CcInjection* inj,const state::State& state) override;
+	void insert(CcInjection* inj,const state::State& state) override;
 	virtual CcInjection* newInj() const override;
 public:
 	InjRandSet(const pattern::Mixture::Component& _cc);
@@ -78,7 +78,7 @@ class InjRandTree : public InjRandContainer {
 
 	mutable pair<int,small_id> selected_root;
 
-	const list<Injection*>& insert(CcInjection *inj,const state::State& state) override;
+	void insert(CcInjection *inj,const state::State& state) override;
 	virtual CcInjection* newInj() const override;
 
 public:

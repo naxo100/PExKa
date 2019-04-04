@@ -43,7 +43,7 @@ class InjRandSet;
 class Injection {
 	friend class InjRandSet;
 	const pattern::Pattern& ptrn;
-	size_t address;
+	int address;
 public:
 	Injection(const pattern::Pattern& ptrn);
 	virtual Injection* clone(const map<Node*,Node*>& mask) const = 0;
@@ -52,14 +52,14 @@ public:
 
 	virtual bool isTrashed() const;
 
-	virtual void codomain(Node* injs[],set<Node*> cod) const = 0;
+	virtual void codomain(Node* injs[],set<Node*>& cod) const = 0;
 
 	virtual size_t count() const = 0;
 
 	const pattern::Pattern& pattern() const;
 
-	void alloc(size_t addr);
-	size_t getAddress() const;
+	virtual void alloc(int addr);
+	int getAddress() const;
 
 	//bool operator< (const Injection& inj) const;
 	virtual bool operator==(const Injection& inj) const = 0;
@@ -84,7 +84,7 @@ public:
 
 	const vector<Node*>& getEmbedding() const override;
 
-	void codomain(Node* injs[],set<Node*> cod) const override;
+	void codomain(Node* injs[],set<Node*>& cod) const override;
 
 	size_t count() const override;
 
@@ -98,14 +98,17 @@ public:
 }*/
 
 class CcValueInj : public CcInjection {
-	distribution_tree::DistributionTree<CcValueInj>* container;
+	map<distribution_tree::DistributionTree<CcValueInj>*,int> containers;//TODO try with unordered_map
 	//FL_TYPE value;
 public:
 	CcValueInj(const pattern::Mixture::Component& _cc);
 	CcValueInj(const CcInjection& inj);
 
-	void setContainer(distribution_tree::DistributionTree<CcValueInj>* cont);
+	//void alloc(int address) override;
+
+	void addContainer(distribution_tree::DistributionTree<CcValueInj>& cont,int addr);
 	void selfRemove();
+	void removeContainer(distribution_tree::DistributionTree<CcValueInj>& cont);
 
 };
 

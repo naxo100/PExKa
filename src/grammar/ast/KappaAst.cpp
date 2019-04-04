@@ -32,7 +32,7 @@ void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variabl
 
 void KappaAst::evaluateCompartments(pattern::Environment &env,const vector<Variable*> &vars){
 	if(compartments.size() == 0){
-		WarningStack::getStack().emplace_back("No compartment declared. Declaring default compartment 'volume'.",yy::location());
+		ADD_WARN("No compartment declared. Declaring default compartment 'volume'.",yy::location());
 		env.declareCompartment(Id(yy::location(),"volume"));
 		return;
 	}

@@ -103,6 +103,9 @@ public:
 
 	SomeValue getVarValue(short_id var_id) const;
 
+	FL_TYPE getTotalActivity() const;
+	default_random_engine& getRandomGenerator() const;
+
 	/** \brief Add nodes to the SiteGraph using a fully described mixture.
 	 * @param n count of copies of the mixture.
 	 * @param mix a mixture without patterns to create nodes.

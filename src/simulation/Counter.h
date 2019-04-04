@@ -12,11 +12,20 @@
 #include <utility>
 #include "../util/params.h"
 
+namespace state{
+	class State;
+}
+
 namespace simulation {
+
+class Plot;
 
 using namespace std;
 
 class Counter {
+	friend class state::State;
+	friend class Plot;
+
 	FL_TYPE time;
 	UINT_TYPE events;
 	UINT_TYPE null_events;
@@ -52,6 +61,8 @@ public:
 
 	virtual FL_TYPE getTime() const;
 	virtual UINT_TYPE getEvent() const;
+	virtual UINT_TYPE getNullEvent() const;
+	virtual UINT_TYPE getProdEvent() const;
 	virtual void advanceTime(FL_TYPE t);
 	virtual void incEvents();
 	virtual void incNullEvents(unsigned type);
@@ -63,7 +74,7 @@ public:
 
 
 class LocalCounter : public Counter {
-
+	//friend class State;
 public:
 	LocalCounter();
 	//~LocalCounter();

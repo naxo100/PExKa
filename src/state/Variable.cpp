@@ -199,4 +199,13 @@ bool TokenVar::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
+BaseExpression::Reduction TokenVar::factorize() const {
+	BaseExpression::Reduction r;
+	r.factors.push_back(this->clone());
+	return r;
+}
+BaseExpression* TokenVar::clone() const {
+	return new TokenVar(*this);
+}
+
 } /* namespace state */

@@ -6,7 +6,7 @@
  */
 
 #include "NullaryOperation.h"
-#include "../state/Variable.h"
+#include "../state/State.h"
 #include <math.h>
 
 
@@ -18,26 +18,30 @@ namespace expressions {
 
 
 template<>
-bool (*NullaryOperations<bool>::funcs[2])()= {
-	[]() {return true;},
-	[]() {return false;}
+FL_TYPE (*NullaryOperations<FL_TYPE>::funcs[4])(const state::State& state)= {
+	[](const state::State& state) {return uniform_real_distribution<FL_TYPE>(0.0,1.0)(state.getRandomGenerator());},
+	[](const state::State& state) {return state.getCounter().getTime();},
+	[](const state::State& state) {return /*TODO cpu_time*/0.0;},
+	[](const state::State& state) {return state.getTotalActivity();}
 };
 
 template<>
-FL_TYPE (*NullaryOperations<FL_TYPE>::funcs[1])()= {
-	[]() {return (float)fmod(rand(),10)/10;}
+int (*NullaryOperations<int>::funcs[3])(const state::State& state)= {
+	[](const state::State& state) {return int(state.getCounter().getEvent());},
+	[](const state::State& state) {return int(state.getCounter().getNullEvent());},
+	[](const state::State& state) {return int(state.getCounter().getProdEvent());}
 };
 
 template<typename R>
 R NullaryOperation<R>::evaluate(const VarVector &consts,
 		const std::unordered_map<std::string, int> *aux_values) const {
-	return func();
+	throw invalid_argument("Cannot cast const evaluate() on NullaryOpaertion.");
 }
 
 template<typename R>
 R NullaryOperation<R>::evaluate(const state::State& state,
 		const AuxMap& aux_values) const {
-	return func();
+	return func(state);
 }
 
 template<typename R>
@@ -69,7 +73,7 @@ bool NullaryOperation<R>::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
-std::string n_ops[] = {"true", "false", "rand_1"};
+std::string n_ops[] = {"Rand(1)","TIME","EVENT","NULL_EVENT","PROD_EVENT","CPUTIME","ACTIVITY"};
 
 
 template <typename R>
@@ -89,16 +93,8 @@ std::string UnaryOperation<bool,T1,T2>::toString() const {
 }*/
 
 template class NullaryOperation<FL_TYPE> ;
-//template class UnaryOperation<int, bool> ;
-//template class UnaryOperation<int, FL_TYPE> ;
-//
-//template class UnaryOperation<FL_TYPE, int> ;
-//template class UnaryOperation<FL_TYPE, bool> ;
-template class NullaryOperation<bool> ;
+template class NullaryOperation<int> ;
 
-//template class UnaryOperation<bool, FL_TYPE> ;
-//template class UnaryOperation<bool, int> ;
-//template class UnaryOperation<bool, bool> ;
 
 } /* namespace expression */
 

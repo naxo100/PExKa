@@ -89,7 +89,6 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		const vector<ag_st_id>& rhs_unmask,const VarVector& consts){
 	small_id i;
 	unsigned first_del = 9999;
-	auto& warns = WarningStack::getStack();
 	list<Action> binds;
 	map<ag_st_id,small_id> lhs_mask,rhs_mask;
 	for(unsigned i = 0; i<rhs_unmask.size() ; i++)
@@ -120,247 +119,241 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 				Action a;
 				ag_st_id lnk1,lnk2,buff;
 				small_id i2;
+				auto& lhs_site = lhs_ag.getSiteSafe(j);
+				auto& rhs_site = rhs_ag.getSiteSafe(j);
 				try{
-					auto& lhs_site = lhs_ag.getSite(j);
-					try{
-						auto& rhs_site = rhs_ag.getSite(j);
-						if(rhs_site.isEmptySite()){
-							if(!lhs_site.isEmptySite())
-								throw SemanticError("The state of site "+ sign.getSite(j).getName()+
-									" in agent "+sign.getName()+" is underspecified on the right side.",loc);
+					lhs_ag.getSite(j);
+				}catch(std::out_of_range &e){
+					if(rhs_site.link_type != Mixture::WILD)
+						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+							sign.getSite(j).getName()+" on the left side must be specified specified to change.",loc);
+				}
+				try{
+					rhs_ag.getSite(j);
+				}catch(std::out_of_range &e){
+					if(!lhs_site.isEmptySite() || lhs_site.link_type != Mixture::WILD)
+						ADD_WARN("The internal/lnk state of the site "+psite->getName()+
+							" in agent "+sign.getName()+" should be specified in the right side.",loc);
+					j++;
+					continue;
+					/*if(lhs_site.link_type >)
+						throw SemanticError("The state of site "+ sign.getSite(j).getName()+
+							" in agent "+sign.getName()+" is underspecified on the right side.",loc);*/
+				}
+
+				if(lhs_site.isEmptySite() && !rhs_site.isEmptySite()){
+					ADD_WARN("Application of rule '"+name+
+							"' will induce a null event when applied to an agent '"+sign.getName()+
+							"' that have the same value in site "+psite->getName(),loc);
+				}
+				if(rhs_site.values[1]){
+					auto aux_exp = dynamic_cast<const Auxiliar<FL_TYPE>*>(rhs_site.values[1]);
+					auto cc_ag_st_aux = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j);
+					if(!aux_exp || ( aux_exp && lhs.getAux().at(aux_exp->toString()) != cc_ag_st_aux ) ){
+						a.t = ASSIGN;
+						a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+						a.value = rhs_site.values[1];
+						//TODO warning when lhs == nullptr ?
+						script.emplace_back(a);
+						changes[make_pair(rhs_unmask[i],false)].first.emplace_back(j);
+					}
+				}
+				else if(!rhs_site.isEmptySite() && lhs_site.label != rhs_site.label){//TODO other type of value changes
+					a.t = CHANGE;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+					get<0>(a.trgt2) = rhs_site.label;
+					script.emplace_back(a);
+					changes[make_pair(rhs_unmask[i],false)].first.emplace_back(j);
+				}
+				else{//expression valued sites
+
+				}
+				switch(lhs_site.link_type){
+				case Mixture::FREE:				/******* LHS_FREE *******/
+					switch(rhs_site.link_type){
+					case Mixture::FREE://nothing
+						break;
+					case Mixture::WILD://warn cause no mention in the rhs
+						break;
+					case Mixture::BIND_TO://error
+					case Mixture::PATH://error?
+						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+								sign.getSite(j).getName()+" on the right hand side is underspecified.",loc);
+						break;
+					case Mixture::BIND://if semi error else connect
+						lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
+						if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
+							throw SemanticError("The link status of agent "+sign.getName()+", site "+
+									sign.getSite(j).getName()+" on the right hand side is inconsistent.",loc);
+						i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk1.first));
+						if(i > i2)//TODO possible error
+							break;//link added before.
+						else{
+							a.t = LINK;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+							//auto buff = lhs_unmask[rhs_mask.at(ag_st_id(rhs_unmask[i].first,lnk1.first))];
+							a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
+							binds.emplace_back(a);
+						}
+						break;
+					}
+					break;
+				case Mixture::WILD:				/******* LHS_WILD *******/
+					switch(rhs_site.link_type){
+					case Mixture::WILD://nothing
+						break;
+					case Mixture::FREE://warning
+						ADD_WARN("Application of rule '"+name+
+									"' will induce a null event when applied to an agent '"+sign.getName()+
+									"' that is free on site '"+sign.getSite(j).getName()+"'",loc);
+						a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
+						script.emplace_back(a);
+						changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
+						break;
+					case Mixture::BIND_TO://error
+					case Mixture::PATH://error
+						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+								sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
+						break;
+					case Mixture::BIND://if semi error else warning
+						lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
+						if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
+							throw SemanticError("The link status of agent '"+sign.getName()+
+									"', site '"+sign.getSite(j).getName()+
+									"' on the right hand side is inconsistent",loc);
+						i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk1.first));
+						if(i > i2)
+							break;//link added before.
+						else {
+							ADD_WARN("Rule '"+name+"': site '"+sign.getSite(j).getName()+
+									"' of agent '"+sign.getName()+"' is bound in the right hand"+
+									"side although it is unspecified in the left hand side",loc);
+							a.t = LINK;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+							a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
+							binds.emplace_back(a);
+						}
+						break;
+					}
+					break;
+				case Mixture::BIND:				/******* LHS_BIND *******/
+					switch(rhs_site.link_type){
+					case Mixture::WILD://warn cause no mention in the rhs
+						break;
+					case Mixture::BIND_TO://error
+					case Mixture::PATH://error
+						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+								sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
+						break;
+					case Mixture::FREE://if semi warning?? and disconnect else disconnect
+						lnk1 = lhs.follow(lhs_unmask[i].first,lhs_unmask[i].second,j);
+						if(lnk1.first == lhs_unmask[i].second && lnk1.second == j){
+							ADD_WARN("Rule '"+name+"': breaking a semi-link on site '"+
+									sign.getSite(j).getName()+"' will induce a side effect",loc);
+							get<3>(a.trgt2) = Action::S_EFF;
 						}
 						else{
-							if(lhs_site.isEmptySite())
-								warns.emplace_back("Application of rule '"+name+
-										"' will induce a null event when applied to an agent '"+sign.getName()+
-										"' that have the same value ",loc);
-							else if(rhs_site.isExpression()){
-								if(rhs_site.values[1]){
-									auto aux_exp = dynamic_cast<const Auxiliar<FL_TYPE>*>(rhs_site.values[1]);
-									auto cc_ag_st_aux = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j);
-									if(!aux_exp || ( aux_exp && lhs.getAux().at(aux_exp->toString()) != cc_ag_st_aux ) ){
-											a.t = ASSIGN;
-											a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-											a.value = rhs_site.values[1];
-											//TODO warning when lhs == nullptr ?
-											script.emplace_back(a);
-											changes[make_pair(rhs_unmask[i],false)].first.emplace_back(j);
-									}
-								}
-							}
-							else if(lhs_site.label != rhs_site.label){//TODO other type of value changes
-								a.t = CHANGE;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-								get<0>(a.trgt2) = rhs_site.label;
-								script.emplace_back(a);
-								changes[make_pair(rhs_unmask[i],false)].first.emplace_back(j);
-							}
-							else{//expression valued sites
-
-							}
-						}
-						switch(lhs_site.link_type){
-						case Mixture::FREE:				/******* LHS_FREE *******/
-							switch(rhs_site.link_type){
-							case Mixture::FREE://nothing
-								break;
-							case Mixture::WILD://error
-							case Mixture::BIND_TO://error
-							case Mixture::PATH://error?
-								throw SemanticError("The link status of agent "+sign.getName()+", site "+
-										sign.getSite(j).getName()+" on the right hand side is underspecified.",loc);
-								break;
-							case Mixture::BIND://if semi error else connect
-								lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
-								if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
-									throw SemanticError("The link status of agent "+sign.getName()+", site "+
-											sign.getSite(j).getName()+" on the right hand side is inconsistent.",loc);
-								i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk1.first));
-								if(i > i2)//TODO possible error
-									break;//link added before.
-								else{
-									a.t = LINK;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-									//auto buff = lhs_unmask[rhs_mask.at(ag_st_id(rhs_unmask[i].first,lnk1.first))];
-									a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
-									binds.emplace_back(a);
-								}
-								break;
-							}
-							break;
-						case Mixture::WILD:				/******* LHS_WILD *******/
-							switch(rhs_site.link_type){
-							case Mixture::WILD://nothing
-								break;
-							case Mixture::FREE://warning
-								warns.emplace_back("Application of rule '"+name+
-										"' will induce a null event when applied to an agent '"+sign.getName()+
-										"' that is free on site '"+sign.getSite(j).getName()+"'",loc);
-								a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
-								script.emplace_back(a);
+							i2 = lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first));
+							if(i > i2){
 								changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
-								break;
-							case Mixture::BIND_TO://error
-							case Mixture::PATH://error
-								throw SemanticError("The link status of agent "+sign.getName()+", site "+
-										sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
-								break;
-							case Mixture::BIND://if semi error else warning
-								lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
-								if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
-									throw SemanticError("The link status of agent '"+sign.getName()+
-											"', site '"+sign.getSite(j).getName()+
-											"' on the right hand side is inconsistent",loc);
-								i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk1.first));
+								break;//unlink added before.
+							}
+							a.trgt2 = make_tuple(lhs_unmask[i].first,lnk1.first,lnk1.second,false);
+						}
+						a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+						script.emplace_back(a);
+						changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
+						break;
+					case Mixture::BIND://if semi-semi nothing if semi-not warning if not-semi error if not-not warn(swap)
+						lnk1 = lhs.follow(lhs_unmask[i].first,lhs_unmask[i].second,j);
+						lnk2 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
+						if(lnk1.first == lhs_unmask[i].second && lnk1.second == j){
+							if(lnk2.first == rhs_unmask[i].second && lnk2.second == j){
+								//semi-semi -> nothing
+							}
+							else {//semi-not
+								i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
 								if(i > i2)
 									break;//link added before.
-								else {
-									warns.emplace_back("Rule '"+name+"': site '"+sign.getSite(j).getName()+
-											"' of agent '"+sign.getName()+"' is bound in the right hand"+
-											"side although it is unspecified in the left hand side",loc);
-									a.t = LINK;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-									a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
-									binds.emplace_back(a);
-								}
-								break;
+								ADD_WARN("The link state of site "+sign.getSite(j).getName()+
+										" of agent "+sign.getName()+
+										" is changed although it is a semi-link in the left hand side",loc);
+								a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
+								a.trgt2 = make_tuple(rhs_unmask[i].first,lnk2.first,lnk2.second,i2);
+								binds.emplace_back(a);
 							}
-							break;
-						case Mixture::BIND:				/******* LHS_BIND *******/
-							switch(rhs_site.link_type){
-							case Mixture::WILD://error
-							case Mixture::BIND_TO://error
-							case Mixture::PATH://error
+						}
+						else {
+							if(lnk2.first == rhs_unmask[i].second && lnk2.second == j)//not-semi
 								throw SemanticError("The link status of agent "+sign.getName()+", site "+
 										sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
-								break;
-							case Mixture::FREE://if semi warning?? and disconnect else disconnect
-								lnk1 = lhs.follow(lhs_unmask[i].first,lhs_unmask[i].second,j);
-								if(lnk1.first == lhs_unmask[i].second && lnk1.second == j){
-									warns.emplace_back("Rule '"+name+"': breaking a semi-link on site '"+
-											sign.getSite(j).getName()+"' will induce a side effect",loc);
-									get<3>(a.trgt2) = Action::S_EFF;
-								}
-								else{
-									i2 = lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first));
-									if(i > i2){
-										changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
-										break;//unlink added before.
-									}
-									a.trgt2 = make_tuple(lhs_unmask[i].first,lnk1.first,lnk1.second,false);
-								}
-								a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-								script.emplace_back(a);
-								changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
-								break;
-							case Mixture::BIND://if semi-semi nothing if semi-not warning if not-semi error if not-not warn(swap)
-								lnk1 = lhs.follow(lhs_unmask[i].first,lhs_unmask[i].second,j);
-								lnk2 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
-								if(lnk1.first == lhs_unmask[i].second && lnk1.second == j){
-									if(lnk2.first == rhs_unmask[i].second && lnk2.second == j){
-										//semi-semi -> nothing
-									}
-									else {//semi-not
-										i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
-										if(i > i2)
-											break;//link added before.
-										warns.emplace_back("The link state of site "+sign.getSite(j).getName()+
-												" of agent "+sign.getName()+
-												" is changed although it is a semi-link in the left hand side",loc);
-										a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
-										a.trgt2 = make_tuple(rhs_unmask[i].first,lnk2.first,lnk2.second,i2);
-										binds.emplace_back(a);
-									}
-								}
-								else {
-									if(lnk2.first == rhs_unmask[i].second && lnk2.second == j)//not-semi
-										throw SemanticError("The link status of agent "+sign.getName()+", site "+
-												sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
-									else {//not-not
-										if(lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first)) !=
-												rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first)) ||
-												lnk1.second != lnk2.second){
-											i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
-											warns.emplace_back(name+" rule induces a link permutation on site "
-													+sign.getSite(j).getName()+" of agent "+sign.getName(),loc);
-											if(i > i2)
-												break;//link added before.
-											a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
-											a.trgt2 = make_tuple(rhs_unmask[i].first,lnk2.first,lnk2.second,i2);
-											binds.emplace_back(a);
-										}
-										//else nothing
-									}
-								}
-								break;
-							}
-							break;
-						case Mixture::BIND_TO:			/******* LHS_BIND_TO *******/
-							switch(rhs_site.link_type){
-							case Mixture::PATH://error
-							case Mixture::WILD://error
-								throw SemanticError("The link status of agent "+sign.getName()+", site "+
-										sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
-								break;
-							case Mixture::FREE://disconnect
-								a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
-								script.emplace_back(a);
-								changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
-								break;
-							case Mixture::BIND://if semi error else warning(swap)
-								lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
-								if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
-									throw SemanticError("The link status of agent "+sign.getName()+", site "+
-											sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
-								else {
+							else {//not-not
+								if(lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first)) !=
+										rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first)) ||
+										lnk1.second != lnk2.second){
 									i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
+									ADD_WARN(name+" rule induces a link permutation on site "
+											+sign.getSite(j).getName()+" of agent "+sign.getName(),loc);
 									if(i > i2)
 										break;//link added before.
-									warns.emplace_back("The link state of site "+sign.getSite(j).getName()+
-											" in agent "+sign.getName()+" is changed although it is a semi-link in the left hand side",loc);
-									a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
-									a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
+									a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
+									a.trgt2 = make_tuple(rhs_unmask[i].first,lnk2.first,lnk2.second,i2);
 									binds.emplace_back(a);
-									sideEffects.emplace_back(lhs_site.lnk_ptrn);
 								}
-								break;
-							case Mixture::BIND_TO://if different error else nothing
-								if(lhs_site.lnk_ptrn != rhs_site.lnk_ptrn)
-									throw SemanticError("The link status of agent '%s', site '%s' on the right hand side is inconsistent",loc);
-								//else its OK
-								break;
+								//else nothing
 							}
-							break;
-						case Mixture::PATH:				/******* LHS_PATH *******/
-							switch(rhs_site.link_type){
-							case Mixture::FREE://disconnect?
-								break;
-							case Mixture::WILD://error
-								break;
-							case Mixture::BIND://warning swap?
-								break;
-							case Mixture::BIND_TO://error
-								break;
-							case Mixture::PATH://if same nothing else ???
-								break;
-							}
-							break;
 						}
+						break;
 					}
-					catch(std::out_of_range &e){
-						//TODO WARNING or Error?
-						//throw SemanticError(
-						warns.emplace_back("The internal/lnk state of the site "+psite->getName()+
-								" in agent "+sign.getName()+" should be specified in the right side.",loc);
+					break;
+				case Mixture::BIND_TO:			/******* LHS_BIND_TO *******/
+					switch(rhs_site.link_type){
+					case Mixture::WILD://warn cause no mention in the rhs
+						break;
+					case Mixture::PATH://error
+						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+								sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
+						break;
+					case Mixture::FREE://disconnect
+						a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
+						script.emplace_back(a);
+						changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
+						break;
+					case Mixture::BIND://if semi error else warning(swap)
+						lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
+						if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
+							throw SemanticError("The link status of agent "+sign.getName()+", site "+
+									sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
+						else {
+							i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
+							if(i > i2)
+								break;//link added before.
+							ADD_WARN("The link state of site "+sign.getSite(j).getName()+
+									" in agent "+sign.getName()+" is changed although it is a semi-link in the left hand side",loc);
+							a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
+							a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
+							binds.emplace_back(a);
+							sideEffects.emplace_back(lhs_site.lnk_ptrn);
+						}
+						break;
+					case Mixture::BIND_TO://if different error else nothing
+						if(lhs_site.lnk_ptrn != rhs_site.lnk_ptrn)
+							throw SemanticError("The link status of agent '%s', site '%s' on the right hand side is inconsistent",loc);
+						//else its OK
+						break;
 					}
-				}catch(std::out_of_range &e){
-					try{
-						//auto rhs_site =
-						rhs_ag.getSite(j);
-						//WARNING
-						throw SemanticError("The state of site "+ sign.getSite(j).getName()+
-							" in agent "+sign.getName()+" is underspecified on the left side.",loc);
+					break;
+				case Mixture::PATH:				/******* LHS_PATH *******/
+					switch(rhs_site.link_type){
+					case Mixture::FREE://disconnect?
+						break;
+					case Mixture::WILD://error
+						break;
+					case Mixture::BIND://warning swap?
+						break;
+					case Mixture::BIND_TO://error
+						break;
+					case Mixture::PATH://if same nothing else ???
+						break;
 					}
-					catch(std::out_of_range &e){
-						//it's ok, omitted in both sides.
-					}
+					break;
 				}
 				j++;
 			}
@@ -509,7 +502,7 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 							return false;
 						break;
 					case Pattern::PATH:
-						WarningStack::getStack().emplace_back("PATH is not implemented yet",loc);
+						ADD_WARN("PATH is not implemented yet",loc);
 						break;
 					case Pattern::WILD:
 						break;
@@ -541,9 +534,9 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 
 void Rule::addAgentIncludes(CandidateMap &candidates,
 			const Pattern::Agent& ag,ag_st_id rhs_cc_ag,int change){
-	for(auto& cc_agid : ag.getIncludes())//add Agent includes to candidates
+	for(auto& cc_agid : ag.getIncludes()){//add Agent includes to candidates
 		candidates[cc_agid.first].setRoot(cc_agid.second,rhs_cc_ag,change);
-
+	}
 }
 
 
@@ -573,6 +566,10 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 						continue;
 					//if testValue for site_ptrns
 					addAgentIncludes(candidates,ag_ptrn,ag_changes.first.first,change);
+					/*for(auto& cc_agid : ag_ptrn.getIncludes())//add Agent includes to candidates
+						cout << "adding: " << cc_agid.first->toString(env) << " -> ("
+							<< int(ag_changes.first.first.first) << "," << int(ag_changes.first.first.second)
+							<< ") -> " << int(cc_agid.second) << endl;*/
 				}
 			}
 			for(auto change : ag_changes.second.second){//for each link val/type changes
@@ -644,15 +641,17 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 		for(auto& info : cc_info.second.node_id){
 			bool rep = false;
 			auto key = make_pair(cc_info.first->getId(),info.second);
-			for(auto val_it = already_done.find(key);val_it != already_done.end(); val_it++)
+			auto range = already_done.equal_range(key);
+			for(auto val_it = range.first;val_it != range.second; val_it++)
 				if( val_it->second == info.first){
-					rep = true;continue;
+					rep = true;cout << " | DONE!";continue;
 				}
 			if(rep)
 				continue;
 			list<two<ag_st_id> > to_test;
 			to_test.emplace_back(ag_st_id(info.first.second,0),ag_st_id(info.second,0));
-			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,state,env))
+			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,state,env)){
+				cout << " | YES!";
 				try{
 					influence[cc_info.first].setRoot(info.second,ag_st_id(-1,news.at(info.first)),0);
 					influence[cc_info.first].infl_by = cc_info.second.infl_by;
@@ -660,10 +659,11 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 					influence[cc_info.first].setRoot(info.second,matches.at(info.first),0);
 					influence[cc_info.first].infl_by = cc_info.second.infl_by;
 				}
-			else
+			}else
 				cout << " | NO!";
-			cout << endl;
+
 		}
+		cout << endl;
 	}
 
 	}//end testing try TODO
@@ -750,7 +750,7 @@ two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs,
 		const VarVector& vars) const{
 	//auto& auxs = lhs.getAux();
 	FL_TYPE a = 1.0;
-	for(unsigned i = 0 ; i < lhs.size() ; i++){
+	for(unsigned i = 0 ; i < lhs.compsCount() ; i++){
 		auto& cc = lhs.getComponent(i);
 		injs[cc.getId()]->selectRule(id, i);
 		a *= injs[cc.getId()]->partialReactivity();

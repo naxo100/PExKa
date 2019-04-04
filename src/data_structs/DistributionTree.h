@@ -42,6 +42,7 @@ public:
 	virtual unsigned count() const = 0;
 	virtual void push(T* inj,FL_TYPE val) = 0;
 	virtual void erase(T* inj) = 0;
+	virtual void erase(int address) = 0;
 };
 
 template <typename T>
@@ -65,6 +66,7 @@ public:
 
 	virtual void push(T* inj,FL_TYPE val) override;
 	virtual void erase(T* inj) override;
+	virtual void erase(int address) override;
 	virtual void decrease(FL_TYPE val,unsigned n = 1) override;
 
 	virtual void balance(Leaf<T>* full,DistributionTree<T>* n);
@@ -86,12 +88,13 @@ protected:
 public:
 	Leaf(Node<T>* _parent);
 	virtual ~Leaf();
-	virtual const T& choose(FL_TYPE r) const override;
+	const T& choose(FL_TYPE r) const override;
 	virtual const pair<T*,FL_TYPE>& choose(unsigned r) const override;
 	virtual unsigned count() const override;
 
 	virtual void push(T* elem,FL_TYPE val) override;
 	virtual void erase(T* elem) override;
+	virtual void erase(int address) override;
 
 
 	virtual void decrease(FL_TYPE val, unsigned n = 1) override;

@@ -78,7 +78,7 @@ void Link::eval(const pattern::Environment &env,
 			throw SemanticError("Patterns are not allowed here.",loc);
 		mix_site.link_type = pattern::Mixture::WILD;
 		if(mix_site.isEmptySite())
-			WarningStack::getStack().emplace_back("A site declared as 'bind to any' and 'any value' can be omitted.",loc);
+			ADD_WARN("A site declared as 'bind to any' and 'any value' can be omitted.",loc);
 		break;
 	case SOME:
 		if(!allow_pattern)
@@ -316,21 +316,27 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 				if(stateInfo.flag & SiteState::MIN_EQUAL)
 					agent.setSiteMinExpr(site_id,stateInfo.range[0]->
 							eval(env, consts, nullptr, ptrn_flag));
-				else
-					agent.setSiteMinExpr(site_id,BaseExpression::makeBinaryExpression<false>(
-							stateInfo.range[0]->eval(env, consts, nullptr, ptrn_flag),
+				else{
+					BaseExpression* r = stateInfo.range[0]->eval(env, consts, nullptr, ptrn_flag);
+					BaseExpression* min = *r == *NEG_INF_EXPR ? MIN_FL_EXPR->clone()
+							: BaseExpression::makeBinaryExpression<false>(r,
 							new Constant<FL_TYPE>(std::numeric_limits<FL_TYPE>::epsilon()),
-								BaseExpression::SUM));
+							BaseExpression::SUM);
+					agent.setSiteMinExpr(site_id, min);
+				}
 			}
 			if(stateInfo.range[2]){
 				if(stateInfo.flag & SiteState::MAX_EQUAL)
 					agent.setSiteMaxExpr(site_id,stateInfo.range[2]->
 							eval(env, consts, nullptr, ptrn_flag));
-				else
-					agent.setSiteMaxExpr(site_id,BaseExpression::makeBinaryExpression<false>(
-							stateInfo.range[2]->eval(env, consts, nullptr, ptrn_flag),
+				else{
+					BaseExpression* r = stateInfo.range[2]->eval(env, consts, nullptr, ptrn_flag);
+					BaseExpression* max = *r == *INF_EXPR ? MAX_FL_EXPR->clone()
+							: BaseExpression::makeBinaryExpression<false>(r,
 							new Constant<FL_TYPE>(-std::numeric_limits<FL_TYPE>::epsilon()),
-								BaseExpression::SUM));
+							BaseExpression::SUM);
+					agent.setSiteMaxExpr(site_id,max);
+				}
 			}
 		}catch(std::bad_cast &e){
 			throw SemanticError("Only valued sites can assign auxiliar.",stateInfo.loc);
@@ -685,9 +691,9 @@ const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulati
 	if(is_bi){
 		if(unary)
 			throw SemanticError("Cannot define a bidirectional rule with a rate for unary cases.",loc);
-		if(!reverse)
-			WarningStack::getStack().emplace_back(
-				"Assuming same rate for both directions of bidirectional rule.",loc);
+		if(!reverse){
+			ADD_WARN("Assuming same rate for both directions of bidirectional rule.",loc);
+		}
 		else{
 			return reverse->eval(env,vars,&deps.second,Expression::AUX_ALLOW);
 		}
@@ -725,7 +731,8 @@ pair<unsigned,const BaseExpression*> Token::eval(const pattern::Environment& env
 	const Expression* expr = neg ? new AlgBinaryOperation(
 			location(),exp,new Const(location(),-1),BaseExpression::MULT)
 			: exp;
-	return make_pair(i,expr->eval(env,vars,0));//TODO flags
+	//pattern::DepSet deps;
+	return make_pair(i,expr->eval(env,vars,nullptr,Expression::RHS + Expression::AUX_ALLOW));//TODO flags
 }
 
 /****** Class RuleSide ***********/

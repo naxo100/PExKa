@@ -49,8 +49,9 @@ public:
 	enum Unary {
 		SQRT, EXPONENT, LOG, SINE, COSINE, TAN, ATAN, ABS, COIN, RAND_N, NOT
 	};
+	//ACTIVITY always last of float op!!
 	enum Nullary {
-		TRUE, FALSE, RAND_1
+		RAND_1,SIM_TIME,CPUTIME,ACTIVITY,SIM_EVENT,NULL_EVENT,PROD_EVENT
 	};
 	enum VarDep {
 		CONSTS = 1,AUX = 2,SPATIAL = 4,TIME = 8,EVENT = 16, RAND = 32
@@ -97,6 +98,8 @@ public:
 
 	//return a flag of VarDep
 	virtual char getVarDeps() const;
+
+	virtual bool isAux() const;
 
 	virtual std::string toString() const;
 

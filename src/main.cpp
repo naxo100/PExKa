@@ -162,7 +162,7 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 	sim.initialize();
-	//sim.print();
+	sim.print();
 
 #ifdef DEBUG
 	env.show();

@@ -184,7 +184,7 @@ instruction:
 init_declaration:
  multiple non_empty_mixture 
 	{$$=Init(@$,$1,Mixture(@2,$2));}
-| ID LAR multiple
+| ID LAR alg_expr
 	{$$=Init(@$,$3,Id(@1,$1));}
 /*** TODO ???
 | ID OP_CUR init_declaration CL_CUR 
@@ -499,18 +499,6 @@ variable:
 	{$$ = new Var(@$,Var::TOKEN,Id(@2,$2));}
 | LABEL 
 	{$$ = new Var(@$,Var::VAR,Id(@1,$1));}
-| TIME
-	{$$ = new Var(@$,Var::TIME);}
-| EVENT
-	{$$ = new Var(@$,Var::EVENT);}
-| NULL_EVENT
-	{$$ = new Var(@$,Var::NULL_EVENT);}
-| PROD_EVENT
-	{$$ = new Var(@$,Var::PROD_EVENT);}
-| ACTIVITY
-	{$$ = new Var(@$,Var::ACTIVITY);}
-| CPUTIME
-	{$$ = new Const(@$,Var::CPUTIME);}
 ;
 
 
@@ -563,6 +551,18 @@ alg_expr:
 	{$$ = new UnaryOperation(@$,$2,BaseExpression::Unary::RAND_N);}
 | RAND_1
 	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::RAND_1);}
+| TIME
+	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::SIM_TIME);}
+| EVENT
+	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::SIM_EVENT);}
+| NULL_EVENT
+	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::NULL_EVENT);}
+| PROD_EVENT
+	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::PROD_EVENT);}
+| ACTIVITY
+	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::ACTIVITY);}
+| CPUTIME
+	{$$ = new NullaryOperation(@$,BaseExpression::Nullary::CPUTIME);}
 | MINUS alg_expr
 	{$$ = new AlgBinaryOperation(@$,new Const(location(),0),$2,BaseExpression::AlgebraicOp::MINUS);}
 | error

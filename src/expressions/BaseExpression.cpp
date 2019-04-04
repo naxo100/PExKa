@@ -57,7 +57,7 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,
 	case FLOAT:
 		switch (type2) {
 		case FLOAT:
-			bin_op = new BinaryOperation<BoolOrFloat, FL_TYPE, float>(ex1, ex2,
+			bin_op = new BinaryOperation<BoolOrFloat, FL_TYPE, FL_TYPE>(ex1, ex2,
 					op);
 			break;
 		case INT:
@@ -142,30 +142,24 @@ BaseExpression* BaseExpression::makeUnaryExpression(const BaseExpression *ex,
 }
 
 BaseExpression* BaseExpression::makeNullaryExpression(const int func) {
-
 	BaseExpression* null_op = nullptr;
 
-	switch (func) {
-	case Nullary::TRUE:
-		null_op = new NullaryOperation<bool>(func);
-		break;
-	case Nullary::FALSE:
-		null_op = new NullaryOperation<bool>(func);
-		break;
-	case Nullary::RAND_1:
+	if(func <= Nullary::ACTIVITY)
 		null_op = new NullaryOperation<FL_TYPE>(func);
-		break;
-	default:
-		SemanticError("Not a valid value for a nullary operation",
-				yy::location());
-	}
-
+	else
+		null_op = new NullaryOperation<int>(func - Nullary::ACTIVITY);
+	//SemanticError("Not a valid value for a nullary operation",
+	//		yy::location());
 	return null_op;
 }
 
 
 char BaseExpression::getVarDeps() const{
 	return '\0';
+}
+
+bool BaseExpression::isAux() const {
+	return false;
 }
 
 std::string BaseExpression::toString() const {

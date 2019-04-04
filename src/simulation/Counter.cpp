@@ -21,6 +21,12 @@ FL_TYPE Counter::getTime() const{
 UINT_TYPE Counter::getEvent() const{
 	return events;
 }
+UINT_TYPE Counter::getNullEvent() const{
+	return null_events;
+}
+UINT_TYPE Counter::getProdEvent() const{
+	return events - null_events;
+}
 
 void Counter::advanceTime(FL_TYPE t){
 	time += t;

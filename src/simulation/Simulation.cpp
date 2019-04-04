@@ -112,16 +112,15 @@ vector<unsigned> Simulation::allocAgents2(unsigned cells, unsigned ag_counts, co
 
 template <template<typename,typename...> class Range,typename... Args>
 void Simulation::addTokens(const Range<int,Args...> &cell_ids,float count,short token_id){
-	list<float> per_cell = allocParticles(cell_ids.size(),count);
-	auto ids_it = cell_ids.begin();
-	for(auto n : per_cell){
+	//list<float> per_cell = allocAgents2(cell_ids.size(),count);
+	//auto ids_it = cell_ids.begin();
+	for(auto id : cell_ids){
 		try{
-			cells.at(*ids_it).addTokens(token_id,n);
+			cells.at(id).addTokens(count/cell_ids.size(),token_id);
 		}
 		catch(std::out_of_range &e){
 			//other mpi_process will add this tokens.
 		}
-		ids_it++;
 	}
 }
 template void Simulation::addTokens(const std::set<int> &cell_ids,float count,short token_id);

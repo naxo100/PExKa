@@ -4,7 +4,7 @@
 
 //#define DEBUG true //in make command
 
-typedef float FL_TYPE;
+typedef double FL_TYPE;
 typedef long INT_TYPE;
 typedef unsigned long UINT_TYPE;
 #define FRMT_FL "f"

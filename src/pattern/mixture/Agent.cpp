@@ -279,7 +279,7 @@ Mixture::Site::Site(small_id lbl,LinkType lt) : label(lbl),link_type(lt),lnk_ptr
 		values{nullptr,nullptr,nullptr}{}
 
 bool Mixture::Site::isEmptySite() const{
-	return label == EMPTY && values[1] == nullptr;
+	return label == EMPTY ;//&& values[1] == nullptr;
 }
 bool Mixture::Site::isExpression() const{
 	return label == AUX || values[1];
@@ -301,23 +301,25 @@ bool Mixture::Site::testValueOpt(const state::SomeValue& val,const state::State&
 		return val.smallVal == label;
 	else{
 		if(values[1]){
-			if(!dynamic_cast<const expressions::Auxiliar<FL_TYPE>*>(values[1]))//TODO only if aux expression are stored
-			try{
-				return values[1]->getValue(state,std::move(aux_map)) == val;
-			}
-			catch(std::out_of_range &e){
-				if(aux_map.size())//aux_values is empty on because it's not time for aux
-					throw e;
-				else
-					return true;//cannot evaluate so maybe true
-			}
+			if(!values[1]->isAux())//TODO only if aux expression are stored
+				try{
+					return values[1]->getValue(state,std::move(aux_map)) == val;
+				}
+				catch(std::out_of_range &e){
+					if(aux_map.size())//aux_values is empty on because it's not time for aux
+						throw e;
+					else
+						return true;//cannot evaluate so maybe true
+				}
 		}
 	}
 	auto fl_val = val.valueAs<FL_TYPE>();
-	if(values[0] && values[0]->getValue(state,move(aux_map)).valueAs<FL_TYPE>() > fl_val)
-		return false;
-	if(values[2] && values[2]->getValue(state,move(aux_map)).valueAs<FL_TYPE>() < fl_val)
-		return false;
+	if(values[0])
+		if(values[0]->getValue(state,move(aux_map)).valueAs<FL_TYPE>() > fl_val)
+			return false;
+	if(values[2])
+		if(values[2]->getValue(state,move(aux_map)).valueAs<FL_TYPE>() < fl_val)
+			return false;
 	return true;
 }
 
@@ -375,7 +377,7 @@ bool Mixture::Site::testEmbed(const Site &s,list<small_id>& to_test) const{
 		}
 		break;
 	default:
-		if(label != s.label)
+		if(s.label != EMPTY && label != s.label)
 			return false;
 	}
 

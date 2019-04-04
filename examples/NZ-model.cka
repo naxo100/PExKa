@@ -1,0 +1,288 @@
+%agent: Person(RightHand,Trust~High~Mod~LowInst~Low)
+
+%token: high_trusters_money
+%init: high_trusters_money <- 0
+%token: mod_trusters_money
+%init: mod_trusters_money <- 0
+%token: lowinst_trusters_money
+%init: lowinst_trusters_money <- 0
+%token: low_trusters_money
+%init: low_trusters_money <- 0
+
+%token: hh
+%init: hh <- 0
+%token: hm
+%init: hm <- 0
+%token: hli
+%init: hli <- 0
+%token: hl
+%init: hl <- 0
+%token: mm
+%init: mm <- 0
+%token: mli
+%init: mli <- 0
+%token: ml
+%init: ml <- 0
+%token: lili
+%init: lili <- 0
+%token: lil
+%init: lil <- 0
+%token: ll
+%init: ll <- 0
+
+%var: 'population' 2e+5
+%var: 't0_person_high_trust' 'population' * .283
+%var: 't0_person_moderate_trust' 'population' * .464
+%var: 't0_person_lowinstitutional_trust' 'population' * .190
+%var: 't0_person_low_trust' 'population' * .062
+
+%var: 'scale' 1e-5
+%var: 'fwd_hh' 4.3194 * 'scale'
+%var: 'fwd_hm' 3.4343 * 'scale'
+%var: 'fwd_hli' 3.2126 * 'scale'
+%var: 'fwd_hl' 1.4627 * 'scale'
+%var: 'fwd_mm' 3.4343 * 'scale'
+%var: 'fwd_mli' 3.2126 * 'scale'
+%var: 'fwd_ml' 1.4627 * 'scale'
+%var: 'fwd_lili' 3.2126 * 'scale'
+%var: 'fwd_lil' 1.4627 * 'scale'
+%var: 'fwd_ll' 1.4627 * 'scale'
+
+%token: cc_hh
+%init: cc_hh <- 0
+%token: cd_hh
+%init: cd_hh <- 0
+%token: dc_hh
+%init: dc_hh <- 0
+%token: dd_hh
+%init: dd_hh <- 0
+%token: cc_hm
+%init: cc_hm <- 0
+%token: cd_hm
+%init: cd_hm <- 0
+%token: dc_hm
+%init: dc_hm <- 0
+%token: dd_hm
+%init: dd_hm <- 0
+%token: cc_hli
+%init: cc_hli <- 0
+%token: cd_hli
+%init: cd_hli <- 0
+%token: dc_hli
+%init: dc_hli <- 0
+%token: dd_hli
+%init: dd_hli <- 0
+%token: cc_hl
+%init: cc_hl <- 0
+%token: cd_hl
+%init: cd_hl <- 0
+%token: dc_hl
+%init: dc_hl <- 0
+%token: dd_hl
+%init: dd_hl <- 0
+%token: cc_mm
+%init: cc_mm <- 0
+%token: cd_mm
+%init: cd_mm <- 0
+%token: dc_mm
+%init: dc_mm <- 0
+%token: dd_mm
+%init: dd_mm <- 0
+%token: cc_mli
+%init: cc_mli <- 0
+%token: cd_mli
+%init: cd_mli <- 0
+%token: dc_mli
+%init: dc_mli <- 0
+%token: dd_mli
+%init: dd_mli <- 0
+%token: cc_ml
+%init: cc_ml <- 0
+%token: cd_ml
+%init: cd_ml <- 0
+%token: dc_ml
+%init: dc_ml <- 0
+%token: dd_ml
+%init: dd_ml <- 0
+%token: cc_lili
+%init: cc_lili <- 0
+%token: cd_lili
+%init: cd_lili <- 0
+%token: dc_lili
+%init: dc_lili <- 0
+%token: dd_lili
+%init: dd_lili <- 0
+%token: cc_lil
+%init: cc_lil <- 0
+%token: cd_lil
+%init: cd_lil <- 0
+%token: dc_lil
+%init: dc_lil <- 0
+%token: dd_lil
+%init: dd_lil <- 0
+%token: cc_ll
+%init: cc_ll <- 0
+%token: cd_ll
+%init: cd_ll <- 0
+%token: dc_ll
+%init: dc_ll <- 0
+%token: dd_ll
+%init: dd_ll <- 0
+
+%var: 'hh_cc' 5 * 0.5750 * 0.5750
+%var: 'hh_cd' 5 * 2 * 0.5750 * (1 - 0.5750)
+%var: 'hh_dd' 5 * (1 - 0.5750) * (1 - 0.5750)
+%var: 'hm_cc' 5 * 0.5750 * 0.5537
+%var: 'hm_cd' 5 * 0.5750 * (1 - 0.5537)
+%var: 'hm_dc' 5 * (1 - 0.5750) * 0.5537
+%var: 'hm_dd' 5 * (1 - 0.5750) * (1 - 0.5537)
+%var: 'hli_cc' 5 * 0.5750 * 0.5545
+%var: 'hli_cd' 5 * 0.5750 * (1 - 0.5545)
+%var: 'hli_dc' 5 * (1 - 0.5750) * 0.5545
+%var: 'hli_dd' 5 * (1 - 0.5750) * (1 - 0.5545)
+%var: 'hl_cc' 5 * 0.5750 * 0.4750
+%var: 'hl_cd' 5 * 0.5750 * (1 - 0.4750)
+%var: 'hl_dc' 5 * (1 - 0.5750) * 0.4750
+%var: 'hl_dd' 5 * (1 - 0.5750) * (1 - 0.4750)
+
+%var: 'mm_cc' 5 * 0.5537 * 0.5537
+%var: 'mm_cd' 5 * 2 * 0.5537 * (1 - 0.5537)
+%var: 'mm_dd' 5 * (1 - 0.5537) * 0.5537
+%var: 'mli_cc' 5 * 0.5537 * 0.5545
+%var: 'mli_cd' 5 * 0.5537 * (1 - 0.5545)
+%var: 'mli_dc' 5 * (1 - 0.5537) * 0.5545
+%var: 'mli_dd' 5 * (1 - 0.5537) * (1 - 0.5545)
+%var: 'ml_cc' 5 * 0.5537 * 0.4750
+%var: 'ml_cd' 5 * 0.5537 * (1 - 0.4750)
+%var: 'ml_dc' 5 * (1 - 0.5537) * 0.4750
+%var: 'ml_dd' 5 * (1 - 0.5537) * (1 - 0.4750)
+
+%var: 'lili_cc' 5 * 0.5545 * 0.5545
+%var: 'lili_cd' 5 * 2 * 0.5545 * (1 - 0.5545)
+%var: 'lili_dd' 5 * (1 - 0.5545) * (1 - 0.5545)
+%var: 'lil_cc' 5 * 0.5545 * 0.4750
+%var: 'lil_cd' 5 * 0.5545 * (1 - 0.4750)
+%var: 'lil_dc' 5 * (1 - 0.5545) * 0.4750
+%var: 'lil_dd' 5 * (1 - 0.5545) * (1 - 0.4750)
+
+%var: 'll_cc' 5 * 0.4750 * 0.4750
+%var: 'll_cd' 5 * 2 * 0.4750 * (1 - 0.4750)
+%var: 'll_dd' 5 * (1 - 0.4750) * (1 - 0.4750)
+
+'High_High' Person(RightHand,Trust~High),Person(RightHand,Trust~High) -> Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~High) | 1.0:hh @ 'fwd_hh'
+'High_Mod' Person(RightHand,Trust~High),Person(RightHand,Trust~Mod) -> Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Mod) | 1.0:hm @ 'fwd_hm'
+'High_LowInst' Person(RightHand,Trust~High),Person(RightHand,Trust~LowInst) -> Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~LowInst) | 1.0:hli @ 'fwd_hli'
+'High_Low' Person(RightHand,Trust~High),Person(RightHand,Trust~Low) -> Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Low) | 1.0:hl @ 'fwd_hl'
+'Mod_Mod' Person(RightHand,Trust~Mod),Person(RightHand,Trust~Mod) -> Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Mod) | 1.0:mm @ 'fwd_mm'
+'Mod_LowInst' Person(RightHand,Trust~Mod),Person(RightHand,Trust~LowInst) -> Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~LowInst) | 1.0:mli @ 'fwd_mli'
+'Mod_Low' Person(RightHand,Trust~Mod),Person(RightHand,Trust~Low) -> Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Low) | 1.0:ml @ 'fwd_ml'
+'LowInst_LowInst' Person(RightHand,Trust~LowInst),Person(RightHand,Trust~LowInst) -> Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~LowInst) | 1.0:lili @ 'fwd_lili'
+'LowInst_Low' Person(RightHand,Trust~LowInst),Person(RightHand,Trust~Low) -> Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~Low) | 1.0:lil @ 'fwd_lil'
+'Low_Low' Person(RightHand,Trust~Low),Person(RightHand,Trust~Low) -> Person(RightHand!1,Trust~Low),Person(RightHand!1,Trust~Low) | 1.0:ll @ 'fwd_ll'
+
+'High_High_CC' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~High) -> Person(RightHand,Trust~High),Person(RightHand,Trust~High) | 1.0:cc_hh + 2.0:high_trusters_money @ 'hh_cc'
+'High_High_CD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~High) -> Person(RightHand,Trust~High),Person(RightHand,Trust~High) | 1.0:cd_hh + 1.0:dc_hh + 0.0:high_trusters_money @ 'hh_cd'
+'High_High_DD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~High) -> Person(RightHand,Trust~High),Person(RightHand,Trust~High) | 1.0:dd_hh + -2.0:high_trusters_money @ 'hh_dd'
+'High_Mod_CC' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Mod) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Mod) | 1.0:cc_hm + 1.0:high_trusters_money + 1.0:mod_trusters_money @ 'hm_cc'
+'High_Mod_CD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Mod) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Mod) | 1.0:cd_hm + -2.0:high_trusters_money + 2.0:mod_trusters_money @ 'hm_cd'
+'High_Mod_DC' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Mod) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Mod) | 1.0:dc_hm + 2.0:high_trusters_money + -2.0:mod_trusters_money @ 'hm_dc'
+'High_Mod_DD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Mod) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Mod) | 1.0:dd_hm + -1.0:high_trusters_money + -1.0:mod_trusters_money @ 'hm_dd'
+'High_LowInst_CC' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~High),Person(RightHand,Trust~LowInst) | 1.0:cc_hli + 1.0:high_trusters_money + 1.0:lowinst_trusters_money @ 'hli_cc'
+'High_LowInst_CD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~High),Person(RightHand,Trust~LowInst) | 1.0:cd_hli + -2.0:high_trusters_money + 2.0:lowinst_trusters_money @ 'hli_cd'
+'High_LowInst_DC' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~High),Person(RightHand,Trust~LowInst) | 1.0:dc_hli + 2.0:high_trusters_money + -2.0:lowinst_trusters_money @ 'hli_dc'
+'High_LowInst_DD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~High),Person(RightHand,Trust~LowInst) | 1.0:dd_hli + -1.0:high_trusters_money + -1.0:lowinst_trusters_money @ 'hli_dd'
+'High_Low_CC' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Low) | 1.0:cc_hl + 1.0:high_trusters_money + 1.0:low_trusters_money @ 'hl_cc'
+'High_Low_CD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Low) | 1.0:cd_hl + -2.0:high_trusters_money + 2.0:low_trusters_money @ 'hl_cd'
+'High_Low_DC' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Low) | 1.0:dc_hl + 2.0:high_trusters_money + -2.0:low_trusters_money @ 'hl_dc'
+'High_Low_DD' Person(RightHand!1,Trust~High),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~High),Person(RightHand,Trust~Low) | 1.0:dd_hl + -1.0:high_trusters_money + -1.0:low_trusters_money @ 'hl_dd'
+
+'Mod_Mod_CC' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Mod) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~Mod) | 1.0:cc_mm + 2.0:mod_trusters_money @ 'mm_cc'
+'Mod_Mod_CD' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Mod) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~Mod) | 1.0:cd_mm + 1.0:dc_mm + 0.0:mod_trusters_money @ 'mm_cd'
+'Mod_Mod_DD' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Mod) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~Mod) | 1.0:dd_mm + -2.0:mod_trusters_money @ 'mm_dd'
+'Mod_LowInst_CC' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~LowInst) | 1.0:cc_mli + 1.0:mod_trusters_money + 1.0:lowinst_trusters_money @ 'mli_cc'
+'Mod_LowInst_CD' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~LowInst) | 1.0:cd_mli + -2.0:mod_trusters_money + 2.0:lowinst_trusters_money @ 'mli_cd'
+'Mod_LowInst_DC' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~LowInst) | 1.0:dc_mli + 2.0:mod_trusters_money + -2.0:lowinst_trusters_money @ 'mli_dc'
+'Mod_LowInst_DD' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~LowInst) | 1.0:dd_mli + -1.0:mod_trusters_money + -1.0:lowinst_trusters_money @ 'mli_dd'
+'Mod_Low_CC' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~Low) | 1.0:cc_ml + 1.0:mod_trusters_money + 1.0:low_trusters_money @ 'ml_cc'
+'Mod_Low_CD' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~Low) | 1.0:cd_ml + -2.0:mod_trusters_money + 2.0:low_trusters_money @ 'ml_cd'
+'Mod_Low_DC' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~Low) | 1.0:dc_ml + 2.0:mod_trusters_money + -2.0:low_trusters_money @ 'ml_dc'
+'Mod_Low_DD' Person(RightHand!1,Trust~Mod),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~Mod),Person(RightHand,Trust~Low) | 1.0:dd_ml + -1.0:mod_trusters_money + -1.0:low_trusters_money @ 'ml_dd'
+
+'LowInst_LowInst_CC' Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~LowInst),Person(RightHand,Trust~LowInst) | 1.0:cc_lili + 2.0:lowinst_trusters_money @ 'lili_cc'
+'LowInst_LowInst_CD' Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~LowInst),Person(RightHand,Trust~LowInst) | 1.0:cd_lili + 1.0:dc_lili + 0.0:lowinst_trusters_money @ 'lili_cd'
+'LowInst_LowInst_DD' Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~LowInst) -> Person(RightHand,Trust~LowInst),Person(RightHand,Trust~LowInst) | 1.0:dd_lili + -2.0:lowinst_trusters_money @ 'lili_dd'
+'LowInst_Low_CC' Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~LowInst),Person(RightHand,Trust~Low) | 1.0:cc_lil + 1.0:lowinst_trusters_money + 1.0:low_trusters_money @ 'lil_cc'
+'LowInst_Low_CD' Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~LowInst),Person(RightHand,Trust~Low) | 1.0:cd_lil + -2.0:lowinst_trusters_money + 2.0:low_trusters_money @ 'lil_cd'
+'LowInst_Low_DC' Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~LowInst),Person(RightHand,Trust~Low) | 1.0:dc_lil + 2.0:lowinst_trusters_money + -2.0:low_trusters_money @ 'lil_dc'
+'LowInst_Low_DD' Person(RightHand!1,Trust~LowInst),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~LowInst),Person(RightHand,Trust~Low) | 1.0:dd_lil + -1.0:lowinst_trusters_money + -1.0:low_trusters_money @ 'lil_dd'
+
+'Low_Low_CC' Person(RightHand!1,Trust~Low),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~Low),Person(RightHand,Trust~Low) | 1.0:cc_ll + 2.0:low_trusters_money @ 'll_cc'
+'Low_Low_CD' Person(RightHand!1,Trust~Low),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~Low),Person(RightHand,Trust~Low) | 1.0:cd_ll + 1.0:dc_ll + 0.0:low_trusters_money @ 'll_cd'
+'Low_Low_DD' Person(RightHand!1,Trust~Low),Person(RightHand!1,Trust~Low) -> Person(RightHand,Trust~Low),Person(RightHand,Trust~Low) | 1.0:dd_ll + -2.0:low_trusters_money @ 'll_dd'
+
+%obs: 'obs_high_money' |high_trusters_money|
+%obs: 'obs_mod_money' |mod_trusters_money|
+%obs: 'obs_lowinst_money' |lowinst_trusters_money|
+%obs: 'obs_low_money' |low_trusters_money|
+
+%obs: 'obs_cc_hh' |cc_hh|
+%obs: 'obs_cd_hh' |cd_hh|
+%obs: 'obs_dc_hh' |dc_hh|
+%obs: 'obs_dd_hh' |dd_hh|
+%obs: 'obs_cc_hm' |cc_hm|
+%obs: 'obs_cd_hm' |cd_hm|
+%obs: 'obs_dc_hm' |dc_hm|
+%obs: 'obs_dd_hm' |dd_hm|
+%obs: 'obs_cc_hli' |cc_hli|
+%obs: 'obs_cd_hli' |cd_hli|
+%obs: 'obs_dc_hli' |dc_hli|
+%obs: 'obs_dd_hli' |dd_hli|
+%obs: 'obs_cc_hl' |cc_hl|
+%obs: 'obs_cd_hl' |cd_hl|
+%obs: 'obs_dc_hl' |dc_hl|
+%obs: 'obs_dd_hl' |dd_hl|
+%obs: 'obs_cc_mm' |cc_mm|
+%obs: 'obs_cd_mm' |cd_mm|
+%obs: 'obs_dc_mm' |dc_mm|
+%obs: 'obs_dd_mm' |dd_mm|
+%obs: 'obs_cc_mli' |cc_mli|
+%obs: 'obs_cd_mli' |cd_mli|
+%obs: 'obs_dc_mli' |dc_mli|
+%obs: 'obs_dd_mli' |dd_mli|
+%obs: 'obs_cc_ml' |cc_ml|
+%obs: 'obs_cd_ml' |cd_ml|
+%obs: 'obs_dc_ml' |dc_ml|
+%obs: 'obs_dd_ml' |dd_ml|
+%obs: 'obs_cc_lili' |cc_lili|
+%obs: 'obs_cd_lili' |cd_lili|
+%obs: 'obs_dc_lili' |dc_lili|
+%obs: 'obs_dd_lili' |dd_lili|
+%obs: 'obs_cc_lil' |cc_lil|
+%obs: 'obs_cd_lil' |cd_lil|
+%obs: 'obs_dc_lil' |dc_lil|
+%obs: 'obs_dd_lil' |dd_lil|
+%obs: 'obs_cc_ll' |cc_ll|
+%obs: 'obs_cd_ll' |cd_ll|
+%obs: 'obs_dc_ll' |dc_ll|
+%obs: 'obs_dd_ll' |dd_ll|
+
+%obs: 'obs_hh' |hh|
+%obs: 'obs_hm' |hm|
+%obs: 'obs_hli' |hli|
+%obs: 'obs_hl' |hl|
+%obs: 'obs_mm' |mm|
+%obs: 'obs_mli' |mli|
+%obs: 'obs_ml' |ml|
+%obs: 'obs_lili' |lili|
+%obs: 'obs_lil' |lil|
+%obs: 'obs_ll' |ll|
+
+%obs: 'person_high_trust' |Person(RightHand,Trust~High)|
+%obs: 'person_moderate_trust' |Person(RightHand,Trust~Mod)|
+%obs: 'person_lowinstitutional_trust' |Person(RightHand,Trust~LowInst)|
+%obs: 'person_low_trust' |Person(RightHand,Trust~Low)|
+
+%init: 't0_person_high_trust' Person(RightHand,Trust~High)
+%init: 't0_person_moderate_trust' Person(RightHand,Trust~Mod)
+%init: 't0_person_lowinstitutional_trust' Person(RightHand,Trust~LowInst)
+%init: 't0_person_low_trust' Person(RightHand,Trust~Low)

@@ -1,0 +1,521 @@
+
+
+%agent: Person(RightHand,Trust~High~Mod~LowInst~Low,money~[0,[inf]], \
+				success~[0,[inf]],fail~[0,[inf]],start~[0,[inf]])
+
+
+%const: 'cc_factor' 1.10
+%const: 'cheater_factor' 0.15			#dc because 'd' is gaining against 'c'
+%const: 'cheated_factor' 1.0-'cheater_factor'	#cd because 'c' is losing against 'd'
+%const: 'dd_factor' 0.80
+
+
+
+%const: 'population' 2000#2e+3
+%const: 't0_person_high_trust' 'population' * .283
+%const: 't0_person_moderate_trust' 'population' * .464
+%const: 't0_person_lowinstitutional_trust' 'population' * .190
+%const: 't0_person_low_trust' 'population' * .062
+
+%const: 'scale' 1.0/'population'#1e-5
+%const: 'fwd_hh' 4.3194 * 'scale'
+%const: 'fwd_hm' 3.4343 * 'scale'
+%const: 'fwd_hli' 3.2126 * 'scale'
+%const: 'fwd_hl' 1.4627 * 'scale'
+%const: 'fwd_mm' 3.4343 * 'scale'
+%const: 'fwd_mli' 3.2126 * 'scale'
+%const: 'fwd_ml' 1.4627 * 'scale'
+%const: 'fwd_lili' 3.2126 * 'scale'
+%const: 'fwd_lil' 1.4627 * 'scale'
+%const: 'fwd_ll' 1.4627 * 'scale'
+
+
+
+%const: 'hh_cc' 5 * 0.5750 * 0.5750
+%const: 'hh_cd' 5 * 2 * 0.5750 * (1 - 0.5750)
+%const: 'hh_dd' 5 * (1 - 0.5750) * (1 - 0.5750)
+
+%const: 'hm_cc' 5 * 0.5750 * 0.5537
+%const: 'hm_cd' 5 * 0.5750 * (1 - 0.5537)
+%const: 'hm_dc' 5 * (1 - 0.5750) * 0.5537
+%const: 'hm_dd' 5 * (1 - 0.5750) * (1 - 0.5537)
+
+%const: 'hli_cc' 5 * 0.5750 * 0.5545
+%const: 'hli_cd' 5 * 0.5750 * (1 - 0.5545)
+%const: 'hli_dc' 5 * (1 - 0.5750) * 0.5545
+%const: 'hli_dd' 5 * (1 - 0.5750) * (1 - 0.5545)
+
+%const: 'hl_cc' 5 * 0.5750 * 0.4750
+%const: 'hl_cd' 5 * 0.5750 * (1 - 0.4750)
+%const: 'hl_dc' 5 * (1 - 0.5750) * 0.4750
+%const: 'hl_dd' 5 * (1 - 0.5750) * (1 - 0.4750)
+
+%const: 'mm_cc' 5 * 0.5537 * 0.5537
+%const: 'mm_cd' 5 * 2 * 0.5537 * (1 - 0.5537)
+%const: 'mm_dd' 5 * (1 - 0.5537) * 0.5537
+
+%const: 'mli_cc' 5 * 0.5537 * 0.5545
+%const: 'mli_cd' 5 * 0.5537 * (1 - 0.5545)
+%const: 'mli_dc' 5 * (1 - 0.5537) * 0.5545
+%const: 'mli_dd' 5 * (1 - 0.5537) * (1 - 0.5545)
+
+%const: 'ml_cc' 5 * 0.5537 * 0.4750
+%const: 'ml_cd' 5 * 0.5537 * (1 - 0.4750)
+%const: 'ml_dc' 5 * (1 - 0.5537) * 0.4750
+%const: 'ml_dd' 5 * (1 - 0.5537) * (1 - 0.4750)
+
+%const: 'lili_cc' 5 * 0.5545 * 0.5545
+%const: 'lili_cd' 5 * 2 * 0.5545 * (1 - 0.5545)
+%const: 'lili_dd' 5 * (1 - 0.5545) * (1 - 0.5545)
+
+%const: 'lil_cc' 5 * 0.5545 * 0.4750
+%const: 'lil_cd' 5 * 0.5545 * (1 - 0.4750)
+%const: 'lil_dc' 5 * (1 - 0.5545) * 0.4750
+%const: 'lil_dd' 5 * (1 - 0.5545) * (1 - 0.4750)
+
+%const: 'll_cc' 5 * 0.4750 * 0.4750
+%const: 'll_cd' 5 * 2 * 0.4750 * (1 - 0.4750)
+%const: 'll_dd' 5 * (1 - 0.4750) * (1 - 0.4750)
+
+#Rules
+
+### Begin Deal
+'High_High' Person(RightHand,Trust~High,money~{30 <= m1},start),\
+				Person(RightHand,Trust~High,money~{30 <= m2},start) ->  \
+			Person(RightHand!1,Trust~High,start~{[T]}),\
+				Person(RightHand!1,Trust~High,start~{[T]}) \
+				| 1.0:hh @ 'fwd_hh'
+	
+'High_Mod' Person(RightHand,Trust~High,money~{30 <= m1},start),\
+				Person(RightHand,Trust~Mod,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~High,start~{[T]}),\
+				Person(RightHand!1,Trust~Mod,start~{[T]}) | 1.0:hm @ 'fwd_hm'
+
+'High_LowInst' Person(RightHand,Trust~High,money~{30 <= m1},start),\
+				Person(RightHand,Trust~LowInst,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~High,start~{[T]}),\
+				Person(RightHand!1,Trust~LowInst,start~{[T]}) | 1.0:hli @ 'fwd_hli'
+
+'High_Low' Person(RightHand,Trust~High,money~{30 <= m1},start),\
+				Person(RightHand,Trust~Low,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~High,start~{[T]}),\
+				Person(RightHand!1,Trust~Low,start~{[T]}) | 1.0:hl @ 'fwd_hl'
+
+'Mod_Mod' Person(RightHand,Trust~Mod,money~{30 <= m1},start),\
+				Person(RightHand,Trust~Mod,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~Mod,start~{[T]}),\
+				Person(RightHand!1,Trust~Mod,start~{[T]}) | 1.0:mm @ 'fwd_mm'
+
+'Mod_LowInst' Person(RightHand,Trust~Mod,money~{30 <= m1},start),\
+				Person(RightHand,Trust~LowInst,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~Mod,start~{[T]}),\
+				Person(RightHand!1,Trust~LowInst,start~{[T]}) | 1.0:mli @ 'fwd_mli'
+
+'Mod_Low' Person(RightHand,Trust~Mod,money~{30 <= m1},start),\
+				Person(RightHand,Trust~Low,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~Mod,start~{[T]}),\
+				Person(RightHand!1,Trust~Low,start~{[T]}) | 1.0:ml @ 'fwd_ml'
+
+'LowInst_LowInst' Person(RightHand,Trust~LowInst,money~{30 <= m1},start),\
+				Person(RightHand,Trust~LowInst,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~LowInst,start~{[T]}),\
+				Person(RightHand!1,Trust~LowInst,start~{[T]}) | 1.0:lili @ 'fwd_lili'
+
+'LowInst_Low' Person(RightHand,Trust~LowInst,money~{30 <= m1},start),\
+				Person(RightHand,Trust~Low,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~LowInst,start~{[T]}),\
+				Person(RightHand!1,Trust~Low,start~{[T]}) | 1.0:lil @ 'fwd_lil'
+
+'Low_Low' Person(RightHand,Trust~Low,money~{30 <= m1},start),\
+				Person(RightHand,Trust~Low,money~{30 <= m2},start) -> \
+			Person(RightHand!1,Trust~Low,start~{[T]}),\
+				Person(RightHand!1,Trust~Low,start~{[T]}) | 1.0:ll @ 'fwd_ll'
+
+
+
+
+'High_High_CC' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~High,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~High,money~{m2*'cc_factor'}) \
+				| 1.0:cc_hh + (m1+m2)*('cc_factor'-1):high_trusters_money 				@ 'hh_cc'
+
+'High_High_CD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~High,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~High,money~{m2+(m1+m2)*'cheater_factor'}) \
+				| 1.0:cd_hh + 1.0:dc_hh	+ m2*'cheater_factor':high_trusters_money@ 'hh_cd'
+
+'High_High_DD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~High,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~High,money~{m1*'dd_factor'}) \
+				| 1.0:dd_hh + (m1+m2)*('dd_factor'-1):high_trusters_money 				@ 'hh_dd'
+
+'High_Mod_CC' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Mod,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~Mod,money~{m2*'cc_factor'}) \
+				| 1.0:cc_hm + m1*('cc_factor'-1):high_trusters_money + m2*('cc_factor'-1):mod_trusters_money @ 'hm_cc'
+
+'High_Mod_CD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Mod,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~Mod,money~{m2+(m1+m2)*'cheater_factor'}) \
+				| 1.0:cd_hm + -m1*'cheater_factor':high_trusters_money + (m1+m2)*'cheater_factor':mod_trusters_money @ 'hm_cd'
+
+'High_Mod_DC' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Mod,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1+(m1+m2)*'cheater_factor'}),\
+					Person(RightHand,Trust~Mod,money~{m2*'cheated_factor'}) \
+				| 1.0:dc_hm + (m1+m2)*'cheater_factor':high_trusters_money + -m2*'cheater_factor':mod_trusters_money @ 'hm_dc'
+
+'High_Mod_DD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Mod,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~Mod,money~{m2*'dd_factor'}) \
+				| 1.0:dd_hm + m1*('dd_factor'-1):high_trusters_money + m2*('dd_factor'-1):mod_trusters_money @ 'hm_dd'
+				
+'High_LowInst_CC' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'cc_factor'}) \
+				| 1.0:cc_hli + m1*('cc_factor'-1):high_trusters_money + m2*('cc_factor'-1):lowinst_trusters_money @ 'hli_cc'
+
+'High_LowInst_CD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2+(m1+m2)*'cheater_factor'}) \
+				| 1.0:cd_hli + -m1*'cheater_factor':high_trusters_money + (m1+m2)*'cheater_factor':lowinst_trusters_money @ 'hli_cd'
+
+'High_LowInst_DC' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1+(m1+m2)*'cheater_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'cheated_factor'}) \
+				| 1.0:dc_hli + (m1+m2)*'cheater_factor':high_trusters_money + -m2*'cheater_factor':lowinst_trusters_money @ 'hli_dc'
+
+'High_LowInst_DD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'dd_factor'}) \
+				| 1.0:dd_hli + m1*('dd_factor'-1):high_trusters_money + m2*('dd_factor'-1):lowinst_trusters_money @ 'hli_dd'
+
+'High_Low_CC' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'cc_factor'}) \
+				| 1.0:cc_hl + m1*('cc_factor'-1):high_trusters_money + m2*('cc_factor'-1):low_trusters_money @ 'hl_cc'
+
+'High_Low_CD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2+(m1+m2)*'cheater_factor'}) \
+				| 1.0:cd_hl + -m1*'cheater_factor':high_trusters_money + (m1+m2)*'cheater_factor':low_trusters_money @ 'hl_cd'
+
+'High_Low_DC' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1+(m1+m2)*'cheater_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'cheated_factor'}) \
+				| 1.0:dc_hl + (m1+m2)*'cheater_factor':high_trusters_money + -m2*'cheater_factor':low_trusters_money @ 'hl_dc'
+
+'High_Low_DD' Person(RightHand!1,Trust~High,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~High,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'dd_factor'}) \
+				| 1.0:dd_hl + m1*('dd_factor'-1):high_trusters_money + m2*('dd_factor'-1):low_trusters_money @ 'hl_dd'
+
+
+'Mod_Mod_CC' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~Mod,money~{m2}) -> \
+			Person(RightHand,Trust~Mod,money~{m1*'cc_factor'}),\
+				Person(RightHand,Trust~Mod,money~{m2*'cc_factor'}) \
+			| 1.0:cc_mm + (m1+m2)*('cc_factor'-1):mod_trusters_money @ 'mm_cc'
+
+'Mod_Mod_CD' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~Mod,money~{m2}) -> \
+			Person(RightHand,Trust~Mod,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~Mod,money~{m2+(m1+m2)*'cheater_factor'}) \
+			| 1.0:cd_mm + 1.0:dc_mm + m2*'cheater_factor':mod_trusters_money @ 'mm_cd'
+
+'Mod_Mod_DD' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~Mod,money~{m2}) -> \
+			Person(RightHand,Trust~Mod,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~Mod,money~{m2*'dd_factor'}) \
+			| 1.0:dd_mm + (m1+m2)*(1-'dd_factor'):mod_trusters_money @ 'mm_dd'
+
+'Mod_LowInst_CC' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~Mod,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'cc_factor'}) \
+			| 1.0:cc_mli + m1*('cc_factor'-1):mod_trusters_money + m2*('cc_factor'-1):lowinst_trusters_money @ 'mli_cc'
+
+'Mod_LowInst_CD' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~Mod,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2+(m1+m2)*'cheater_factor'}) \
+			| 1.0:cd_mli + -m1*'cheater_factor':mod_trusters_money + (m1+m2)*'cheater_factor':lowinst_trusters_money @ 'mli_cd'
+
+'Mod_LowInst_DC' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~Mod,money~{m1+(m1+m2)*'cheater_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'cheated_factor'}) \
+			| 1.0:dc_mli + (m1+m2)*'cheater_factor':mod_trusters_money + -m2*'cheater_factor':lowinst_trusters_money @ 'mli_dc'
+
+'Mod_LowInst_DD' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+				Person(RightHand,Trust~Mod,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'dd_factor'}) \
+			| 1.0:dd_mli + m1*('dd_factor'-1):mod_trusters_money + m2*('dd_factor'-1):lowinst_trusters_money @ 'mli_dd'
+
+'Mod_Low_CC' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+			Person(RightHand,Trust~Mod,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'cc_factor'}) \
+			| 1.0:cc_ml + m1*('cc_factor'-1):mod_trusters_money + m2*('cc_factor'-1):low_trusters_money @ 'ml_cc'
+
+'Mod_Low_CD' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+			Person(RightHand,Trust~Mod,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2+(m1+m2)*'cheater_factor'}) \
+			| 1.0:cd_ml + -m1*'cheater_factor':mod_trusters_money + (m1+m2)*'cheater_factor':low_trusters_money @ 'ml_cd'
+
+'Mod_Low_DC' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+			Person(RightHand,Trust~Mod,money~{m1+(m1+m2)*'cheater_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'cheated_factor'}) \
+			| 1.0:dc_ml + (m1+m2)*'cheater_factor':mod_trusters_money + -m2*'cheater_factor':low_trusters_money @ 'ml_dc'
+
+'Mod_Low_DD' Person(RightHand!1,Trust~Mod,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+			Person(RightHand,Trust~Mod,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'dd_factor'}) \
+			| 1.0:dd_ml + m1*('dd_factor'-1):mod_trusters_money + m2*('dd_factor'-1):low_trusters_money @ 'ml_dd'
+
+
+'LowInst_LowInst_CC' Person(RightHand!1,Trust~LowInst,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+					Person(RightHand,Trust~LowInst,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'cc_factor'}) \
+			| 1.0:cc_lili + (m1+m2)*('cc_factor'-1):lowinst_trusters_money @ 'lili_cc'
+
+'LowInst_LowInst_CD' Person(RightHand!1,Trust~LowInst,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+					Person(RightHand,Trust~LowInst,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2+(m1+m2)*'cheater_factor'}) \
+			| 1.0:cd_lili + 1.0:dc_lili + (m1+m2)*'cheater_factor':lowinst_trusters_money @ 'lili_cd'
+
+'LowInst_LowInst_DD' Person(RightHand!1,Trust~LowInst,money~{m1}),\
+					Person(RightHand!1,Trust~LowInst,money~{m2}) -> \
+					Person(RightHand,Trust~LowInst,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~LowInst,money~{m2*'dd_factor'}) \
+			| 1.0:dd_lili + (m1+m2)*(1-'dd_factor'):lowinst_trusters_money @ 'lili_dd'
+
+'LowInst_Low_CC' Person(RightHand!1,Trust~LowInst,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~LowInst,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'cc_factor'}) \
+			| 1.0:cc_lil + m1*('cc_factor'-1):lowinst_trusters_money + m2*('cc_factor'-1):low_trusters_money @ 'lil_cc'
+
+'LowInst_Low_CD' Person(RightHand!1,Trust~LowInst,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~LowInst,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2+(m1+m2)*'cheater_factor'}) \
+			| 1.0:cd_lil + -m1*'cheater_factor':lowinst_trusters_money + (m1+m2)*'cheater_factor':low_trusters_money @ 'lil_cd'
+
+'LowInst_Low_DC' Person(RightHand!1,Trust~LowInst,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~LowInst,money~{m1+(m1+m2)*'cheater_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'cheated_factor'}) \
+			| 1.0:dc_lil + (m1+m2)*'cheater_factor':lowinst_trusters_money + -m2*'cheater_factor':low_trusters_money @ 'lil_dc'
+
+'LowInst_Low_DD' Person(RightHand!1,Trust~LowInst,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+				Person(RightHand,Trust~LowInst,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'dd_factor'}) \
+			| 1.0:dd_lil + m1*('dd_factor'-1):lowinst_trusters_money + -m2*('dd_factor'-1):low_trusters_money @ 'lil_dd'
+
+
+
+'Low_Low_CC' Person(RightHand!1,Trust~Low,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+			Person(RightHand,Trust~Low,money~{m1*'cc_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'cc_factor'}) \
+			| 1.0:cc_ll + (m1+m2)*('cc_factor'-1):low_trusters_money @ 'll_cc'
+
+'Low_Low_CD' Person(RightHand!1,Trust~Low,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+			Person(RightHand,Trust~Low,money~{m1*'cheated_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2+(m1+m2)*'cheater_factor'}) \
+			| 1.0:cd_ll + 1.0:dc_ll + m2*'cheater_factor':low_trusters_money @ 'll_cd'
+
+'Low_Low_DD' Person(RightHand!1,Trust~Low,money~{m1}),\
+					Person(RightHand!1,Trust~Low,money~{m2}) -> \
+			Person(RightHand,Trust~Low,money~{m1*'dd_factor'}),\
+					Person(RightHand,Trust~Low,money~{m2*'dd_factor'}) \
+			| 1.0:dd_ll + (m1+m2)*(1-'dd_factor'):low_trusters_money @ 'll_dd'
+
+
+
+#init
+%init: 't0_person_high_trust' Person(RightHand,Trust~High,money~{100})
+%init: 't0_person_moderate_trust' Person(RightHand,Trust~Mod,money~{100})
+%init: 't0_person_lowinstitutional_trust' Person(RightHand,Trust~LowInst,money~{100})
+%init: 't0_person_low_trust' Person(RightHand,Trust~Low,money~{100})
+
+
+%token: high_trusters_money
+%init: high_trusters_money <- 't0_person_high_trust'*100
+%token: mod_trusters_money
+%init: mod_trusters_money <- 't0_person_moderate_trust'*100
+%token: lowinst_trusters_money
+%init: lowinst_trusters_money <- 't0_person_lowinstitutional_trust'*100
+%token: low_trusters_money
+%init: low_trusters_money <- 't0_person_low_trust'*100
+
+
+%obs: 'High: M <= 30' Person(Trust~High,money~{m <= 30})
+%obs: 'High: 30 < M <= 75' Person(Trust~High,money~{30.0001 <= M <= 75})
+%obs: 'High: 75 < M <= 125' Person(Trust~High,money~{75.0001 <= M <= 125})
+%obs: 'High: 125 < M < 200' Person(Trust~High,money~{125.0001 <= M <= 200})
+%obs: 'High: 200 < M' Person(Trust~High,money~{200.0001 <= M})
+%obs: 'High: Average' |high_trusters_money|/'t0_person_high_trust'
+
+%obs: 'ModTrust: M <= 30' Person(Trust~Mod,money~{m <= 30})
+%obs: 'ModTrust: 30 < M <= 75' Person(Trust~Mod,money~{30.0001 <= M <= 75})
+%obs: 'ModTrust: 75 < M <= 125' Person(Trust~Mod,money~{75.0001 <= M <= 125})
+%obs: 'ModTrust: 125 < M < 200' Person(Trust~Mod,money~{125.0001 <= M <= 200})
+%obs: 'ModTrust: 200 < M' Person(Trust~Mod,money~{200.0001 <= M})
+%obs: 'ModTrust: Average' |mod_trusters_money|/'t0_person_moderate_trust'
+
+%obs: 'LowInst: M <= 30' Person(Trust~LowInst,money~{m <= 30})
+%obs: 'LowInst: 30 < M <= 75' Person(Trust~LowInst,money~{30.0001 <= M <= 75})
+%obs: 'LowInst: 75 < M <= 125' Person(Trust~LowInst,money~{75.0001 <= M <= 125})
+%obs: 'LowInst: 125 < M < 200' Person(Trust~LowInst,money~{125.0001 <= M <= 200})
+%obs: 'LowInst: 200 < M' Person(Trust~LowInst,money~{200.0001 <= M})
+%obs: 'LowInst: Average' |lowinst_trusters_money|/'t0_person_lowinstitutional_trust'
+
+%obs: 'LowTrust: M <= 30' Person(Trust~Low,money~{m <= 30})
+%obs: 'LowTrust: 30 < M <= 75' Person(Trust~Low,money~{30.0001 <= M <= 75})
+%obs: 'LowTrust: 75 < M <= 125' Person(Trust~Low,money~{75.0001 <= M <= 125})
+%obs: 'LowTrust: 125 < M < 200' Person(Trust~Low,money~{125.0001 <= M <= 200})
+%obs: 'LowTrust: 200 < M' Person(Trust~Low,money~{200.0001 <= M})
+%obs: 'LowTrust: Average' |low_trusters_money|/'t0_person_low_trust'
+
+
+
+
+
+
+%token: hh
+%init: hh <- 0
+%token: hm
+%init: hm <- 0
+%token: hli
+%init: hli <- 0
+%token: hl
+%init: hl <- 0
+%token: mm
+%init: mm <- 0
+%token: mli
+%init: mli <- 0
+%token: ml
+%init: ml <- 0
+%token: lili
+%init: lili <- 0
+%token: lil
+%init: lil <- 0
+%token: ll
+%init: ll <- 0
+
+
+%token: cc_hh
+%init: cc_hh <- 0
+%token: cd_hh
+%init: cd_hh <- 0
+%token: dc_hh
+%init: dc_hh <- 0
+%token: dd_hh
+%init: dd_hh <- 0
+%token: cc_hm
+%init: cc_hm <- 0
+%token: cd_hm
+%init: cd_hm <- 0
+%token: dc_hm
+%init: dc_hm <- 0
+%token: dd_hm
+%init: dd_hm <- 0
+%token: cc_hli
+%init: cc_hli <- 0
+%token: cd_hli
+%init: cd_hli <- 0
+%token: dc_hli
+%init: dc_hli <- 0
+%token: dd_hli
+%init: dd_hli <- 0
+%token: cc_hl
+%init: cc_hl <- 0
+%token: cd_hl
+%init: cd_hl <- 0
+%token: dc_hl
+%init: dc_hl <- 0
+%token: dd_hl
+%init: dd_hl <- 0
+%token: cc_mm
+%init: cc_mm <- 0
+%token: cd_mm
+%init: cd_mm <- 0
+%token: dc_mm
+%init: dc_mm <- 0
+%token: dd_mm
+%init: dd_mm <- 0
+%token: cc_mli
+%init: cc_mli <- 0
+%token: cd_mli
+%init: cd_mli <- 0
+%token: dc_mli
+%init: dc_mli <- 0
+%token: dd_mli
+%init: dd_mli <- 0
+%token: cc_ml
+%init: cc_ml <- 0
+%token: cd_ml
+%init: cd_ml <- 0
+%token: dc_ml
+%init: dc_ml <- 0
+%token: dd_ml
+%init: dd_ml <- 0
+%token: cc_lili
+%init: cc_lili <- 0
+%token: cd_lili
+%init: cd_lili <- 0
+%token: dc_lili
+%init: dc_lili <- 0
+%token: dd_lili
+%init: dd_lili <- 0
+%token: cc_lil
+%init: cc_lil <- 0
+%token: cd_lil
+%init: cd_lil <- 0
+%token: dc_lil
+%init: dc_lil <- 0
+%token: dd_lil
+%init: dd_lil <- 0
+%token: cc_ll
+%init: cc_ll <- 0
+%token: cd_ll
+%init: cd_ll <- 0
+%token: dc_ll
+%init: dc_ll <- 0
+%token: dd_ll
+%init: dd_ll <- 0
+
+
+
+
+
+
+
+
+
+
+

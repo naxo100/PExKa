@@ -228,6 +228,13 @@ void State::positiveUpdate(const simulation::Rule& r){
 				}catch(out_of_range &ex) {}//not in new_cc
 			//if(cc->getAgent(cc_ag_root.second).getId() != node->getId())
 			//	continue;
+			bool b=true;//TODO this is WROOOOONGGGG!!
+			/*for(auto elem : info.infl_by)
+				if(ev.null_actions.count(make_pair(static_cast<const Node*>(node),elem)) == 0){
+					b=false;break;
+				}
+			if(b)
+				continue;*/
 			two<std::set<Internal*> > port_lists;
 			const list<matching::Injection*>* injs_p = &injections[cc->getId()]->emplace(*node,port_lists,*this,cc_ag_root.second);
 

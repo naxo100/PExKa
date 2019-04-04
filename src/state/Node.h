@@ -180,7 +180,8 @@ struct EventInfo {
 	//perturbation_ids
 	std::set<mid_id> pert_ids;
 	//null events
-	small_id warns;
+	int warns;
+	//set<pair<const Node*,int>> null_actions;//positive for value, negative for lnk
 
 	//new cc derived from multinode
 	map<Node*,Node*> new_cc;

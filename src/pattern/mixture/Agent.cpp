@@ -324,17 +324,19 @@ bool Mixture::Site::testValueOpt(const state::SomeValue& val,const state::State&
 bool Mixture::Site::operator ==(const Site &s) const{
 	switch(label){
 	case AUX:
-		if(int(label) + int(s.label) == EMPTY + AUX){
+		if(s.label == AUX){
 			for(int i = 0; i < 3; i++)
 				if(values[i] != s.values[i]){
 					if(values[i] && s.values[i]){
-						if(*values[i] == *s.values[i])
+						if(*values[i] != *s.values[i])
 							return false;
 					}
 					else
 						return false;
 				}
 		}
+		//else if(s.label == EMPTY)
+			//TODO check if aux has pattern, if not return true
 		else
 			return false;
 		break;
@@ -346,19 +348,9 @@ bool Mixture::Site::operator ==(const Site &s) const{
 		if(link_type >= LinkType::BIND && s.lnk_ptrn != lnk_ptrn)//bind or bind_to //TODO PATH
 			return false;
 	}
-	else return false;
+	else
+		return false;
 
-
-	if(label == AUX)
-		for(int i = 0; i < 3; i++)
-			if(values[i] != s.values[i]){
-				if(values[i] && s.values[i]){
-					if(*values[i] == *s.values[i])
-						return false;
-				}
-				else
-					return false;
-			}
 	return true;
 }
 

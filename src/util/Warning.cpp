@@ -30,4 +30,6 @@ void WarningStack::show() const {
 	for(auto& warn : *this){
 		std::cout << warn.what() << std::endl;
 	}
+	if(size() == 0)
+		std::cout << "No warnings." << std::endl;
 }

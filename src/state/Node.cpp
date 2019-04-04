@@ -221,27 +221,28 @@ void Node::removeFrom(EventInfo& ev,matching::InjRandContainer** injs,SiteGraph&
 }
 
 void Node::changeIntState(EventInfo& ev,matching::InjRandContainer** injs,small_id id,small_id value){
-	if(interface[id].val.smallVal == value){
+	if(interface[id].val.smallVal == value)
 		ev.warns++;
-	}
-	else{
+		//ev.null_actions.emplace(this,id);
+	//else{
 		interface[id].val.set(value);
 		interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
-	}
+	//}
 }
 
 void Node::assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id,const SomeValue& val){
-	if(interface[id].val == val){
+	if(interface[id].val == val)
 		ev.warns++;
-	}
-	else{
+		//ev.null_actions.emplace(this,id);
+	//else{
 		interface[id].val = val;//TODO opertor= ??
 		interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
-	}
+	//}
 }
 
 void Node::unbind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,bool side_eff){
 	auto& inter = interface[id];
+
 	if(inter.link.first){
 		if(side_eff)
 			ev.side_effects.emplace(inter.link);
@@ -252,7 +253,7 @@ void Node::unbind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,bo
 		inter.link.first = nullptr;
 	}
 	else
-		ev.warns++;
+		ev.warns++;//ev.null_actions.emplace(this,-id);
 }
 void Node::bind(EventInfo& ev,matching::InjRandContainer** injs,small_id id,Node* trgt_node,
 		small_id trgt_site,bool side_eff){
@@ -400,10 +401,9 @@ void SubNode::changeIntState(EventInfo& ev,matching::InjRandContainer** injs,sma
 	auto& new_node = ev.new_cc.at(this);
 	if(new_node == nullptr)
 		new_node = new Node(*this,ev.new_cc);
-	if(interface[id].val.smallVal == value){
-		ev.warns++;
-	}
-	else
+	if(interface[id].val.smallVal == value)
+		ev.warns++;//ev.null_actions.emplace(this,id);
+	//else
 		new_node->setState(id,value);
 	for(auto dep : *interface[id].deps.first)
 		ev.inj_mask[dep].clear();
@@ -418,10 +418,9 @@ void SubNode::assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id
 	auto& new_node = ev.new_cc.at(this);
 	if(new_node == nullptr)
 		new_node = new Node(*this,ev.new_cc);
-	if(interface[id].val == value){
-		ev.warns++;
-	}
-	else
+	if(interface[id].val == value)
+		ev.warns++;//ev.null_actions.emplace(this,id);
+	//else
 		new_node->setState(id,value);
 	for(auto dep : *interface[id].deps.first)
 		ev.inj_mask[dep].clear();
@@ -431,7 +430,7 @@ void SubNode::unbind(EventInfo& ev,matching::InjRandContainer** injs,small_id id
 	//unbind must be inside cc
 	auto& lnk = this->interface[id].link;
 	if(!lnk.first){
-		ev.warns++;
+		ev.warns;//ev.null_actions.emplace(this,-id);
 		return;//null_event
 	}
 	if(!ev.new_cc.count(this))
@@ -637,7 +636,7 @@ void EventInfo::clear(small_id _cc_count){
 	to_update.clear();
 	rule_ids.clear();
 	aux_map.clear();
-	warns = 0;
+	warns = 0;//null_actions.clear();
 	cc_count = _cc_count;
 }
 

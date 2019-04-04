@@ -38,17 +38,11 @@ Node<T>::Node(FL_TYPE val) : DistributionTree<T>(nullptr,val),counter(0) {
 }
 
 template <typename T>
-Node<T>::Node(Leaf<T>* leaf,FL_TYPE val) : DistributionTree<T>(leaf->parent),counter(0){
+Node<T>::Node(Leaf<T>* leaf,FL_TYPE val) : DistributionTree<T>(leaf->parent),counter(leaf->count()){
 	this->value = val;
-	/*auto node_parent = static_cast<Node<T>*>(this->parent);
-	if(node_parent->value > this->value)
-		node_parent->smaller = this;
-	else
-		node_parent->greater = this;*/
 	this->sum = leaf->total();
 	leaf->parent = this;
 	leaf->level = this->level+1;
-	this->value = leaf->sum / leaf->injs.size();
 	smaller = leaf;
 	auto _greater = new Leaf<T>(this);
 	greater = _greater;
@@ -189,6 +183,14 @@ void Node<T>::balance(Leaf<T>* full,DistributionTree<T>* n) {
 		}
 
 	}
+	else{
+		auto new_node = new Node<T>(full,full->total()/full->count());
+		if(smaller == full)
+			smaller = new_node;
+		else
+			greater = new_node;
+		return;
+	}
 }
 
 
@@ -217,7 +219,9 @@ void Leaf<T>::share(Leaf* sister,FL_TYPE val){//negative val for smaller sister
 		else if(it->second == abs_val){
 			this->parent->push(it->first, it->second);
 			it = injs.erase(it);//TODO problems with erase in for?
-			this->decrease(it->second);
+			this->sum -= it->second;
+			this->parent->sum -= it->second;
+			this->parent->counter --;
 		}
 		else{
 			it->first->alloc(i);

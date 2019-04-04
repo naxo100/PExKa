@@ -55,10 +55,11 @@ public:
 	struct CandidateInfo {
 		bool is_valid;
 		bool is_new;
+		set<int> infl_by;//negative for lnk change
 		//small_id cc_root;
 		map<ag_st_id,small_id> node_id;//(lhs_cc,lhs_cc_ag) -> cc_root 		XXXXX //lhs_cc-> (lhs_cc_ag,cc_root)
 		CandidateInfo();
-		void set(small_id root,ag_st_id node);
+		void setRoot(small_id root,ag_st_id node,int change);
 	};
 	typedef map<const pattern::Mixture::Component*,CandidateInfo> CandidateMap;
 protected:
@@ -86,7 +87,7 @@ protected:
 		const state::State& state,const Environment& env) const;
 
 	static void addAgentIncludes(CandidateMap &m,
-			const Pattern::Agent& ag,ag_st_id rhs_cc_ag);
+			const Pattern::Agent& ag,ag_st_id rhs_cc_ag,int change);
 
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.

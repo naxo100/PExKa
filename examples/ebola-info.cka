@@ -40,7 +40,7 @@
 				@  'k_expose' * (1 - 'alfa_i'*'p_i'^i1)*(1 - 'alfa_i'*'p_i'^i2) #/ (1-'alfa_f'*'p_f'^f)
 		
 'expose-corp' P(s~S,info~{i},fake~{f}), D(buried~false) -> P(s~E,info~{i},fake~{f}),D(buried~false) \
-				@ 'k_expose D' * (1 - 'alfa_i'*'p_i'^i) / (1-'alfa_f'*'p_f'^f)
+				@ 'k_expose D' * (1 - 'alfa_i'*'p_i'^i) #/ (1-'alfa_f'*'p_f'^f)
 		
 'infect' 	P(s~E) -> P(s~I) @ 'k_infect'
 

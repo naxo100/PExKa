@@ -18,21 +18,26 @@ short Statement::getUseId() const {
 }
 
 /****** Class Declaration *******/
-Declaration::Declaration() : type(ALG),constant(false),observable(false),expr(NULL){};
+Declaration::Declaration() : type(ALG),constant(false),observable(false),expr(nullptr),mixture(nullptr){};
 Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
-	Node(l),name(lab),type(ALG),constant(false),observable(false),expr(e) {};
+	Node(l),name(lab),type(ALG),constant(false),observable(false),expr(e),mixture(nullptr) {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(l),name(lab),type(KAPPA),constant(false),observable(false),mixture(new Mixture(m)) {
+	Node(l),name(lab),type(KAPPA),constant(false),observable(false),expr(nullptr),mixture(new Mixture(m)) {
 };
+
+Declaration::Declaration(const location &l,const Id &lab,const Expression *e,const Mixture &m):
+	Node(l),name(lab),type(AUX_EXPR),constant(false),observable(false),expr(e),mixture(new Mixture(m)) {
+};
+
 
 Declaration::Declaration(const Declaration &d) :
 		Node(d.loc),name(d.name),type(d.type),constant(d.constant),observable(d.observable){
 	if(type)
 		mixture = new Mixture(*(d.mixture));
-	else
-		if(d.expr) expr = d.expr->clone();
-		else expr=NULL;
+
+	if(d.expr) expr = d.expr->clone();
+	else expr = nullptr;
 }
 
 Declaration& Declaration::operator=(const Declaration &d){
@@ -46,9 +51,10 @@ Declaration& Declaration::operator=(const Declaration &d){
 
 	if(type)
 		mixture = new Mixture(*(d.mixture));
-	else
-		if(d.expr) expr = d.expr->clone();
-		else expr=NULL;
+
+	if(d.expr) expr = d.expr->clone();
+	else expr= nullptr;
+
 	return *this;
 }
 //int Declaration::count = 0;
@@ -80,8 +86,7 @@ Declaration& Declaration::operator =(const Declaration &&d){
 Declaration::~Declaration(){
 	if(type)
 		delete mixture;
-	else
-		if (expr) delete expr;
+	if (expr) delete expr;
 };
 
 Variable* Declaration::evalVar(pattern::Environment &env,

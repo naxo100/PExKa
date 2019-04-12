@@ -176,9 +176,9 @@ void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 					aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux*/
 			}
 			auto val = 1.0;
-			for(auto& aux_val : aux_values)
-				val *= r.getReduction().aux_functions.at(aux_val.first)->
-						getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+			for(auto& aux_func : r.getReduction().aux_functions){
+				val *= aux_func.second->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+			}
 			cc_node.second->push(ccval_inj,val);//TODO static cast?
 		}
 	}

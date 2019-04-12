@@ -370,6 +370,8 @@ variable_declaration:
 	{$$ = Declaration(@$,Id(@1,$1),Mixture(@2,$2));}
 | LABEL alg_expr 
 	{$$ = Declaration(@$,Id(@1,$1),$2);}
+| LABEL OP_CUR alg_expr CL_CUR non_empty_mixture
+	{$$ = Declaration(@$,Id(@1,$1),$3,Mixture(@5,$5));}
 | LABEL error 
 	{yy::KappaParser::error(@2 , "error in LABEL error");}
 ;

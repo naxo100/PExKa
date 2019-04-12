@@ -31,10 +31,11 @@ public:
 class Declaration: public Node, public Statement {
 public:
 	//static int count;
-	enum VarType{ALG,KAPPA};
+	enum VarType{ALG,KAPPA,AUX_EXPR};
 	Declaration();
 	Declaration(const location &l,const Id &lab,const Expression *e);
 	Declaration(const location &l,const Id &lab,const Mixture &m);
+	Declaration(const location &l,const Id &lab,const Expression *e,const Mixture &m);
 	Declaration& operator=(const Declaration &d);
 	Declaration(const Declaration &d);
 	/*Declaration(const Declaration &&d);
@@ -61,10 +62,9 @@ protected:
 	VarType type;
 	bool constant;
 	bool observable;
-	union {
-		const Expression *expr;
-		const Mixture *mixture;
-	};
+
+	const Expression *expr;
+	const Mixture *mixture;
 };
 
 //The Number of Agents and the Agents at the start

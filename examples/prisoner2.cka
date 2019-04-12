@@ -1,0 +1,230 @@
+
+
+%agent: Person(RightHand,money~[0,[inf]], \
+				success~[0,[inf]],fail~[0,[inf]],start~[0,[inf]],\
+				inter~[0,[inf]],coop~[0,[inf]])
+
+
+%const: 'cc_factor' 1.10
+%const: 'cheater_factor' 0.15			#dc because 'd' is gaining against 'c'
+%const: 'cheated_factor' 1.0-'cheater_factor'	#cd because 'c' is losing against 'd'
+%const: 'dd_factor' 0.80
+
+
+
+%const: 'population' 2000  #2e+3
+%const: 't0_person_high_trust' 'population' * .283
+%const: 't0_person_moderate_trust' 'population' * .464
+%const: 't0_person_lowinstitutional_trust' 'population' * .190
+%const: 't0_person_low_trust' 'population' * .062
+
+%const: 'scale' 1.0/'population'#1e-5
+
+%const: 'fwd_h' 2.0783
+%const: 'fwd_m' 1.8532
+%const: 'fwd_li' 1.7924
+%const: 'fwd_l' 1.2094
+
+%const: 'coop_h' 0.5750
+%const: 'coop_m' 0.5537
+%const: 'coop_li' 0.5537
+%const: 'coop_l' 0.4750
+
+
+#Rules
+
+### Begin Deal
+'begin-deal' Person(RightHand,money~{30 <= m1},start,inter~{i1}),\
+				Person(RightHand,money~{30 <= m2},start,inter~{i2}) ->  \
+			Person(RightHand!1,start~{[T]}),\
+				Person(RightHand!1,start~{[T]}) \
+				| 1.0:hh @ i1*i2*'scale'
+
+
+
+
+
+'end-deal_CC' Person(RightHand!1,money~{m1},coop~{c1}),\
+					Person(RightHand!1,money~{m2},coop~{c2}) -> \
+				Person(RightHand,money~{m1*'cc_factor'}),\
+					Person(RightHand,money~{m2*'cc_factor'}) \
+				| 1.0:cc_hh + (m1+m2)*('cc_factor'-1):high_trusters_money 				@ 5*c1*c2
+
+'end-deal_CD' Person(RightHand!1,money~{m1},coop~{c1}),\
+					Person(RightHand!1,money~{m2},coop~{c2}) -> \
+				Person(RightHand,money~{m1*'cheated_factor'}),\
+					Person(RightHand,money~{m2+(m1+m2)*'cheater_factor'}) \
+				| 1.0:cd_hh + 1.0:dc_hh	+ m2*'cheater_factor':high_trusters_money		@ 2*5*c1*(1-c2)
+
+'end-deal_DD' Person(RightHand!1,money~{m1},coop~{c1}),\
+					Person(RightHand!1,money~{m2},coop~{c2}) -> \
+				Person(RightHand,money~{m1*'dd_factor'}),\
+					Person(RightHand,money~{m1*'dd_factor'}) \
+				| 1.0:dd_hh + (m1+m2)*('dd_factor'-1):high_trusters_money 				@ 5*(1-c1)*(1-c2)
+
+
+
+
+#init
+%init: 't0_person_high_trust' Person(RightHand,money~{100},inter~{'fwd_h'},coop~{'coop_h'})
+%init: 't0_person_moderate_trust' Person(RightHand,money~{100},inter~{'fwd_m'},coop~{'coop_m'})
+%init: 't0_person_lowinstitutional_trust' Person(RightHand,money~{100},inter~{'fwd_li'},coop~{'coop_li'})
+%init: 't0_person_low_trust' Person(RightHand,money~{100},inter~{'fwd_l'},coop~{'coop_l'})
+
+
+%token: high_trusters_money
+%init: high_trusters_money <- 't0_person_high_trust'*100
+%token: mod_trusters_money
+%init: mod_trusters_money <- 't0_person_moderate_trust'*100
+%token: lowinst_trusters_money
+%init: lowinst_trusters_money <- 't0_person_lowinstitutional_trust'*100
+%token: low_trusters_money
+%init: low_trusters_money <- 't0_person_low_trust'*100
+
+
+%obs: 'High: M <= 30' Person(inter~{'fwd_h'},money~{m <= 30})
+%obs: 'High: 30 < M <= 75' Person(inter~{'fwd_h'},money~{30.0001 <= M <= 75})
+%obs: 'High: 75 < M <= 125' Person(inter~{'fwd_h'},money~{75.0001 <= M <= 125})
+%obs: 'High: 125 < M < 200' Person(inter~{'fwd_h'},money~{125.0001 <= M <= 200})
+%obs: 'High: 200 < M' Person(inter~{'fwd_h'},money~{200.0001 <= M})
+%obs: 'High: Average' |high_trusters_money|/'t0_person_high_trust'
+
+%obs: 'ModTrust: M <= 30' Person(inter~{'fwd_m'},money~{m <= 30})
+%obs: 'ModTrust: 30 < M <= 75' Person(inter~{'fwd_m'},money~{30.0001 <= M <= 75})
+%obs: 'ModTrust: 75 < M <= 125' Person(inter~{'fwd_m'},money~{75.0001 <= M <= 125})
+%obs: 'ModTrust: 125 < M < 200' Person(inter~{'fwd_m'},money~{125.0001 <= M <= 200})
+%obs: 'ModTrust: 200 < M' Person(inter~{'fwd_m'},money~{200.0001 <= M})
+%obs: 'ModTrust: Average' |mod_trusters_money|/'t0_person_moderate_trust'
+
+%obs: 'LowInst: M <= 30' Person(inter~{'fwd_li'},money~{m <= 30})
+%obs: 'LowInst: 30 < M <= 75' Person(inter~{'fwd_li'},money~{30.0001 <= M <= 75})
+%obs: 'LowInst: 75 < M <= 125' Person(inter~{'fwd_li'},money~{75.0001 <= M <= 125})
+%obs: 'LowInst: 125 < M < 200' Person(inter~{'fwd_li'},money~{125.0001 <= M <= 200})
+%obs: 'LowInst: 200 < M' Person(inter~{'fwd_li'},money~{200.0001 <= M})
+%obs: 'LowInst: Average' |lowinst_trusters_money|/'t0_person_lowinstitutional_trust'
+
+%obs: 'LowTrust: M <= 30' Person(inter~{'fwd_l'},money~{m <= 30})
+%obs: 'LowTrust: 30 < M <= 75' Person(inter~{'fwd_l'},money~{30.0001 <= M <= 75})
+%obs: 'LowTrust: 75 < M <= 125' Person(inter~{'fwd_l'},money~{75.0001 <= M <= 125})
+%obs: 'LowTrust: 125 < M < 200' Person(inter~{'fwd_l'},money~{125.0001 <= M <= 200})
+%obs: 'LowTrust: 200 < M' Person(inter~{'fwd_l'},money~{200.0001 <= M})
+%obs: 'LowTrust: Average' |low_trusters_money|/'t0_person_low_trust'
+
+
+
+
+
+
+%token: hh
+%init: hh <- 0
+%token: hm
+%init: hm <- 0
+%token: hli
+%init: hli <- 0
+%token: hl
+%init: hl <- 0
+%token: mm
+%init: mm <- 0
+%token: mli
+%init: mli <- 0
+%token: ml
+%init: ml <- 0
+%token: lili
+%init: lili <- 0
+%token: lil
+%init: lil <- 0
+%token: ll
+%init: ll <- 0
+
+
+%token: cc_hh
+%init: cc_hh <- 0
+%token: cd_hh
+%init: cd_hh <- 0
+%token: dc_hh
+%init: dc_hh <- 0
+%token: dd_hh
+%init: dd_hh <- 0
+%token: cc_hm
+%init: cc_hm <- 0
+%token: cd_hm
+%init: cd_hm <- 0
+%token: dc_hm
+%init: dc_hm <- 0
+%token: dd_hm
+%init: dd_hm <- 0
+%token: cc_hli
+%init: cc_hli <- 0
+%token: cd_hli
+%init: cd_hli <- 0
+%token: dc_hli
+%init: dc_hli <- 0
+%token: dd_hli
+%init: dd_hli <- 0
+%token: cc_hl
+%init: cc_hl <- 0
+%token: cd_hl
+%init: cd_hl <- 0
+%token: dc_hl
+%init: dc_hl <- 0
+%token: dd_hl
+%init: dd_hl <- 0
+%token: cc_mm
+%init: cc_mm <- 0
+%token: cd_mm
+%init: cd_mm <- 0
+%token: dc_mm
+%init: dc_mm <- 0
+%token: dd_mm
+%init: dd_mm <- 0
+%token: cc_mli
+%init: cc_mli <- 0
+%token: cd_mli
+%init: cd_mli <- 0
+%token: dc_mli
+%init: dc_mli <- 0
+%token: dd_mli
+%init: dd_mli <- 0
+%token: cc_ml
+%init: cc_ml <- 0
+%token: cd_ml
+%init: cd_ml <- 0
+%token: dc_ml
+%init: dc_ml <- 0
+%token: dd_ml
+%init: dd_ml <- 0
+%token: cc_lili
+%init: cc_lili <- 0
+%token: cd_lili
+%init: cd_lili <- 0
+%token: dc_lili
+%init: dc_lili <- 0
+%token: dd_lili
+%init: dd_lili <- 0
+%token: cc_lil
+%init: cc_lil <- 0
+%token: cd_lil
+%init: cd_lil <- 0
+%token: dc_lil
+%init: dc_lil <- 0
+%token: dd_lil
+%init: dd_lil <- 0
+%token: cc_ll
+%init: cc_ll <- 0
+%token: cd_ll
+%init: cd_ll <- 0
+%token: dc_ll
+%init: dc_ll <- 0
+%token: dd_ll
+%init: dd_ll <- 0
+
+
+
+
+
+
+
+
+
+
+

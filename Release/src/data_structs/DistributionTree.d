@@ -1,0 +1,35 @@
+src/data_structs/DistributionTree.o: \
+ ../src/data_structs/DistributionTree.cpp \
+ ../src/data_structs/DistributionTree.h \
+ ../src/data_structs/../util/params.h \
+ ../src/data_structs/../matching/Injection.h \
+ ../src/data_structs/../matching/../util/params.h \
+ ../src/data_structs/../matching/../pattern/mixture/Mixture.h \
+ ../src/data_structs/../matching/../pattern/mixture/../../util/params.h \
+ ../src/data_structs/../matching/../pattern/mixture/../../expressions/AlgExpression.h \
+ ../src/data_structs/../matching/../pattern/mixture/../../expressions/BaseExpression.h \
+ ../src/data_structs/../matching/../pattern/mixture/../../expressions/SomeValue.h \
+ ../src/data_structs/../matching/../pattern/mixture/../../expressions/../util/params.h \
+ ../src/data_structs/../matching/../data_structs/DistributionTree.h
+
+../src/data_structs/DistributionTree.h:
+
+../src/data_structs/../util/params.h:
+
+../src/data_structs/../matching/Injection.h:
+
+../src/data_structs/../matching/../util/params.h:
+
+../src/data_structs/../matching/../pattern/mixture/Mixture.h:
+
+../src/data_structs/../matching/../pattern/mixture/../../util/params.h:
+
+../src/data_structs/../matching/../pattern/mixture/../../expressions/AlgExpression.h:
+
+../src/data_structs/../matching/../pattern/mixture/../../expressions/BaseExpression.h:
+
+../src/data_structs/../matching/../pattern/mixture/../../expressions/SomeValue.h:
+
+../src/data_structs/../matching/../pattern/mixture/../../expressions/../util/params.h:
+
+../src/data_structs/../matching/../data_structs/DistributionTree.h:

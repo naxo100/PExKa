@@ -49,6 +49,10 @@ public:
 	enum Unary {
 		SQRT, EXPONENT, LOG, SINE, COSINE, TAN, ATAN, ABS, COIN, RAND_N, NOT
 	};
+	enum N_ary {
+		SUM,AVG
+	};
+
 	//ACTIVITY always last of float op!!
 	enum Nullary {
 		RAND_1,SIM_TIME,CPUTIME,ACTIVITY,SIM_EVENT,NULL_EVENT,PROD_EVENT

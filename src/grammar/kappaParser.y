@@ -56,7 +56,8 @@
 %token END NEWLINE SEMICOLON
 %token AT ATD FIX OP_PAR CL_PAR OP_BRA CL_BRA COMMA DOT TYPE LAR OP_CUR CL_CUR JOIN FREE
 %token LOG PLUS MULT MINUS AND OR GREATER SMALLER EQUAL PERT INTRO DELETE DO SET UNTIL TRUE FALSE OBS KAPPA_RAR TRACK CPUTIME CONFIG REPEAT DIFF
-%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER KAPPA_VALUE SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET CONST DIV PLOT SINE COSINE TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO 
+%token KAPPA_WLD KAPPA_SEMI KAPPA_INTER KAPPA_VALUE SIGNATURE INF TIME EVENT ACTIVITY NULL_EVENT PROD_EVENT INIT LET CONST DIV PLOT SINE COSINE TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO
+%token SUM AVG 
 %token EMAX TMAX RAND_1 FLUX ASSIGN ASSIGN2 TOKEN KAPPA_LNK PIPE KAPPA_LRAR PRINT PRINTF /*CAT VOLUME*/ MAX MIN
 %token <int> INT 
 %token <std::string> ID LABEL KAPPA_MRK NAME 
@@ -104,6 +105,7 @@
 %type <Id>					rule_label
 %type <Rule>					rule_expression
 %type <Init>					init_declaration
+%type <std::pair<BaseExpression::N_ary,Expression*>> distr_expr
 
 %start statements
 
@@ -370,11 +372,20 @@ variable_declaration:
 	{$$ = Declaration(@$,Id(@1,$1),Mixture(@2,$2));}
 | LABEL alg_expr 
 	{$$ = Declaration(@$,Id(@1,$1),$2);}
-| LABEL OP_CUR alg_expr CL_CUR non_empty_mixture
+| LABEL OP_CUR distr_expr CL_CUR non_empty_mixture
 	{$$ = Declaration(@$,Id(@1,$1),$3,Mixture(@5,$5));}
 | LABEL error 
 	{yy::KappaParser::error(@2 , "error in LABEL error");}
 ;
+
+
+distr_expr:
+  SUM alg_expr
+	{$$ = make_pair(BaseExpression::SUM,$2);}
+| AVG alg_expr
+	{$$ = make_pair(BaseExpression::AVG,$2);}
+
+
 
 bool_expr:
   OP_PAR bool_expr CL_PAR 

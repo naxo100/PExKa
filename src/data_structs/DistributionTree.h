@@ -43,6 +43,8 @@ public:
 	virtual void push(T* inj,FL_TYPE val) = 0;
 	virtual void erase(T* inj) = 0;
 	virtual void erase(int address) = 0;
+
+	virtual FL_TYPE sumInternal(FL_TYPE (*func)(const T*)) const = 0;
 };
 
 template <typename T>
@@ -70,6 +72,9 @@ public:
 	virtual void decrease(FL_TYPE val,unsigned n = 1) override;
 
 	virtual void balance(Leaf<T>* full,DistributionTree<T>* n);
+
+	FL_TYPE sumInternal(expressions::BaseExpression* aux_func,
+		const map<string,two<small_id>>& aux_map) const override;
 };
 
 template <typename T>
@@ -98,6 +103,9 @@ public:
 
 
 	virtual void decrease(FL_TYPE val, unsigned n = 1) override;
+
+	FL_TYPE sumInternal(expressions::BaseExpression* aux_func,
+		const map<string,two<small_id>>& aux_map) const override;
 };
 
 

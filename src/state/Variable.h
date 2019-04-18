@@ -93,6 +93,31 @@ public:
 
 };
 
+
+class DistributionVar : public AlgExpression<FL_TYPE>, public Variable {
+	const pattern::Mixture& mixture;
+	N_ary op;
+	const BaseExpression* auxFunc;
+
+
+public:
+	DistributionVar(const short var_id, const std::string &nme,const bool is_obs,
+				const pattern::Mixture &kappa,const pair<N_ary,const BaseExpression*>& exp);
+
+	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
+
+	BaseExpression::Reduction factorize() const override;
+	BaseExpression* clone() const override;
+
+	FL_TYPE evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values ) const override;
+	FL_TYPE evaluate(const state::State& state,const AuxMap& aux_values) const override;
+
+
+	virtual bool operator==(const BaseExpression& exp) const override;
+	const pattern::Mixture& getMix() const;
+};
+
+
 /*
 //template <typename FL_TYPE>
 class RateVar : public Variable, public AlgExpression<FL_TYPE> {
@@ -128,6 +153,9 @@ public:
 	//virtual void getNeutralAuxMap(
 	//		std::unordered_map<std::string, FL_TYPE>& aux_map) const;
 };
+
+
+
 
 } /* namespace state */
 

@@ -26,8 +26,9 @@ Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
 	Node(l),name(lab),type(KAPPA),constant(false),observable(false),expr(nullptr),mixture(new Mixture(m)) {
 };
 
-Declaration::Declaration(const location &l,const Id &lab,const Expression *e,const Mixture &m):
-	Node(l),name(lab),type(AUX_EXPR),constant(false),observable(false),expr(e),mixture(new Mixture(m)) {
+Declaration::Declaration(const location &l,const Id &lab,
+		pair<BaseExpression::N_ary,const Expression*> e,const Mixture &m):
+	Node(l),name(lab),type(AUX_EXPR),constant(false),observable(false),expr(e.second),mixture(new Mixture(m)) {
 };
 
 
@@ -108,7 +109,12 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		p_mix->setAndDeclareComponents(env);
 		auto& mix = env.declareMixture(*p_mix);
 		delete p_mix;
-		var = new state::KappaVar(id,name.getString(),false,mix);
+		if(type == KAPPA)
+			var = new state::KappaVar(id,name.getString(),observable,mix);
+		else if(type == AUX_EXPR){
+			BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
+		}
+
 	}
 	else {
 		char flag = constant ? Expression::CONST : 0;

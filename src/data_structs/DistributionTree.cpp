@@ -333,6 +333,17 @@ unsigned Leaf<T>::count() const{
 	return injs.size();
 }
 
+template <typename T>
+FL_TYPE Leaf<T>::sumInternal(expressions::BaseExpression* aux_func,
+		const map<string,two<small_id>>& aux_map) const {
+	FL_TYPE sum = 0;
+	for(auto& inj : injs){
+		inj.first
+	}
+}
+
+
+
 
 template class DistributionTree<matching::CcValueInj>;
 template class Node<matching::CcValueInj>;

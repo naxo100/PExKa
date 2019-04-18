@@ -247,5 +247,21 @@ void InjRandTree::selectRule(int rid,small_id cc) const {
 	selected_root.second = cc;
 };
 
+
+FL_TYPE InjRandTree::sumInternal(expressions::BaseExpression* aux_func,
+			const map<string,two<small_id>>& aux_map) const {
+	expressions::AuxMap aux_values;
+	VarVector consts;
+	FL_TYPE (*func)(const CcValueInj*) =
+			[&](const CcValueInj* inj) {
+		for(auto aux_coords : aux_map)
+			aux_values[aux_coords.first] = inj->getEmbedding()[0][aux_coords.second.first].
+				getInternalState(aux_coords.second.second).valueAs<FL_TYPE>();
+		return aux_func->getValue(consts, aux_values).valueAs<FL_TYPE>();
+	};
+	return roots.begin()->second.begin()->second->sumInternal(func);
+}
+
+
 }
 

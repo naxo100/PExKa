@@ -134,6 +134,48 @@ bool KappaVar::operator==(const BaseExpression& exp) const {
 
 
 
+/******* class DistributionVar ****************/
+
+DistributionVar::DistributionVar(const short id,const std::string &nme,const bool is_obs,
+		const pattern::Mixture &kappa,const pair<N_ary,const BaseExpression*>& exp) :
+				AlgExpression<int>(),Variable(id,nme,is_obs),
+				mixture(kappa),op(exp.first),auxFunc(exp.second) {}
+
+//TODO
+FL_TYPE DistributionVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
+	throw std::invalid_argument("Cannot call DistributionVar::auxFactors().");
+}
+
+BaseExpression::Reduction DistributionVar::factorize() const {
+	BaseExpression::Reduction r;
+	r.factors.push_back(this->clone());
+	return r;
+}
+BaseExpression* DistributionVar::clone() const {
+	return new DistributionVar(*this);
+}
+
+FL_TYPE DistributionVar::evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values) const {
+	throw std::invalid_argument("Cannot call KappaVar::evaluate() without state.");
+}
+FL_TYPE DistributionVar::evaluate(const state::State& state,const AuxMap& aux_values) const {
+	return state.g
+}
+
+const pattern::Mixture& DistributionVar::getMix() const {
+	return mixture;
+}
+
+bool DistributionVar::operator==(const BaseExpression& exp) const {
+	try{
+		auto& kappa_exp = dynamic_cast<const KappaVar&>(exp);
+		return kappa_exp.mixture == mixture;
+	}
+	catch(bad_cast &ex){	}
+	return false;
+}
+
+
 /******* class RateVar ****************/
 /*RateVar::RateVar(const short id,const std::string &nme,const bool is_obs,
 		const AlgExpression<FL_TYPE> *exp ) :

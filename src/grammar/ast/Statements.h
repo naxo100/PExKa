@@ -35,7 +35,8 @@ public:
 	Declaration();
 	Declaration(const location &l,const Id &lab,const Expression *e);
 	Declaration(const location &l,const Id &lab,const Mixture &m);
-	Declaration(const location &l,const Id &lab,const Expression *e,const Mixture &m);
+	Declaration(const location &l,const Id &lab,
+			pair<BaseExpression::N_ary,const Expression*> e,const Mixture &m);
 	Declaration& operator=(const Declaration &d);
 	Declaration(const Declaration &d);
 	/*Declaration(const Declaration &&d);
@@ -65,6 +66,8 @@ protected:
 
 	const Expression *expr;
 	const Mixture *mixture;
+
+	BaseExpression::N_ary op;
 };
 
 //The Number of Agents and the Agents at the start

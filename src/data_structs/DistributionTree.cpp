@@ -217,6 +217,18 @@ void Node<T>::balance(Leaf<T>* full,DistributionTree<T>* n) {
 	}
 }
 
+template <typename T>
+FL_TYPE Node<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
+	FL_TYPE sum = 0;
+	for(auto inj : injs){
+		sum += func(inj);
+	}
+	for(auto inj : multi_injs){
+		sum += func(inj)*inj->count();
+	}
+	return sum + smaller->sumInternal(func)+greater->sumInternal(func);
+}
+
 
 
 /*********** class InjRandTree::Leaf **********/
@@ -334,12 +346,12 @@ unsigned Leaf<T>::count() const{
 }
 
 template <typename T>
-FL_TYPE Leaf<T>::sumInternal(expressions::BaseExpression* aux_func,
-		const map<string,two<small_id>>& aux_map) const {
+FL_TYPE Leaf<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
 	FL_TYPE sum = 0;
 	for(auto& inj : injs){
-		inj.first
+		sum += func(inj.first);
 	}
+	return sum;
 }
 
 

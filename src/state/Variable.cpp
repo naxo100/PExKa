@@ -7,6 +7,8 @@
 
 #include "Variable.h"
 #include "State.h"
+#include "../pattern/mixture/Component.h"
+
 
 namespace state {
 
@@ -138,8 +140,12 @@ bool KappaVar::operator==(const BaseExpression& exp) const {
 
 DistributionVar::DistributionVar(const short id,const std::string &nme,const bool is_obs,
 		const pattern::Mixture &kappa,const pair<N_ary,const BaseExpression*>& exp) :
-				AlgExpression<int>(),Variable(id,nme,is_obs),
-				mixture(kappa),op(exp.first),auxFunc(exp.second) {}
+				AlgExpression<FL_TYPE>(),Variable(id,nme,is_obs),
+				mixture(kappa),op(exp.first),auxFunc(exp.second) {
+	for(auto aux : mixture.getAux())
+		//check if aux is in expr
+		auxMap[aux.first] = make_pair(get<1>(aux.second),get<2>(aux.second));
+}
 
 //TODO
 FL_TYPE DistributionVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
@@ -159,7 +165,8 @@ FL_TYPE DistributionVar::evaluate(const VarVector& consts,const unordered_map<st
 	throw std::invalid_argument("Cannot call KappaVar::evaluate() without state.");
 }
 FL_TYPE DistributionVar::evaluate(const state::State& state,const AuxMap& aux_values) const {
-	return state.g
+	return state.getInjContainer(mixture.getComponent(0).getId()).sumInternal(auxFunc, auxMap, state)
+			/ (op? 1 : state.mixInstances(mixture));
 }
 
 const pattern::Mixture& DistributionVar::getMix() const {
@@ -168,7 +175,7 @@ const pattern::Mixture& DistributionVar::getMix() const {
 
 bool DistributionVar::operator==(const BaseExpression& exp) const {
 	try{
-		auto& kappa_exp = dynamic_cast<const KappaVar&>(exp);
+		auto& kappa_exp = dynamic_cast<const DistributionVar&>(exp);
 		return kappa_exp.mixture == mixture;
 	}
 	catch(bad_cast &ex){	}

@@ -99,6 +99,7 @@ class DistributionVar : public AlgExpression<FL_TYPE>, public Variable {
 	N_ary op;
 	const BaseExpression* auxFunc;
 
+	map<string,two<small_id>> auxMap;
 
 public:
 	DistributionVar(const short var_id, const std::string &nme,const bool is_obs,

@@ -87,28 +87,28 @@
 %obs: 'High: 75 < M <= 125' Person(inter~{'fwd_h'},money~{75.0001 <= M <= 125})
 %obs: 'High: 125 < M < 200' Person(inter~{'fwd_h'},money~{125.0001 <= M <= 200})
 %obs: 'High: 200 < M' Person(inter~{'fwd_h'},money~{200.0001 <= M})
-%obs: 'High: Average' |high_trusters_money|/'t0_person_high_trust'
+%obs: 'High: Average' {[AVG] m} Person(inter~{'fwd_h'},money~{m})
 
 %obs: 'ModTrust: M <= 30' Person(inter~{'fwd_m'},money~{m <= 30})
 %obs: 'ModTrust: 30 < M <= 75' Person(inter~{'fwd_m'},money~{30.0001 <= M <= 75})
 %obs: 'ModTrust: 75 < M <= 125' Person(inter~{'fwd_m'},money~{75.0001 <= M <= 125})
 %obs: 'ModTrust: 125 < M < 200' Person(inter~{'fwd_m'},money~{125.0001 <= M <= 200})
 %obs: 'ModTrust: 200 < M' Person(inter~{'fwd_m'},money~{200.0001 <= M})
-%obs: 'ModTrust: Average' |mod_trusters_money|/'t0_person_moderate_trust'
+%obs: 'High: Average' {[AVG] m} Person(inter~{'fwd_m'},money~{m})
 
 %obs: 'LowInst: M <= 30' Person(inter~{'fwd_li'},money~{m <= 30})
 %obs: 'LowInst: 30 < M <= 75' Person(inter~{'fwd_li'},money~{30.0001 <= M <= 75})
 %obs: 'LowInst: 75 < M <= 125' Person(inter~{'fwd_li'},money~{75.0001 <= M <= 125})
 %obs: 'LowInst: 125 < M < 200' Person(inter~{'fwd_li'},money~{125.0001 <= M <= 200})
 %obs: 'LowInst: 200 < M' Person(inter~{'fwd_li'},money~{200.0001 <= M})
-%obs: 'LowInst: Average' |lowinst_trusters_money|/'t0_person_lowinstitutional_trust'
+%obs: 'High: Average' {[AVG] m} Person(inter~{'fwd_li'},money~{m})
 
 %obs: 'LowTrust: M <= 30' Person(inter~{'fwd_l'},money~{m <= 30})
 %obs: 'LowTrust: 30 < M <= 75' Person(inter~{'fwd_l'},money~{30.0001 <= M <= 75})
 %obs: 'LowTrust: 75 < M <= 125' Person(inter~{'fwd_l'},money~{75.0001 <= M <= 125})
 %obs: 'LowTrust: 125 < M < 200' Person(inter~{'fwd_l'},money~{125.0001 <= M <= 200})
 %obs: 'LowTrust: 200 < M' Person(inter~{'fwd_l'},money~{200.0001 <= M})
-%obs: 'LowTrust: Average' |low_trusters_money|/'t0_person_low_trust'
+%obs: 'High: Average' {[AVG] m} Person(inter~{'fwd_l'},money~{m})
 
 
 

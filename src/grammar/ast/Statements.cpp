@@ -18,22 +18,23 @@ short Statement::getUseId() const {
 }
 
 /****** Class Declaration *******/
-Declaration::Declaration() : type(ALG),constant(false),observable(false),expr(nullptr),mixture(nullptr){};
+Declaration::Declaration() : type(ALG),constant(false),observable(false),expr(nullptr),mixture(nullptr),op(){};
 Declaration::Declaration(const location &l,const Id &lab,const Expression *e):
-	Node(l),name(lab),type(ALG),constant(false),observable(false),expr(e),mixture(nullptr) {};
+	Node(l),name(lab),type(ALG),constant(false),observable(false),expr(e),mixture(nullptr),op() {};
 
 Declaration::Declaration(const location &l,const Id &lab,const Mixture &m):
-	Node(l),name(lab),type(KAPPA),constant(false),observable(false),expr(nullptr),mixture(new Mixture(m)) {
+	Node(l),name(lab),type(KAPPA),constant(false),observable(false),expr(nullptr),mixture(new Mixture(m)),op() {
 };
 
 Declaration::Declaration(const location &l,const Id &lab,
 		pair<BaseExpression::N_ary,const Expression*> e,const Mixture &m):
-	Node(l),name(lab),type(AUX_EXPR),constant(false),observable(false),expr(e.second),mixture(new Mixture(m)) {
+	Node(l),name(lab),type(AUX_EXPR),constant(false),observable(false),
+	expr(e.second),mixture(new Mixture(m)),op(e.first) {
 };
 
 
 Declaration::Declaration(const Declaration &d) :
-		Node(d.loc),name(d.name),type(d.type),constant(d.constant),observable(d.observable){
+		Node(d.loc),name(d.name),type(d.type),constant(d.constant),observable(d.observable),op(d.op){
 	if(type)
 		mixture = new Mixture(*(d.mixture));
 
@@ -47,6 +48,7 @@ Declaration& Declaration::operator=(const Declaration &d){
 	type = d.type;
 	constant = d.constant;
 	observable = d.observable;
+	op = d.op;
 	if(expr)
 		delete expr;
 
@@ -113,6 +115,9 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 			var = new state::KappaVar(id,name.getString(),observable,mix);
 		else if(type == AUX_EXPR){
 			BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
+			if(p_mix->compsCount() != 1)
+				throw SemanticError("Distribution expressions can't have more than one Conected Component.",loc);
+			var = new state::DistributionVar(id,name.getString(),observable,mix,make_pair(op,b_expr));
 		}
 
 	}

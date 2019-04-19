@@ -105,6 +105,7 @@ public:
 
 	FL_TYPE getTotalActivity() const;
 	default_random_engine& getRandomGenerator() const;
+	const matching::InjRandContainer& getInjContainer(int cc_id) const;
 
 	/** \brief Add nodes to the SiteGraph using a fully described mixture.
 	 * @param n count of copies of the mixture.

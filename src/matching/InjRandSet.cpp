@@ -135,6 +135,23 @@ CcInjection* InjRandSet::newInj() const{
 FL_TYPE InjRandSet::partialReactivity() const {
 	return count();
 }
+
+FL_TYPE InjRandSet::sumInternal(const expressions::BaseExpression* aux_func,
+			const map<string,two<small_id>>& aux_map, const state::State &state) const {
+	expressions::AuxMap aux_values;
+	auto func = [&](const CcInjection* inj) -> FL_TYPE {
+		for(auto aux_coords : aux_map)
+			aux_values[aux_coords.first] = inj->getEmbedding()[0][aux_coords.second.first].
+				getInternalState(aux_coords.second.second).valueAs<FL_TYPE>();
+		return aux_func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+	};
+	FL_TYPE sum = 0;
+	for(auto inj : container)
+		sum += func(inj);
+	return sum;
+}
+
+
 /*vector<CcInjection*>::iterator InjRandSet::begin(){
 	return container.begin();
 }
@@ -248,16 +265,14 @@ void InjRandTree::selectRule(int rid,small_id cc) const {
 };
 
 
-FL_TYPE InjRandTree::sumInternal(expressions::BaseExpression* aux_func,
-			const map<string,two<small_id>>& aux_map) const {
+FL_TYPE InjRandTree::sumInternal(const expressions::BaseExpression* aux_func,
+			const map<string,two<small_id>>& aux_map, const state::State &state) const {
 	expressions::AuxMap aux_values;
-	VarVector consts;
-	FL_TYPE (*func)(const CcValueInj*) =
-			[&](const CcValueInj* inj) {
+	function<FL_TYPE (const CcValueInj*)> func = [&](const CcValueInj* inj) -> FL_TYPE {
 		for(auto aux_coords : aux_map)
 			aux_values[aux_coords.first] = inj->getEmbedding()[0][aux_coords.second.first].
 				getInternalState(aux_coords.second.second).valueAs<FL_TYPE>();
-		return aux_func->getValue(consts, aux_values).valueAs<FL_TYPE>();
+		return aux_func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 	};
 	return roots.begin()->second.begin()->second->sumInternal(func);
 }

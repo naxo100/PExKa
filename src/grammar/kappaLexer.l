@@ -162,7 +162,6 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "[coin]"	return KappaParser::make_COIN(loc);
 "[randN]"	return KappaParser::make_RAND_N(loc);
 "[rand1]"	return KappaParser::make_RAND_1(loc);
-
 "[sum]"		return KappaParser::make_SUM(loc); 
 "[average]"	return KappaParser::make_AVG(loc);
 "[avg]"		return KappaParser::make_AVG(loc);

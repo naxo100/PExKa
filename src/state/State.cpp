@@ -69,6 +69,9 @@ default_random_engine& State::getRandomGenerator() const{
 	return randGen;
 }
 
+const matching::InjRandContainer& State::getInjContainer(int cc_id) const{
+	return *(injections[cc_id]);
+}
 
 void State::addNodes(unsigned n,const pattern::Mixture& mix){
 	if(n == 0)//test?

@@ -50,7 +50,7 @@ public:
 		SQRT, EXPONENT, LOG, SINE, COSINE, TAN, ATAN, ABS, COIN, RAND_N, NOT
 	};
 	enum N_ary {
-		SUM,AVG
+		SUMATORY,AVERAGE
 	};
 
 	//ACTIVITY always last of float op!!

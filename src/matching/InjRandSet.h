@@ -39,8 +39,8 @@ public:
 
 	virtual void selectRule(int rid,small_id cc) const;
 
-	virtual FL_TYPE sumInternal(expressions::BaseExpression* aux_func,
-			const map<string,two<small_id>>& aux_map) const;
+	virtual FL_TYPE sumInternal(const expressions::BaseExpression* aux_func,
+			const map<string,two<small_id>>& aux_map, const state::State &state) const = 0;
 	//vector<CcInjection*>::iterator begin();
 	//vector<CcInjection*>::iterator end();
 };
@@ -64,8 +64,8 @@ public:
 	//Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask) override;
 	void erase(Injection* inj) override;
 
-	FL_TYPE sumInternal(expressions::BaseExpression* aux_func,
-			const map<string,two<small_id>>& aux_map) const override;
+	FL_TYPE sumInternal(const expressions::BaseExpression* aux_func,
+			const map<string,two<small_id>>& aux_map, const state::State &state) const override;
 
 	//vector<CcInjection*>::iterator begin();
 	//vector<CcInjection*>::iterator end();
@@ -98,8 +98,8 @@ public:
 
 	void selectRule(int rid,small_id cc) const override;
 
-	FL_TYPE sumInternal(expressions::BaseExpression* aux_func,
-				const map<string,two<small_id>>& aux_map) const override;
+	FL_TYPE sumInternal(const expressions::BaseExpression* aux_func,
+				const map<string,two<small_id>>& aux_map, const state::State &state) const override;
 	//void addHint(FL_TYPE value);
 };
 

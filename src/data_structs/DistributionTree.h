@@ -9,6 +9,7 @@
 #define SRC_DATA_STRUCTS_DISTRIBUTIONTREE_H_
 
 #include <vector>
+#include <functional>
 
 #include "../util/params.h"
 
@@ -44,7 +45,7 @@ public:
 	virtual void erase(T* inj) = 0;
 	virtual void erase(int address) = 0;
 
-	virtual FL_TYPE sumInternal(FL_TYPE (*func)(const T*)) const = 0;
+	virtual FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const = 0;
 };
 
 template <typename T>
@@ -73,8 +74,7 @@ public:
 
 	virtual void balance(Leaf<T>* full,DistributionTree<T>* n);
 
-	FL_TYPE sumInternal(expressions::BaseExpression* aux_func,
-		const map<string,two<small_id>>& aux_map) const override;
+	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
 };
 
 template <typename T>
@@ -104,8 +104,7 @@ public:
 
 	virtual void decrease(FL_TYPE val, unsigned n = 1) override;
 
-	FL_TYPE sumInternal(expressions::BaseExpression* aux_func,
-		const map<string,two<small_id>>& aux_map) const override;
+	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
 };
 
 

@@ -373,9 +373,9 @@ void Environment::show() const {
 				it->printConnections(l);
 			}
 		}
-		cout << "\n\t\tAgentPatterns[" ;
+		/*cout << "\n\t\tAgentPatterns[" ;
 		int count = 0;
-		/*for(auto& ag_list : agentPatterns)
+		for(auto& ag_list : agentPatterns)
 			count += ag_list.size();
 		cout << count << "]" << endl;
 		for(auto& ap_list : agentPatterns)

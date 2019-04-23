@@ -78,6 +78,18 @@ std::string n_ops[] = {"Rand(1)","TIME","EVENT","NULL_EVENT","PROD_EVENT","CPUTI
 
 template <typename R>
 char NullaryOperation<R>::getVarDeps() const{
+	switch(op){
+	case BaseExpression::SIM_TIME:
+	case BaseExpression::CPUTIME:
+	case BaseExpression::ACTIVITY:
+		return BaseExpression::TIME;
+	case BaseExpression::NULL_EVENT:
+	case BaseExpression::SIM_EVENT:
+	case BaseExpression::PROD_EVENT:
+		return BaseExpression::EVENT;
+	case BaseExpression::RAND_1:
+		return BaseExpression::RAND;
+	}
 	return '\0';
 }
 

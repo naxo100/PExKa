@@ -8,6 +8,7 @@
 #include "Vars.h"
 #include "Constant.h"
 #include <iostream>
+#include <typeinfo>
 namespace expressions {
 
 
@@ -85,8 +86,7 @@ bool Auxiliar<T>::operator==(const BaseExpression& exp) const {
 		auto& aux_exp = dynamic_cast<const Auxiliar<T>&>(exp);
 		if (aux_exp.name == name)
 			return true;
-	} catch (std::bad_cast &ex) {
-	}
+	} catch (std::bad_cast &ex) { }
 	return false;
 }
 

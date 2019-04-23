@@ -543,7 +543,7 @@ void Rule::addAgentIncludes(CandidateMap &candidates,
 void Rule::checkInfluence(const state::State& state,const Environment& env) {
 	//TODO changes of BIND_TO -> FREE
 	//TODO changes of semi-link -> free ???
-	try{
+	//try{
 	//we first check all candidates to avoid do complete evaluation of same CC twice
 	CandidateMap candidates;
 	for(auto& ag_changes : changes){//for each agent that changes
@@ -635,9 +635,9 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 	}
 	//Checking candidates
 	multimap<ag_st_id,ag_st_id> already_done;
-	cout << "testing if rule " << this->getName() << " have influence on candidates CC:" << endl;
+	//cout << "testing if rule " << this->getName() << " have influence on candidates CC:" << endl;
 	for(auto& cc_info : candidates){
-		cout << "\t" << cc_info.first->toString(env);
+		//cout << "\t" << cc_info.first->toString(env);
 		for(auto& info : cc_info.second.node_id){
 			bool rep = false;
 			auto key = make_pair(cc_info.first->getId(),info.second);
@@ -651,7 +651,7 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 			list<two<ag_st_id> > to_test;
 			to_test.emplace_back(ag_st_id(info.first.second,0),ag_st_id(info.second,0));
 			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,state,env)){
-				cout << " | YES!";
+				//cout << " | YES!";
 				try{
 					influence[cc_info.first].setRoot(info.second,ag_st_id(-1,news.at(info.first)),0);
 					influence[cc_info.first].infl_by = cc_info.second.infl_by;
@@ -659,18 +659,17 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 					influence[cc_info.first].setRoot(info.second,matches.at(info.first),0);
 					influence[cc_info.first].infl_by = cc_info.second.infl_by;
 				}
-			}else
-				cout << " | NO!";
-
+			}
+			//else cout << " | NO!";
 		}
-		cout << endl;
+		//cout << endl;
 	}
 
-	}//end testing try TODO
+	/*}//end testing try TODO
 	catch(exception &ex){
 		cout << "cannot check influences for " << this->getName() << endl;
 		throw ex;
-	}
+	}*/
 }
 
 const Rule::CandidateMap& Rule::getInfluences() const{

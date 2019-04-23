@@ -10,6 +10,7 @@
 #include <math.h>       /* sqrt, exp, log, sin, cos, tan, atan, abs */
 
 #include <iostream>
+#include <typeinfo>
 namespace expressions {
 
 /***********************************************/

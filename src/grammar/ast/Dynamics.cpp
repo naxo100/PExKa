@@ -240,7 +240,7 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 				sign->getName()+"().",loc);
 	}
 	//const state::SomeValue *v;
-	state::BaseExpression* num;
+	state::BaseExpression* values[3] = {nullptr,nullptr,nullptr};
 	switch(stateInfo.type){
 	case SiteState::EMPTY:
 		//agent.setSiteValue(site_id,(small_id)-1);// default value
@@ -294,67 +294,64 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 			dynamic_cast<const pattern::Signature::RangeSite<int>&>(sign->getSite(site_id));
 			if(stateInfo.range[0]){
 				if(stateInfo.flag & SiteState::MIN_EQUAL)
-					agent.setSiteMinExpr(site_id,stateInfo.range[0]->
-							eval(env, consts, nullptr, ptrn_flag));
+					values[0] = stateInfo.range[0]->eval(env, consts, nullptr, ptrn_flag);
 				else
-					agent.setSiteMinExpr(site_id,BaseExpression::makeBinaryExpression<false>(
+					values[0] = BaseExpression::makeBinaryExpression<false>(
 							stateInfo.range[0]->eval(env, consts, nullptr, ptrn_flag),
-							new Constant<int>(1),BaseExpression::SUM));
+							new Constant<int>(1),BaseExpression::SUM);
 			}
 			if(stateInfo.range[2]){
 				if(stateInfo.flag & SiteState::MAX_EQUAL)
-					agent.setSiteMaxExpr(site_id,stateInfo.range[2]->
-							eval(env, consts, nullptr, ptrn_flag));
+					values[2] = stateInfo.range[2]->
+							eval(env, consts, nullptr, ptrn_flag);
 				else
-					agent.setSiteMaxExpr(site_id,BaseExpression::makeBinaryExpression<false>(
+					values[2] = BaseExpression::makeBinaryExpression<false>(
 							stateInfo.range[2]->eval(env, consts, nullptr, ptrn_flag),
-							new Constant<int>(-1),BaseExpression::SUM));
+							new Constant<int>(-1),BaseExpression::SUM);
 			}
 		}catch(std::bad_cast &e){try{
 			dynamic_cast<const pattern::Signature::RangeSite<FL_TYPE>&>(sign->getSite(site_id));
 			if(stateInfo.range[0]){
 				if(stateInfo.flag & SiteState::MIN_EQUAL)
-					agent.setSiteMinExpr(site_id,stateInfo.range[0]->
-							eval(env, consts, nullptr, ptrn_flag));
+					values[0] = stateInfo.range[0]->
+							eval(env, consts, nullptr, ptrn_flag);
 				else{
 					BaseExpression* r = stateInfo.range[0]->eval(env, consts, nullptr, ptrn_flag);
-					BaseExpression* min = *r == *NEG_INF_EXPR ? MIN_FL_EXPR->clone()
+					values[0] = *r == *NEG_INF_EXPR ? MIN_FL_EXPR->clone()
 							: BaseExpression::makeBinaryExpression<false>(r,
 							new Constant<FL_TYPE>(std::numeric_limits<FL_TYPE>::epsilon()),
 							BaseExpression::SUM);
-					agent.setSiteMinExpr(site_id, min);
 				}
 			}
 			if(stateInfo.range[2]){
 				if(stateInfo.flag & SiteState::MAX_EQUAL)
-					agent.setSiteMaxExpr(site_id,stateInfo.range[2]->
-							eval(env, consts, nullptr, ptrn_flag));
+					values[2] = stateInfo.range[2]->
+							eval(env, consts, nullptr, ptrn_flag);
 				else{
 					BaseExpression* r = stateInfo.range[2]->eval(env, consts, nullptr, ptrn_flag);
-					BaseExpression* max = *r == *INF_EXPR ? MAX_FL_EXPR->clone()
+					values[2] = *r == *INF_EXPR ? MAX_FL_EXPR->clone()
 							: BaseExpression::makeBinaryExpression<false>(r,
 							new Constant<FL_TYPE>(-std::numeric_limits<FL_TYPE>::epsilon()),
 							BaseExpression::SUM);
-					agent.setSiteMaxExpr(site_id,max);
 				}
 			}
 		}catch(std::bad_cast &e){
 			throw SemanticError("Only valued sites can assign auxiliar.",stateInfo.loc);
 		}}//double try
 
-		if(ptrn_flag & Mixture::Info::PATTERN)
-			agent.setSiteAux(site_id);
-		else if(stateInfo.range[0] || stateInfo.range[2])
+		if((stateInfo.range[0] || stateInfo.range[2]) && !(ptrn_flag & Mixture::Info::PATTERN))
 			throw SemanticError("Can't use an inequation pattern at RHS.",stateInfo.loc);
 		//else {
-			if(stateInfo.range[1])
-				agent.setSiteExpr(site_id,stateInfo.range[1]->eval
-						(env,consts,nullptr,ptrn_flag|Expression::FORCE));
-			else
-				agent.setSiteExpr(site_id,Var(stateInfo.aux.loc,Var::AUX,stateInfo.aux).eval
-						(env, consts, nullptr, ptrn_flag));//TODO is this mandatory???
-			break;
-		//}
+		if(stateInfo.range[1]){
+			values[1] = stateInfo.range[1]->eval
+					(env,consts,nullptr,ptrn_flag|Expression::FORCE);
+			agent.setSiteExprValue(site_id,values[1]);
+		}
+		else{
+			values[1] = Var(stateInfo.aux.loc,Var::AUX,stateInfo.aux).eval
+					(env, consts, nullptr, ptrn_flag);//TODO is this mandatory???
+			agent.setSiteAuxPattern(site_id,values);
+		}
 		break;
 	case SiteState::EXPR:
 		try{
@@ -365,15 +362,15 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 			throw SemanticError("Only valued sites can assign expressions.",stateInfo.loc);
 		}}
 		if(ptrn_flag & Mixture::Info::RHS)
-			num = stateInfo.val->eval(env,consts,nullptr,ptrn_flag);
+			values[1] = stateInfo.val->eval(env,consts,nullptr,ptrn_flag);
 		else //LHS
-			num = stateInfo.val->eval(env,consts,nullptr,Expression::CONST | ptrn_flag);
+			values[1] = stateInfo.val->eval(env,consts,nullptr,Expression::CONST | ptrn_flag);
 		try{
-			if(! sign->getSite(site_id).isPossibleValue(num->getValue(VarVector())))//TODO use a real VarVector
+			if(! sign->getSite(site_id).isPossibleValue(values[1]->getValue(VarVector())))//TODO use a real VarVector
 				throw SemanticError("This value is not included in range declaration of site",loc);
 		}
 		catch(exception &e){}//TODO check which exceptions
-		agent.setSiteExpr(site_id,num);
+		agent.setSiteExprValue(site_id,values[1]);
 		break;
 	}
 

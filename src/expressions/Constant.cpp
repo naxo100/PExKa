@@ -5,6 +5,7 @@
  *      Author: naxo100
  */
 
+#include <typeinfo>
 #include "Constant.h"
 #include "../state/State.h"
 

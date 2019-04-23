@@ -12,6 +12,7 @@
 #include "UnaryOperation.h"
 #include <cmath>		//std::pow
 #include <algorithm>	//std::max,std::min
+#include <typeinfo>		//bad_cast
 
 
 namespace expressions {

@@ -166,7 +166,7 @@ FL_TYPE DistributionVar::evaluate(const VarVector& consts,const unordered_map<st
 }
 FL_TYPE DistributionVar::evaluate(const state::State& state,const AuxMap& aux_values) const {
 	return state.getInjContainer(mixture.getComponent(0).getId()).sumInternal(auxFunc, auxMap, state)
-			/ (op? 1 : state.mixInstances(mixture));
+			/ (op? state.mixInstances(mixture) : 1);
 }
 
 const pattern::Mixture& DistributionVar::getMix() const {

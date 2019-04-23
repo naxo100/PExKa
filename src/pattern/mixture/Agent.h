@@ -42,10 +42,10 @@ public:
 	void setSiteValue(small_id mix_site,small_id label);
 	void setSiteValue(small_id mix_site,int val);
 	void setSiteValue(small_id mix_site,FL_TYPE val);
-	void setSiteExpr(small_id mix_site,const expressions::BaseExpression* expr);
-	void setSiteAux(small_id mix_site);
-	void setSiteMinExpr(small_id mix_site,const expressions::BaseExpression* expr);
-	void setSiteMaxExpr(small_id mix_site,const expressions::BaseExpression* expr);
+	void setSiteExprValue(small_id mix_site,const expressions::BaseExpression* expr);
+	void setSiteAuxPattern(small_id mix_site,expressions::BaseExpression** vals);
+	//void setSiteMinExpr(small_id mix_site,const expressions::BaseExpression* expr);
+	//void setSiteMaxExpr(small_id mix_site,const expressions::BaseExpression* expr);
 
 	/*not optimized*/
 	list<string> getAuxNames() const;
@@ -93,6 +93,7 @@ public:
 struct Pattern::Site {
 	const static small_id EMPTY = small_id(-1);
 	const static small_id AUX = small_id(-2);
+	const static small_id EXPR = small_id(-3);
 	small_id label;//small_id(-2) -> aux
 
 	LinkType link_type;

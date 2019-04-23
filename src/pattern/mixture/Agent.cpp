@@ -122,21 +122,24 @@ void Mixture::Agent::setSiteValue(small_id site_id,int val){
 	//interface[site_id].label = Site::AUX;
 }
 
-void Mixture::Agent::setSiteExpr(small_id mix_site,const BaseExpression* expr){
+void Mixture::Agent::setSiteExprValue(small_id mix_site,const BaseExpression* expr){
 	interface[mix_site].values[1] = expr;
-	interface[mix_site].label = Site::AUX;//Expression site TODO
+	interface[mix_site].label = Site::EXPR;//Expression site TODO
 }
-void Mixture::Agent::setSiteAux(small_id mix_site){
+void Mixture::Agent::setSiteAuxPattern(small_id mix_site, BaseExpression** vals){
 	//interface[mix_site].aux_id = id;
 	interface[mix_site].label = Site::AUX;//expression site
+	for(int i = 0; i < 3; i++)
+		interface[mix_site].values[i] = vals[i];
 }
+/*
 void Mixture::Agent::setSiteMinExpr(small_id mix_site,const BaseExpression* expr){
 	interface[mix_site].values[0] = expr;
 }
 void Mixture::Agent::setSiteMaxExpr(small_id mix_site,const BaseExpression* expr){
 	interface[mix_site].values[2] = expr;
 }
-
+*/
 
 
 
@@ -209,13 +212,14 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 		//out += "[" + to_string(mixAgId) + "," + to_string(it->first) + "]" + site.getName(); //site name
 		out += site.getName(); //site name
 
-		if(it->second.label != Site::AUX) {
-			labelSite = dynamic_cast<const Signature::LabelSite*>(& site);
-			if(labelSite && !it->second.isEmptySite())//is not an empty site
-				out += "~" + labelSite->getLabel(it->second.label); //value of site
-				//throw std::invalid_argument("Mixture::Agent::toString(): not a valid state type.");
-		}
-		else{
+		switch(it->second.label){
+		case Site::EXPR:
+			out += "~{ ";
+			if(it->second.values[1])
+				out += it->second.values[1]->toString();
+			out += " }";
+			break;
+		case Site::AUX:
 			out += "~{ ";
 			if(it->second.values[0])
 				out += it->second.values[0]->toString()+ " <= ";
@@ -226,7 +230,12 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 			if(it->second.values[2])
 				out += " <= " + it->second.values[2]->toString();
 			out += " }";
-
+			break;
+		default:
+			labelSite = dynamic_cast<const Signature::LabelSite*>(& site);
+			if(labelSite && !it->second.isEmptySite())//is not an empty site
+				out += "~" + labelSite->getLabel(it->second.label); //value of site
+				//throw std::invalid_argument("Mixture::Agent::toString(): not a valid state type.");
 		}
 
 		switch(it->second.link_type) {
@@ -282,7 +291,7 @@ bool Mixture::Site::isEmptySite() const{
 	return label == EMPTY ;//&& values[1] == nullptr;
 }
 bool Mixture::Site::isExpression() const{
-	return label == AUX || values[1];
+	throw invalid_argument("this method is wrong");//return label == AUX || values[1];
 }
 
 //test if mix_site match with value or inequation
@@ -326,20 +335,26 @@ bool Mixture::Site::testValueOpt(const state::SomeValue& val,const state::State&
 bool Mixture::Site::operator ==(const Site &s) const{
 	switch(label){
 	case AUX:
-		if(s.label == AUX){
-			for(int i = 0; i < 3; i++)
-				if(values[i] != s.values[i]){
-					if(values[i] && s.values[i]){
-						if(*values[i] != *s.values[i])
-							return false;
-					}
-					else
+		if(s.label != AUX)
+			return false;
+		for(int i = 0; i < 3; i++)
+			if(values[i] != s.values[i]){
+				if(values[i] && s.values[i]){
+					if(*values[i] != *s.values[i])
 						return false;
 				}
-		}
+				else
+					return false;
+			}
 		//else if(s.label == EMPTY)
 			//TODO check if aux has pattern, if not return true
 		else
+			return false;
+		break;
+	case EXPR:
+		if(s.label != EXPR)
+			return false;
+		if(*values[1] != *s.values[1])
 			return false;
 		break;
 	default:
@@ -360,6 +375,14 @@ bool Mixture::Site::operator ==(const Site &s) const{
 bool Mixture::Site::testEmbed(const Site &s,list<small_id>& to_test) const{
 	switch(label){
 	case EMPTY:break;
+	case EXPR:
+		if(values[1] && values[1]->getVarDeps() <= BaseExpression::CONSTS){
+			auto rhs_val = values[1]->getValue(VarVector());
+			if(s.values[1] && s.values[1]->getVarDeps() < BaseExpression::CONSTS &&
+					s.values[1]->getValue(VarVector()).valueAs<FL_TYPE>() != rhs_val.valueAs<FL_TYPE>() )
+				return false;
+		}
+		break;
 	case AUX:
 		if(s.label == EMPTY)//else is AUX never VAL
 			break;

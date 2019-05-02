@@ -11,14 +11,14 @@
 namespace simulation {
 
 Plot::Plot(const pattern::Environment& env) : nextPoint(0.),dT(0.) {
-	auto& params = Parameters::getInstance();
+	auto& params = Parameters::get();
 	try {
-		file.open(params.outputFile(),ios::out);
+		file.open(params.outputFile,ios::out);
 	}
 	catch(...){
 		cout << "error opening output file." << endl;
 	}
-	dT = params.limitTime() / params.plotPoints();
+	dT = params.maxTime / params.points;
 	if(dT == 0.0)
 		dT = 0.0001;
 	file << "#Time";

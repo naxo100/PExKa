@@ -12,10 +12,8 @@
 namespace simulation {
 
 Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars),
-		params(Parameters::getInstance()), plot(env),ccInjections(nullptr),mixInjections(nullptr){
-	//ccInjections = new set<matching::Injection*>[env.size<pattern::Mixture::Component>()];
-	//mixInjections = new set<matching::Injection*>[env.size<pattern::Mixture>()];
-}
+		params(Parameters::get()), plot(env),ccInjections(nullptr),mixInjections(nullptr),
+		randGen(params.seed){/****/}
 
 Simulation::~Simulation() {
 	// TODO Auto-generated destructor stub
@@ -24,9 +22,11 @@ Simulation::~Simulation() {
 }
 
 void Simulation::setCells(list<unsigned int>& _cells){
+	auto distr = uniform_int_distribution<int>();
 	for(auto cell_id : _cells){
 		cells.emplace(piecewise_construct,forward_as_tuple(cell_id),
-				forward_as_tuple(env.size<state::TokenVar>(),vars,env.getCompartmentByCellId(cell_id).getVolume(),plot,env));
+				forward_as_tuple(env.size<state::TokenVar>(),vars,
+						env.getCompartmentByCellId(cell_id).getVolume(),plot,env,distr(randGen)));
 	}
 }
 
@@ -46,7 +46,7 @@ void Simulation::run(const Parameters& params){
 		//calculate Tau-Leaping
 			//calculate map [species -> diffusion-to-cells array]
 			//map-diffusion-in = scatter map-diffusion-to?
-		auto tau = params.limitTime();// = calculate-tau( map-diffusion-in )
+		auto tau = params.maxTime;// = calculate-tau( map-diffusion-in )
 		//parallel
 		for(auto& id_state : cells){
 			id_state.second.advanceUntil(counter.getTime()+tau);
@@ -93,7 +93,8 @@ vector<unsigned> Simulation::allocAgents2(unsigned cells, unsigned ag_counts, co
 	}
 
 	// Sampling multinomial distribution.
-	boost::mt19937 rng;
+	auto distr = uniform_int_distribution<int>();
+	boost::mt19937 rng(distr(randGen));
 	unsigned sum_ag = 0;
 	float sum_p  = 1.0;
 	for (auto p : p_values) {

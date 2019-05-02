@@ -25,10 +25,10 @@ void (State::*State::action[6])(const simulation::Rule::Action&) =
 
 State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		const BaseExpression& vol,simulation::Plot& _plot,
-		const pattern::Environment& _env) :
+		const pattern::Environment& _env,int seed) :
 	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]),
-	activityTree(nullptr),injections(nullptr),randGen(0/*TODO seed*/),
-	plot(_plot){}
+	activityTree(nullptr),injections(nullptr),randGen(seed),
+	plot(_plot){ }
 
 //const State empty = State(0,std::vector<Variable*>(),new Constant<float>(1.0),
 //		simulation::Plot(),pattern::Environment::empty)

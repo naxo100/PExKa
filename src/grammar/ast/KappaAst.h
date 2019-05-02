@@ -37,7 +37,7 @@ class KappaAst {
 	list<Init> inits;
 	list<const Use*> useExpressions;
 	list<Rule> rules;
-	list<Perturbation> perturbations;
+	list<Pert> perturbations;
 
 public:
 	KappaAst();
@@ -62,7 +62,7 @@ public:
 	void add(const Init &i);
 	void add(const Use *u);
 	void add(const Rule &r);
-	void add(const Perturbation &p);
+	void add(const Pert &p);
 
 
 	//show declarations

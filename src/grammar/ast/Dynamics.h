@@ -187,13 +187,13 @@ protected:
 };
 
 
-class Perturbation: public Node {
+class Pert: public Node {
 public:
-	Perturbation();
-	Perturbation(const location &l,const Expression *cond,
+	Pert();
+	Pert(const location &l,const Expression *cond,
 			const list<Effect> &effs,const Expression* rep = nullptr);
 	void show(string tabs = "");
-	~Perturbation();
+	~Pert();
 protected:
 	const Expression *condition,*until;
 	list<Effect> effects;

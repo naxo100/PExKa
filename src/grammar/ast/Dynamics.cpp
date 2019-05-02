@@ -602,12 +602,12 @@ Effect::~Effect(){
 }
 
 
-/****** Class Perturbation *******/
-Perturbation::Perturbation() : condition(nullptr),until(nullptr){};
-Perturbation::Perturbation(const location &l,const Expression *cond,const list<Effect> &effs,const Expression* rep):
+/****** Class Pert *******/
+Pert::Pert() : condition(nullptr),until(nullptr){};
+Pert::Pert(const location &l,const Expression *cond,const list<Effect> &effs,const Expression* rep):
 	Node(l), condition(cond), until(rep), effects(effs){};
 
-void Perturbation::show(string tabs) {
+void Pert::show(string tabs) {
 	tabs += "   ";
 	cout << "Perturbation {" << endl;
 
@@ -627,7 +627,7 @@ void Perturbation::show(string tabs) {
 	cout << endl << "}" << endl;
 }
 
-Perturbation::~Perturbation() {
+Pert::~Pert() {
 	if(until)
 		delete until;
 };

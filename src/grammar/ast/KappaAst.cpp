@@ -112,7 +112,7 @@ void KappaAst::add(const Rule &r){
 	rules.push_back(r);
 }
 
-void KappaAst::add(const Perturbation &p){
+void KappaAst::add(const Pert &p){
 	perturbations.push_back(p);
 }
 
@@ -139,7 +139,7 @@ void KappaAst::show(){
 
 	cout << endl << "Showing Perturbations:" << endl;
 	short i = 0;
-	for(list<Perturbation>::iterator it = perturbations.begin();it != perturbations.end(); it++){
+	for(list<Pert>::iterator it = perturbations.begin();it != perturbations.end(); it++){
 		cout << ++i << ") ";
 		it->show();
 	}

@@ -27,9 +27,6 @@ MyMaskedBinaryRandomTree<Container>::MyMaskedBinaryRandomTree(std::size_t n,defa
 	//unbalanced_subtrees has to be init after layer because need to know what is the bigger layer
 
 	unbalancedByLayer = new Container<int>[layer[size]+1]();
-
-	//unsigned seed=1;//=chrono::system_clock::now().time_since_epoch().count();
-  	generator=default_random_engine(time(nullptr));
 }
 
 template<template <typename,typename...> class Container>

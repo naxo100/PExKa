@@ -88,7 +88,7 @@ public:
 	 */
 	State(size_t tok_count,const std::vector<Variable*>& _vars,
 			const BaseExpression& vol,simulation::Plot& plot,
-			const pattern::Environment& env);
+			const pattern::Environment& env,int seed);
 	~State();
 
 	const simulation::Counter& getCounter() const;

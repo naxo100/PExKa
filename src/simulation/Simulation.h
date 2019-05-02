@@ -37,6 +37,7 @@ class Simulation {
 
 
 	unordered_map<unsigned int,state::State> cells;
+	default_random_engine randGen;
 
 	template <typename T>
 	list<T> allocParticles(unsigned cells,T count,const list<T>* vol_ratios = nullptr);

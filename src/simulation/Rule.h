@@ -94,7 +94,7 @@ public:
 	 * @param nme Declared kapa label of rule.
 	 * @param mix LHS of the rule.
 	 */
-	Rule(int _id,const ast::Id& nme, const Mixture& mix);
+	Rule(int _id,const string& nme, const Mixture& mix,const yy::location& _loc);
 	~Rule();
 
 	int getId() const;

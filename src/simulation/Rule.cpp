@@ -17,7 +17,7 @@
 
 namespace simulation {
 
-Rule::Rule(int _id,const ast::Id& nme, const Mixture& mix) : id(_id),name(nme.getString()),loc(nme.loc),
+Rule::Rule(int _id,const string& nme, const Mixture& mix,const yy::location& _loc) : id(_id),name(nme),loc(_loc),
 		lhs(mix),rhs(nullptr),rate(nullptr),isRhsDeclared(false){}
 
 Rule::~Rule() {
@@ -97,8 +97,10 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 		lhs_mask[lhs_unmask[i]] = i;
 
 	//modify nodes
+	string s_i;
 	for(i = 0; i < lhs_unmask.size(); i++){
 		auto& lhs_ag = lhs.getAgent(lhs_unmask[i]);
+		s_i = "("+to_string(i)+")";
 		try{
 			if(i >= rhs_unmask.size()) { // fixbug: when the right mixture have less agents than left
 				first_del = i;
@@ -125,7 +127,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 					lhs_ag.getSite(j);
 				}catch(std::out_of_range &e){
 					if(rhs_site.link_type != Mixture::WILD)
-						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+						throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 							sign.getSite(j).getName()+" on the left side must be specified specified to change.",loc);
 				}
 				try{
@@ -133,7 +135,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 				}catch(std::out_of_range &e){
 					if(!lhs_site.isEmptySite() || lhs_site.link_type != Mixture::WILD)
 						ADD_WARN("The internal/lnk state of the site "+psite->getName()+
-							" in agent "+sign.getName()+" should be specified in the right side.",loc);
+							" in agent "+sign.getName()+s_i+" should be specified in the right side.",loc);
 					j++;
 					continue;
 					/*if(lhs_site.link_type >)
@@ -143,8 +145,8 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 
 				if(lhs_site.isEmptySite() && !rhs_site.isEmptySite()){
 					ADD_WARN("Application of rule '"+name+
-							"' will induce a null event when applied to an agent '"+sign.getName()+
-							"' that have the same value in site "+psite->getName(),loc);
+							"' will induce a null event when applied to an agent "+sign.getName()+
+							s_i+" that have the same value in site "+psite->getName(),loc);
 				}
 				if(rhs_site.values[1]){
 					auto aux_exp = dynamic_cast<const Auxiliar<FL_TYPE>*>(rhs_site.values[1]);
@@ -176,13 +178,13 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						break;
 					case Mixture::BIND_TO://error
 					case Mixture::PATH://error?
-						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+						throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 								sign.getSite(j).getName()+" on the right hand side is underspecified.",loc);
 						break;
 					case Mixture::BIND://if semi error else connect
 						lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
 						if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
-							throw SemanticError("The link status of agent "+sign.getName()+", site "+
+							throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 									sign.getSite(j).getName()+" on the right hand side is inconsistent.",loc);
 						i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk1.first));
 						if(i > i2)//TODO possible error
@@ -202,29 +204,29 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						break;
 					case Mixture::FREE://warning
 						ADD_WARN("Application of rule '"+name+
-									"' will induce a null event when applied to an agent '"+sign.getName()+
-									"' that is free on site '"+sign.getSite(j).getName()+"'",loc);
+									"' will induce a null event when applied to an agent "+sign.getName()+
+									s_i+" that is free on site '"+sign.getSite(j).getName()+"'",loc);
 						a.t = UNBIND;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 						script.emplace_back(a);
 						changes[make_pair(rhs_unmask[i],false)].second.emplace_back(j);
 						break;
 					case Mixture::BIND_TO://error
 					case Mixture::PATH://error
-						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+						throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 								sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
 						break;
 					case Mixture::BIND://if semi error else warning
 						lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
 						if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
-							throw SemanticError("The link status of agent '"+sign.getName()+
-									"', site '"+sign.getSite(j).getName()+
+							throw SemanticError("The link status of agent "+sign.getName()+
+									s_i+", site '"+sign.getSite(j).getName()+
 									"' on the right hand side is inconsistent",loc);
 						i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk1.first));
 						if(i > i2)
 							break;//link added before.
 						else {
 							ADD_WARN("Rule '"+name+"': site '"+sign.getSite(j).getName()+
-									"' of agent '"+sign.getName()+"' is bound in the right hand"+
+									"' of agent "+sign.getName()+s_i+" is bound in the right hand"+
 									"side although it is unspecified in the left hand side",loc);
 							a.t = LINK;a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
 							a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
@@ -239,7 +241,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						break;
 					case Mixture::BIND_TO://error
 					case Mixture::PATH://error
-						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+						throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 								sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
 						break;
 					case Mixture::FREE://if semi warning?? and disconnect else disconnect
@@ -274,7 +276,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 									break;//link added before.
 								ADD_WARN("The link state of site "+sign.getSite(j).getName()+
 										" of agent "+sign.getName()+
-										" is changed although it is a semi-link in the left hand side",loc);
+										s_i+" is changed although it is a semi-link in the left hand side",loc);
 								a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 								a.trgt2 = make_tuple(rhs_unmask[i].first,lnk2.first,lnk2.second,i2);
 								binds.emplace_back(a);
@@ -282,7 +284,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						}
 						else {
 							if(lnk2.first == rhs_unmask[i].second && lnk2.second == j)//not-semi
-								throw SemanticError("The link status of agent "+sign.getName()+", site "+
+								throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 										sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
 							else {//not-not
 								if(lhs_mask.at(make_pair(lhs_unmask[i].first,lnk1.first)) !=
@@ -290,7 +292,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 										lnk1.second != lnk2.second){
 									i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
 									ADD_WARN(name+" rule induces a link permutation on site "
-											+sign.getSite(j).getName()+" of agent "+sign.getName(),loc);
+											+sign.getSite(j).getName()+" of agent "+sign.getName()+s_i,loc);
 									if(i > i2)
 										break;//link added before.
 									a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,false);
@@ -308,7 +310,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 					case Mixture::WILD://warn cause no mention in the rhs
 						break;
 					case Mixture::PATH://error
-						throw SemanticError("The link status of agent "+sign.getName()+", site "+
+						throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 								sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
 						break;
 					case Mixture::FREE://disconnect
@@ -319,14 +321,14 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 					case Mixture::BIND://if semi error else warning(swap)
 						lnk1 = rhs->follow(rhs_unmask[i].first,rhs_unmask[i].second,j);
 						if(lnk1.first == rhs_unmask[i].second && lnk1.second == j)
-							throw SemanticError("The link status of agent "+sign.getName()+", site "+
+							throw SemanticError("The link status of agent "+sign.getName()+s_i+", site "+
 									sign.getSite(j).getName()+" on the right hand side is underspecified",loc);
 						else {
 							i2 = rhs_mask.at(make_pair(rhs_unmask[i].first,lnk2.first));
 							if(i > i2)
 								break;//link added before.
 							ADD_WARN("The link state of site "+sign.getSite(j).getName()+
-									" in agent "+sign.getName()+" is changed although it is a semi-link in the left hand side",loc);
+									" in agent "+sign.getName()+s_i+" is changed although it is a semi-link in the left hand side",loc);
 							a.t = LINK; a.trgt1 = make_tuple(lhs_unmask[i].first,lhs_unmask[i].second,j,Action::S_EFF);
 							a.trgt2 = make_tuple(rhs_unmask[i].first,lnk1.first,lnk1.second,i2);
 							binds.emplace_back(a);
@@ -335,7 +337,7 @@ void Rule::difference(const Environment& env, const vector<ag_st_id>& lhs_unmask
 						break;
 					case Mixture::BIND_TO://if different error else nothing
 						if(lhs_site.lnk_ptrn != rhs_site.lnk_ptrn)
-							throw SemanticError("The link status of agent '%s', site '%s' on the right hand side is inconsistent",loc);
+							throw SemanticError("The link status of agent '%s's_i+, site '%s' on the right hand side is inconsistent",loc);
 						//else its OK
 						break;
 					}

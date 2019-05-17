@@ -607,6 +607,21 @@ Pert::Pert() : condition(nullptr),until(nullptr){};
 Pert::Pert(const location &l,const Expression *cond,const list<Effect> &effs,const Expression* rep):
 	Node(l), condition(cond), until(rep), effects(effs){};
 
+
+void Pert::eval(pattern::Environment& env,const vector<state::Variable*>& vars) const {
+	expressions::BaseExpression *cond,*rep;
+	if(condition)
+		cond  = condition->eval(env, vars, nullptr, 0);
+	else
+		cond = new Constant<bool>(true);
+
+	if(until)
+		rep = until->eval(env, vars, nullptr, 0);
+	else
+		rep = new Constant<bool>(false);
+
+}
+
 void Pert::show(string tabs) {
 	tabs += "   ";
 	cout << "Perturbation {" << endl;
@@ -779,7 +794,7 @@ void Rule::eval(pattern::Environment& env,
 	auto lhs_mask = lhs_mix_p->setAndDeclareComponents(env);
 	auto& lhs_mix = env.declareMixture(*lhs_mix_p);
 	delete lhs_mix_p;
-	auto& rule = env.declareRule(label,lhs_mix);
+	auto& rule = env.declareRule(label,lhs_mix,loc);
 
 	lhs_mix.addInclude(rule.getId());
 	two<pattern::DepSet> deps;//first-> | second<-
@@ -806,7 +821,7 @@ void Rule::eval(pattern::Environment& env,
 		delete rhs_mix_p;
 		rule.setRHS(&rhs_mix,bi);
 		auto reverse_label = label.getString()+" @bckwrds";
-		auto& inverse_rule = env.declareRule(Id(label.loc,reverse_label),rhs_mix);
+		auto& inverse_rule = env.declareRule(Id(label.loc,reverse_label),rhs_mix,loc);
 		inverse_rule.setRHS(&lhs_mix,bi);
 		inverse_rule.difference(env,rhs_mask,lhs_mask,vars);
 		inverse_rule.setRate(reverse);

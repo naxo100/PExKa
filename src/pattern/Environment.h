@@ -76,7 +76,7 @@ public:
 	Mixture& declareMixture(const Mixture& m);
 	Mixture::Component& declareComponent(const Mixture::Component& c);
 	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,bool is_lhs = true);
-	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix);
+	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix,const yy::location& loc);
 	void declareObservable(state::Variable* obs);
 
 	void buildInfluenceMap(const state::State& state);

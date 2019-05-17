@@ -185,7 +185,7 @@ Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bo
 	return new_agent;
 }
 
-simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture& mix){
+simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture& mix,const yy::location& loc){
 	//if(this->exists(name,algMap) || this->exists(name,kappaMap))
 	const string& name = name_loc.getString();
 	if(this->exists(name,varMap))
@@ -194,7 +194,7 @@ simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture
 	id = varNames.size();
 	varMap[name] = id;
 	varNames.push_back(name);
-	rules.emplace_back(rules.size(),name_loc,mix);
+	rules.emplace_back(rules.size(),name_loc.getString(),mix,loc);
 	return rules.back();
 }
 

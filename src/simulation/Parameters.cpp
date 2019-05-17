@@ -15,7 +15,7 @@ Parameters Parameters::singleton;
 
 Parameters::Parameters() : maxEvent(std::numeric_limits<UINT_TYPE>::max()),
 		maxTime(/*std::numeric_limits<FL_TYPE>::infinity()*/0),points(1),
-		outputFile("sim.out"),options(nullptr){}
+		outputFile("sim.out"),options(nullptr),seed(0){}
 
 void Parameters::makeOptions(const string &msg){
 	options = new options_description(msg);
@@ -52,7 +52,7 @@ void Parameters::evalOptions(int argc, char* argv[]){
 	}
 
 	if (vm.count("help")) {
-		cout << options << "\n";
+		cout << *options << "\n";
 		exit(0);
 	}
 

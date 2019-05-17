@@ -15,8 +15,12 @@ Warning::~Warning() {}
 const std::string Warning::what() const{
 	static char c[150];
 	if(loc != yy::location())
-		sprintf(c,"In file \"%s\", line %d, characters %d-%d:\n  ",
-		        loc.begin.filename->c_str(),loc.begin.line,loc.begin.column,loc.end.column);
+		if(loc.begin.line == loc.end.line)
+			sprintf(c,"In file \"%s\", line %d, characters %d-%d:\n  ",
+					loc.begin.filename->c_str(),loc.begin.line,loc.begin.column,loc.end.column);
+		else
+			sprintf(c,"In file \"%s\", lines %d-%d:\n  ",
+					loc.begin.filename->c_str(),loc.begin.line,loc.end.line);
 	else
 		c[0] = '\0';
 	return c + msg;
@@ -39,7 +43,7 @@ int WarningStack::add(int id,const std::string &msg,const yy::location loc){
 		id = ++global_id;
 	if(this->count(id) < MAX_WARNS-1)
 		emplace(id,Warning(msg,loc));
-	if(this->count(id) == MAX_WARNS-1)
+	else if(this->count(id) == MAX_WARNS-1)
 		emplace(id,Warning(msg+" (Shutting down this warning).",loc));
 	return id;
 }

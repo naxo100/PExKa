@@ -194,6 +194,8 @@ public:
 			const list<Effect> &effs,const Expression* rep = nullptr);
 	void show(string tabs = "");
 	~Pert();
+
+	void eval(pattern::Environment& env,const vector<state::Variable*>& vars) const;
 protected:
 	const Expression *condition,*until;
 	list<Effect> effects;

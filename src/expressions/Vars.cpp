@@ -115,6 +115,7 @@ template class Auxiliar<FL_TYPE> ;
 template<typename R>
 VarLabel<R>::VarLabel(BaseExpression* expr) :
 		var(expr) {
+	cout << "realmente estoy usando esta clase????" << endl;
 }
 template<typename R>
 R VarLabel<R>::evaluate(const VarVector &consts,

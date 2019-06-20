@@ -21,7 +21,10 @@ Environment::Environment() {
 	//useExpressions[0].evaluateCells();
 }
 
-Environment::~Environment() {}
+Environment::~Environment() {
+	for(auto pert : perts)
+		delete pert;
+}
 
 
 bool Environment::exists(const string &name,const Environment::IdMap &map){
@@ -198,6 +201,11 @@ simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture
 	return rules.back();
 }
 
+void Environment::declarePert(simulation::Perturbation* pert){
+	pert->setId(perts.size());
+	perts.push_back(pert);
+}
+
 void Environment::declareObservable(state::Variable* var){
 	observables.emplace_back(var);
 }
@@ -230,6 +238,14 @@ const list<pair<const Mixture::Component*,small_id> >& Environment::getFreeSiteC
 
 short Environment::getVarId(const string &s) const {
 	return varMap.at(s);
+}
+short Environment::getVarId(const ast::Id &s) const {
+	try {
+		return varMap.at(s.getString());
+	}catch(out_of_range &ex){
+		throw SemanticError("Variable "+s.getString()+" has not been declared (yet).",s.loc);
+	}
+	return -1;
 }
 short Environment::getChannelId(const string &s) const {
 	return channelMap.at(s);
@@ -268,6 +284,9 @@ const list<Mixture::Agent>& Environment::getAgentPatterns(small_id id) const{
 }
 const vector<simulation::Rule>& Environment::getRules() const {
 	return rules;
+}
+const vector<simulation::Perturbation*>& Environment::getPerts() const {
+	return perts;
 }
 const list<state::Variable*>& Environment::getObservables() const {
 	return observables;
@@ -333,12 +352,23 @@ template <>
 void Environment::reserve<simulation::Rule>(size_t count) {
 	rules.reserve(count);
 }
+template <>
+void Environment::reserve<simulation::Perturbation>(size_t count) {
+	perts.reserve(count);
+}
 
-const DepSet& Environment::getDependencies(const Dependencies::Dependency& dep) const{
+const DepSet& Environment::getDependencies(const Dependency& dep) const{
 	return deps.getDependencies(dep).deps;
 }
-void Environment::addDependency(Dependencies::Dependency key,Dependencies::Dep dep,unsigned id){
-	deps.addDependency(key,dep,id);
+const Dependencies& Environment::getDependencies() const{
+	return deps;
+}
+void Environment::addDependency(Dependency key,Dependency::Dep dep,unsigned id){
+	if(key.type == Dependency::TIME && dep == Dependency::PERT &&
+			perts[id]->nextStopTime() >= 0)
+		deps.addTimePertDependency(id, perts[id]->nextStopTime());
+	else
+		deps.addDependency(key,dep,id);
 }
 
 

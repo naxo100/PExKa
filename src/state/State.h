@@ -15,6 +15,7 @@
 #include "SiteGraph.h"
 #include "../simulation/Counter.h"
 #include "../simulation/Rule.h"
+#include "../simulation/Perturbation.h"
 #include "../data_structs/RandomTree.h"
 #include "../pattern/Dependencies.h"
 #include "../matching/InjRandSet.h"
@@ -50,6 +51,10 @@ class State {
 	simulation::LocalCounter counter;
 	simulation::Plot& plot;
 	mutable EventInfo ev;
+	mutable unordered_map<small_id,simulation::Perturbation> perts;
+	mutable pattern::Dependencies activeDeps;
+	mutable list<small_id> pertIds;//maybe part of event-info?
+	mutable list<pair<float,pattern::Dependency>> timePerts;//ordered
 	//time_t program_t0;
 
 	/** \brief Negative update of injections after apply a change to an agent site.
@@ -70,7 +75,6 @@ class State {
 	void del(const simulation::Rule::Action& act);
 	void assign(const simulation::Rule::Action& act);
 	//void add(const simulation::Rule::Action& a);
-	void positiveUpdate(const simulation::Rule& r);
 
 	/** \brief static vector with the basic rule action methods.
 	 */
@@ -91,6 +95,9 @@ public:
 			const pattern::Environment& env,int seed);
 	~State();
 
+
+	void del(Node* node);
+
 	const simulation::Counter& getCounter() const;
 
 	/** \brief Add tokens population to the state.
@@ -103,6 +110,9 @@ public:
 
 	SomeValue getVarValue(short_id var_id) const;
 
+
+	void positiveUpdate(const simulation::Rule::CandidateMap& wake_up);
+
 	FL_TYPE getTotalActivity() const;
 	default_random_engine& getRandomGenerator() const;
 	const matching::InjRandContainer& getInjContainer(int cc_id) const;
@@ -113,6 +123,7 @@ public:
 	 * @param env the environment of the simulation.
 	 */
 	void addNodes(unsigned n,const pattern::Mixture& mix);
+	void initNodes(unsigned n,const pattern::Mixture& mix);
 
 	UINT_TYPE mixInstances(const pattern::Mixture& mix) const;
 
@@ -126,13 +137,16 @@ public:
 
 	void advanceUntil(FL_TYPE sync_t);
 
-	void updateDeps(const pattern::Dependencies::Dependency& dep);
+	void updateVar(const Variable& val);
+	void updateDeps(const pattern::Dependency& dep);
+
+	void tryPerturbate();
 
 
 	void selectInjection(const simulation::Rule &r,two<FL_TYPE> bin_act,
 			two<FL_TYPE> un_act);
 	const simulation::Rule& drawRule();
-	FL_TYPE event();
+	int event();
 
 	void initInjections();
 	void initActTree();

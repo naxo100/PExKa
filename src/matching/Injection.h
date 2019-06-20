@@ -52,7 +52,7 @@ public:
 
 	virtual bool isTrashed() const;
 
-	virtual void codomain(Node* injs[],set<Node*>& cod) const = 0;
+	virtual void codomain(vector<Node*>& injs,set<Node*>& cod) const = 0;
 
 	virtual size_t count() const = 0;
 
@@ -84,7 +84,7 @@ public:
 
 	const vector<Node*>& getEmbedding() const override;
 
-	void codomain(Node* injs[],set<Node*>& cod) const override;
+	void codomain(vector<Node*>& injs,set<Node*>& cod) const override;
 
 	size_t count() const override;
 

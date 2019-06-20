@@ -110,7 +110,7 @@ const vector<Node*>& CcInjection::getEmbedding() const {
 	return ccAgToNode;
 }
 
-void CcInjection::codomain(Node* injs[],set<Node*>& cod) const {
+void CcInjection::codomain(vector<Node*>& injs,set<Node*>& cod) const {
 	int i = 0;
 	for(auto node_p : ccAgToNode){
 		if(cod.find(node_p) != cod.end())

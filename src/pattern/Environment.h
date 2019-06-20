@@ -18,6 +18,7 @@
 #include "mixture/Mixture.h"
 #include "Dependencies.h"
 #include "../simulation/Rule.h"
+#include "../simulation/Perturbation.h"
 //#include "../state/AlgExpression.h"
 //#include "../grammar/ast/Basics.h"
 #include "../util/Exceptions.h"
@@ -55,6 +56,7 @@ protected:
 	list<Mixture::Component> components;
 	vector<list<Mixture::Agent> > agentPatterns;
 	vector<simulation::Rule> rules;
+	vector<simulation::Perturbation*> perts;
 	list<state::Variable*> observables;
 	mutable Dependencies deps;//mutable because [] accessing
 
@@ -77,6 +79,8 @@ public:
 	Mixture::Component& declareComponent(const Mixture::Component& c);
 	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,bool is_lhs = true);
 	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix,const yy::location& loc);
+	void declarePert(simulation::Perturbation* pert);
+
 	void declareObservable(state::Variable* obs);
 
 	void buildInfluenceMap(const state::State& state);
@@ -93,6 +97,7 @@ public:
 	const list<Mixture::Component>& getComponents() const;
 	const list<Mixture::Agent>& getAgentPatterns(small_id id) const;
 	const vector<simulation::Rule>& getRules() const;
+	const vector<simulation::Perturbation*>& getPerts() const;
 	const list<state::Variable*>& getObservables() const;
 
 
@@ -100,6 +105,7 @@ public:
 
 	short idOfAlg(const string& name) const;
 	short getVarId(const string &name) const;
+	short getVarId(const ast::Id &name) const;
 	short getChannelId(const string &name) const;
 	short getCompartmentId(const string &name) const;
 	short getSignatureId(const string &name) const;
@@ -107,8 +113,9 @@ public:
 
 	state::BaseExpression* getVarExpression(const string &name) const;
 
-	const DepSet& getDependencies(const Dependencies::Dependency& dep) const;
-	void addDependency(Dependencies::Dependency key,Dependencies::Dep dep,unsigned id);
+	const DepSet& getDependencies(const Dependency& dep) const;
+	const Dependencies& getDependencies() const;
+	void addDependency(Dependency key,Dependency::Dep dep,unsigned id);
 
 	template <typename T>
 	size_t size() const;

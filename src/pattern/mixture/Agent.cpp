@@ -69,7 +69,7 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 	if(this == &a)
 		return true;
 	if(signId == a.signId && interface.size() == a.interface.size()){
-		for(const pair<int,Site> &id_site : interface){
+		for(auto &id_site : interface){
 			try{
 				if(! (id_site.second == a.getSite(id_site.first)) )
 					return false;
@@ -286,6 +286,50 @@ string Mixture::Agent::toString(const Environment& env, short mixAgId,
 
 Mixture::Site::Site(small_id lbl,LinkType lt) : label(lbl),link_type(lt),lnk_ptrn(-1,-1),
 		values{nullptr,nullptr,nullptr}{}
+
+Mixture::Site::Site(expressions::SomeValue val,LinkType lt) : label(0),link_type(lt),lnk_ptrn(-1,-1),
+		values{nullptr,nullptr,nullptr}{
+	switch(val.t){
+	case expressions::SMALL_ID:
+		label = val.smallVal;break;
+	case expressions::FLOAT:
+		values[1] = new expressions::Constant<FL_TYPE>(val.fVal);break;
+	case expressions::INT:
+		values[1] = new expressions::Constant<int>(val.iVal);break;
+	default:
+		throw invalid_argument("Not a valid value type for agent site.");
+	}
+}
+
+Mixture::Site::Site(const Site& site) : label(site.label),link_type(site.link_type),lnk_ptrn(site.lnk_ptrn){
+	for(int i = 0; i < 3; i++)
+		if(site.values[i]){
+			if(dynamic_cast<const state::Variable*>(site.values[i]))
+				values[i] = site.values[i];
+			else
+				values[i] = site.values[i]->clone();
+		}
+		else
+			values[i] = nullptr;
+}
+
+Mixture::Site::~Site(){
+	for(int i = 0; i < 3; i++)
+		if(values[i] && !dynamic_cast<const state::Variable*>(values[i]))
+			delete values[i];
+}
+/*
+Mixture::Site& Mixture::Site::operator=(const Site& site) : label(site.label),link_type(site.link_type),lnk_ptrn(site.lnk_ptrn){
+	for(int i = 0; i < 3; i++)
+		if(values[i]){
+			if(dynamic_cast<const state::Variable*>(values[i]))
+				values[i] = site.values[i];
+			else
+				values[i] = site.values[i]->clone();
+		}
+		else
+			values[i] = nullptr;
+}*/
 
 bool Mixture::Site::isEmptySite() const{
 	return label == EMPTY ;//&& values[1] == nullptr;

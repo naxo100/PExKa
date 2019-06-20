@@ -27,6 +27,8 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
  ../src/state/../simulation/../grammar/location.hh \
  ../src/state/../simulation/../grammar/position.hh \
  ../src/state/../simulation/../state/SiteGraph.h \
+ ../src/state/../simulation/Perturbation.h \
+ ../src/state/../simulation/Rule.h \
  ../src/state/../data_structs/RandomTree.h \
  ../src/state/../data_structs/../util/params.h \
  ../src/state/../pattern/Dependencies.h \
@@ -94,6 +96,10 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
 ../src/state/../simulation/../grammar/position.hh:
 
 ../src/state/../simulation/../state/SiteGraph.h:
+
+../src/state/../simulation/Perturbation.h:
+
+../src/state/../simulation/Rule.h:
 
 ../src/state/../data_structs/RandomTree.h:
 

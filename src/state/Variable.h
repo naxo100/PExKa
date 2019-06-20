@@ -34,12 +34,20 @@ public:
 	Variable(const short id, const std::string &nme,const bool is_obs = false);
 	virtual ~Variable() = 0;
 
+	virtual bool isConst() const;
+
+	virtual void update(const Variable& var) = 0;
+
+	short getId() const;
+
 	//template <typename T>
 	//virtual SomeValue getValue(/*const State &state*/) const = 0;
 	//virtual int getValue() const = 0;
 	//virtual bool getValue() const = 0;
 	//const std::string& getName() const;
 	virtual std::string toString() const override;
+
+	static Variable* makeAlgVar(short id,const std::string& name,BaseExpression* exp);
 
 };
 
@@ -49,6 +57,8 @@ class AlgebraicVar : public Variable, public AlgExpression<T> {
 public:
 	AlgebraicVar(const short var_id, const std::string &nme,const bool is_obs,
 			const AlgExpression<T> *exp);
+	virtual ~AlgebraicVar();
+	void update(const Variable& var);
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
@@ -65,6 +75,9 @@ template <typename T>
 class ConstantVar : public Variable, public Constant<T> {
 public:
 	ConstantVar(const short var_id, const std::string &name, const AlgExpression<T> *exp);
+	void update(const Variable& var);
+
+	bool isConst() const override;
 
 	std::string toString() const override;
 
@@ -74,10 +87,11 @@ public:
 };
 
 class KappaVar : public AlgExpression<int>, public Variable {
-	const pattern::Mixture& mixture;
+	const pattern::Mixture* mixture;
 public:
 	KappaVar(const short var_id, const std::string &nme,const bool is_obs,
 			const pattern::Mixture &kappa);
+	void update(const Variable& var);
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
@@ -95,7 +109,7 @@ public:
 
 
 class DistributionVar : public AlgExpression<FL_TYPE>, public Variable {
-	const pattern::Mixture& mixture;
+	const pattern::Mixture* mixture;
 	N_ary op;
 	const BaseExpression* auxFunc;
 
@@ -104,6 +118,7 @@ class DistributionVar : public AlgExpression<FL_TYPE>, public Variable {
 public:
 	DistributionVar(const short var_id, const std::string &nme,const bool is_obs,
 				const pattern::Mixture &kappa,const pair<N_ary,const BaseExpression*>& exp);
+	void update(const Variable& var);
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 

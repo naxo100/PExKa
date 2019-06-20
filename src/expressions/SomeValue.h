@@ -50,8 +50,12 @@ public:
 	bool operator!=(const SomeValue&) const;
 	bool operator==(const SomeValue&) const;
 
+
+	friend std::ostream& operator<<(std::ostream& out, const SomeValue& val);
 };
 
+
+std::ostream& operator<<(std::ostream& out, const SomeValue& val);
 
 }
 

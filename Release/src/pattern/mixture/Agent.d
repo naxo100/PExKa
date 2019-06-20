@@ -35,6 +35,8 @@ src/pattern/mixture/Agent.o: ../src/pattern/mixture/Agent.cpp \
  ../src/pattern/mixture/../../simulation/../state/../matching/../data_structs/DistributionTree.h \
  ../src/pattern/mixture/../../simulation/../state/../matching/../data_structs/../util/params.h \
  ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h \
+ ../src/pattern/mixture/../../simulation/Perturbation.h \
+ ../src/pattern/mixture/../../simulation/Rule.h \
  ../src/pattern/mixture/../../util/Exceptions.h \
  ../src/pattern/mixture/../../util/../grammar/location.hh \
  ../src/pattern/mixture/../../expressions/Vars.h \
@@ -113,6 +115,10 @@ src/pattern/mixture/Agent.o: ../src/pattern/mixture/Agent.cpp \
 ../src/pattern/mixture/../../simulation/../state/../matching/../data_structs/../util/params.h:
 
 ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h:
+
+../src/pattern/mixture/../../simulation/Perturbation.h:
+
+../src/pattern/mixture/../../simulation/Rule.h:
 
 ../src/pattern/mixture/../../util/Exceptions.h:
 

@@ -171,10 +171,10 @@ public:
  */
 struct EventInfo {
 	//map of emb LHS [cc_id][ag_id]
-	Node*** emb;
+	vector<Node*>* emb;
 	small_id cc_count;
 	//map of new_nodes RHS
-	Node** fresh_emb;
+	vector<Node*> fresh_emb;
 	//node_address,site_id
 	std::multimap<Node*,small_id> side_effects;
 	//perturbation_ids
@@ -196,7 +196,7 @@ struct EventInfo {
 	EventInfo();
 	~EventInfo();
 
-	void clear(small_id cc_count);
+	void clear();
 
 };
 

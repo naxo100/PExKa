@@ -36,6 +36,8 @@ src/grammar/ast/KappaAst.o: ../src/grammar/ast/KappaAst.cpp \
  ../src/grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/DistributionTree.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/../util/params.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h \
+ ../src/grammar/ast/../../pattern/../simulation/Perturbation.h \
+ ../src/grammar/ast/../../pattern/../simulation/Rule.h \
  ../src/grammar/ast/../../pattern/../util/Exceptions.h \
  ../src/grammar/ast/../../pattern/../util/../grammar/location.hh \
  ../src/grammar/ast/Basics.h \
@@ -51,6 +53,7 @@ src/grammar/ast/KappaAst.o: ../src/grammar/ast/KappaAst.cpp \
  ../src/grammar/ast/../../simulation/../state/SiteGraph.h \
  ../src/grammar/ast/../../simulation/../state/../simulation/Counter.h \
  ../src/grammar/ast/../../simulation/../state/../simulation/Rule.h \
+ ../src/grammar/ast/../../simulation/../state/../simulation/Perturbation.h \
  ../src/grammar/ast/../../simulation/../state/../data_structs/RandomTree.h \
  ../src/grammar/ast/../../simulation/../state/../data_structs/../util/params.h \
  ../src/grammar/ast/../../simulation/../state/../pattern/Dependencies.h \
@@ -139,6 +142,10 @@ src/grammar/ast/KappaAst.o: ../src/grammar/ast/KappaAst.cpp \
 
 ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h:
 
+../src/grammar/ast/../../pattern/../simulation/Perturbation.h:
+
+../src/grammar/ast/../../pattern/../simulation/Rule.h:
+
 ../src/grammar/ast/../../pattern/../util/Exceptions.h:
 
 ../src/grammar/ast/../../pattern/../util/../grammar/location.hh:
@@ -170,6 +177,8 @@ src/grammar/ast/KappaAst.o: ../src/grammar/ast/KappaAst.cpp \
 ../src/grammar/ast/../../simulation/../state/../simulation/Counter.h:
 
 ../src/grammar/ast/../../simulation/../state/../simulation/Rule.h:
+
+../src/grammar/ast/../../simulation/../state/../simulation/Perturbation.h:
 
 ../src/grammar/ast/../../simulation/../state/../data_structs/RandomTree.h:
 

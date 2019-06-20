@@ -17,7 +17,7 @@
 #include <cmath>
 
 namespace state {
-using Deps = pattern::Dependencies;
+using Deps = pattern::Dependency::Dep;
 
 
 void (State::*State::action[6])(const simulation::Rule::Action&) =
@@ -28,7 +28,11 @@ State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		const pattern::Environment& _env,int seed) :
 	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]),
 	activityTree(nullptr),injections(nullptr),randGen(seed),
-	plot(_plot){ }
+	plot(_plot),activeDeps(env.getDependencies()){
+	for(auto pert : env.getPerts()){
+		perts.emplace(pert->getId(),*pert);
+	}
+}
 
 //const State empty = State(0,std::vector<Variable*>(),new Constant<float>(1.0),
 //		simulation::Plot(),pattern::Environment::empty)
@@ -47,6 +51,8 @@ State::~State() {
 	//test
 	activityTree = nullptr;
 	injections = nullptr;
+	/*for(auto var : vars)
+		delete var;*///vars are deleted in main!
 }
 
 
@@ -73,12 +79,20 @@ const matching::InjRandContainer& State::getInjContainer(int cc_id) const{
 	return *(injections[cc_id]);
 }
 
-void State::addNodes(unsigned n,const pattern::Mixture& mix){
-	if(n == 0)//test?
-		return;
+void State::initNodes(unsigned n,const pattern::Mixture& mix){
 	for(auto comp_p : mix){
 		graph.addComponents(n,*comp_p,*this);
 	}
+}
+
+void State::addNodes(unsigned n,const pattern::Mixture& mix){
+	Node** nodes;
+	for(auto comp_p : mix){
+		nodes = graph.addComponents(n,*comp_p,*this);
+	}
+	if(nodes)
+		for(int i = 0; i < mix.size(); i++)
+			ev.fresh_emb.push_back(nodes[i]);
 }
 
 UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
@@ -180,6 +194,10 @@ void State::del(const simulation::Rule::Action& a){
 	node->removeFrom(ev,injections,graph);
 }
 
+void State::del(Node* node){
+	node->removeFrom(ev,injections,graph);
+}
+
 void State::apply(const simulation::Rule& r){
 	//ADD action first
 	//ev.fresh_emb = new Node*[r.getNewNodes().size()];//maybe not!
@@ -196,7 +214,7 @@ void State::apply(const simulation::Rule& r){
 		auto node = new Node(*n,ev.new_cc);
 		ev.new_cc[n] = node;
 		graph.allocate(node);
-		ev.fresh_emb[i] = node;
+		ev.fresh_emb.push_back(node);
 		i++;
 	}
 	ev.new_cc.clear();
@@ -223,9 +241,9 @@ void State::apply(const simulation::Rule& r){
 		tokens[change.first] += change.second->getValue(*this,move(ev.aux_map)).valueAs<FL_TYPE>();
 }
 
-void State::positiveUpdate(const simulation::Rule& r){
+void State::positiveUpdate(const simulation::Rule::CandidateMap& wake_up){
 	//TODO vars_to_wake_up
-	auto& wake_up = r.getInfluences();
+	//auto& wake_up = r.getInfluences();
 	for(auto& cc_info : wake_up){
 		auto cc = cc_info.first;
 		auto& info = cc_info.second;
@@ -261,7 +279,7 @@ void State::positiveUpdate(const simulation::Rule& r){
 				}
 				//cout << "matching Node " << node_p->toString(env) << " with CC " << comp.toString(env) << endl;
 				ev.to_update.emplace(cc);
-				updateDeps(Deps::Dependency(Deps::KAPPA,cc->getId()));
+				updateDeps(pattern::Dependency(Deps::KAPPA,cc->getId()));
 
 			}
 		}
@@ -283,20 +301,44 @@ void State::positiveUpdate(const simulation::Rule& r){
 			}
 		}
 	}
+
+	//prepare negative_update
+	//set<small_id> rule_ids;
+	for(auto cc : ev.to_update){
+		for(auto r_id : cc->includedIn())
+			ev.rule_ids.emplace(r_id);
+	}
+	//total update
+	//cout << "rules to update: ";
+	for(auto r_id : ev.rule_ids){
+		//cout << env.getRules()[r_id].getName() << ", ";
+		auto act = env.getRules()[r_id].evalActivity(injections,vars);
+		activityTree->add(r_id,act.first+act.second);
+	}
+	//cout << endl;
+	counter.incNullActions(ev.warns);
+
+	ev.clear();
 }
 
 void State::advanceUntil(FL_TYPE sync_t) {
 	counter.next_sync_at = sync_t;
 	plot.fill(*this,env);
 	while(counter.getTime() < sync_t){
-		FL_TYPE dt = 0;
 		try{
-			dt = event();
-			counter.incEvents();
+			const NullEvent ex(event());
+			if(ex.error){
+				counter.incNullEvents(ex.error);
+				#ifdef DEBUG
+					cout << "\tnull-event (" << ex.what() << ")" << endl;
+				#endif
+			}
+			else
+				counter.incEvents();
 		}
-		catch(NullEvent &ex){
+		catch(const NullEvent &ex){
 			#ifdef DEBUG
-				cout << "\t(null-event " << ex.error << ")" << endl;
+				cout << "\tnull-event (" << ex.what() << ")" << endl;
 			#endif
 			counter.incNullEvents(ex.error);
 		}
@@ -310,7 +352,7 @@ void State::selectBinaryInj(const simulation::Rule& r,bool clsh_if_un) const {
 	//SiteGraph::Node*** total_inj = new SiteGraph::Node**[mix.compsCount()];
 	//ev->emb = new Node**[mix.compsCount()];
 	auto& mix = r.getLHS();
-	ev.clear(mix.compsCount());
+	ev.cc_count = mix.compsCount();
 	for(unsigned i = 0 ; i < mix.compsCount() ; i++){
 		auto& cc = mix.getComponent(i);
 		injections[cc.getId()]->selectRule(r.getId(), i);
@@ -388,7 +430,7 @@ const simulation::Rule& State::drawRule(){
 	return rule;
 }
 
-FL_TYPE State::event() {
+int State::event() {
 	//if(counter.getEvent() == 27511)
 	//	cout << "aca!!!"
 	//			<< endl;
@@ -404,16 +446,44 @@ FL_TYPE State::event() {
 		return dt;//TODO
 	}
 
-	//TODO perts
+	counter.advanceTime(dt);
+
+	updateDeps(pattern::Dependency(pattern::Dependency::TIME));
+	//timePerts = pertIds;
+	//pertIds.clear();
+	FL_TYPE stop_t = 0.0;
+	for(auto& time_dPert : timePerts){//fixed-time-perts
+		if(time_dPert.first > counter.getTime())
+			break;
+		auto p_id = time_dPert.second.id;
+		bool abort = false;
+		auto& pert = perts.at(p_id);
+		stop_t = pert.timeTest(*this);
+		//if(stop_t){
+			counter.time = (stop_t > 0) ? stop_t : counter.time;
+			pert.apply(*this);
+			abort = pert.testAbort(*this,true);
+		//}
+		//if(!abort)
+		//	abort = pert.testAbort(*this,false);
+		if(abort)
+			perts.erase(p_id);
+		else
+			activeDeps.addTimePertDependency(p_id, pert.nextStopTime());
+	}
+	timePerts.clear();
+	tryPerturbate();//trying no-fixed-time perturbations
 
 	#ifdef DEBUG
 		printf("Event %3lu | Time %.4f \t  act = %.4f",
-				counter.getEvent(),counter.getTime()+dt,act);
+				counter.getEvent(),counter.getTime(),act);
 	#endif
 	//EventInfo* ev = nullptr;
+
+	if(stop_t)
+		return 6;//NullEvent caused by perturbation
 	auto& rule = drawRule();
 
-	counter.advanceTime(dt);
 	plot.fill(*this,env);
 
 	#ifdef DEBUG
@@ -426,43 +496,75 @@ FL_TYPE State::event() {
 		//		ev->emb[0][0]->getAddress() : -1L));
 	#endif
 	apply(rule);
-	positiveUpdate(rule);
-	//prepare negative_update
-	//set<small_id> rule_ids;
-	for(auto cc : ev.to_update){
-		for(auto r_id : cc->includedIn())
-			ev.rule_ids.emplace(r_id);
-	}
-	//total update
-	//cout << "rules to update: ";
-	for(auto r_id : ev.rule_ids){
-		//cout << env.getRules()[r_id].getName() << ", ";
-		auto act = env.getRules()[r_id].evalActivity(injections,vars);
-		activityTree->add(r_id,act.first+act.second);
-	}
-	//cout << endl;
-	counter.incNullActions(ev.warns);
-	return dt;
+	positiveUpdate(rule.getInfluences());
+
+	return 0;
 
 }
 
-void State::updateDeps(const Deps::Dependency& d){
+void State::tryPerturbate() {
+	while(pertIds.size()){
+		auto curr_perts = pertIds;
+		pertIds.clear();
+		for(auto p_id : curr_perts){
+			bool abort = false;
+			auto& pert = perts.at(p_id);
+			auto trigger = pert.test(*this);
+			if(trigger){
+				pert.apply(*this);
+				abort = pert.testAbort(*this,true);
+			}
+			if(!abort)
+				abort = pert.testAbort(*this,false);
+			if(abort)
+				perts.erase(p_id);
+
+		}
+	}
+}
+
+void State::updateVar(const Variable& var){
+	//delete vars[var.getId()];
+	vars[var.getId()]->update(var);
+	updateDeps(pattern::Dependency(Deps::VAR,var.getId()));
+}
+
+void State::updateDeps(const pattern::Dependency& d){
 	pattern::DepSet deps;
 	deps.emplace(d);
+	pattern::Dependency last_dep;
+	auto dep_it = deps.begin();
 	while(!deps.empty()){
-		auto& dep = *deps.begin();
-		switch(dep.type){
+		//auto& dep = *deps.begin();
+		switch(dep_it->type){
 		case Deps::RULE:
-			ev.rule_ids.emplace(dep.id);
+			ev.rule_ids.emplace(dep_it->id);
 			break;
 		case Deps::KAPPA:
 			break;
 			//auto act = evalActivity(env.getRules()[dep.id]);
 			//activityTree->add(dep.id,act.first+act.second);
+		case Deps::VAR:
+			break;
+		case Deps::PERT:
+			if(perts.count(dep_it->id))
+				pertIds.push_back(dep_it->id);
+			else //pert was aborted
+				activeDeps.erase(*dep_it,last_dep);
+			break;
+		case Deps::TIME:{
+			auto& deps = activeDeps.getDependencies(*dep_it).ordered_deps;
+			if(deps.size()){
+				auto nextDeps = deps.equal_range(deps.begin()->first);
+				timePerts.insert(timePerts.begin(),nextDeps.first,nextDeps.second);
+				activeDeps.eraseTimePerts(nextDeps.first,nextDeps.second);
+			}
+			}break;
 		}
-		deps.erase(deps.begin());
-		auto more_deps = env.getDependencies(dep);
+		auto more_deps = activeDeps.getDependencies(*dep_it).deps;
 		deps.insert(more_deps.begin(),more_deps.end());
+		last_dep = *dep_it;
+		dep_it = deps.erase(dep_it);
 	}
 }
 

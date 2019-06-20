@@ -100,6 +100,20 @@ const Injection& InjRandSet::chooseRandom(default_random_engine& randGen) const{
 	}
 }
 
+const Injection& InjRandSet::choose(unsigned id) const {
+	if(id < container.size() - multiCount)
+			return *container[id + multiCount];
+	else{
+		id -= container.size() - multiCount;
+		auto it = container.begin();
+		while(id > (*it)->count()){
+			id -= (*it)->count();
+			it++;
+		}
+		return **it;
+	}
+}
+
 void InjRandSet::insert(CcInjection* inj,const state::State& state){
 	inj->alloc(container.size());
 	container.push_back(inj);
@@ -227,6 +241,10 @@ const Injection& InjRandTree::chooseRandom(default_random_engine& randGen) const
 		return *root->choose(selection).first;
 	}
 	//throw std::out_of_range("Selected injection out of range. [InjRandTree::chooseRandom()]");
+}
+
+const Injection& InjRandTree::choose(unsigned id) const {
+	return *(roots.begin()->second.begin()->second->choose(id).first);
 }
 
 void InjRandTree::erase(Injection* inj){

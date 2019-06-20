@@ -607,25 +607,21 @@ string Internal::toString(const pattern::Signature::Site& sit,bool show_binds,ma
 
 
 
-EventInfo::EventInfo() : emb(nullptr),cc_count(0),fresh_emb(nullptr),warns(0) {
+EventInfo::EventInfo() : emb(nullptr),cc_count(0),fresh_emb(),warns(0) {
 	//TODO these numbers are arbitrary!!
-	emb = new Node**[4];
+	emb = new vector<Node*>[4];
 	for(int i = 0; i < 4 ; i++)
-		emb[i] = new Node*[12];
-	fresh_emb = new Node*[5];
+		emb[i].resize(12);
+	fresh_emb.reserve(10);
 }
 
 EventInfo::~EventInfo(){
 	if(emb){
-		for(small_id i = 0; i < 4; i++)
-			delete[] emb[i];
 		delete[] emb;
 	}
-	if(fresh_emb)
-		delete[] fresh_emb;
 }
 
-void EventInfo::clear(small_id _cc_count){
+void EventInfo::clear(){
 	side_effects.clear();
 	pert_ids.clear();
 	new_cc.clear();
@@ -633,8 +629,9 @@ void EventInfo::clear(small_id _cc_count){
 	to_update.clear();
 	rule_ids.clear();
 	aux_map.clear();
+	fresh_emb.clear();
 	warns = 0;//null_actions.clear();
-	cc_count = _cc_count;
+	//cc_count = _cc_count;
 }
 
 

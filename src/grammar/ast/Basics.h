@@ -73,10 +73,10 @@ public:
 
 
 //TODO class VarValue
-class VarValue : public Node{
+struct VarValue : public Node{
 	Id var;
 	const Expression *value;
-public:
+
 	VarValue();
 	VarValue(const location &l,const Id &name,const Expression *exp);
 	virtual void show( string tabs = "" ) const;

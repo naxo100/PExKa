@@ -25,7 +25,7 @@ public:
 };
 
 
-class WarningStack : std::multimap<int,Warning> {
+class WarningStack : private std::multimap<int,Warning> {
 	static WarningStack stack;
 	static const int MAX_WARNS = 3;
 	static int global_id;
@@ -33,11 +33,12 @@ class WarningStack : std::multimap<int,Warning> {
 	WarningStack(const WarningStack&);
 public:
 	static WarningStack& getStack();
-	int add(int id,const std::string& msg,const yy::location loc = yy::location());
+	int add(int id,const std::string& msg,const yy::location &loc = yy::location());
 	void show() const;
 };
 
 
 #define ADD_WARN(msg,loc) {static int id = 0;id = WarningStack::getStack().add(id,msg,loc);}
+#define ADD_WARN_NOLOC(msg) {static int id = 0;id = WarningStack::getStack().add(id,msg);}
 
 #endif /* SRC_UTIL_WARNING_H_ */

@@ -11,6 +11,10 @@
 #include "AlgExpression.h"
 #include <vector>
 
+
+namespace simulation {
+	class Perturbation;
+}
 namespace expressions {
 
 
@@ -32,6 +36,8 @@ class BinaryOperation: public AlgExpression<R> {
 	//static R (*operations[]) (T1,T2);
 	R (*func)(T1, T2);
 	const char op;
+
+	friend class simulation::Perturbation;
 public:
 	R evaluate(const VarVector &consts,
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const
@@ -53,9 +59,9 @@ public:
 			std::unordered_map<std::string, FL_TYPE>& aux_map) const;
 
 	//return a flag of VarDep
-	virtual char getVarDeps() const override;
+	char getVarDeps() const override;
 
-	virtual std::string toString() const override;
+	std::string toString() const override;
 };
 
 } /* namespace expression */

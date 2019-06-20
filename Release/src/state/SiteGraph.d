@@ -32,12 +32,15 @@ src/state/SiteGraph.o: ../src/state/SiteGraph.cpp \
  ../src/state/../pattern/../simulation/../grammar/location.hh \
  ../src/state/../pattern/../simulation/../grammar/position.hh \
  ../src/state/../pattern/../simulation/../state/SiteGraph.h \
+ ../src/state/../pattern/../simulation/Perturbation.h \
+ ../src/state/../pattern/../simulation/Rule.h \
  ../src/state/../pattern/../util/Exceptions.h \
  ../src/state/../pattern/../util/../grammar/location.hh \
  ../src/state/State.h ../src/state/Variable.h \
  ../src/state/../simulation/Counter.h \
  ../src/state/../simulation/../util/params.h \
  ../src/state/../simulation/Rule.h \
+ ../src/state/../simulation/Perturbation.h \
  ../src/state/../data_structs/RandomTree.h \
  ../src/state/../data_structs/../util/params.h \
  ../src/state/../pattern/Dependencies.h \
@@ -116,6 +119,10 @@ src/state/SiteGraph.o: ../src/state/SiteGraph.cpp \
 
 ../src/state/../pattern/../simulation/../state/SiteGraph.h:
 
+../src/state/../pattern/../simulation/Perturbation.h:
+
+../src/state/../pattern/../simulation/Rule.h:
+
 ../src/state/../pattern/../util/Exceptions.h:
 
 ../src/state/../pattern/../util/../grammar/location.hh:
@@ -129,6 +136,8 @@ src/state/SiteGraph.o: ../src/state/SiteGraph.cpp \
 ../src/state/../simulation/../util/params.h:
 
 ../src/state/../simulation/Rule.h:
+
+../src/state/../simulation/Perturbation.h:
 
 ../src/state/../data_structs/RandomTree.h:
 

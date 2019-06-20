@@ -30,6 +30,8 @@ src/expressions/NullaryOperation.o: \
  ../src/expressions/../state/../simulation/../grammar/location.hh \
  ../src/expressions/../state/../simulation/../grammar/position.hh \
  ../src/expressions/../state/../simulation/../state/SiteGraph.h \
+ ../src/expressions/../state/../simulation/Perturbation.h \
+ ../src/expressions/../state/../simulation/Rule.h \
  ../src/expressions/../state/../data_structs/RandomTree.h \
  ../src/expressions/../state/../data_structs/../util/params.h \
  ../src/expressions/../state/../pattern/Dependencies.h
@@ -99,6 +101,10 @@ src/expressions/NullaryOperation.o: \
 ../src/expressions/../state/../simulation/../grammar/position.hh:
 
 ../src/expressions/../state/../simulation/../state/SiteGraph.h:
+
+../src/expressions/../state/../simulation/Perturbation.h:
+
+../src/expressions/../state/../simulation/Rule.h:
 
 ../src/expressions/../state/../data_structs/RandomTree.h:
 

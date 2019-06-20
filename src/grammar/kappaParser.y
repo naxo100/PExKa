@@ -98,7 +98,7 @@
 %type <std::list<Effect>>			effect_list
 %type <Radius>					alg_with_radius   
 %type <Rate>					rate
-%type <Pert>				perturbation_declaration
+%type <Pert*>				perturbation_declaration
 %type <std::list<Token>>			sum_token token_expr
 %type <RuleSide> 				lhs_rhs
 %type <Id>					rule_label
@@ -283,9 +283,9 @@ comp_list:
 
 perturbation_declaration:
  bool_expr DO effect_list 
-	{ $$ = Pert(@$,$1,$3); }
+	{ $$ = new Pert(@$,$1,$3); }
 | REPEAT bool_expr DO effect_list UNTIL bool_expr
-	{ $$ = Pert(@$,$2,$4,$6); }
+	{ $$ = new Pert(@$,$2,$4,$6); }
 /*| REPEAT OP_PAR bool_expr DO effect_list CL_PAR UNTIL bool_expr
 	{ $$ = Pert(@$,$3,$5,$8); }*/
 ;

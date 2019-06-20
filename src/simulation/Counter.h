@@ -35,7 +35,7 @@ class Counter {
 	pair<UINT_TYPE,FL_TYPE> last_tick;
 	bool initialized;
 	unsigned int ticks;
-	unsigned int stat_null[5];
+	unsigned int stat_null[6];
 	FL_TYPE init_time;
 	UINT_TYPE init_event;
 	FL_TYPE max_time;

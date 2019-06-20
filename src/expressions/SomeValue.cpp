@@ -7,6 +7,7 @@
 
 #include "SomeValue.h"
 #include <stdexcept>
+#include <iostream>
 
 
 namespace expressions {
@@ -88,6 +89,23 @@ bool SomeValue::operator !=(const SomeValue& val) const {
 }
 bool SomeValue::operator ==(const SomeValue& val) const {
 	return val.fVal == fVal && val.t == t;
+}
+
+std::ostream& operator <<(std::ostream& out,const SomeValue& val) {
+	switch(val.t){
+	case FLOAT:
+		return out << std::to_string(val.fVal);
+	case INT:
+		return out << val.iVal;
+	case BOOL:
+		return out << val.bVal;
+	case SMALL_ID:
+		return out << int(val.smallVal);
+	case SHORT_ID:
+		return out << int(val.shortVal);
+	default:
+		return out << "NaN";
+	}
 }
 
 

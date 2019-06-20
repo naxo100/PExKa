@@ -29,7 +29,8 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
  ../src/pattern/../simulation/../state/../matching/../data_structs/DistributionTree.h \
  ../src/pattern/../simulation/../state/../matching/../data_structs/../util/params.h \
  ../src/pattern/../simulation/../state/../expressions/AlgExpression.h \
- ../src/pattern/../util/Exceptions.h \
+ ../src/pattern/../simulation/Perturbation.h \
+ ../src/pattern/../simulation/Rule.h ../src/pattern/../util/Exceptions.h \
  ../src/pattern/../util/../grammar/location.hh \
  ../src/pattern/../grammar/ast/Basics.h \
  ../src/pattern/../grammar/ast/../location.hh \
@@ -107,6 +108,10 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
 ../src/pattern/../simulation/../state/../matching/../data_structs/../util/params.h:
 
 ../src/pattern/../simulation/../state/../expressions/AlgExpression.h:
+
+../src/pattern/../simulation/Perturbation.h:
+
+../src/pattern/../simulation/Rule.h:
 
 ../src/pattern/../util/Exceptions.h:
 

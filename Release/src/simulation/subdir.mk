@@ -6,6 +6,7 @@
 CPP_SRCS += \
 ../src/simulation/Counter.cpp \
 ../src/simulation/Parameters.cpp \
+../src/simulation/Perturbation.cpp \
 ../src/simulation/Plot.cpp \
 ../src/simulation/Rule.cpp \
 ../src/simulation/Simulation.cpp 
@@ -13,6 +14,7 @@ CPP_SRCS += \
 OBJS += \
 ./src/simulation/Counter.o \
 ./src/simulation/Parameters.o \
+./src/simulation/Perturbation.o \
 ./src/simulation/Plot.o \
 ./src/simulation/Rule.o \
 ./src/simulation/Simulation.o 
@@ -20,6 +22,7 @@ OBJS += \
 CPP_DEPS += \
 ./src/simulation/Counter.d \
 ./src/simulation/Parameters.d \
+./src/simulation/Perturbation.d \
 ./src/simulation/Plot.d \
 ./src/simulation/Rule.d \
 ./src/simulation/Simulation.d 

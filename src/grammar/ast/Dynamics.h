@@ -164,6 +164,9 @@ public:
 	Effect(const Effect &eff);
 	Effect& operator=(const Effect& eff);
 
+	simulation::Perturbation::Effect* eval(pattern::Environment& env,
+			const vector<state::Variable*> &vars) const;
+
 	void show(string tabs = "") const;
 
 	~Effect();
@@ -192,7 +195,7 @@ public:
 	Pert();
 	Pert(const location &l,const Expression *cond,
 			const list<Effect> &effs,const Expression* rep = nullptr);
-	void show(string tabs = "");
+	void show(string tabs = "") const;
 	~Pert();
 
 	void eval(pattern::Environment& env,const vector<state::Variable*>& vars) const;

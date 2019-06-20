@@ -27,9 +27,11 @@ SiteGraph::~SiteGraph() {
 
 #define MAX_CC_SIZE 10	//TODO
 #define MULTINODE_LIM 500000 //TODO
-void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
+Node** SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 		const State& state) {
-	Node* buff_nodes[MAX_CC_SIZE];
+	if(n == 0)//test?
+		return nullptr;
+	static Node* buff_nodes[MAX_CC_SIZE];
 	unsigned i = 0;
 	if(n < MULTINODE_LIM) {//=> n = 1
 		while(n--){
@@ -74,6 +76,7 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 					buff_nodes[bind.second.first],bind.second.second);
 	}
 
+	return buff_nodes;
 }
 
 

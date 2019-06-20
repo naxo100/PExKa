@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
 	//cout << "\n\n" ;
 
 	// initialize states
-	pattern::Environment env;
+	pattern::Environment& env = *(new pattern::Environment());//just to delete vars after env
 	vector<Variable*> vars;
 	try{
 		ast.evaluateDeclarations(env,vars,true);//constants
@@ -73,6 +73,7 @@ int main(int argc, char* argv[]){
 		ast.evaluateDeclarations(env,vars,false);//vars
 		ast.evaluateChannels(env,vars);
 		ast.evaluateRules(env,vars);
+		ast.evaluatePerts(env, vars);
 	}
 	catch(const exception &e){
 		cerr << "An exception found: " << e.what() << endl;
@@ -132,6 +133,10 @@ int main(int argc, char* argv[]){
 	sim.print();
 
 	cout << "finished!" << endl;
+
+	delete &env;
+	for(auto var : vars)
+		delete var;
 
 	/* TODO
 	 * Environment env = ast.evaluateGlobals();

@@ -135,7 +135,7 @@ void Simulation::addAgents(const Range<int,Args...> &cell_ids,unsigned count,con
 		if(n == 0)
 			continue;
 		try{
-			cells.at(*ids_it).addNodes(n,mix);
+			cells.at(*ids_it).initNodes(n,mix);
 		}
 		catch(std::out_of_range &e){
 			//other mpi_process will add this tokens.

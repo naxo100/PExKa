@@ -99,20 +99,23 @@ struct Pattern::Site {
 	LinkType link_type;
 
 	//valid on BIND and BIND_TO
-	ag_st_id lnk_ptrn;//agent,site (-1,-1)
+	ag_st_id lnk_ptrn;//agent_id,site (-1,-1)
 
 	//string aux_id;//if "" then no aux
 	const expressions::BaseExpression* values[3];//[smaller=,value,greater=]
-
-
-	bool operator==(const Site &s) const;
-	bool testEmbed(const Site &s,list<small_id>& to_test) const;
 
 	/** \brief Constructs an empty site.
 	 * Default state value is (small_id)-1 and
 	 * default link_type is FREE.
 	 */
 	Site(small_id _label = EMPTY,LinkType ltype = FREE);
+	Site(expressions::SomeValue _val,LinkType ltype = FREE);
+	Site(const Site& site);
+	~Site();
+
+	//Site& operator=(const Site& s);
+	bool operator==(const Site &s) const;
+	bool testEmbed(const Site &s,list<small_id>& to_test) const;
 	int compareLinkPtrn(ag_st_id ptrn) const;
 	bool isEmptySite() const;
 	bool isExpression() const;

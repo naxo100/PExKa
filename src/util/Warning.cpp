@@ -37,7 +37,7 @@ WarningStack& WarningStack::getStack() {
 }
 
 int WarningStack::global_id = 1;
-int WarningStack::add(int id,const std::string &msg,const yy::location loc){
+int WarningStack::add(int id,const std::string &msg,const yy::location &loc){
 
 	if(id == 0)
 		id = ++global_id;

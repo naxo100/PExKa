@@ -13,6 +13,7 @@
 
 namespace ast {
 
+using Deps = pattern::Dependency;
 
 /****** Class Link ***********/
 Link::Link() : type(FREE),value(0){}
@@ -549,6 +550,46 @@ Effect& Effect::operator=(const Effect& eff){
 	return *this;
 }
 
+simulation::Perturbation::Effect* Effect::eval(pattern::Environment& env,
+		const vector<state::Variable*> &vars) const {
+	switch(action){
+	case INTRO:{
+		auto mixture = mix->eval(env,vars,0);
+		mixture->setComponents();
+		return new simulation::Intro(n->eval(env, vars, nullptr, 0),mixture);
+	}
+	case DELETE:{
+		auto mixture = mix->eval(env,vars,Expression::PATTERN);
+		mixture->declareAgents(env, true);
+		mixture->setAndDeclareComponents(env);
+		auto& decl_mixture = env.declareMixture(*mixture);
+		delete mixture;
+		return new simulation::Delete(n->eval(env, vars, nullptr, 0),
+				decl_mixture);
+	}
+	case UPDATE:{
+		auto id = env.getVarId(set.var.getString());
+		if(id > vars.size())
+			throw SemanticError("Update rule's rates directly is not implemented yet.",loc);
+		if(vars[id]->isConst())
+			throw SemanticError("Cannot update constants.",loc);
+		return new simulation::Update(*vars[id],set.value->eval(env, vars));
+	}
+	case UPDATE_TOK:
+	case STOP:
+	case SNAPSHOT:
+	case PRINT:
+	case PRINTF:
+	case CFLOW:
+	case CFLOW_OFF:
+	case FLUX:
+	case FLUX_OFF:
+		break;
+	}
+	return nullptr;
+}
+
+
 void Effect::show(string tabs) const {
 	tabs += "   ";
 	cout << tabs << "effect :" << endl ;
@@ -610,8 +651,9 @@ Pert::Pert(const location &l,const Expression *cond,const list<Effect> &effs,con
 
 void Pert::eval(pattern::Environment& env,const vector<state::Variable*>& vars) const {
 	expressions::BaseExpression *cond,*rep;
+	pattern::DepSet deps;
 	if(condition)
-		cond  = condition->eval(env, vars, nullptr, 0);
+		cond  = condition->eval(env, vars, &deps, 0);
 	else
 		cond = new Constant<bool>(true);
 
@@ -620,9 +662,19 @@ void Pert::eval(pattern::Environment& env,const vector<state::Variable*>& vars) 
 	else
 		rep = new Constant<bool>(false);
 
+	auto pert = new simulation::Perturbation(cond,rep,loc);
+
+	for(auto &eff : effects){
+		pert->addEffect(eff.eval(env, vars),env);
+	}
+
+	env.declarePert(pert);
+	for(auto& dep : deps)
+		env.addDependency(dep,Deps::PERT, pert->getId());
+
 }
 
-void Pert::show(string tabs) {
+void Pert::show(string tabs) const {
 	tabs += "   ";
 	cout << "Perturbation {" << endl;
 
@@ -800,7 +852,7 @@ void Rule::eval(pattern::Environment& env,
 	two<pattern::DepSet> deps;//first-> | second<-
 	auto reverse = rate.eval(env,rule,vars,deps,bi);
 	for(auto dep : deps.first){
-		if(dep.type == pattern::Dependencies::AUX){
+		if(dep.type == Deps::AUX){
 			auto cc_id = get<0>(lhs_mix.getAux().at(dep.aux));
 			lhs_mix.getComponent(cc_id).addRateDep(rule,cc_id);
 		}
@@ -831,7 +883,7 @@ void Rule::eval(pattern::Environment& env,
 		for(auto& t : lhs.tokens)
 			inverse_rule.addTokenChange(t.eval(env,vars));
 		for(auto& dep : deps.second)
-			env.addDependency(dep,pattern::Dependencies::RULE,inverse_rule.getId());
+			env.addDependency(dep,Deps::RULE,inverse_rule.getId());
 	}
 	else{
 		rhs_mix_p->declareAgents(env,false);
@@ -841,7 +893,7 @@ void Rule::eval(pattern::Environment& env,
 	//DEBUG cout << lhs_mix.toString(env,lhs_mask) << " -> " << rhs_mix_p->toString(env,rhs_mask) << endl;
 	rule.difference(env,lhs_mask,rhs_mask,vars);
 	for(auto& dep : deps.first)
-		env.addDependency(dep,pattern::Dependencies::RULE,rule.getId());
+		env.addDependency(dep,Deps::RULE,rule.getId());
 }
 
 size_t Rule::getCount(){

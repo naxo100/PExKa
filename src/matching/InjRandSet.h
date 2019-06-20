@@ -28,6 +28,7 @@ public:
 	InjRandContainer(const pattern::Mixture::Component& _cc);
 	virtual ~InjRandContainer();
 	virtual const Injection& chooseRandom(default_random_engine& randGen) const = 0;
+	virtual const Injection& choose(unsigned id) const  = 0;
 	virtual size_t count() const = 0;
 	virtual FL_TYPE partialReactivity() const = 0;
 
@@ -56,6 +57,7 @@ public:
 	InjRandSet(const pattern::Mixture::Component& _cc);
 	~InjRandSet();
 	const Injection& chooseRandom(default_random_engine& randGen) const override;
+	const Injection& choose(unsigned id) const override;
 	size_t count() const override;
 	virtual FL_TYPE partialReactivity() const;
 
@@ -90,6 +92,7 @@ class InjRandTree : public InjRandContainer {
 public:
 	InjRandTree(const pattern::Mixture::Component& cc);
 	const Injection& chooseRandom(default_random_engine& randGen) const override;
+	const Injection& choose(unsigned id) const override;
 	size_t count() const override;
 	virtual FL_TYPE partialReactivity() const;
 

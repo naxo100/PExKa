@@ -9,6 +9,7 @@
 #define SRC_SIMULATION_PERTURBATION_H_
 
 #include "../pattern/mixture/Mixture.h"
+#include "Rule.h"
 
 
 namespace state {
@@ -21,53 +22,79 @@ using namespace expressions;
 using namespace pattern;
 
 class Perturbation {
-
+public:
 	class Effect {
-		virtual ~Effect() = 0;
+	public:
+		virtual ~Effect();
 		virtual void apply(state::State &state) const = 0;
+		virtual int addInfluences(int current,Rule::CandidateMap& map,const Environment &env) const;
 	};
-
+	friend class pattern::Environment;
+protected:
+	int id;
 	BaseExpression* condition;
 	BaseExpression* until;
 	list<Effect*> effects;
+	Rule::CandidateMap influence;
+	int introCount;
+	float nextStop;
+	float incStep;
+
+	mutable int applies;
+	bool isCopy;
+
+	void setId(int _id);
 public:
-	Perturbation(BaseExpression* cond,BaseExpression* unt);
-	virtual ~Perturbation();
+	Perturbation(BaseExpression* cond,BaseExpression* unt,const yy::location& loc);
+	Perturbation(const Perturbation& pert);
+	~Perturbation();
+
+	int getId() const;
 
 	bool test(const state::State& state) const;
+	FL_TYPE timeTest(const state::State& state) const;
+	bool testAbort(const state::State &state,bool just_applied);
 	void apply(state::State &state) const;
 
-	void addEffect(Effect* eff);
+	void addEffect(Effect* eff,const Environment& env);
+
+	float nextStopTime() const;
+
+	string toString(const state::State& state) const;
 };
 
 
 
 class Intro : public Perturbation::Effect {
-	unsigned n;
-	const pattern::Mixture& mix;
+	const BaseExpression* n;
+	const pattern::Mixture* mix;
 
 public:
-	Intro(unsigned n,const pattern::Mixture& mix);
+	Intro(const BaseExpression* n,const pattern::Mixture* mix);
+	~Intro();
 
 	void apply(state::State &state) const override;
+	int addInfluences(int current,Rule::CandidateMap& map,const Environment &env) const override;
 };
 
 class Delete : public Perturbation::Effect {
-	unsigned n;
+	const BaseExpression* n;
 	const pattern::Mixture& mix;
 
 public:
-	Delete(unsigned n,const pattern::Mixture& mix);
+	Delete(const BaseExpression* n,const pattern::Mixture& mix);
+	~Delete();
 
 	void apply(state::State &state) const override;
 };
 
 class Update : public Perturbation::Effect {
-	unsigned varId;
-	const expressions::BaseExpression* value;
+	state::Variable* var;
 
 public:
-	Update(unsigned var_id,const expressions::BaseExpression* val);
+	Update(const state::Variable& _var,expressions::BaseExpression* expr);
+	//Update(unsigned var_id,pattern::Mixture* _var);
+	~Update();
 
 	void apply(state::State &state) const override;
 };
@@ -77,7 +104,8 @@ class UpdateToken : public Perturbation::Effect {
 	const expressions::BaseExpression* value;
 
 public:
-	UpdateToken(unsigned var_id,const expressions::BaseExpression* val);
+	UpdateToken(unsigned var_id,expressions::BaseExpression* val);
+	~UpdateToken();
 
 	void apply(state::State &state) const override;
 };

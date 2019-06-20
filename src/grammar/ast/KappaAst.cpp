@@ -17,7 +17,12 @@ KappaAst::KappaAst()  {
 }
 
 KappaAst::~KappaAst() {
-	// TODO Auto-generated destructor stub
+	for(auto pert : perturbations)
+		if(pert)
+			delete pert;
+	for(auto use : useExpressions)
+		if(use)
+			delete use;
 }
 
 void KappaAst::evaluateSignatures(pattern::Environment &env,const vector<Variable*> &consts){
@@ -83,6 +88,12 @@ void KappaAst::evaluateRules(pattern::Environment &env,vector<Variable*> &vars){
 		r.eval(env,vars);
 	//env.buildInfluenceMap();do it later with defined state
 }
+void KappaAst::evaluatePerts(pattern::Environment &env,vector<Variable*> &vars){
+	env.reserve<simulation::Perturbation>(perturbations.size());
+	for(auto p : perturbations)
+		p->eval(env,vars);
+	//env.buildInfluenceMap();do it later with defined state
+}
 
 void KappaAst::add(const Declaration &d){
 	if(d.isConstant())
@@ -112,7 +123,7 @@ void KappaAst::add(const Rule &r){
 	rules.push_back(r);
 }
 
-void KappaAst::add(const Pert &p){
+void KappaAst::add(const Pert *p){
 	perturbations.push_back(p);
 }
 
@@ -139,9 +150,9 @@ void KappaAst::show(){
 
 	cout << endl << "Showing Perturbations:" << endl;
 	short i = 0;
-	for(list<Pert>::iterator it = perturbations.begin();it != perturbations.end(); it++){
+	for(auto pert : perturbations){
 		cout << ++i << ") ";
-		it->show();
+		pert->show();
 	}
 
 	cout << endl;

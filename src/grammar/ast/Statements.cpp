@@ -94,7 +94,7 @@ Declaration::~Declaration(){
 
 Variable* Declaration::evalVar(pattern::Environment &env,
 		Expression::VAR &vars) const{
-	Variable* var;
+	Variable* var = nullptr;
 	short id = 0;
 	try {
 		id = env.declareVariable(name,type);

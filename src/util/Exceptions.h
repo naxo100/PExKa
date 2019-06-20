@@ -41,12 +41,13 @@ public:
 };
 
 class NullEvent : public std::exception {
-	/* 0:unary rule with binary instance
-	 * 1:binary rule with unary instance
-	 * 2:clashing instance
-	 * 3:overapproximation clash
-	 * 4:invalid injection clash
-	 * 5: perturbation interrupting time */
+	/* 0: not a null event
+	 * 1:unary rule with binary instance
+	 * 2:binary rule with unary instance
+	 * 3:clashing instance
+	 * 4:overapproximation clash
+	 * 5:invalid injection clash
+	 * 6: perturbation interrupting time */
 public:
 	const int error;
 	NullEvent(int e);

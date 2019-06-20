@@ -33,6 +33,8 @@ src/state/Node.o: ../src/state/Node.cpp ../src/state/Node.h \
  ../src/state/../pattern/../simulation/../grammar/location.hh \
  ../src/state/../pattern/../simulation/../grammar/position.hh \
  ../src/state/../pattern/../simulation/../state/SiteGraph.h \
+ ../src/state/../pattern/../simulation/Perturbation.h \
+ ../src/state/../pattern/../simulation/Rule.h \
  ../src/state/../pattern/../util/Exceptions.h \
  ../src/state/../pattern/../util/../grammar/location.hh \
  ../src/state/../pattern/mixture/Agent.h \
@@ -110,6 +112,10 @@ src/state/Node.o: ../src/state/Node.cpp ../src/state/Node.h \
 ../src/state/../pattern/../simulation/../grammar/position.hh:
 
 ../src/state/../pattern/../simulation/../state/SiteGraph.h:
+
+../src/state/../pattern/../simulation/Perturbation.h:
+
+../src/state/../pattern/../simulation/Rule.h:
 
 ../src/state/../pattern/../util/Exceptions.h:
 

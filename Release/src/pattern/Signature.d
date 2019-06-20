@@ -38,6 +38,8 @@ src/pattern/Signature.o: ../src/pattern/Signature.cpp \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/DistributionTree.h \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/../util/params.h \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h \
+ ../src/pattern/../grammar/ast/../../pattern/../simulation/Perturbation.h \
+ ../src/pattern/../grammar/ast/../../pattern/../simulation/Rule.h \
  ../src/pattern/../grammar/ast/../../pattern/../util/Exceptions.h \
  ../src/pattern/../grammar/ast/../../pattern/Dependencies.h
 
@@ -122,6 +124,10 @@ src/pattern/Signature.o: ../src/pattern/Signature.cpp \
 ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/../util/params.h:
 
 ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h:
+
+../src/pattern/../grammar/ast/../../pattern/../simulation/Perturbation.h:
+
+../src/pattern/../grammar/ast/../../pattern/../simulation/Rule.h:
 
 ../src/pattern/../grammar/ast/../../pattern/../util/Exceptions.h:
 

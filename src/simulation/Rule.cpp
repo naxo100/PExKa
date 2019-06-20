@@ -21,10 +21,9 @@ Rule::Rule(int _id,const string& nme, const Mixture& mix,const yy::location& _lo
 		lhs(mix),rhs(nullptr),rate(nullptr),isRhsDeclared(false){}
 
 Rule::~Rule() {
-	// TODO Auto-generated destructor stub
 	if(!isRhsDeclared)
 		delete rhs;
-	if(rate)
+	if (!dynamic_cast<const state::Variable*>(rate))
 		delete rate;
 	for(auto node : newNodes)
 		delete node;
@@ -58,6 +57,8 @@ void Rule::setRHS(const Mixture* mix,bool is_declared){
 	isRhsDeclared = is_declared;
 }
 void Rule::setRate(const BaseExpression* r){
+	if(rate)
+		delete rate;
 	rate = r;
 	if(r->getVarDeps() & BaseExpression::AUX)
 		basic = r->factorize();

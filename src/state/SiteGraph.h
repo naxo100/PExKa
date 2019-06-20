@@ -30,7 +30,7 @@ public:
 	SiteGraph();
 	~SiteGraph();
 
-	void addComponents(unsigned n,const pattern::Mixture::Component& cc,
+	Node** addComponents(unsigned n,const pattern::Mixture::Component& cc,
 			const State& state);
 
 	/** \brief Put a node in the sitegraph.

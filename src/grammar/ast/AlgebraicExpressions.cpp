@@ -180,6 +180,17 @@ void UnaryOperation::show( string tabs ) const {
 BaseExpression* NullaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,pattern::DepSet* deps,
 		const char flags) const{
+	switch(func){
+	case BaseExpression::Nullary::SIM_TIME:
+		deps->emplace(pattern::Dependency::TIME);break;
+	case BaseExpression::Nullary::CPUTIME:
+	case BaseExpression::Nullary::ACTIVITY:
+	case BaseExpression::Nullary::SIM_EVENT:
+	case BaseExpression::Nullary::NULL_EVENT:
+	case BaseExpression::Nullary::PROD_EVENT:
+		deps->emplace(pattern::Dependency::EVENT);break;
+	default:break;
+	}
 	return BaseExpression::makeNullaryExpression(func);
 }
 NullaryOperation::NullaryOperation(const location &l,const BaseExpression::Nullary f):
@@ -204,24 +215,19 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 		const char flags) const {
 	BaseExpression* expr =nullptr;
 	switch(type){
-	case VAR:
-		try {
-			unsigned id = env.getVarId(name.getString());
-			expr = vars[id];
-			if(deps){
-				auto* kappa = dynamic_cast<state::KappaVar*>(vars[id]);
-				if(kappa)
-					for(auto cc : kappa->getMix())
-						deps->emplace(pattern::Dependencies::KAPPA,cc->getId());
-				else
-					deps->emplace(pattern::Dependencies::VAR,id);
-			}
-		}
-		catch(const std::out_of_range &e){
-			throw SemanticError("Variable or constant '"+name.getString()+
-					"' is not yet defined.",loc);
+	case VAR:{
+		unsigned id = env.getVarId(name);
+		expr = vars[id];
+		if(deps){
+			auto* kappa = dynamic_cast<state::KappaVar*>(vars[id]);
+			if(kappa)
+				for(auto cc : kappa->getMix())
+					deps->emplace(pattern::Dependency::KAPPA,cc->getId());
+			else
+				deps->emplace(pattern::Dependency::VAR,id);
 		}
 		break;
+	}
 	case AUX:
 		if(flags & AUX_ALLOW){
 			if( (flags & LHS) || (flags & RHS) ){
@@ -239,7 +245,7 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 		try {
 			auto id = env.getTokenId(name.getString());
 			if(deps)
-				deps->emplace(pattern::Dependencies::TOK,id);
+				deps->emplace(pattern::Dependency::TOK,id);
 			expr = new state::TokenVar(id);
 		}
 		catch(const std::out_of_range &e){

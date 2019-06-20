@@ -367,7 +367,7 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 
 template<typename R, typename T1, typename T2>
 BaseExpression* BinaryOperation<R, T1, T2>::clone() const{
-	return new BinaryOperation<R, T1, T2>(*this);
+	return new BinaryOperation<R, T1, T2>(exp1->clone(),exp2->clone(),op);
 }
 
 template<typename R, typename T1, typename T2>

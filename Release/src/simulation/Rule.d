@@ -37,6 +37,9 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../pattern/Dependencies.h \
  ../src/simulation/../pattern/../util/params.h \
  ../src/simulation/../pattern/../simulation/Rule.h \
+ ../src/simulation/../pattern/../simulation/Perturbation.h \
+ ../src/simulation/../pattern/../simulation/../pattern/mixture/Mixture.h \
+ ../src/simulation/../pattern/../simulation/Rule.h \
  ../src/simulation/../pattern/../util/Exceptions.h \
  ../src/simulation/../grammar/ast/Basics.h \
  ../src/simulation/../grammar/ast/../location.hh \
@@ -125,6 +128,12 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 ../src/simulation/../pattern/Dependencies.h:
 
 ../src/simulation/../pattern/../util/params.h:
+
+../src/simulation/../pattern/../simulation/Rule.h:
+
+../src/simulation/../pattern/../simulation/Perturbation.h:
+
+../src/simulation/../pattern/../simulation/../pattern/mixture/Mixture.h:
 
 ../src/simulation/../pattern/../simulation/Rule.h:
 

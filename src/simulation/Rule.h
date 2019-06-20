@@ -86,8 +86,6 @@ protected:
 		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,
 		const state::State& state,const Environment& env) const;
 
-	static void addAgentIncludes(CandidateMap &m,
-			const Pattern::Agent& ag,ag_st_id rhs_cc_ag,int change);
 
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.
@@ -142,6 +140,9 @@ public:
 
 	const list<Action>& getScript() const;
 	const vector<state::Node*>& getNewNodes() const;
+
+	static void addAgentIncludes(CandidateMap &m,
+		const Pattern::Agent& ag,ag_st_id rhs_cc_ag,int change);
 
 	void checkInfluence(const state::State& state,const Environment& env);
 	string toString(const pattern::Environment& env) const;

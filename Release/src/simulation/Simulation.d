@@ -32,6 +32,8 @@ src/simulation/Simulation.o: ../src/simulation/Simulation.cpp \
  ../src/simulation/../state/../simulation/../grammar/location.hh \
  ../src/simulation/../state/../simulation/../grammar/position.hh \
  ../src/simulation/../state/../simulation/../state/SiteGraph.h \
+ ../src/simulation/../state/../simulation/Perturbation.h \
+ ../src/simulation/../state/../simulation/Rule.h \
  ../src/simulation/../state/../data_structs/RandomTree.h \
  ../src/simulation/../state/../data_structs/../util/params.h \
  ../src/simulation/../state/../pattern/Dependencies.h \
@@ -43,6 +45,7 @@ src/simulation/Simulation.o: ../src/simulation/Simulation.cpp \
  ../src/simulation/../pattern/mixture/Mixture.h \
  ../src/simulation/../pattern/Dependencies.h \
  ../src/simulation/../pattern/../simulation/Rule.h \
+ ../src/simulation/../pattern/../simulation/Perturbation.h \
  ../src/simulation/../pattern/../util/Exceptions.h \
  ../src/simulation/../pattern/../util/../grammar/location.hh \
  ../src/simulation/../pattern/RuleSet.h \
@@ -120,6 +123,10 @@ src/simulation/Simulation.o: ../src/simulation/Simulation.cpp \
 
 ../src/simulation/../state/../simulation/../state/SiteGraph.h:
 
+../src/simulation/../state/../simulation/Perturbation.h:
+
+../src/simulation/../state/../simulation/Rule.h:
+
 ../src/simulation/../state/../data_structs/RandomTree.h:
 
 ../src/simulation/../state/../data_structs/../util/params.h:
@@ -141,6 +148,8 @@ src/simulation/Simulation.o: ../src/simulation/Simulation.cpp \
 ../src/simulation/../pattern/Dependencies.h:
 
 ../src/simulation/../pattern/../simulation/Rule.h:
+
+../src/simulation/../pattern/../simulation/Perturbation.h:
 
 ../src/simulation/../pattern/../util/Exceptions.h:
 

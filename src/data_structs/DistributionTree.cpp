@@ -29,6 +29,11 @@ DistributionTree<T>::~DistributionTree(){
 		delete parent;
 }
 
+template <typename T>
+void DistributionTree<T>::treeBalance(DistributionTree<T>*& parent_pointer) {
+	return;
+}
+
 /*********** class InjRandTree::Node **********/
 
 template <typename T>
@@ -68,7 +73,7 @@ void Node<T>::push(T* inj,FL_TYPE val){
 			greater->push(inj,val);
 		}
 		catch(bad_alloc &e){
-			balance(static_cast<Leaf<T>*>(greater),smaller);
+			leafBalance(static_cast<Leaf<T>*>(greater),smaller);
 			this->push(inj, val);
 			return;
 		}
@@ -78,7 +83,7 @@ void Node<T>::push(T* inj,FL_TYPE val){
 			smaller->push(inj,val);
 		}
 		catch(bad_alloc &e){
-			balance(static_cast<Leaf<T>*>(smaller),greater);
+			leafBalance(static_cast<Leaf<T>*>(smaller),greater);
 			this->push(inj, val);
 			return;
 		}
@@ -180,7 +185,7 @@ unsigned Node<T>::count() const{
 
 
 template <typename T>
-void Node<T>::balance(Leaf<T>* full,DistributionTree<T>* n) {
+void Node<T>::leafBalance(Leaf<T>* full,DistributionTree<T>* n) {
 	if(injs.size() || multi_injs.size()){//TODO size > 5
 		full->sort();
 		auto new_node = new Node<T>(full,full->choose(full->count()/2).second);
@@ -229,6 +234,68 @@ FL_TYPE Node<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
 	return sum + smaller->sumInternal(func)+greater->sumInternal(func);
 }
 
+
+template <typename T>
+float Node<T>::treeHeight() const {
+	return (smaller->treeHeight() + greater->treeHeight() )/2.0;
+}
+
+template <typename T>
+bool Node<T>::testBalance() const {
+	return smaller->treeHeight() >= 3*greater->treeHeight() ? true :
+			smaller->treeHeight()*3 <= greater->treeHeight()? true : false;
+}
+
+
+template <typename T>
+void Node<T>::treeBalance(DistributionTree<T>*& parent_pointer) {
+	smaller->treeBalance(smaller);
+	greater->treeBalance(greater);
+
+	if(testBalance())
+		nodeBalance(parent_pointer);
+}
+
+template <typename T>
+void Node<T>::nodeBalance(DistributionTree<T>*& parent_pointer) {
+	if(smaller->treeHeight() > greater->treeHeight()){
+		auto count_buff = this->count() - smaller->count();
+		auto sum_buff = this->total() - smaller->total();
+
+		smaller->parent = this->parent;
+		smaller->level--;
+		auto smaller_node = dynamic_cast<Node<T>*>(smaller);
+		smaller_node->greater->parent = this;
+		smaller_node->counter += count_buff;
+		smaller_node->sum += sum_buff;
+
+		this->parent = smaller_node;
+		this->smaller = smaller_node->smaller;
+		this->level++;
+		this->counter -= count_buff;
+		this->sum -= sum_buff;
+		parent_pointer = smaller_node;
+	}
+	else{
+		auto count_buff = this->count() - greater->count();
+		auto sum_buff = this->total() - greater->total();
+
+		greater->parent = this->parent;
+		greater->level--;
+		auto greater_node = dynamic_cast<Node<T>*>(greater);
+		greater_node->smaller->parent = this;
+		greater_node->counter += count_buff;
+		greater_node->sum += sum_buff;
+
+		this->parent = greater_node;
+		this->greater = greater_node->greater;
+		this->level++;
+		this->counter -= count_buff;
+		this->sum -= sum_buff;
+		parent_pointer = greater_node;
+	}
+
+}
 
 
 /*********** class InjRandTree::Leaf **********/
@@ -352,6 +419,17 @@ FL_TYPE Leaf<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
 		sum += func(inj.first);
 	}
 	return sum;
+}
+
+
+template <typename T>
+float Leaf<T>::treeHeight() const{
+	return this->level+1;
+}
+
+template <typename T>
+bool Leaf<T>::testBalance() const {
+	return false;
 }
 
 

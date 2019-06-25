@@ -26,7 +26,7 @@ void (State::*State::action[6])(const simulation::Rule::Action&) =
 State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		const BaseExpression& vol,simulation::Plot& _plot,
 		const pattern::Environment& _env,int seed) :
-	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]),
+	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]()),
 	activityTree(nullptr),injections(nullptr),randGen(seed),
 	plot(_plot),activeDeps(env.getDependencies()){
 	for(auto pert : env.getPerts()){

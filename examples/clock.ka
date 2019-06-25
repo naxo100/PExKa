@@ -78,8 +78,8 @@
 'unbinRv' REV_ERBa(rore!1,loc~nuc),RORE(REV_ERBa!1,gene!_) -> REV_ERBa(rore,loc~nuc),RORE(REV_ERBa,gene!_) @ 21.76
 
 #Chapter 'Light'
-'zg Ref1' GENE(id~PER1) -> GENE(id~PER1),mRNA(enc~PER1,loc~nuc) @ 'zg Ref1 var'
-'zg Ref2' GENE(id~PER2) -> GENE(id~PER2),mRNA(enc~PER2,loc~nuc) @ 'zg Ref1 var'
+'zg Ref1' GENE(id~PER1) -> GENE(id~PER1),mRNA(enc~PER1,loc~nuc) | 1:count @ 'zg Ref1 var'
+'zg Ref2' GENE(id~PER2) -> GENE(id~PER2),mRNA(enc~PER2,loc~nuc) | 1:count @ 'zg Ref1 var'
 
 %var: 'zg Ref1 var' 0.0
 %var: 'zg Ref2 var' 0.0
@@ -149,10 +149,27 @@
 	$UPDATE 'zg Ref2 var' 0.000339\
 until [false]
 
-%mod: repeat ([T] [mod] 24) = 0.0000001 do \
-	$UPDATE 'zg Ref1 var' 0.0;\
-	$UPDATE 'zg Ref2 var' 0.0\
-until [false]
+#%mod: repeat ([T] [mod] 24) = 0.0000001 do \
+#	$UPDATE 'zg Ref1 var' 0.0;\
+#	$UPDATE 'zg Ref2 var' 0.0\
+#until [false]
+
+
+%token: count
+
+%init: count <- 0
+%obs: 'count' |count|
+
+
+
+
+
+
+
+
+
+
+
 
 #Perturbations:
 #%var: 'N' 1

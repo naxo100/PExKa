@@ -22,12 +22,15 @@ class Node;
 
 template <typename T>
 class DistributionTree {
+	friend class Node<T>;
 protected:
 	Node<T> *parent;
 	unsigned level;
 	FL_TYPE value;
 	FL_TYPE sum;
 
+	//virtual void nodeBalance(DistributionTree<T>*& parent_pointer) = 0;
+	virtual bool testBalance() const = 0;
 public:
 	static const int MAX_LVL0 = 2;
 	//DistributionTree();
@@ -46,6 +49,9 @@ public:
 	virtual void erase(int address) = 0;
 
 	virtual FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const = 0;
+
+	virtual void treeBalance(DistributionTree<T>*& parent_pointer);
+	virtual float treeHeight() const = 0;
 };
 
 template <typename T>
@@ -59,6 +65,9 @@ class Node : public DistributionTree<T> {
 	vector<T*> multi_injs; //equals
 	DistributionTree<T> *smaller,*greater;
 	unsigned counter;
+
+	virtual void nodeBalance(DistributionTree<T>*& parent_pointer);
+	virtual bool testBalance() const override;
 public:
 	Node(FL_TYPE val = 0.0);
 	Node(Leaf<T>* leaf,FL_TYPE val = 0.0);
@@ -72,7 +81,9 @@ public:
 	virtual void erase(int address) override;
 	virtual void decrease(FL_TYPE val,unsigned n = 1) override;
 
-	virtual void balance(Leaf<T>* full,DistributionTree<T>* n);
+	virtual void leafBalance(Leaf<T>* full,DistributionTree<T>* n);
+	virtual void treeBalance(DistributionTree<T>*& parent_pointer) override;
+	virtual float treeHeight() const override;
 
 	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
 };
@@ -90,6 +101,8 @@ protected:
 	//float sum;
 	void share(Leaf *greater,FL_TYPE val);
 	void sort();
+
+	virtual bool testBalance() const override;
 public:
 	Leaf(Node<T>* _parent);
 	virtual ~Leaf();
@@ -105,6 +118,9 @@ public:
 	virtual void decrease(FL_TYPE val, unsigned n = 1) override;
 
 	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
+
+
+	virtual float treeHeight() const override;
 };
 
 

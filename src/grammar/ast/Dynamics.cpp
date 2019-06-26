@@ -573,7 +573,12 @@ simulation::Perturbation::Effect* Effect::eval(pattern::Environment& env,
 			throw SemanticError("Update rule's rates directly is not implemented yet.",loc);
 		if(vars[id]->isConst())
 			throw SemanticError("Cannot update constants.",loc);
-		return new simulation::Update(*vars[id],set.value->eval(env, vars));
+		pattern::DepSet deps;
+		auto set_expr = set.value->eval(env, vars, &deps);
+		auto upd_eff = new simulation::Update(*vars[id],set_expr);
+		if(deps.count(pattern::Dependency(pattern::Dependency::VAR,id)))
+			upd_eff->setValueUpdate();
+		return upd_eff;
 	}
 	case UPDATE_TOK:
 	case STOP:

@@ -90,6 +90,7 @@ public:
 
 class Update : public Perturbation::Effect {
 	state::Variable* var;
+	bool byValue;
 
 public:
 	Update(const state::Variable& _var,expressions::BaseExpression* expr);
@@ -97,6 +98,7 @@ public:
 	~Update();
 
 	void apply(state::State &state) const override;
+	void setValueUpdate();
 };
 
 class UpdateToken : public Perturbation::Effect {

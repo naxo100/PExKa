@@ -36,6 +36,7 @@ public:
 
 	virtual bool isConst() const;
 
+	virtual void update(SomeValue val);
 	virtual void update(const Variable& var) = 0;
 
 	short getId() const;
@@ -58,7 +59,8 @@ public:
 	AlgebraicVar(const short var_id, const std::string &nme,const bool is_obs,
 			const AlgExpression<T> *exp);
 	virtual ~AlgebraicVar();
-	void update(const Variable& var);
+	void update(SomeValue val) override;
+	void update(const Variable& var) override;
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
@@ -107,8 +109,8 @@ public:
 
 };
 
-
-class DistributionVar : public AlgExpression<FL_TYPE>, public Variable {
+template <typename T>
+class DistributionVar : public AlgExpression<T>, public Variable {
 	const pattern::Mixture* mixture;
 	N_ary op;
 	const BaseExpression* auxFunc;
@@ -125,8 +127,8 @@ public:
 	BaseExpression::Reduction factorize() const override;
 	BaseExpression* clone() const override;
 
-	FL_TYPE evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values ) const override;
-	FL_TYPE evaluate(const state::State& state,const AuxMap& aux_values) const override;
+	T evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values ) const override;
+	T evaluate(const state::State& state,const AuxMap& aux_values) const override;
 
 
 	virtual bool operator==(const BaseExpression& exp) const override;

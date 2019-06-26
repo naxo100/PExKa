@@ -137,7 +137,7 @@ public:
 
 	void advanceUntil(FL_TYPE sync_t);
 
-	void updateVar(const Variable& val);
+	void updateVar(const Variable& val,bool by_value = false);
 	void updateDeps(const pattern::Dependency& dep);
 
 	void tryPerturbate();

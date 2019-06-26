@@ -37,7 +37,7 @@ void Plot::fill(const state::State& state,const pattern::Environment& env) {
 	while(t >= nextPoint){
 		file << nextPoint;
 		for(auto var : env.getObservables()){
-			file << "\t" << var->getValue(state).valueAs<int>();
+			file << "\t" << var->getValue(state);
 		}
 		file << endl;
 		nextPoint += dT;

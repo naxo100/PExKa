@@ -182,7 +182,9 @@ BaseExpression* NullaryOperation::eval(const pattern::Environment& env,
 		const char flags) const{
 	switch(func){
 	case BaseExpression::Nullary::SIM_TIME:
-		deps->emplace(pattern::Dependency::TIME);break;
+		if(deps)
+			deps->emplace(pattern::Dependency::TIME);
+		break;
 	case BaseExpression::Nullary::CPUTIME:
 	case BaseExpression::Nullary::ACTIVITY:
 	case BaseExpression::Nullary::SIM_EVENT:
@@ -231,7 +233,7 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 	case AUX:
 		if(flags & AUX_ALLOW){
 			if( (flags & LHS) || (flags & RHS) ){
-				expr = new Auxiliar<FL_TYPE>(name.getString());
+				expr = new Auxiliar<FL_TYPE>(name.getString());//TODO maybe change to Aux<type> depending on valued_site type?
 				if(deps)//TODO set deps
 					deps->emplace(name.getString());
 			}

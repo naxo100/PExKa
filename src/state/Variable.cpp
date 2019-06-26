@@ -27,6 +27,10 @@ short Variable::getId() const {
 	return id;
 }
 
+void Variable::update(SomeValue val){
+	throw std::invalid_argument("update(SomeValue) can only be called in AlebraicVar");
+}
+
 Variable* Variable::makeAlgVar(short id, const string& name, BaseExpression *expr){
 	Variable* var = nullptr;
 	switch(expr->getType()){
@@ -74,6 +78,12 @@ void AlgebraicVar<T>::update(const Variable& var){
 	catch(bad_cast &ex){
 		throw invalid_argument("Cannot update an AlgebraicVar to another type of expression (try to change to Int/Float).");
 	}
+}
+
+template <typename T>
+void AlgebraicVar<T>::update(SomeValue val){
+	delete expression; //TODO
+	expression = new Constant<T>(val.valueAs<T>());
 }
 
 template <typename T>
@@ -207,19 +217,20 @@ bool KappaVar::operator==(const BaseExpression& exp) const {
 
 /******* class DistributionVar ****************/
 
-DistributionVar::DistributionVar(const short id,const std::string &nme,const bool is_obs,
+template <typename T>
+DistributionVar<T>::DistributionVar(const short id,const std::string &nme,const bool is_obs,
 		const pattern::Mixture &kappa,const pair<N_ary,const BaseExpression*>& exp) :
-				AlgExpression<FL_TYPE>(),Variable(id,nme,is_obs),
+				AlgExpression<T>(),Variable(id,nme,is_obs),
 				mixture(&kappa),op(exp.first),auxFunc(exp.second) {
 	for(auto aux : mixture->getAux())
 		//check if aux is in expr
 		auxMap[aux.first] = make_pair(get<1>(aux.second),get<2>(aux.second));
 }
 
-
-void DistributionVar::update(const Variable& var){
+template <typename T>
+void DistributionVar<T>::update(const Variable& var){
 	try{
-		auto distr_var = dynamic_cast<const DistributionVar&>(var);
+		auto distr_var = dynamic_cast<const DistributionVar<T>&>(var);
 		delete auxFunc;
 		mixture = distr_var.mixture;
 		auxFunc = distr_var.auxFunc;
@@ -229,33 +240,39 @@ void DistributionVar::update(const Variable& var){
 	}
 }
 
-//TODO
-FL_TYPE DistributionVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
+template <typename T>
+FL_TYPE DistributionVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const {
 	throw std::invalid_argument("Cannot call DistributionVar::auxFactors().");
 }
 
-BaseExpression::Reduction DistributionVar::factorize() const {
+template <typename T>
+BaseExpression::Reduction DistributionVar<T>::factorize() const {
 	BaseExpression::Reduction r;
 	r.factors.push_back(this->clone());
 	return r;
 }
-BaseExpression* DistributionVar::clone() const {
+template <typename T>
+BaseExpression* DistributionVar<T>::clone() const {
 	return new DistributionVar(*this);
 }
 
-FL_TYPE DistributionVar::evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values) const {
+template <typename T>
+T DistributionVar<T>::evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values) const {
 	throw std::invalid_argument("Cannot call KappaVar::evaluate() without state.");
 }
-FL_TYPE DistributionVar::evaluate(const state::State& state,const AuxMap& aux_values) const {
+template <typename T>
+T DistributionVar<T>::evaluate(const state::State& state,const AuxMap& aux_values) const {
 	return state.getInjContainer(mixture->getComponent(0).getId()).sumInternal(auxFunc, auxMap, state)
 			/ (op? state.mixInstances(*mixture) : 1);
 }
 
-const pattern::Mixture& DistributionVar::getMix() const {
+template <typename T>
+const pattern::Mixture& DistributionVar<T>::getMix() const {
 	return *mixture;
 }
 
-bool DistributionVar::operator==(const BaseExpression& exp) const {
+template <typename T>
+bool DistributionVar<T>::operator==(const BaseExpression& exp) const {
 	try{
 		auto& kappa_exp = dynamic_cast<const DistributionVar&>(exp);
 		return kappa_exp.mixture == mixture;
@@ -264,7 +281,8 @@ bool DistributionVar::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
-
+template class DistributionVar<int>;
+template class DistributionVar<FL_TYPE>;
 /******* class RateVar ****************/
 /*RateVar::RateVar(const short id,const std::string &nme,const bool is_obs,
 		const AlgExpression<FL_TYPE> *exp ) :

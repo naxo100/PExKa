@@ -117,7 +117,8 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 			BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
 			if(p_mix->compsCount() != 1)
 				throw SemanticError("Distribution expressions can't have more than one Conected Component.",loc);
-			var = new state::DistributionVar(id,name.getString(),observable,mix,make_pair(op,b_expr));
+			//if(op == BaseExpression::SUMATORY && ) //TODO maybe make DistrVar<int> if expr is int?
+			var = new state::DistributionVar<FL_TYPE>(id,name.getString(),observable,mix,make_pair(op,b_expr));
 		}
 
 	}
@@ -126,15 +127,15 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
 		switch(b_expr->getType()){
 		case FLOAT:
-			var = new state::AlgebraicVar<FL_TYPE>(id,name.getString(),false,
+			var = new state::AlgebraicVar<FL_TYPE>(id,name.getString(),observable,
 				dynamic_cast<AlgExpression<FL_TYPE>*>(b_expr));
 			break;
 		case INT:
-			var = new state::AlgebraicVar<int>(id,name.getString(),false,
+			var = new state::AlgebraicVar<int>(id,name.getString(),observable,
 				dynamic_cast<AlgExpression<int>*>(b_expr));
 			break;
 		case BOOL:
-			var = new state::AlgebraicVar<bool>(id,name.getString(),false,
+			var = new state::AlgebraicVar<bool>(id,name.getString(),observable,
 				dynamic_cast<AlgExpression<bool>*>(b_expr));
 			break;
 		case NONE:

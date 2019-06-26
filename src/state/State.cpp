@@ -523,9 +523,12 @@ void State::tryPerturbate() {
 	}
 }
 
-void State::updateVar(const Variable& var){
+void State::updateVar(const Variable& var,bool by_value){
 	//delete vars[var.getId()];
-	vars[var.getId()]->update(var);
+	if(by_value)
+		vars[var.getId()]->update(var.getValue(*this));
+	else
+		vars[var.getId()]->update(var);
 	updateDeps(pattern::Dependency(Deps::VAR,var.getId()));
 }
 
@@ -554,7 +557,7 @@ void State::updateDeps(const pattern::Dependency& d){
 			break;
 		case Deps::TIME:{
 			auto& deps = activeDeps.getDependencies(*dep_it).ordered_deps;
-			if(deps.size()){
+			if(deps.size() && deps.begin()->first <= counter.time ){
 				auto nextDeps = deps.equal_range(deps.begin()->first);
 				timePerts.insert(timePerts.begin(),nextDeps.first,nextDeps.second);
 				activeDeps.eraseTimePerts(nextDeps.first,nextDeps.second);

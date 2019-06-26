@@ -237,7 +237,7 @@ void Delete::apply(state::State& state) const {
 /***** Update **************************/
 
 
-Update::Update(const state::Variable& _var,expressions::BaseExpression* expr) : var(nullptr){
+Update::Update(const state::Variable& _var,expressions::BaseExpression* expr) : var(nullptr),byValue(false){
 	var = state::Variable::makeAlgVar(_var.getId(), _var.toString(), expr);
 }
 Update::~Update(){
@@ -246,7 +246,11 @@ Update::~Update(){
 
 void Update::apply(state::State &state) const {
 	cout << "updating var " << var->toString() << " to value " << var->getValue(state) << endl;
-	state.updateVar(*var);
+	state.updateVar(*var,byValue);
+}
+
+void Update::setValueUpdate() {
+	byValue= true;
 }
 
 

@@ -194,8 +194,8 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 
 void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 	auto ccval_inj = static_cast<CcValueInj*>(inj);
-	for(auto& rid_ccnode : roots){
-		for(auto& cc_node : rid_ccnode.second){
+	for(auto& rid_ccnode : roots){// for each rule that is using this pattern
+		for(auto& cc_node : rid_ccnode.second){// for each CC in the LHS that use this pattern
 			auto& r = state.getEnv().getRules()[rid_ccnode.first];
 			state::AuxMap aux_values;
 			for(auto& aux : r.getLHS().getAux()){
@@ -208,7 +208,8 @@ void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 			}
 			auto val = 1.0;
 			for(auto& aux_func : r.getReduction().aux_functions){
-				val *= aux_func.second->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+				if(aux_values.count(aux_func.first))//TODO remove when fix reductions (one per CC and not per aux)
+					val *= aux_func.second->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 			}
 			cc_node.second->push(ccval_inj,val);//TODO static cast?
 		}

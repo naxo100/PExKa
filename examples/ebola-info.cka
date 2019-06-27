@@ -17,7 +17,7 @@
 %const: 'forgetI_rate' 0.0			#never
 %const: 'inform_rate' 0.3			#if (show-info) appears 1 entire day -> 30% pop informed
 %const: 'informI_rate' 0.5			#an infected person is informed in 2 days avg
-%const: 'show_info_rate' 0.14		#it appears once a week
+#%const: 'show_info_rate' 0.14		#it appears once a week
 %const: 'hide_info_rate' 2			#it disappears in 12 hours
 
 %const: 'alfa_i' 0.8
@@ -65,12 +65,16 @@
 'forget E'	P(s~S,info~{i < [inf]}) -> P(s~S,info~{i+1}) @ 'forgetSE_rate'
 
 
-'show info' -> Info() @ 'show_info_rate'
+#'show info' -> Info() @ 'show_info_rate'
 'hide info'	Info() -> @ 'hide_info_rate'
 
 
 'debate'	P(info~{i1}),P(info~{i2}) -> P(info~{[min] i1 i2}),P(info~{[min] i1 i2}) @ 'debate_rate'
 #'gossip'	P(fake~{i1}),P(fake~{i2}) -> P(fake~{[min] i1 i2}),P(fake~{[min] i1 i2}) @ 0.0011
+
+
+%mod: repeat ([T] [mod] 7) = -0.0 do $ADD 1 Info() until [false]
+
 
 
 #init
@@ -93,7 +97,7 @@
 %obs: 'Dead'		D()
 %obs: 'Smarts%*10'	'smarts'*1000.0 / 'Pop_t0'
 #%obs: 'Idiots'		P(info~{5 <= i})
-%obs: 'Info-On-Tv'	1000*'info'
+%obs: 'Info-On-Tv'	-50*'info'
 
 
 

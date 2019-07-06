@@ -22,7 +22,7 @@ class Plot {
 	FL_TYPE nextPoint;
 	FL_TYPE dT;
 public:
-	Plot(const pattern::Environment& env);
+	Plot(const pattern::Environment& env,int run_id = 0);
 	~Plot();
 
 	void fill(const state::State& state,const pattern::Environment& env);

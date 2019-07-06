@@ -107,11 +107,11 @@ R BinaryOperation<R, T1, T2>::evaluate(const state::State& state,
  }*/
 
 template<typename R, typename T1, typename T2>
-BinaryOperation<R, T1, T2>::BinaryOperation(const BaseExpression *ex1,
-		const BaseExpression *ex2, const short op) :
+BinaryOperation<R, T1, T2>::BinaryOperation(BaseExpression *ex1,
+		BaseExpression *ex2, const short op) :
 		op(op) {
-	exp1 = dynamic_cast<const AlgExpression<T1>*>(ex1);
-	exp2 = dynamic_cast<const AlgExpression<T2>*>(ex2);
+	exp1 = dynamic_cast<AlgExpression<T1>*>(ex1);
+	exp2 = dynamic_cast<AlgExpression<T2>*>(ex2);
 	func = BinaryOperations<R, T1, T2>::funcs[op];
 }
 
@@ -364,6 +364,32 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 //	r.factorized_expression = ex;
 
 }
+
+template <typename R, typename T1, typename T2>
+BaseExpression* BinaryOperation<R,T1,T2>::reduce(VarVector& vars){
+	auto r1 = exp1->reduce(vars);
+	auto r2 = exp2->reduce(vars);
+	auto cons_r1 = dynamic_cast<Constant<T1>*>(r1);
+	auto cons_r2 = dynamic_cast<Constant<T2>*>(r2);
+	if(r1 != exp1)
+		delete exp1;
+	if(r2 != exp2)
+		delete exp2;
+	if(cons_r1){
+		if(cons_r2){
+			T1 val1 = cons_r1->evaluate(vars);
+			T2 val2 = cons_r2->evaluate(vars);
+			delete r1;delete r2;
+			return new Constant<R>(func(val1,val2));
+		}
+	}
+	exp1 = dynamic_cast<AlgExpression<T1>*>(r1);
+	exp2 = dynamic_cast<AlgExpression<T2>*>(r2);
+	return this;
+}
+
+
+
 
 template<typename R, typename T1, typename T2>
 BaseExpression* BinaryOperation<R, T1, T2>::clone() const{

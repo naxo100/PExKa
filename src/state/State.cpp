@@ -26,9 +26,19 @@ void (State::*State::action[6])(const simulation::Rule::Action&) =
 State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		const BaseExpression& vol,simulation::Plot& _plot,
 		const pattern::Environment& _env,int seed) :
-	env(_env),volume(vol),vars(_vars),tokens (new float[tok_count]()),
-	activityTree(nullptr),injections(nullptr),randGen(seed),
+	env(_env),volume(vol),vars(_vars.size()),rates(env.size<simulation::Rule>()),
+	tokens (new float[tok_count]()),activityTree(nullptr),injections(nullptr),randGen(seed),
 	plot(_plot),activeDeps(env.getDependencies()){
+	for(unsigned i = 0; i < _vars.size(); i++){
+		vars[i] = dynamic_cast<Variable*>(_vars[i]->clone());
+		vars[i]->reduce(vars);
+	}
+	for(auto& rule : env.getRules()){
+		int i = rule.getId();
+		rates[i].baseRate = rule.getRate().clone()->reduce(vars);
+		if(rates[i].baseRate->getVarDeps() & BaseExpression::AUX)
+			rates[i].base = rates[i].baseRate->factorize();
+	}
 	for(auto pert : env.getPerts()){
 		perts.emplace(pert->getId(),*pert);
 	}
@@ -65,6 +75,14 @@ void State::addTokens(float n,unsigned tok_id){
 }
 float State::getTokenValue(unsigned tok_id) const{
 	return tokens[tok_id];
+}
+
+const simulation::Rule::Rate& State::getRuleRate(int _id) const {
+	return rates[_id];
+}
+
+SomeValue State::getVarValue(short_id var_id, const AuxMap& aux_values) const {
+	return vars[var_id]->getValue(*this, move(aux_values));
 }
 
 FL_TYPE State::getTotalActivity() const {
@@ -104,13 +122,23 @@ UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
 	return count;
 }
 
-/*two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
-	two<FL_TYPE> act;
-	act.first = mixInstances(r.getLHS()) * r.getRate().getValue(*this).valueAs<FL_TYPE>();
-	//TODO act.second = ...
-	act.second = 0.;
-	return act;
-}*/
+two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
+	//two<FL_TYPE> act;
+	FL_TYPE a = 1.0;
+	auto& lhs = r.getLHS();
+	for(unsigned i = 0 ; i < lhs.compsCount() ; i++){
+		auto& cc = lhs.getComponent(i);
+		injections[cc.getId()]->selectRule(r.getId(), i);
+		a *= injections[cc.getId()]->partialReactivity();
+	}
+	auto& rate = rates[r.getId()];
+	if(rate.base.aux_functions.empty())
+		a *= rate.baseRate->getValue(vars).valueAs<FL_TYPE>();
+	else
+		for(auto factor : rate.base.factors)
+			a *= factor->getValue(vars).valueAs<FL_TYPE>();
+	return make_pair(a,0.0);
+}
 /*
 template <int n> //for both
 void State::negativeUpdate(SiteGraph::Internal& intf){
@@ -312,7 +340,7 @@ void State::positiveUpdate(const simulation::Rule::CandidateMap& wake_up){
 	//cout << "rules to update: ";
 	for(auto r_id : ev.rule_ids){
 		//cout << env.getRules()[r_id].getName() << ", ";
-		auto act = env.getRules()[r_id].evalActivity(injections,vars);
+		auto act = evalActivity(env.getRules()[r_id]);
 		activityTree->add(r_id,act.first+act.second);
 	}
 	//cout << endl;
@@ -406,7 +434,7 @@ const simulation::Rule& State::drawRule(){
 	auto rid_alpha = activityTree->chooseRandom();
 	auto& rule = env.getRules()[rid_alpha.first];
 
-	auto a1a2 = rule.evalActivity(injections,vars);
+	auto a1a2 = evalActivity(rule);
 	auto alpha = a1a2.first + a1a2.second;
 
 	//*?
@@ -615,7 +643,7 @@ void State::initActTree() {
 	for(auto rule_p : rules){
 		auto& rule = *rule_p;
 		//auto act_pr = evalActivity(rule);
-		auto act_pr = rule.evalActivity(injections,vars);
+		auto act_pr = evalActivity(rule);
 		activityTree->add(rule.getId(),act_pr.first+act_pr.second);
 #ifdef DEBUG
 		printf("\t%s\t%.6f\n", rule.getName().c_str(),(act_pr.first+act_pr.second));
@@ -637,7 +665,7 @@ void State::print() const {
 	}
 	cout << "\t}\n\tRules {\n";
 	for(auto& r : env.getRules()){
-		auto act = r.evalActivity(injections,vars);
+		auto act = evalActivity(r);
 		cout << "\t(" << r.getId() << ")\t" << r.getName() << "\t("
 			<< act.first << " , " << act.second << ")" << endl;
 	}

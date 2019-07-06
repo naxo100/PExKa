@@ -42,6 +42,7 @@ class State {
 	SiteGraph graph;
 	const state::BaseExpression& volume;
 	std::vector<Variable*> vars;
+	vector<simulation::Rule::Rate> rates;
 	float* tokens;
 
 	data_structs::RandomTree* activityTree;
@@ -108,7 +109,8 @@ public:
 
 	float getTokenValue(unsigned tok_id) const;
 
-	SomeValue getVarValue(short_id var_id) const;
+	const simulation::Rule::Rate& getRuleRate(int id) const;
+	SomeValue getVarValue(short_id var_id,const AuxMap& aux_values) const;
 
 
 	void positiveUpdate(const simulation::Rule::CandidateMap& wake_up);
@@ -127,7 +129,7 @@ public:
 
 	UINT_TYPE mixInstances(const pattern::Mixture& mix) const;
 
-	//two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
+	two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
 
 	/** \brief Apply actions described by r to the state.
 	 * @param r rule to apply.

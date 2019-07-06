@@ -58,7 +58,7 @@ public:
 		RAND_1,SIM_TIME,CPUTIME,ACTIVITY,SIM_EVENT,NULL_EVENT,PROD_EVENT
 	};
 	enum VarDep {
-		CONSTS = 1,AUX = 2,SPATIAL = 4,TIME = 8,EVENT = 16, RAND = 32
+		CONSTS = 1,AUX = 2,SPATIAL = 4,TIME = 8,EVENT = 16, RAND = 32, VARDEP=64
 	};
 
 	virtual ~BaseExpression() = 0;
@@ -86,16 +86,17 @@ public:
 	 */
 	virtual Reduction factorize() const = 0;
 	virtual BaseExpression* clone() const = 0;
+	virtual BaseExpression* reduce(VarVector& vars) = 0;
 
 	//virtual std::set<std::string> getAuxiliars() const = 0;
 	virtual bool operator==(const BaseExpression& exp) const = 0;
 	virtual bool operator!=(const BaseExpression& exp) const;
 
 	template<bool isBool>
-	static BaseExpression* makeBinaryExpression(const BaseExpression *ex1,
-			const BaseExpression *ex2, const int op);
+	static BaseExpression* makeBinaryExpression(BaseExpression *ex1,
+			BaseExpression *ex2, const int op);
 
-	static BaseExpression* makeUnaryExpression(const BaseExpression *ex, const int func);
+	static BaseExpression* makeUnaryExpression(BaseExpression *ex, const int func);
 
 	static BaseExpression* makeNullaryExpression(const int func);
 

@@ -63,6 +63,11 @@ BaseExpression::Reduction NullaryOperation<R>::factorize() const {
 	return r;
 }
 
+template <typename T>
+BaseExpression* NullaryOperation<T>::reduce(VarVector &vars) {
+	return this;
+}
+
 template<typename R>
 BaseExpression* NullaryOperation<R>::clone() const {
 	return new NullaryOperation<R>(*this);

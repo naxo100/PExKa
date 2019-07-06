@@ -17,6 +17,9 @@ Constant<T>::Constant(T v) :
 		val(v) {
 }
 
+template <typename T>
+Constant<T>::~Constant(){}
+
 template<typename T>
 T Constant<T>::evaluate(const VarVector &consts,
 		const std::unordered_map<std::string, int> *aux_values) const {
@@ -39,6 +42,11 @@ BaseExpression::Reduction Constant<T>::factorize() const {
 	BaseExpression::Reduction r;
 	r.factors.push_back(this->clone());
 	return r;
+}
+
+template <typename T>
+BaseExpression* Constant<T>::reduce(VarVector& vars){
+	return this;
 }
 
 template<typename T>

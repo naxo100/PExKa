@@ -182,12 +182,12 @@ vector<CcInjection*>::iterator InjRandSet::end(){
 InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 		InjRandContainer(_cc),average(0),counter(0),selected_root(0,0){
 	auto& deps = cc.getRateDeps();
-	distribution_tree::Node<CcValueInj>* pointer = nullptr;
-	for(auto r_cc : deps){
-		if(r_cc.first.getReduction().aux_functions.size())
+	//distribution_tree::Node<CcValueInj>* pointer = nullptr;
+	for(auto r_cc : deps){//
+		if(r_cc.first.getRate().getVarDeps() & expressions::BaseExpression::AUX)
 			roots[r_cc.first.getId()][r_cc.second] = new distribution_tree::Node<CcValueInj>(1.0);
 		else
-			roots[r_cc.first.getId()][r_cc.second] = nullptr;
+			roots[r_cc.first.getId()][r_cc.second] = nullptr;//no need to make another tree for this root
 	}
 
 }
@@ -207,7 +207,7 @@ void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 					aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux*/
 			}
 			auto val = 1.0;
-			for(auto& aux_func : r.getReduction().aux_functions){
+			for(auto& aux_func : state.getRuleRate(r.getId()).base.aux_functions){
 				if(aux_values.count(aux_func.first))//TODO remove when fix reductions (one per CC and not per aux)
 					val *= aux_func.second->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 			}

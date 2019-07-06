@@ -15,7 +15,7 @@ Parameters Parameters::singleton;
 
 Parameters::Parameters() : maxEvent(std::numeric_limits<UINT_TYPE>::max()),
 		maxTime(/*std::numeric_limits<FL_TYPE>::infinity()*/0),points(1),
-		outputFile("sim.out"),options(nullptr),seed(0){}
+		outputFile("sim"),outputFileType("tsv"),options(nullptr),seed(0),runs(1){}
 
 void Parameters::makeOptions(const string &msg){
 	options = new options_description(msg);
@@ -23,6 +23,7 @@ void Parameters::makeOptions(const string &msg){
 	//allowed options
 	options->add_options()
 		("input-file,i",value<vector <string> >(),"Kappa files to read model (for backward compatibility with KaSim/PISKa)")
+		("runs,r",value<int>(),"Produce several trajectories, and make some statistical analysis at the end")
 		("events,e",value<int>(),"Stop simulation at 'arg' events (negative for unbounded)")
 		("time,t",value<float>(),"Stop simulation at time 'arg' (arbitrary time unit)")
 		("points,p",value<int>(),"Number of points in plot files")
@@ -33,8 +34,9 @@ void Parameters::makeOptions(const string &msg){
 		("implicit-signature","Parser will guess agent signatures automatically")
 		("seed,s",value<int>(),"Seed for random number generation (default is chosen from time())")
 		("sync-t",value<float>(),"Synchronize compartments every 'arg' simulation-time units")
-		("version,v", "print version string")
-		("help,h", "produce help message")
+		("version,v", "Print version string")
+		("help,h", "Produce help message")
+
 	;
 }
 
@@ -93,6 +95,9 @@ void Parameters::evalOptions(int argc, char* argv[]){
 		outputFile = vm["out"].as<string>();
 	if(vm.count("dir"))
 		outputFile = vm["dir"].as<string>() + "/" + outputFile;
+
+	if(vm.count("runs"))
+		runs = vm["runs"].as<int>();
 
 }
 

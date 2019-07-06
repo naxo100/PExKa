@@ -17,10 +17,12 @@ class Constant: public AlgExpression<T> {
 	T val;
 public:
 	Constant(T v);
+	virtual ~Constant();
 	T evaluate(const VarVector &consts,const std::unordered_map<std::string, int> *aux_values = nullptr) const override;
 	T evaluate(const state::State& state, const AuxMap& aux_values) const override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const override;
 	BaseExpression::Reduction factorize() const override;
+	virtual BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 	bool operator==(const BaseExpression& exp) const override;
 

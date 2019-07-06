@@ -219,7 +219,7 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 	switch(type){
 	case VAR:{
 		unsigned id = env.getVarId(name);
-		expr = vars[id];
+		expr = vars[id]->makeVarLabel();
 		if(deps){
 			auto* kappa = dynamic_cast<state::KappaVar*>(vars[id]);
 			if(kappa)

@@ -339,13 +339,34 @@ bool Mixture::Site::isExpression() const{
 }
 
 //test if mix_site match with value or inequation
-bool Mixture::Site::testValue(const state::SomeValue& val,const state::State& state,
-		const expressions::AuxMap& aux_map) const {
+bool Mixture::Site::testValue(const state::SomeValue& val,const VarVector& vars) const {
 	//TODO ignore vars when using for check influence
-	if(label != EMPTY && val.t != NONE)
-		return testValueOpt(val,state,aux_map);
+	if(label != EMPTY && val.t != NONE){
+		if(val.t == expressions::SMALL_ID)
+			return val.smallVal == label;
+		else{
+			if(values[1]){
+				if(!values[1]->isAux())//TODO only if aux expression are stored
+					try{
+						return values[1]->getValue(vars) == val;
+					}
+					catch(std::out_of_range &e){
+						return true;//cannot evaluate so maybe true
+					}
+			}
+		}
+		auto fl_val = val.valueAs<FL_TYPE>();
+		if(values[0])
+			if(values[0]->getValue(vars).valueAs<FL_TYPE>() > fl_val)
+				return false;
+		if(values[2])
+			if(values[2]->getValue(vars).valueAs<FL_TYPE>() < fl_val)
+				return false;
+		return true;
+	}
 	return true;
 }
+
 //test if mix_site match with value or inequation
 bool Mixture::Site::testValueOpt(const state::SomeValue& val,const state::State& state,
 		const expressions::AuxMap& aux_map) const {
@@ -359,10 +380,10 @@ bool Mixture::Site::testValueOpt(const state::SomeValue& val,const state::State&
 					return values[1]->getValue(state,std::move(aux_map)) == val;
 				}
 				catch(std::out_of_range &e){
-					if(aux_map.size())//aux_values is empty on because it's not time for aux
-						throw e;
+					if(aux_map.size())//aux_values is not empty so we miss some aux
+						throw out_of_range("testValueOpt(): Auxiliar or Var was not found.");
 					else
-						return true;//cannot evaluate so maybe true
+						throw out_of_range("testValueOpt(): no auxiliars given.");//no aux?? something wrong here
 				}
 		}
 	}

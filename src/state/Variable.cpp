@@ -8,6 +8,7 @@
 #include "Variable.h"
 #include "State.h"
 #include "../pattern/mixture/Component.h"
+#include "../expressions/Vars.h"
 
 
 namespace state {
@@ -56,10 +57,12 @@ Variable* Variable::makeAlgVar(short id, const string& name, BaseExpression *exp
 //const std::string& Variable::getName() const {return name;};
 std::string Variable::toString() const {return name;};
 
+/*****************************************/
 /******* class AlgebraicVar **************/
+/*****************************************/
 template <typename T>
 AlgebraicVar<T>::AlgebraicVar(const short var_id, const std::string &nme,
-		const bool is_obs,const AlgExpression<T> *exp):
+		const bool is_obs,AlgExpression<T> *exp):
 		BaseExpression(), Variable(var_id,nme,is_obs),expression(exp) {}
 
 template <typename T>
@@ -73,7 +76,7 @@ void AlgebraicVar<T>::update(const Variable& var){
 	try{
 		auto& alg_var = dynamic_cast<const AlgebraicVar<T>&>(var);
 		delete expression; //TODO
-		expression = dynamic_cast<const AlgExpression<T>*>(alg_var.expression->clone());
+		expression = dynamic_cast<AlgExpression<T>*>(alg_var.expression->clone());
 	}
 	catch(bad_cast &ex){
 		throw invalid_argument("Cannot update an AlgebraicVar to another type of expression (try to change to Int/Float).");
@@ -104,9 +107,24 @@ BaseExpression::Reduction AlgebraicVar<T>::factorize() const {
 	r.factors.push_back(this->clone());
 	return r;
 }
+
+template <typename T>
+BaseExpression* AlgebraicVar<T>::reduce(VarVector &vars) {
+	auto r = expression->reduce(vars);
+	if(expression != r)
+		delete expression;
+	expression = dynamic_cast<AlgExpression<T>*>(r);
+	return this;
+}
+
 template <typename T>
 BaseExpression* AlgebraicVar<T>::clone() const {
-	return new AlgebraicVar<T>(*this);
+	return new AlgebraicVar<T>(id,name,isObservable,dynamic_cast<AlgExpression<T>*>(expression->clone()));
+}
+
+template <typename T>
+BaseExpression* AlgebraicVar<T>::makeVarLabel() const{
+	return new VarLabel<T>(id);
 }
 
 template <typename T>
@@ -122,10 +140,8 @@ template class AlgebraicVar<bool>;
 
 /******* class ConstantVar *************/
 template <typename T>
-ConstantVar<T>::ConstantVar(const short var_id, const std::string &nme,const AlgExpression<T> *exp):
-		Variable(var_id,nme),Constant<T>(exp->evaluate(VarVector(),nullptr)) {//TODO call with real VarVector
-	delete exp;
-}
+ConstantVar<T>::ConstantVar(const short var_id, const std::string &nme,T value):
+		Variable(var_id,nme),Constant<T>(value) {}
 
 template <typename T>
 void ConstantVar<T>::update(const Variable& var){
@@ -135,6 +151,20 @@ void ConstantVar<T>::update(const Variable& var){
 template <typename T>
 bool ConstantVar<T>::isConst() const {
 	return true;
+}
+
+template <typename T>
+BaseExpression* ConstantVar<T>::reduce(VarVector &vars) {
+	return this;
+}
+template <typename T>
+BaseExpression* ConstantVar<T>::clone() const {
+	return new ConstantVar<T>(*this);
+}
+
+template <typename T>
+BaseExpression* ConstantVar<T>::makeVarLabel() const{
+	return new VarLabel<T>(id);
 }
 
 template <typename T>
@@ -189,6 +219,15 @@ BaseExpression::Reduction KappaVar::factorize() const {
 	r.factors.push_back(this->clone());
 	return r;
 }
+
+BaseExpression* KappaVar::reduce(VarVector &vars) {
+	return this;
+}
+
+BaseExpression* KappaVar::makeVarLabel() const{
+	return new VarLabel<int>(id);
+}
+
 BaseExpression* KappaVar::clone() const {
 	return new KappaVar(*this);
 }
@@ -251,6 +290,12 @@ BaseExpression::Reduction DistributionVar<T>::factorize() const {
 	r.factors.push_back(this->clone());
 	return r;
 }
+
+template <typename T>
+BaseExpression* DistributionVar<T>::reduce(VarVector &vars) {
+	return this;
+}
+
 template <typename T>
 BaseExpression* DistributionVar<T>::clone() const {
 	return new DistributionVar(*this);
@@ -264,6 +309,11 @@ template <typename T>
 T DistributionVar<T>::evaluate(const state::State& state,const AuxMap& aux_values) const {
 	return state.getInjContainer(mixture->getComponent(0).getId()).sumInternal(auxFunc, auxMap, state)
 			/ (op? state.mixInstances(*mixture) : 1);
+}
+
+template <typename T>
+BaseExpression* DistributionVar<T>::makeVarLabel() const{
+	return new VarLabel<T>(id);
 }
 
 template <typename T>
@@ -353,6 +403,11 @@ BaseExpression::Reduction TokenVar::factorize() const {
 	r.factors.push_back(this->clone());
 	return r;
 }
+
+BaseExpression* TokenVar::reduce(VarVector &vars) {
+	return this;
+}
+
 BaseExpression* TokenVar::clone() const {
 	return new TokenVar(*this);
 }

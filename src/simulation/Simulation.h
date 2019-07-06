@@ -24,11 +24,12 @@ namespace simulation {
 using namespace std;
 
 class Simulation {
+	int id;
+	pattern::Environment& env;
+	//const vector<state::Variable*>& vars;
 	vector<state::State> states;//vector?
 	const Parameters& params;
-	pattern::Environment& env;
 	pattern::RuleSet rules;
-	const vector<state::Variable*>& vars;
 	GlobalCounter counter;
 	Plot plot;
 
@@ -48,10 +49,11 @@ class Simulation {
 	vector<unsigned> allocAgents2(unsigned cells, unsigned ag_count, const list<float>* vol_ratios = nullptr);
 
 public:
-	Simulation(pattern::Environment& env,const std::vector<state::Variable*>& vars);
+	Simulation(pattern::Environment& env,int id = 0);
+	Simulation(const Simulation& sim,int _id);
 	~Simulation();
 
-	void setCells(list<unsigned int>& cells);
+	void setCells(list<unsigned int>& cells,const VarVector& vars);
 
 	void initialize();
 	void run(const Parameters& params);

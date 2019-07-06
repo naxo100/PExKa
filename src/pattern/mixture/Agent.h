@@ -121,8 +121,7 @@ struct Pattern::Site {
 	bool isExpression() const;
 	bool isBindToAny() const;
 	bool testValue(const expressions::SomeValue& val,
-			const state::State& state,
-			const expressions::AuxMap& aux_map) const;
+			const VarVector& vars) const;
 	bool testValueOpt(const expressions::SomeValue& val,
 			const state::State& state,
 			const expressions::AuxMap& aux_map) const;

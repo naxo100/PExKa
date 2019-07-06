@@ -47,10 +47,10 @@ R UnaryOperation<R, T>::evaluate(const state::State& state,
 }
 
 template<typename R, typename T>
-UnaryOperation<R, T>::UnaryOperation(const BaseExpression *ex,
+UnaryOperation<R, T>::UnaryOperation(BaseExpression *ex,
 		const short op) :
 		op(op) {
-	exp = dynamic_cast<const AlgExpression<T>*>(ex);
+	exp = dynamic_cast<AlgExpression<T>*>(ex);
 	func = UnaryOperations<R, T>::funcs[op];
 }
 
@@ -74,6 +74,19 @@ BaseExpression::Reduction UnaryOperation<R, T>::factorize() const {
 	for(it = m.begin(); it != m.end(); it++)
 		res.aux_functions[it->first] = new UnaryOperation(it->second, BaseExpression::SQRT);
 	return res;
+}
+
+template <typename R, typename T>
+BaseExpression* UnaryOperation<R,T>::reduce(VarVector &vars){
+	if(op >= BaseExpression::COIN)//random constant
+		return this;
+	auto r = exp->reduce(vars);
+	auto cons_r = dynamic_cast<Constant<T>*>(r);
+	if(cons_r){
+		delete exp;
+		return new Constant<R>(func(cons_r->evaluate(vars)));
+	}
+	return this;
 }
 
 template<typename R, typename T>

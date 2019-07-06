@@ -14,6 +14,7 @@
 #include "../expressions/Vars.h"
 #include "../pattern/mixture/Agent.h"
 #include "../pattern/mixture/Component.h"
+#include "../state/State.h"
 
 namespace simulation {
 
@@ -45,12 +46,12 @@ const pattern::Mixture& Rule::getLHS() const {
 const BaseExpression& Rule::getRate() const {
 	return *rate;
 }
-const BaseExpression::Reduction& Rule::getReduction() const {
+/*const BaseExpression::Reduction& Rule::getReduction() const {
 	return basic;
 }
 const BaseExpression::Reduction& Rule::getUnaryReduction() const {
 	return unary;
-}
+}*/
 
 void Rule::setRHS(const Mixture* mix,bool is_declared){
 	rhs = mix;
@@ -60,13 +61,13 @@ void Rule::setRate(const BaseExpression* r){
 	if(rate)
 		delete rate;
 	rate = r;
-	if(r->getVarDeps() & BaseExpression::AUX)
-		basic = r->factorize();
+	//if(r->getVarDeps() & BaseExpression::AUX)
+	//	basic = r->factorize();
 }
 void Rule::setUnaryRate(pair<const BaseExpression*,int> u_rate ){
 	unaryRate = u_rate;
-	if(u_rate.first->getVarDeps() & BaseExpression::AUX)
-		unary = u_rate.first->factorize();
+	//if(u_rate.first->getVarDeps() & BaseExpression::AUX)
+	//	unary = u_rate.first->factorize();
 }
 
 
@@ -458,7 +459,7 @@ const vector<state::Node*>& Rule::getNewNodes() const{
 
 bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,
-		const state::State& state,const Environment& env) const {
+		const VarVector& vars,const Environment& env) const {
 	map<small_id,small_id> visited;
 	expressions::AuxMap empty_aux;
 	auto& rhs_cc = rhs->getComponent(rhs_cc_id);
@@ -483,7 +484,7 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 			auto new_node = newNodes.at((int)news.at(make_pair(rhs_cc_id,rhs_ag_id)));
 			for(auto& id_site : test_ag){
 				auto& test_site = id_site.second;
-				if(!test_site.testValue(new_node->getInternalState(id_site.first), state, empty_aux))
+				if(!test_site.testValue(new_node->getInternalState(id_site.first), vars))
 					return false;
 				try{
 					auto& rhs_site = rhs_ag.getSite(id_site.first);
@@ -543,7 +544,7 @@ void Rule::addAgentIncludes(CandidateMap &candidates,
 }
 
 
-void Rule::checkInfluence(const state::State& state,const Environment& env) {
+void Rule::checkInfluence(const Environment &env,const VarVector& vars) {
 	//TODO changes of BIND_TO -> FREE
 	//TODO changes of semi-link -> free ???
 	//try{
@@ -605,7 +606,7 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 			bool isEmb = true;
 			for(auto& id_site : ag){
 				auto& newNode_val = newNodes[/*i*/n.second]->getInternalState(id_site.first);
-				if(!id_site.second.testValue(newNode_val,state,aux_map))
+				if(!id_site.second.testValue(newNode_val,vars))
 					isEmb=false;
 
 				try{//site is declared in new agent
@@ -653,7 +654,7 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 				continue;
 			list<two<ag_st_id> > to_test;
 			to_test.emplace_back(ag_st_id(info.first.second,0),ag_st_id(info.second,0));
-			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,state,env)){
+			if(test_linked_agents(to_test,info.first.first,*cc_info.first,already_done,vars,env)){
 				//cout << " | YES!";
 				try{
 					influence[cc_info.first].setRoot(info.second,ag_st_id(-1,news.at(info.first)),0);
@@ -678,6 +679,13 @@ void Rule::checkInfluence(const state::State& state,const Environment& env) {
 const Rule::CandidateMap& Rule::getInfluences() const{
 	return influence;
 }
+
+/*void Rule::initialize(const state::State& state,VarVector& vars){
+	if(rate)
+
+
+	checkInfluence(state);
+}*/
 
 
 
@@ -747,7 +755,7 @@ string Rule::toString(const pattern::Environment& env) const {
 	return s;
 }
 
-
+/*
 two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs,
 		const VarVector& vars) const{
 	//auto& auxs = lhs.getAux();
@@ -764,7 +772,7 @@ two<FL_TYPE> Rule::evalActivity(const matching::InjRandContainer* const * injs,
 			a *= factor->getValue(vars).valueAs<FL_TYPE>();
 	return make_pair(a,0.0);
 }
-
+*/
 
 Rule::CandidateInfo::CandidateInfo() : is_valid(true),is_new(false) {};
 void Rule::CandidateInfo::setRoot(small_id root,ag_st_id node,int change){

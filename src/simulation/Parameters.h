@@ -38,7 +38,10 @@ public:
 
 	vector<string> inputFiles;
 	string outputFile;
+	string outputFileType;
 	options_description *options;
+
+	int runs;
 
 	~Parameters();
 	static const Parameters& get();

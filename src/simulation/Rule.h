@@ -62,6 +62,12 @@ public:
 		void setRoot(small_id root,ag_st_id node,int change);
 	};
 	typedef map<const pattern::Mixture::Component*,CandidateInfo> CandidateMap;
+	struct Rate {
+		BaseExpression* baseRate;
+		pair<BaseExpression*,int> unaryRate;
+		BaseExpression::Reduction base,unary;
+		//CandidateMap influence;
+	};
 protected:
 	yy::location loc;
 	int id;
@@ -72,7 +78,7 @@ protected:
 	vector<ag_st_id> lhsMask,rhsMask;//[order] -> (comp_id,ag_id)
 	const BaseExpression *rate;//basic rate
 	pair<const BaseExpression*,int> unaryRate;//rate,radius
-	BaseExpression::Reduction basic,unary;
+	//BaseExpression::Reduction basic,unary;
 	list<Action> script;
 	vector<state::Node*> newNodes;
 	map<pair<ag_st_id,bool>,two<list<small_id > > > changes;//(rhs_ag,new?) -> modified_sites ( [by_value],[by_lnk] )
@@ -84,8 +90,7 @@ protected:
 
 	bool test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,
-		const state::State& state,const Environment& env) const;
-
+		const VarVector& vars,const Environment& env) const;
 
 public:
 	/** \brief Initialize a rule with a declared kappa label and its LHS.
@@ -100,13 +105,13 @@ public:
 	const Mixture& getLHS() const;
 	const Mixture& getRHS() const;
 	const BaseExpression& getRate() const;
-	const BaseExpression::Reduction& getReduction() const;
+//	const BaseExpression::Reduction& getReduction() const;
 	const BaseExpression& getUnaryRate() const;
-	const BaseExpression::Reduction& getUnaryReduction() const;
+//	const BaseExpression::Reduction& getUnaryReduction() const;
 	const CandidateMap& getInfluences() const;
 	const list<pair<unsigned,const BaseExpression*> > getTokenChanges() const;
 
-	two<FL_TYPE> evalActivity(const matching::InjRandContainer* const * injs,const VarVector& vars) const;
+	//two<FL_TYPE> evalActivity(const matching::InjRandContainer* const * injs,const VarVector& vars) const;
 
 	/** \brief Set RHS of the rule.
 	 * If this is a reversible rule, mix is declared in env and should not be
@@ -144,7 +149,11 @@ public:
 	static void addAgentIncludes(CandidateMap &m,
 		const Pattern::Agent& ag,ag_st_id rhs_cc_ag,int change);
 
-	void checkInfluence(const state::State& state,const Environment& env);
+
+	void checkInfluence(const Environment &env,const VarVector& vars);
+	void initialize(const state::State& state,VarVector& vars);
+
+
 	string toString(const pattern::Environment& env) const;
 };
 

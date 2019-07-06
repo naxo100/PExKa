@@ -163,15 +163,15 @@ Variable* Declaration::evalConst(pattern::Environment &env,
 		switch(b_expr->getType()){
 		case FLOAT:
 			var = new state::ConstantVar<FL_TYPE>(id,name.getString(),
-				dynamic_cast<AlgExpression<FL_TYPE>*>(b_expr));
+				b_expr->getValue(vars).valueAs<FL_TYPE>());
 			break;
 		case INT:
 			var = new state::ConstantVar<int>(id,name.getString(),
-				dynamic_cast<AlgExpression<int>*>(b_expr));
+					b_expr->getValue(vars).valueAs<int>());
 			break;
 		case BOOL:
 			var = new state::ConstantVar<bool>(id,name.getString(),
-				dynamic_cast<AlgExpression<bool>*>(b_expr));
+					b_expr->getValue(vars).valueAs<bool>());
 			break;
 		}
 	}

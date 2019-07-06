@@ -22,7 +22,7 @@ struct UnaryOperations {
 
 template<typename R, typename T>
 class UnaryOperation: public AlgExpression<R> {
-	const AlgExpression<T>* exp;
+	AlgExpression<T>* exp;
 	R (*func)(T);
 	const char op;
 public:
@@ -35,10 +35,11 @@ public:
 				override;
 	//std::set<std::string> getAuxiliars() const override;
 	BaseExpression::Reduction factorize() const override;
+	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 	bool operator==(const BaseExpression& exp) const override;
 	~UnaryOperation();
-	UnaryOperation(const BaseExpression *ex,
+	UnaryOperation(BaseExpression *ex,
 			const short op);
 
 	virtual std::string toString() const override;

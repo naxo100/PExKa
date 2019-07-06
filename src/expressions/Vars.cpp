@@ -9,6 +9,9 @@
 #include "Constant.h"
 #include <iostream>
 #include <typeinfo>
+#include "../state/Variable.h"
+#include "../state/State.h"
+#include "SomeValue.h"
 namespace expressions {
 
 
@@ -72,12 +75,8 @@ BaseExpression* Auxiliar<R>::clone() const {
 }
 
 template<typename R>
-AlgExpression<R>* Auxiliar<R>::reduce(const state::State& state,
-		const AuxMap&& aux_values) const {
-	if (aux_values.count(name))
-		return new Constant<R>(aux_values.at(name));
-	else
-		return new Auxiliar<R>(name);
+BaseExpression* Auxiliar<R>::reduce(VarVector &vars) {
+	return this;
 }
 
 template<typename T>
@@ -113,37 +112,48 @@ template class Auxiliar<FL_TYPE> ;
 /************** class VarLabel **************/
 /********************************************/
 template<typename R>
-VarLabel<R>::VarLabel(BaseExpression* expr) :
-		var(expr) {
-	cout << "realmente estoy usando esta clase????" << endl;
-}
+VarLabel<R>::VarLabel(int id) :
+		varId(id) {}
 template<typename R>
 R VarLabel<R>::evaluate(const VarVector &consts,
-		unordered_map<string, int> *aux_values) const {
-	throw std::invalid_argument("This should never been used");
+		const unordered_map<string, int> *aux_values) const {
+	//throw std::invalid_argument("This should never been used");
+	return consts[varId]->getValue(consts, aux_values).valueAs<R>();
 }
 template<typename R>
 R VarLabel<R>::evaluate(const state::State& state,
 		const AuxMap& aux_values) const {
-	throw std::invalid_argument("This should never been used");
+	//throw std::invalid_argument("This should never been used");
+	return state.getVarValue(varId,aux_values).valueAs<R>();//TODO this is not using auxs
 }
 template<typename R>
-int VarLabel<R>::auxFactors(
-		std::unordered_map<std::string, int> &factor) const {
-	throw std::invalid_argument("This should never been used");
+FL_TYPE VarLabel<R>::auxFactors(
+		std::unordered_map<std::string, FL_TYPE> &factor) const {
+	throw std::invalid_argument("VarLabel::auxFactor(): This should never been used");
 }
 
-/*template<typename R>
-virtual AlgExpression<R>* VarLabel<R>::reduce(const state::State& state,
-		const AuxMap&& aux_values = AuxMap()) const {
-	return constant<R>(state.getVarValue(id).valueAs<R>());
-}*/
+template<typename R>
+BaseExpression* VarLabel<R>::reduce(VarVector &vars ) {
+	auto cons_var = dynamic_cast<state::ConstantVar<R>*>(vars[varId]);
+	if(cons_var)
+		return new Constant<R>(cons_var->evaluate(vars));
+	return vars[varId];//this var should has been reduced
+}
+
+template <typename R>
+BaseExpression::Reduction VarLabel<R>::factorize() const {
+	throw invalid_argument("You should have reduced this expression before factorize! (var-name/id: "+name+"/"+to_string(varId));
+}
+template <typename R>
+BaseExpression* VarLabel<R>::clone() const {
+	return new VarLabel<R>(*this);
+}
 
 template<typename T>
 bool VarLabel<T>::operator==(const BaseExpression& exp) const {
 	try {
 		auto& var_exp = dynamic_cast<const VarLabel<T>&>(exp);
-		return var_exp.var == var;
+		return var_exp.varId == varId;
 	} catch (std::bad_cast &ex) {
 	}
 	return false;
@@ -151,12 +161,16 @@ bool VarLabel<T>::operator==(const BaseExpression& exp) const {
 
 template <typename T>
 char VarLabel<T>::getVarDeps() const{
-	return var->getVarDeps();
+	return BaseExpression::VARDEP;
 }
 
 template <typename T>
 std::string VarLabel<T>::toString() const{
-	return var->toString();
+	return name;
 }
+
+template class VarLabel<int> ;
+template class VarLabel<FL_TYPE> ;
+template class VarLabel<bool> ;
 
 } /* namespace expressio */

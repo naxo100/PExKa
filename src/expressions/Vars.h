@@ -16,18 +16,24 @@ using namespace std;
 
 template<typename R>
 class VarLabel: public AlgExpression<R> {
-	AlgExpression<R>* var;
+	int varId;
+	string name;
 
 public:
-	VarLabel(BaseExpression* expr);
-	R evaluate(const VarVector &consts,unordered_map<string, int> *aux_values = nullptr)
+	VarLabel(int id);
+	R evaluate(const VarVector &consts,const unordered_map<string, int> *aux_values)
 			const override;
 	R evaluate(const state::State& state, const AuxMap& aux_values)
 			const override;
-	int auxFactors(std::unordered_map<std::string, int> &factor) const override;
+	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const override;
+
+	BaseExpression::Reduction factorize() const override;
+	BaseExpression* clone() const override;
+
+
 	bool operator==(const BaseExpression& exp) const override;
 	char getVarDeps() const override;
-	//AlgExpression<R>* reduce(const state::State& state,const AuxMap&& aux_values = AuxMap()) const ;
+	BaseExpression* reduce(VarVector &vars) override;
 	std::string toString() const override;
 };
 
@@ -50,8 +56,7 @@ public:
 			override;
 	bool operator==(const BaseExpression& exp) const;
 	//std::set<std::string> getAuxiliars() const override;
-	AlgExpression<R>* reduce(const state::State& state,
-			const AuxMap&& aux_values = AuxMap()) const;
+	BaseExpression* reduce(VarVector &vars) override;
 
 	char getVarDeps() const;
 	bool isAux() const override;

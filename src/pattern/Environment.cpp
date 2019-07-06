@@ -210,9 +210,9 @@ void Environment::declareObservable(state::Variable* var){
 	observables.emplace_back(var);
 }
 
-void Environment::buildInfluenceMap(const state::State& state){
+void Environment::buildInfluenceMap(const VarVector& vars){
 	for(auto& r : rules)
-		r.checkInfluence(state,*this);
+		r.checkInfluence(*this,vars);
 }
 void Environment::buildFreeSiteCC() {
 	for(auto& ag_class : agentPatterns){

@@ -25,6 +25,7 @@ using namespace std;
  *
  */
 class Variable : public virtual BaseExpression {
+protected:
 	const short id;
 	const std::string name;//TODO &??
 	bool isObservable;
@@ -41,6 +42,9 @@ public:
 
 	short getId() const;
 
+	virtual BaseExpression* makeVarLabel() const = 0;
+	//virtual BaseExpression* reduce(VarVector& vars) override = 0;
+
 	//template <typename T>
 	//virtual SomeValue getValue(/*const State &state*/) const = 0;
 	//virtual int getValue() const = 0;
@@ -54,10 +58,10 @@ public:
 
 template <typename T>
 class AlgebraicVar : public Variable, public AlgExpression<T> {
-	const AlgExpression<T>* expression;
+	AlgExpression<T>* expression;
 public:
 	AlgebraicVar(const short var_id, const std::string &nme,const bool is_obs,
-			const AlgExpression<T> *exp);
+			AlgExpression<T> *exp);
 	virtual ~AlgebraicVar();
 	void update(SomeValue val) override;
 	void update(const Variable& var) override;
@@ -65,10 +69,13 @@ public:
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
 	BaseExpression::Reduction factorize() const override;
+	BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 
 	virtual T evaluate(const VarVector& consts,const unordered_map<string,int> *aux_values = nullptr) const override;
 	virtual T evaluate(const state::State& state,const AuxMap& aux_values) const override;
+
+	BaseExpression* makeVarLabel() const override;
 
 	virtual bool operator==(const BaseExpression& exp) const override;
 };
@@ -76,10 +83,15 @@ public:
 template <typename T>
 class ConstantVar : public Variable, public Constant<T> {
 public:
-	ConstantVar(const short var_id, const std::string &name, const AlgExpression<T> *exp);
+	ConstantVar(const short var_id, const std::string &name,T value);
 	void update(const Variable& var);
 
 	bool isConst() const override;
+
+	BaseExpression* reduce(VarVector &vars) override;
+	BaseExpression* clone()  const override;
+
+	BaseExpression* makeVarLabel() const override;
 
 	std::string toString() const override;
 
@@ -98,10 +110,13 @@ public:
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
 	BaseExpression::Reduction factorize() const override;
+	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 	
 	int evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values ) const override;
 	int evaluate(const state::State& state,const AuxMap& aux_values) const override;
+
+	BaseExpression* makeVarLabel() const override;
 
 
 	virtual bool operator==(const BaseExpression& exp) const override;
@@ -125,10 +140,13 @@ public:
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
 	BaseExpression::Reduction factorize() const override;
+	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 
 	T evaluate(const VarVector &consts,const unordered_map<string,int> *aux_values ) const override;
 	T evaluate(const state::State& state,const AuxMap& aux_values) const override;
+
+	BaseExpression* makeVarLabel() const override;
 
 
 	virtual bool operator==(const BaseExpression& exp) const override;
@@ -166,6 +184,7 @@ public:
 	bool operator==(const BaseExpression& exp) const override;
 
 	BaseExpression::Reduction factorize() const override;
+	BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 
 	//virtual void getNeutralAuxMap(

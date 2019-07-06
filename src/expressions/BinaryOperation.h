@@ -31,8 +31,8 @@ struct BinaryOperations<bool, T1, T2> {
 
 template<typename R, typename T1, typename T2>
 class BinaryOperation: public AlgExpression<R> {
-	const AlgExpression<T1>* exp1;
-	const AlgExpression<T2>* exp2;
+	AlgExpression<T1>* exp1;
+	AlgExpression<T2>* exp2;
 	//static R (*operations[]) (T1,T2);
 	R (*func)(T1, T2);
 	const char op;
@@ -49,10 +49,12 @@ public:
 	BaseExpression::Reduction factorize() const override;
 	BaseExpression* clone() const override;
 
+	BaseExpression* reduce(VarVector& vars);
+
 	//std::set<std::string> getAuxiliars() const override;
 	bool operator==(const BaseExpression& exp) const override;
 	~BinaryOperation();
-	BinaryOperation(const BaseExpression *ex1, const BaseExpression *ex2,
+	BinaryOperation(BaseExpression *ex1, BaseExpression *ex2,
 			const short op);
 
 	void getNeutralAuxMap(

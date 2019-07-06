@@ -45,8 +45,8 @@ BaseExpression::~BaseExpression() {
  }*/
 
 template<bool isBool>
-BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,
-		const BaseExpression *ex2, const int op) {
+BaseExpression* BaseExpression::makeBinaryExpression(BaseExpression *ex1,
+		BaseExpression *ex2, const int op) {
 	Type type1 = ex1->getType();
 	Type type2 = ex2->getType();
 	typedef typename std::conditional<isBool, bool, FL_TYPE>::type BoolOrFloat;
@@ -115,12 +115,12 @@ BaseExpression* BaseExpression::makeBinaryExpression(const BaseExpression *ex1,
 	return bin_op;
 }
 template BaseExpression* BaseExpression::makeBinaryExpression<true>(
-		const BaseExpression *ex1, const BaseExpression *ex2, const int op);
+		BaseExpression *ex1, BaseExpression *ex2, const int op);
 template BaseExpression* BaseExpression::makeBinaryExpression<false>(
-		const BaseExpression *ex1, const BaseExpression *ex2, const int op);
+		BaseExpression *ex1, BaseExpression *ex2, const int op);
 
 
-BaseExpression* BaseExpression::makeUnaryExpression(const BaseExpression *ex,
+BaseExpression* BaseExpression::makeUnaryExpression(BaseExpression *ex,
 		const int func) {
 	Type type = ex->getType();
 

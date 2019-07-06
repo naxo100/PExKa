@@ -33,7 +33,8 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
  ../src/state/../data_structs/../util/params.h \
  ../src/state/../pattern/Dependencies.h \
  ../src/state/../pattern/mixture/Component.h \
- ../src/state/../pattern/mixture/Mixture.h
+ ../src/state/../pattern/mixture/Mixture.h \
+ ../src/state/../expressions/Vars.h
 
 ../src/state/Variable.h:
 
@@ -110,3 +111,5 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
 ../src/state/../pattern/mixture/Component.h:
 
 ../src/state/../pattern/mixture/Mixture.h:
+
+../src/state/../expressions/Vars.h:

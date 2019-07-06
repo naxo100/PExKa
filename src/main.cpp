@@ -5,9 +5,6 @@
  *      Author: naxo
  */
 
-//David modifico esto :D
-//new modification
-
 #include "grammar/KappaLexer.h"
 #include "grammar/KappaParser.hpp"
 #include <boost/program_options/options_description.hpp>
@@ -37,11 +34,10 @@ int main(int argc, char* argv[]){
 	const string v_msg("PExKa "+version);
 	const string usage_msg("Simple usage is \n$ [mpirun* -np procs] PExKa ([-i] kappa_file)+ [-e events] -t time [-p points] -sync-t tau");
 
-	for(int i = 0; i < argc; i++) cout << argv[i] << " | "; cout << endl;
-
+	cout << "PISKa ";
+	for(int i = 0; i < argc; i++) cout << argv[i] << " "; cout << endl;
 
 	auto& params = simulation::Parameters::singleton;
-
 	params.makeOptions(v_msg + "\n" + usage_msg + "\n\nAllowed options");
 	params.evalOptions(argc, argv);
 
@@ -73,12 +69,15 @@ int main(int argc, char* argv[]){
 		ast.evaluateDeclarations(env,vars,false);//vars
 		ast.evaluateChannels(env,vars);
 		ast.evaluateRules(env,vars);
-		ast.evaluatePerts(env, vars);
+		ast.evaluatePerts(env,vars);
 	}
 	catch(const exception &e){
 		cerr << "An exception found: " << e.what() << endl;
 		exit(1);
 	}
+
+	env.buildFreeSiteCC();
+	env.buildInfluenceMap(vars);
 
 
 	map<pair<int,int>,double> edges;
@@ -97,23 +96,11 @@ int main(int argc, char* argv[]){
 	//for(auto edge : edges)
 	//	cout << edge.first.first << "->" << edge.first.second << ": " << edge.second << endl;
 	auto cells = simulation::Simulation::allocCells(1,vector<double>(pattern::Compartment::getTotalCells(),1.0),edges,-1);
-	simulation::Simulation sim(env,vars);
+	//simulation::Simulation sim(env);
 	//for(auto i : cells[0])
 	//	cout << i << ", ";
 	//cout << endl;
-	sim.setCells(cells[0]);
-	try{
-		ast.evaluateInits(env,vars,sim);
-	}
-	catch(const exception &e){
-		cerr << "An exception found: " << e.what() << endl;
-		exit(1);
-	}
-	if(env.getRules().size() < 1){
-		cout << "No rules to execute a simulation. Aborting." << endl;
-		return 0;
-	}
-	sim.initialize();
+
 
 	WarningStack::getStack().show();
 
@@ -122,21 +109,43 @@ int main(int argc, char* argv[]){
 	env.show();
 #endif
 
-	sim.print();
-	try{
-		sim.run(params);
-	}catch(exception &e){
-		cerr << "An exception found: " << e.what() << endl;
-		exit(1);
+	//sim.print();
+
+	auto sims = new simulation::Simulation*[params.runs];
+	//sims[0] = &sim;
+	for(int i = 0; i < params.runs; i++){
+		sims[i] = new simulation::Simulation(env,i);
+		sims[i]->setCells(cells[0],vars);
+		try{
+			ast.evaluateInits(env,vars,*sims[i]);
+		}
+		catch(const exception &e){
+			cerr << "An exception found: " << e.what() << endl;
+			exit(1);
+		}
+		if(env.getRules().size() < 1){
+			cout << "No rules to execute a simulation. Aborting." << endl;
+			return 0;
+		}
+		sims[i]->initialize();
 	}
 
-	sim.print();
+	for(int i = 0; i < params.runs ; i++){
+		try{
+			sims[i]->run(params);
+		}catch(exception &e){
+			cerr << "An exception found on running simulation:\n" << e.what() << endl;
+			exit(1);
+		}
+	}
+
+	sims[0]->print();
 
 	cout << "finished!" << endl;
 
 	delete &env;
-	for(auto var : vars)
-		delete var;
+	for(auto var_it = vars.rbegin(); var_it != vars.rend() ; var_it++)
+		delete *var_it;
 
 	/* TODO
 	 * Environment env = ast.evaluateGlobals();

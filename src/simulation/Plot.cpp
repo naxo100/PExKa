@@ -10,10 +10,22 @@
 
 namespace simulation {
 
-Plot::Plot(const pattern::Environment& env) : nextPoint(0.),dT(0.) {
+Plot::Plot(const pattern::Environment& env,int run_id) : nextPoint(0.),dT(0.) {
 	auto& params = Parameters::get();
 	try {
-		file.open(params.outputFile,ios::out);
+		if(params.runs > 1){
+			char file_name[100],buff[20];
+			sprintf(buff,"%%s-%%%dd.%%s",int(log10(params.runs-1))+1);
+			sprintf(file_name,buff,params.outputFile.c_str(),run_id,params.outputFileType.c_str());
+			cout << buff << "\n" << file_name << endl;
+			file.open(file_name,ios::out);
+		}
+		else{
+			if(params.outputFile.find(".") && params.outputFileType == "csv")//not nice
+				file.open(params.outputFile.c_str(),ios::out);
+			else
+				file.open(params.outputFile+"."+params.outputFileType,ios::out);
+		}
 	}
 	catch(...){
 		cout << "error opening output file." << endl;

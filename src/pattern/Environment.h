@@ -83,7 +83,7 @@ public:
 
 	void declareObservable(state::Variable* obs);
 
-	void buildInfluenceMap(const state::State& state);
+	void buildInfluenceMap(const VarVector& vars);
 	void buildFreeSiteCC();
 	const list<pair<const Mixture::Component*,small_id> >& getFreeSiteCC(small_id ag,small_id site) const;
 

@@ -11,9 +11,17 @@
 
 namespace simulation {
 
-Simulation::Simulation(pattern::Environment& _env,const vector<state::Variable*>& _vars) : env(_env),vars(_vars),
-		params(Parameters::get()), plot(env),ccInjections(nullptr),mixInjections(nullptr),
-		randGen(params.seed){/****/}
+Simulation::Simulation(pattern::Environment& _env,int _id) : id(_id),env(_env),
+		params(Parameters::get()), plot(env,_id),ccInjections(nullptr),mixInjections(nullptr),
+		randGen(params.seed+_id){/****/}
+
+Simulation::Simulation(const Simulation& sim,int _id) : id(_id),env(sim.env),params(Parameters::get()),
+		plot(env,_id),ccInjections(nullptr),mixInjections(nullptr),randGen(params.seed+_id){
+	auto distr = uniform_int_distribution<int>();
+	/*for(auto& id_state : sim.cells)
+		cells.emplace(piecewise_construct,forward_as_tuple(id_state.first),
+				forward_as_tuple(id_state.second,distr(randGen)));*/
+}
 
 Simulation::~Simulation() {
 	// TODO Auto-generated destructor stub
@@ -21,7 +29,7 @@ Simulation::~Simulation() {
 	//delete[] mixInjections;
 }
 
-void Simulation::setCells(list<unsigned int>& _cells){
+void Simulation::setCells(list<unsigned int>& _cells,const VarVector& vars){
 	auto distr = uniform_int_distribution<int>();
 	for(auto cell_id : _cells){
 		cells.emplace(piecewise_construct,forward_as_tuple(cell_id),
@@ -31,9 +39,9 @@ void Simulation::setCells(list<unsigned int>& _cells){
 }
 
 void Simulation::initialize(){
-	env.buildFreeSiteCC();
 	for(auto& id_state : cells){
-		env.buildInfluenceMap(id_state.second);
+		//env.buildInfluenceMap(id_state.second);
+		//id_state.second.buildInfluenceMap();
 		id_state.second.initInjections();
 		id_state.second.initActTree();
 	}

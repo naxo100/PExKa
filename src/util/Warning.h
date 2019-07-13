@@ -38,7 +38,7 @@ public:
 };
 
 
-#define ADD_WARN(msg,loc) {static int id = 0;id = WarningStack::getStack().add(id,msg,loc);}
-#define ADD_WARN_NOLOC(msg) {static int id = 0;id = WarningStack::getStack().add(id,msg);}
+#define ADD_WARN(msg,loc) _Pragma("omp critical") {static int id = 0;id = WarningStack::getStack().add(id,msg,loc);}
+#define ADD_WARN_NOLOC(msg) _Pragma("omp critical") {static int id = 0;id = WarningStack::getStack().add(id,msg);}
 
 #endif /* SRC_UTIL_WARNING_H_ */

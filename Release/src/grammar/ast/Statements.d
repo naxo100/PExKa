@@ -61,7 +61,9 @@ src/grammar/ast/Statements.o: ../src/grammar/ast/Statements.cpp \
  ../src/grammar/ast/../../simulation/../pattern/Environment.h \
  ../src/grammar/ast/../../simulation/../pattern/RuleSet.h \
  ../src/grammar/ast/../../simulation/../matching/Injection.h \
- ../src/grammar/ast/../../util/Exceptions.h
+ ../src/grammar/ast/../../util/Exceptions.h \
+ ../src/grammar/ast/../../util/Warning.h \
+ ../src/grammar/ast/../../util/../grammar/location.hh
 
 ../src/grammar/ast/Statements.h:
 
@@ -192,3 +194,7 @@ src/grammar/ast/Statements.o: ../src/grammar/ast/Statements.cpp \
 ../src/grammar/ast/../../simulation/../matching/Injection.h:
 
 ../src/grammar/ast/../../util/Exceptions.h:
+
+../src/grammar/ast/../../util/Warning.h:
+
+../src/grammar/ast/../../util/../grammar/location.hh:

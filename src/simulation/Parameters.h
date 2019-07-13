@@ -39,6 +39,7 @@ public:
 	vector<string> inputFiles;
 	string outputFile;
 	string outputFileType;
+	string outputDirectory;
 	options_description *options;
 
 	int runs;

@@ -605,7 +605,9 @@ string Internal::toString(const pattern::Signature::Site& sit,bool show_binds,ma
 	return s;
 }
 
-
+/********************************
+ ******* EventInfo **************
+ ********************************/
 
 EventInfo::EventInfo() : emb(nullptr),cc_count(0),fresh_emb(),warns(0) {
 	//TODO these numbers are arbitrary!!

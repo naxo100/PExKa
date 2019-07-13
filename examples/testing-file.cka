@@ -13,7 +13,7 @@
 
 
 
-%const: 'population' 2000  #2e+3
+%const: 'population' 10  #2e+3
 %const: 't0_person_high_trust' 'population' * .073
 %const: 't0_person_moderate_trust' 'population' * .298
 %const: 't0_person_lowinstitutional_trust' 'population' * .502
@@ -96,5 +96,12 @@
 #%obs: 'Total Sum' {[sum] m} Person(money~{m})
 
 %obs: 'count' |count|
+
+
+
+
+
+
+
 
 

@@ -51,7 +51,16 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../pattern/mixture/Agent.h \
  ../src/simulation/../pattern/mixture/Mixture.h \
  ../src/simulation/../pattern/mixture/../../grammar/location.hh \
- ../src/simulation/../pattern/mixture/Component.h
+ ../src/simulation/../pattern/mixture/Component.h \
+ ../src/simulation/../state/State.h ../src/simulation/../state/Variable.h \
+ ../src/simulation/../state/SiteGraph.h \
+ ../src/simulation/../state/../simulation/Counter.h \
+ ../src/simulation/../state/../simulation/../util/params.h \
+ ../src/simulation/../state/../simulation/Rule.h \
+ ../src/simulation/../state/../simulation/Perturbation.h \
+ ../src/simulation/../state/../data_structs/RandomTree.h \
+ ../src/simulation/../state/../data_structs/../util/params.h \
+ ../src/simulation/../state/../pattern/Dependencies.h
 
 ../src/simulation/../util/Exceptions.h:
 
@@ -160,3 +169,23 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 ../src/simulation/../pattern/mixture/../../grammar/location.hh:
 
 ../src/simulation/../pattern/mixture/Component.h:
+
+../src/simulation/../state/State.h:
+
+../src/simulation/../state/Variable.h:
+
+../src/simulation/../state/SiteGraph.h:
+
+../src/simulation/../state/../simulation/Counter.h:
+
+../src/simulation/../state/../simulation/../util/params.h:
+
+../src/simulation/../state/../simulation/Rule.h:
+
+../src/simulation/../state/../simulation/Perturbation.h:
+
+../src/simulation/../state/../data_structs/RandomTree.h:
+
+../src/simulation/../state/../data_structs/../util/params.h:
+
+../src/simulation/../state/../pattern/Dependencies.h:

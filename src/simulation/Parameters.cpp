@@ -14,8 +14,9 @@ namespace simulation {
 Parameters Parameters::singleton;
 
 Parameters::Parameters() : maxEvent(std::numeric_limits<UINT_TYPE>::max()),
-		maxTime(/*std::numeric_limits<FL_TYPE>::infinity()*/0),points(1),
-		outputFile("sim"),outputFileType("tsv"),options(nullptr),seed(0),runs(1){}
+		maxTime(/*std::numeric_limits<FL_TYPE>::infinity()*/0),points(0),seed(0),
+		outputFile("sim"),outputFileType("tsv"),outputDirectory("."),
+		options(nullptr),runs(1){}
 
 void Parameters::makeOptions(const string &msg){
 	options = new options_description(msg);
@@ -94,7 +95,7 @@ void Parameters::evalOptions(int argc, char* argv[]){
 	if(vm.count("out"))
 		outputFile = vm["out"].as<string>();
 	if(vm.count("dir"))
-		outputFile = vm["dir"].as<string>() + "/" + outputFile;
+		outputDirectory = vm["dir"].as<string>();
 
 	if(vm.count("runs"))
 		runs = vm["runs"].as<int>();

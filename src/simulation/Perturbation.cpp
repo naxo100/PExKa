@@ -245,7 +245,7 @@ Update::~Update(){
 }
 
 void Update::apply(state::State &state) const {
-	cout << "updating var " << var->toString() << " to value " << var->getValue(state) << endl;
+	//cout << "updating var " << var->toString() << " to value " << var->getValue(state) << endl;
 	state.updateVar(*var,byValue);
 }
 

@@ -11,7 +11,7 @@
 
 namespace simulation {
 
-Simulation::Simulation(pattern::Environment& _env,int _id) : id(_id),env(_env),
+Simulation::Simulation(const pattern::Environment& _env,int _id) : id(_id),env(_env),
 		params(Parameters::get()), plot(env,_id),ccInjections(nullptr),mixInjections(nullptr),
 		randGen(params.seed+_id){/****/}
 

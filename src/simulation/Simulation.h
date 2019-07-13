@@ -25,7 +25,7 @@ using namespace std;
 
 class Simulation {
 	int id;
-	pattern::Environment& env;
+	const pattern::Environment& env;
 	//const vector<state::Variable*>& vars;
 	vector<state::State> states;//vector?
 	const Parameters& params;
@@ -49,7 +49,7 @@ class Simulation {
 	vector<unsigned> allocAgents2(unsigned cells, unsigned ag_count, const list<float>* vol_ratios = nullptr);
 
 public:
-	Simulation(pattern::Environment& env,int id = 0);
+	Simulation(const pattern::Environment& env,int id = 0);
 	Simulation(const Simulation& sim,int _id);
 	~Simulation();
 

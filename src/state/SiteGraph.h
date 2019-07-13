@@ -30,8 +30,8 @@ public:
 	SiteGraph();
 	~SiteGraph();
 
-	Node** addComponents(unsigned n,const pattern::Mixture::Component& cc,
-			const State& state);
+	void addComponents(unsigned n,const pattern::Mixture::Component& cc,
+			const State& state,vector<Node*>&& nodes = vector<Node*>(10));
 
 	/** \brief Put a node in the sitegraph.
 	 * Put a node in the sitegraph, set its address,

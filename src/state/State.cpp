@@ -35,7 +35,10 @@ State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 	}
 	for(auto& rule : env.getRules()){
 		int i = rule.getId();
-		rates[i].baseRate = rule.getRate().clone()->reduce(vars);
+		auto new_rate = rule.getRate().clone();
+		rates[i].baseRate = new_rate->reduce(vars);
+		if(new_rate != rates[i].baseRate)//reduce can return the same pointer on expression but no with vars.
+			delete new_rate;
 		if(rates[i].baseRate->getVarDeps() & BaseExpression::AUX)
 			rates[i].base = rates[i].baseRate->factorize();
 	}
@@ -56,13 +59,16 @@ State::~State() {
 	delete[] tokens;
 	if(activityTree)
 		delete activityTree;
-	if(injections)
+	if(injections){
+		for(unsigned i = 0; i < env.size<pattern::Mixture::Component>(); i++)
+			delete injections[i];
 		delete[] injections;
+	}
 	//test
 	activityTree = nullptr;
 	injections = nullptr;
-	/*for(auto var : vars)
-		delete var;*///vars are deleted in main!
+	for(auto it = vars.rbegin(); it != vars.rend(); it++)
+		delete *it;//vars are deleted in main!
 }
 
 
@@ -104,13 +110,8 @@ void State::initNodes(unsigned n,const pattern::Mixture& mix){
 }
 
 void State::addNodes(unsigned n,const pattern::Mixture& mix){
-	Node** nodes;
-	for(auto comp_p : mix){
-		nodes = graph.addComponents(n,*comp_p,*this);
-	}
-	if(nodes)
-		for(int i = 0; i < mix.size(); i++)
-			ev.fresh_emb.push_back(nodes[i]);
+	for(auto comp_p : mix)
+		graph.addComponents(n,*comp_p,*this,move(ev.fresh_emb));
 }
 
 UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
@@ -471,7 +472,7 @@ int State::event() {
 	if(act == 0 || std::isinf(dt)){
 		counter.advanceTime(dt);
 		plot.fill(*this,env);
-		return dt;//TODO
+		return 0;//TODO
 	}
 
 	counter.advanceTime(dt);
@@ -600,8 +601,11 @@ void State::updateDeps(const pattern::Dependency& d){
 }
 
 void State::initInjections() {
-	if(injections)
+	if(injections){
+		for(unsigned i = 0; i < env.size<pattern::Mixture::Component>(); i++)
+			delete injections[i];
 		delete[] injections;
+	}
 	injections = (matching::InjRandContainer**)(new matching::InjRandContainer*[env.size<pattern::Mixture::Component>()]);
 	for(auto& cc : env.getComponents())
 		if(cc.getRateDeps().size())

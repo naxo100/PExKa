@@ -28,7 +28,7 @@ int KappaDriver::parse(){
 			ifstream f(fit->c_str());
 
 			if (f.fail()) {
-		      cerr << "Cannot open file " << fit->c_str() << endl;
+		      cerr << "Cannot open input file " << fit->c_str() << endl;
 		      exit (EXIT_FAILURE);
 		    }
 

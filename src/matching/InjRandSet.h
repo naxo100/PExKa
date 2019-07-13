@@ -77,7 +77,7 @@ public:
 class InjRandTree : public InjRandContainer {
 	//list<FL_TYPE> hints;
 
-	list<CcInjection*> freeInjs;
+	//list<CcInjection*> freeInjs;
 	list<CcInjection*> infList;
 
 	FL_TYPE average;
@@ -91,6 +91,7 @@ class InjRandTree : public InjRandContainer {
 
 public:
 	InjRandTree(const pattern::Mixture::Component& cc);
+	~InjRandTree();
 	const Injection& chooseRandom(default_random_engine& randGen) const override;
 	const Injection& choose(unsigned id) const override;
 	size_t count() const override;

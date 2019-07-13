@@ -11,6 +11,7 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+//#include <omp>
 #include <vector>
 #include "grammar/KappaDriver.h"
 #include "grammar/ast/KappaAst.h"
@@ -102,7 +103,6 @@ int main(int argc, char* argv[]){
 	//cout << endl;
 
 
-	WarningStack::getStack().show();
 
 
 #ifdef DEBUG
@@ -113,6 +113,7 @@ int main(int argc, char* argv[]){
 
 	auto sims = new simulation::Simulation*[params.runs];
 	//sims[0] = &sim;
+	#pragma omp parallel for
 	for(int i = 0; i < params.runs; i++){
 		sims[i] = new simulation::Simulation(env,i);
 		sims[i]->setCells(cells[0],vars);
@@ -120,27 +121,37 @@ int main(int argc, char* argv[]){
 			ast.evaluateInits(env,vars,*sims[i]);
 		}
 		catch(const exception &e){
-			cerr << "An exception found: " << e.what() << endl;
+			cerr << "An exception found on %init evaluation: " << e.what() << endl;
 			exit(1);
 		}
-		if(env.getRules().size() < 1){
-			cout << "No rules to execute a simulation. Aborting." << endl;
-			return 0;
-		}
-		sims[i]->initialize();
-	}
 
-	for(int i = 0; i < params.runs ; i++){
+		sims[i]->initialize();
+
+		if(i == 0)
+			WarningStack::getStack().show();
+
+		if( env.getRules().size() < 1){
+			cout << "No rules to execute a simulation. Aborting." << endl;
+			exit(1);
+		}
+
+#ifdef DEBUG
+		if(i == 0)
+			sims[i]->print();
+
+#endif
 		try{
 			sims[i]->run(params);
 		}catch(exception &e){
-			cerr << "An exception found on running simulation:\n" << e.what() << endl;
-			exit(1);
+			cerr << "An exception found when running simulation (" << i <<"):\n" << e.what() << endl;
+			//exit(1);
 		}
+		if(i != 0)
+			delete sims[i];
 	}
 
-	sims[0]->print();
-
+	//sims[0]->print();
+	delete sims[0];
 	cout << "finished!" << endl;
 
 	delete &env;

@@ -22,7 +22,8 @@ Dependency::Dependency(Dep d,unsigned i) : type(d),id(i) {}
 Dependency::Dependency(string _aux) : type(AUX),aux(_aux),id(0) {}
 
 bool Dependency::operator <(const Dependency& d) const {
-	return type < d.type ? true : type == d.type ? id < d.id : false;
+	return type == d.type ?
+				(id == d.id ? aux < d.aux : id < d.id) : type < d.type;
 }
 
 void Dependencies::addDependency(Dependency key,Dependency::Dep d, unsigned int id){

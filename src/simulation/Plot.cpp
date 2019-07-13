@@ -7,28 +7,37 @@
 
 #include "Plot.h"
 #include "../pattern/Environment.h"
+#include <boost/filesystem.hpp>
 
 namespace simulation {
+
+using namespace boost::filesystem;
 
 Plot::Plot(const pattern::Environment& env,int run_id) : nextPoint(0.),dT(0.) {
 	auto& params = Parameters::get();
 	try {
+		path p(params.outputDirectory);
+		if(!exists(p))
+			create_directory(p);
+		else
+			if(!is_directory(p))
+				throw invalid_argument("Cannot create folder: another file with the same name exists.");
 		if(params.runs > 1){
-			char file_name[100],buff[20];
-			sprintf(buff,"%%s-%%%dd.%%s",int(log10(params.runs-1))+1);
+			char file_name[400],buff[200];//big chars[] to avoid errors here
+			sprintf(buff,"%s/%%s-%%0%dd.%%s",params.outputDirectory.c_str(),int(log10(params.runs-1))+1);
 			sprintf(file_name,buff,params.outputFile.c_str(),run_id,params.outputFileType.c_str());
-			cout << buff << "\n" << file_name << endl;
+			cout << file_name << endl;
 			file.open(file_name,ios::out);
 		}
 		else{
 			if(params.outputFile.find(".") && params.outputFileType == "csv")//not nice
-				file.open(params.outputFile.c_str(),ios::out);
+				file.open((params.outputDirectory+"/"+params.outputFile).c_str(),ios::out);
 			else
-				file.open(params.outputFile+"."+params.outputFileType,ios::out);
+				file.open((params.outputDirectory+"/"+params.outputFile+"."+params.outputFileType).c_str(),ios::out);
 		}
 	}
-	catch(...){
-		cout << "error opening output file." << endl;
+	catch(exception &e){
+		throw invalid_argument("Error on creating output file:\n\t"+string(e.what()));
 	}
 	dT = params.maxTime / params.points;
 	if(dT == 0.0)

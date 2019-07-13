@@ -7,6 +7,7 @@
 
 #include "Statements.h"
 #include "../../util/Exceptions.h"
+#include "../../util/Warning.h"
 
 namespace ast {
 
@@ -115,7 +116,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 			var = new state::KappaVar(id,name.getString(),observable,mix);
 		else if(type == AUX_EXPR){
 			BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
-			if(p_mix->compsCount() != 1)
+			if(mix.compsCount() != 1)
 				throw SemanticError("Distribution expressions can't have more than one Conected Component.",loc);
 			//if(op == BaseExpression::SUMATORY && ) //TODO maybe make DistrVar<int> if expr is int?
 			var = new state::DistributionVar<FL_TYPE>(id,name.getString(),observable,mix,make_pair(op,b_expr));
@@ -262,8 +263,15 @@ void Init::eval(const pattern::Environment &env,const VarVector &vars,
 		int n;
 		if(alg == nullptr)
 			throw std::invalid_argument("Null value for mix init.");
-		else
-			n = alg->eval(env,vars,nullptr,Expression::CONST)->getValue(vars).valueAs<int>();
+		else{
+			auto n_value = alg->eval(env,vars,nullptr,Expression::CONST)->getValue(vars);
+			if(n_value.t == Type::FLOAT){
+				n = round(n_value.fVal);
+				ADD_WARN("Making approximation of a float value in agent initialization to "+to_string(n),loc);
+			}
+			else
+				n = n_value.valueAs<int>();
+		}
 		auto mix = mixture.eval(env,vars,false);
 		mix->setComponents();
 		sim.addAgents(cells,n,*mix);

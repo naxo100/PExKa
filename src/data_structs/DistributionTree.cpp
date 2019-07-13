@@ -25,8 +25,8 @@ FL_TYPE DistributionTree<T>::total() const {
 
 template <typename T>
 DistributionTree<T>::~DistributionTree(){
-	if(parent)
-		delete parent;
+	//if(parent)
+	//	delete parent;
 }
 
 template <typename T>

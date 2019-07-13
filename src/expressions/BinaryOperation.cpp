@@ -170,8 +170,8 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 
 	// create the auxiliar functions from the current operation with
 	// the functions of the expressions (exp1 and exp2)
-	map<string, BaseExpression*> m1 = r1.aux_functions;
-	map<string, BaseExpression*> m2 = r2.aux_functions;
+	auto& m1 = r1.aux_functions;
+	auto& m2 = r2.aux_functions;
 	std::map<string, BaseExpression*>::iterator it;
 	switch(op){
 		case (BaseExpression::SUM):
@@ -264,9 +264,9 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
 						r.aux_functions[it->first] = it->second;
 				}
 			}else if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) * constant|variable)
-				r.aux_functions[m1.begin()->first] = m1.begin()->second;
+				r.aux_functions = m1;
 			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable) * f(aux1)*.....*g(auxn)
-				r.aux_functions[m2.begin()->first] = m2.begin()->second;
+				r.aux_functions = m2;
 			}else{
 				break;
 			}
@@ -371,18 +371,21 @@ BaseExpression* BinaryOperation<R,T1,T2>::reduce(VarVector& vars){
 	auto r2 = exp2->reduce(vars);
 	auto cons_r1 = dynamic_cast<Constant<T1>*>(r1);
 	auto cons_r2 = dynamic_cast<Constant<T2>*>(r2);
-	if(r1 != exp1)
-		delete exp1;
-	if(r2 != exp2)
-		delete exp2;
 	if(cons_r1){
 		if(cons_r2){
 			T1 val1 = cons_r1->evaluate(vars);
 			T2 val2 = cons_r2->evaluate(vars);
-			delete r1;delete r2;
+			if(r1 != exp1)
+				delete r1;
+			if(r2 != exp2)
+				delete r2;
 			return new Constant<R>(func(val1,val2));
 		}
 	}
+	if(r1 != exp1)
+		delete exp1;
+	if(r2 != exp2)
+		delete exp2;
 	exp1 = dynamic_cast<AlgExpression<T1>*>(r1);
 	exp2 = dynamic_cast<AlgExpression<T2>*>(r2);
 	return this;

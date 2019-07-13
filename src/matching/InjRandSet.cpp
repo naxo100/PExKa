@@ -192,6 +192,14 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 
 }
 
+InjRandTree::~InjRandTree(){
+	for(auto inj : infList)
+		delete inj;
+	for(auto root : roots)
+		for(auto tree : root.second)
+			delete tree.second;
+}
+
 void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 	auto ccval_inj = static_cast<CcValueInj*>(inj);
 	for(auto& rid_ccnode : roots){// for each rule that is using this pattern

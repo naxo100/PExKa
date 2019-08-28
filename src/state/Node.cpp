@@ -229,11 +229,14 @@ void Node::assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id,co
 		ev.warns++;
 		//ev.null_actions.emplace(this,id);
 	//else{
-		interface[id].val = val;//TODO opertor= ??
-		interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
+#ifdef DEBUG
+		cout << "site-value changed from " << interface[id].val.valueAs<FL_TYPE>();
+#endif
+	interface[id].val = val;//TODO opertor= ??
+	interface[id].negativeUpdate(ev,injs,interface[id].deps.first);
 	//}
 #ifdef DEBUG
-		cout << "value changed to: " << val.valueAs<FL_TYPE>() << endl;
+		cout << " to " << val.valueAs<FL_TYPE>() << endl;
 #endif
 }
 

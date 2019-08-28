@@ -46,13 +46,13 @@ short_id Mixture::Agent::getId() const {
 	return signId;
 }
 
-list<string> Mixture::Agent::getAuxNames() const {
-	list<string> ret;
+map<small_id,string> Mixture::Agent::getAuxNames() const {
+	map<small_id,string> ret;
 	for(auto id_site : *this){
 		string name;
 		auto aux = dynamic_cast<const expressions::Auxiliar<FL_TYPE>*>(id_site.second.values[1]);
 		if(aux)
-			ret.push_back(aux->toString());
+			ret.emplace(id_site.first,aux->toString());
 	}
 	return ret;
 }
@@ -400,9 +400,11 @@ bool Mixture::Site::testValueOpt(const state::SomeValue& val,const state::State&
 bool Mixture::Site::operator ==(const Site &s) const{
 	switch(label){
 	case AUX:
+		if(s.label == EMPTY)
+			break;
 		if(s.label != AUX)
 			return false;
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < 3; i=i+2)
 			if(values[i] != s.values[i]){
 				if(values[i] && s.values[i]){
 					if(*values[i] != *s.values[i])
@@ -411,15 +413,17 @@ bool Mixture::Site::operator ==(const Site &s) const{
 				else
 					return false;
 			}
-		//else if(s.label == EMPTY)
-			//TODO check if aux has pattern, if not return true
-		else
-			return false;
 		break;
 	case EXPR:
 		if(s.label != EXPR)
 			return false;
 		if(*values[1] != *s.values[1])
+			return false;
+		break;
+	case EMPTY:
+		if(s.label == AUX)
+			break;
+		if(label != s.label)
 			return false;
 		break;
 	default:

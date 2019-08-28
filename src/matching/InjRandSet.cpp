@@ -18,8 +18,13 @@ namespace matching {
 InjRandContainer::InjRandContainer(const pattern::Mixture::Component& _cc) : cc(_cc){}
 
 InjRandContainer::~InjRandContainer(){
-	for(auto inj : freeInjs)
-		delete inj;
+	for(auto inj_it = freeInjs.begin(); inj_it != freeInjs.end(); inj_it++){
+		//test if there is repeats injs in the list
+		/*for(auto inj2_it = next(inj_it); inj2_it != freeInjs.end(); inj2_it++)
+			if(*inj_it == *inj2_it)
+				throw invalid_argument("inj is repeated in freeinjs!");*/
+		delete *inj_it;
+	}
 }
 
 Injection* InjRandContainer::emplace(Node& node,
@@ -49,15 +54,9 @@ Injection* InjRandContainer::emplace(Injection* base_inj,map<Node*,Node*>& mask,
 		inj = freeInjs.front();
 
 	inj->copy(static_cast<CcInjection*>(base_inj),mask);//TODO static_cast??
-	//container[inj->address];
 	insert(inj,state);
 	freeInjs.pop_front();
 
-/*#if DEBUG
-	for(auto inj2 : container)
-		if(inj != inj2 && *inj == *inj2)
-			throw invalid_argument("InjSet cannot contain the same injection twice.");
-#endif*/
 	return inj;
 }
 
@@ -184,8 +183,10 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 	auto& deps = cc.getRateDeps();
 	//distribution_tree::Node<CcValueInj>* pointer = nullptr;
 	for(auto r_cc : deps){//
-		if(r_cc.first.getRate().getVarDeps() & expressions::BaseExpression::AUX)
+		if(r_cc.first.getRate().getVarDeps() & expressions::BaseExpression::AUX){
+			//TODO only ifthe reduction rate is diferent from every one else
 			roots[r_cc.first.getId()][r_cc.second] = new distribution_tree::Node<CcValueInj>(1.0);
+		}
 		else
 			roots[r_cc.first.getId()][r_cc.second] = nullptr;//no need to make another tree for this root
 	}
@@ -195,6 +196,7 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 InjRandTree::~InjRandTree(){
 	for(auto inj : infList)
 		delete inj;
+	roots.begin()->second.begin()->second->deleteContent();
 	for(auto root : roots)
 		for(auto tree : root.second)
 			delete tree.second;

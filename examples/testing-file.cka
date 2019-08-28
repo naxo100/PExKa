@@ -1,19 +1,18 @@
 
 
-%agent: Person(RightHand,money~[0,[inf]], \
-				success~[0,[inf]],fail~[0,[inf]],start~[0,[inf]],\
+%agent: Person(RightHand,Trust~High~Mod~LowInst~Low,money~[0,[inf]], \
 				inter~[0,[inf]],coop~[0,[inf]])
 
 
 #payoff-matrix
-%const: 'cc_payoff' 1
-%const: 'cd_payoff' -10
-%const: 'dc_payoff' 10
-%const: 'dd_payoff'	-1
+%const: 'cc_payoff' 1.0
+%const: 'cd_payoff' -10.0
+%const: 'dc_payoff' 10.0
+%const: 'dd_payoff'	-1.0
 
 
 
-%const: 'population' 10  #2e+3
+%const: 'population' 2000  #2e+3
 %const: 't0_person_high_trust' 'population' * .073
 %const: 't0_person_moderate_trust' 'population' * .298
 %const: 't0_person_lowinstitutional_trust' 'population' * .502
@@ -26,6 +25,10 @@
 %const: 'interaction_rate_lit' 3.1400
 %const: 'interaction_rate_lt' 2.8844
 
+%const: 'inter-max' 'interaction_rate_ht'
+%const: 'inter-min' 'interaction_rate_lt'
+%const: 'inter-step' 0.05
+
 %const: 'coop_h' 0.5750
 %const: 'coop_m' 0.5537
 %const: 'coop_li' 0.5537
@@ -35,25 +38,25 @@
 #Rules
 
 ### Begin Deal
-'begin-deal' Person(RightHand,start,inter~{i1}),\
-				Person(RightHand,start,inter~{i2}) ->  \
-			Person(RightHand!1,start~{[T]}),\
-				Person(RightHand!1,start~{[T]}) \
+'begin-deal' Person(RightHand,inter~{i1}),\
+				Person(RightHand,inter~{i2}) ->  \
+			Person(RightHand!1),\
+				Person(RightHand!1) \
 				| 1:count @ i1*i2*'interaction_scale'
 
 
 
 
 
-'end-deal_CC' Person(RightHand!1,money~{m1},coop~{c1}),\
-					Person(RightHand!1,money~{m2},coop~{c2}) -> \
-				Person(RightHand,money~{m1+'cc_payoff'}),\
-					Person(RightHand,money~{m2+'cc_payoff'}) \
+'end-deal_CC' Person(RightHand!1,money~{m1},coop~{c1},inter~{i1}),\
+					Person(RightHand!1,money~{m2},coop~{c2},inter~{i2}) -> \
+				Person(RightHand,money~{m1+'cc_payoff'},inter~{i1+('inter-max'-i1)*'inter-step'}),\
+					Person(RightHand,money~{m2+'cc_payoff'},inter~{i2+('inter-max'-i2)*'inter-step'}) \
                 @ 5*c1*c2
 
-'end-deal_CD' Person(RightHand!1,money~{m1},coop~{c1}),\
+'end-deal_CD' Person(RightHand!1,money~{m1},coop~{c1},inter~{i1}),\
 					Person(RightHand!1,money~{m2},coop~{c2}) -> \
-				Person(RightHand,money~{m1+'cd_payoff'}),\
+				Person(RightHand,money~{m1+'cd_payoff'},inter~{i1-(i1-'inter-min')*'inter-step'}),\
 					Person(RightHand,money~{m2+'dc_payoff'}) \
 				@ 2*5*c1*(1-c2)
 
@@ -67,10 +70,10 @@
 
 
 #init
-%init: 't0_person_high_trust' Person(RightHand,money~{0},inter~{'interaction_rate_ht'},coop~{'coop_h'})
-%init: 't0_person_moderate_trust' Person(RightHand,money~{0},inter~{'interaction_rate_mt'},coop~{'coop_m'})
-%init: 't0_person_lowinstitutional_trust' Person(RightHand,money~{0},inter~{'interaction_rate_lit'},coop~{'coop_li'})
-%init: 't0_person_low_trust' Person(RightHand,money~{0},inter~{'interaction_rate_lt'},coop~{'coop_l'})
+%init: 't0_person_high_trust' Person(RightHand,Trust~High,money~{0},inter~{'interaction_rate_ht'},coop~{'coop_h'})
+%init: 't0_person_moderate_trust' Person(RightHand,Trust~Mod,money~{0},inter~{'interaction_rate_mt'},coop~{'coop_m'})
+%init: 't0_person_lowinstitutional_trust' Person(RightHand,Trust~LowInst,money~{0},inter~{'interaction_rate_lit'},coop~{'coop_li'})
+%init: 't0_person_low_trust' Person(RightHand,Trust~Low,money~{0},inter~{'interaction_rate_lt'},coop~{'coop_l'})
 
 %token: count
 %init: count <- 0
@@ -79,17 +82,15 @@
 
 
 
-%obs: 'HT Avg' {[avg] m} Person(inter~{'interaction_rate_ht'},money~{m})
-#%obs: 'HT Sum' {[sum] m} Person(inter~{'interaction_rate_ht'},money~{m})
+%obs: 'HT Avg Money' {[avg] m} Person(Trust~High,money~{m})
+%obs: 'MT Avg Money' {[avg] m} Person(Trust~Mod,money~{m})
+%obs: 'LIT Avg Money' {[avg] m} Person(Trust~LowInst,money~{m})
+%obs: 'LT Avg Money' {[avg] m} Person(Trust~Low,money~{m})
 
-%obs: 'MT Avg' {[avg] m} Person(inter~{'interaction_rate_mt'},money~{m})
-#%obs: 'MT Sum' {[sum] m} Person(inter~{'interaction_rate_mt'},money~{m})
-
-%obs: 'LIT Avg' {[avg] m} Person(inter~{'interaction_rate_lit'},money~{m})
-#%obs: 'LIT Sum' {[sum] m} Person(inter~{'interaction_rate_lit'},money~{m})
-
-%obs: 'LT Avg' {[avg] m} Person(inter~{'interaction_rate_lt'},money~{m})
-#%obs: 'LT Sum' {[sum] m} Person(inter~{'interaction_rate_lt'},money~{m})
+%obs: 'HT Avg inter' {[avg] inter} Person(inter~{inter},Trust~High)
+%obs: 'MT Avg inter' {[avg] inter} Person(inter~{inter},Trust~Mod)
+%obs: 'LIT Avg inter' {[avg] inter} Person(inter~{inter},Trust~LowInst)
+%obs: 'LT Avg inter' {[avg] inter} Person(inter~{inter},Trust~Low)
 
 %obs: 'Total Avg' {[avg] m} Person(money~{m})
 

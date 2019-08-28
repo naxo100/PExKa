@@ -20,7 +20,7 @@ class VarLabel: public AlgExpression<R> {
 	string name;
 
 public:
-	VarLabel(int id);
+	VarLabel(int id,const string& name);
 	R evaluate(const VarVector &consts,const unordered_map<string, int> *aux_values)
 			const override;
 	R evaluate(const state::State& state, const AuxMap& aux_values)

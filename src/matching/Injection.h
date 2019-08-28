@@ -108,7 +108,8 @@ public:
 
 	void addContainer(distribution_tree::DistributionTree<CcValueInj>& cont,int addr);
 	void selfRemove();
-	void removeContainer(distribution_tree::DistributionTree<CcValueInj>& cont);
+	//returns true if the containers list is empty
+	bool removeContainer(distribution_tree::DistributionTree<CcValueInj>& cont);
 
 };
 

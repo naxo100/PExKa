@@ -60,10 +60,19 @@ Node<T>::~Node(){
 	delete greater;
 	if(smaller)
 		delete smaller;
+}
+
+template <typename T>
+void Node<T>::deleteContent(){
+	greater->deleteContent();
+	if(smaller)
+		smaller->deleteContent();
 	for(auto inj : injs)
-		delete inj;
+		if(inj->removeContainer(*this))
+			delete inj;
 	for(auto inj : multi_injs)
-		delete inj;
+		if(inj->removeContainer(*this))
+			delete inj;
 }
 
 template <typename T>
@@ -106,6 +115,7 @@ void Node<T>::push(T* inj,FL_TYPE val){
 
 template <typename T>
 void Node<T>::erase(T* elem){
+	throw invalid_argument("dont call this method: Node<T>::erase(T* elem).");
 	if(elem->count() != 1){
 		multi_injs.back()->addContainer(*this,elem->getAddress());
 		multi_injs[elem->getAddress()] = multi_injs.back();
@@ -121,7 +131,7 @@ void Node<T>::erase(T* elem){
 }
 
 template <typename T>
-void Node<T>::erase(int address){
+T* Node<T>::erase(int address){
 	T* elem;
 	if(address < 0){
 		address = -address + 1;
@@ -138,6 +148,7 @@ void Node<T>::erase(int address){
 	}
 	elem->alloc(size_t(-1));
 	this->decrease(this->value*elem->count(),elem->count());
+	return elem;
 }
 
 template <typename T>
@@ -198,7 +209,7 @@ void Node<T>::leafBalance(Leaf<T>* full,DistributionTree<T>* n) {
 
 	auto leaf = static_cast<Leaf<T>*>(n);
 	if( leaf && leaf->count() < (Leaf<T>::MAX_LVL0 << this->level)){//second node is leaf and not half-full
-		leaf->sort();
+		leaf->sort(true);
 		full->sort();//this let invalid containers of CcValueInj
 		auto median = (leaf->count() + full->count())/2;
 		if(full == smaller){
@@ -258,6 +269,7 @@ void Node<T>::treeBalance(DistributionTree<T>*& parent_pointer) {
 
 template <typename T>
 void Node<T>::nodeBalance(DistributionTree<T>*& parent_pointer) {
+	throw invalid_argument("this method Node<T>::nodeBalance() is not ready.");
 	if(smaller->treeHeight() > greater->treeHeight()){
 		auto count_buff = this->count() - smaller->count();
 		auto sum_buff = this->total() - smaller->total();
@@ -304,9 +316,13 @@ template <typename T>
 Leaf<T>::Leaf(Node<T>* _parent) : DistributionTree<T>(_parent) {}
 
 template <typename T>
-Leaf<T>::~Leaf(){
+Leaf<T>::~Leaf(){}
+
+template <typename T>
+void Leaf<T>::deleteContent(){
 	for(auto inj : injs)
-		delete inj.first;
+		if(inj.first->removeContainer(*this))
+			delete inj.first;
 }
 
 template <typename T>
@@ -336,11 +352,12 @@ void Leaf<T>::share(Leaf* sister,FL_TYPE val){//negative val for smaller sister
 }
 
 template <typename T>
-void Leaf<T>::sort(){
+void Leaf<T>::sort(bool revalidate){
 	static auto is_less = [](const pair<T*,FL_TYPE> &a,const pair<T*,FL_TYPE> &b) {return a.second < b.second;};
 	std::sort(injs.begin(),injs.end(),is_less);
-	/*for(unsigned i = 0; i < injs.size(); i++)//not useful ???
-		injs[i].first->addContainer(*this,i);*/
+	if(revalidate)
+		for(unsigned i = 0; i < injs.size(); i++)//not useful ???
+			injs[i].first->addContainer(*this,i);
 }
 
 
@@ -375,20 +392,23 @@ void Leaf<T>::decrease(FL_TYPE val,unsigned n){
 
 template <typename T>
 void Leaf<T>::erase(T* elem){
+	throw invalid_argument("dont call this method: Leaf<T>::erase(T*).");
 	this->decrease(injs[elem->getAddress()].second);
 	injs.back().first->addContainer(*this,elem->getAddress());
 	injs[elem->getAddress()] = injs.back();
 	injs.pop_back();
 }
 template <typename T>
-void Leaf<T>::erase(int address){
+T* Leaf<T>::erase(int address){
 	if(address > injs.size())
-		throw std::out_of_range("This injection is not here!");
+		throw std::out_of_range("This injection is not here! (Leaf<T>::erase(int))");
 	pair<T*,FL_TYPE> elem_val = injs[address];
 	this->decrease(elem_val.second);
 	injs.back().first->addContainer(*this,address);
 	injs[address] = injs.back();
 	injs.pop_back();
+
+	return elem_val.first;
 }
 
 template <typename T>

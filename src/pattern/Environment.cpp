@@ -10,6 +10,7 @@
 #include "mixture/Agent.h"
 #include "mixture/Component.h"
 #include "../util/Warning.h"
+#include "../expressions/Vars.h"
 
 using namespace std;
 
@@ -165,19 +166,41 @@ Mixture::Component& Environment::declareComponent(const Mixture::Component& new_
 	return new_agent;
 }*/
 
-Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,bool is_lhs){
+Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,
+		map<string,small_id>& new_aux,bool is_lhs){
 	for(auto &ag : agentPatterns[new_ag->getId()] ){
 		if(new_ag->operator==(ag)){
-			if(new_ag->getAuxNames() == ag.getAuxNames()){
+			auto ag_auxnames = ag.getAuxNames();
+			auto newag_auxnames = new_ag->getAuxNames();
+			if(newag_auxnames == ag_auxnames){
 				//cout << "Same agent pattern was declared before: " << ag.toString(*this) << endl;
 				delete new_ag;
 				return ag;
 			}
-			else{
-				stringstream loc;
-				loc << ag.getLoc();
-				ADD_WARN("Same agent pattern declared before ("+loc.str()+
-					") but with different aux names. Try to normalize name to improve performance.",new_ag->getLoc());
+			else{//trying to mix agents including both auxiliars in mixture
+				for(auto& val : newag_auxnames)
+					new_aux.emplace(val.second,val.first);
+				for(auto& val : ag_auxnames){
+					if(new_aux.count(val.second)){
+						stringstream loc;
+						loc << ag.getLoc();
+						ADD_WARN("Same agent pattern declared before ("+loc.str()+
+							") but with different aux names. Try to normalize name to improve performance.",
+							new_ag->getLoc());
+						new_aux.clear();
+						break;
+					}
+					//new_aux.emplace(val.second,val.first);
+				}
+				if(!new_aux.size())
+					break;
+				for(unsigned i = 0; i < signatures[ag.getId()].getSiteCount(); i++){
+					if(newag_auxnames.count(i) && !ag_auxnames.count(i)){
+						state::BaseExpression* values[3] = {nullptr,nullptr,nullptr};
+						values[1] = new expressions::Auxiliar<FL_TYPE>(newag_auxnames.at(i));
+						ag.setSiteAuxPattern(i, values);
+					}
+				}
 			}
 		}
 	}

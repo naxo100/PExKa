@@ -48,7 +48,7 @@ public:
 	//void setSiteMaxExpr(small_id mix_site,const expressions::BaseExpression* expr);
 
 	/*not optimized*/
-	list<string> getAuxNames() const;
+	map<small_id,string> getAuxNames() const;
 
 
 	//void setSiteLink(short mix_site,LinkType l);

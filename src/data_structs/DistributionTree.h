@@ -36,6 +36,7 @@ public:
 	//DistributionTree();
 	DistributionTree(Node<T>* leaf = nullptr,FL_TYPE val = 0.0);
 	virtual ~DistributionTree();
+	virtual void deleteContent() = 0;
 	//return the sum of activity in node and children
 	virtual FL_TYPE total() const;
 	virtual void decrease(FL_TYPE val,unsigned n = 1) = 0;
@@ -46,7 +47,7 @@ public:
 	virtual unsigned count() const = 0;
 	virtual void push(T* inj,FL_TYPE val) = 0;
 	virtual void erase(T* inj) = 0;
-	virtual void erase(int address) = 0;
+	virtual T* erase(int address) = 0;
 
 	virtual FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const = 0;
 
@@ -72,13 +73,14 @@ public:
 	Node(FL_TYPE val = 0.0);
 	Node(Leaf<T>* leaf,FL_TYPE val = 0.0);
 	virtual ~Node();
+	virtual void deleteContent();
 	virtual const T& choose(FL_TYPE r) const override;
 	virtual const pair<T*,FL_TYPE>& choose(unsigned i) const override;
 	virtual unsigned count() const override;
 
 	virtual void push(T* inj,FL_TYPE val) override;
 	virtual void erase(T* inj) override;
-	virtual void erase(int address) override;
+	virtual T* erase(int address) override;
 	virtual void decrease(FL_TYPE val,unsigned n = 1) override;
 
 	virtual void leafBalance(Leaf<T>* full,DistributionTree<T>* n);
@@ -100,19 +102,20 @@ protected:
 	vector<pair<T*,FL_TYPE>> injs; //equals
 	//float sum;
 	void share(Leaf *greater,FL_TYPE val);
-	void sort();
+	void sort(bool revalidate = false);
 
 	virtual bool testBalance() const override;
 public:
 	Leaf(Node<T>* _parent);
 	virtual ~Leaf();
+	virtual void deleteContent();
 	const T& choose(FL_TYPE r) const override;
 	virtual const pair<T*,FL_TYPE>& choose(unsigned r) const override;
 	virtual unsigned count() const override;
 
 	virtual void push(T* elem,FL_TYPE val) override;
 	virtual void erase(T* elem) override;
-	virtual void erase(int address) override;
+	virtual T* erase(int address) override;
 
 
 	virtual void decrease(FL_TYPE val, unsigned n = 1) override;

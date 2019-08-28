@@ -39,7 +39,9 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
  ../src/pattern/../grammar/ast/../../pattern/Dependencies.h \
  ../src/pattern/mixture/Agent.h ../src/pattern/mixture/Mixture.h \
  ../src/pattern/mixture/../../grammar/location.hh \
- ../src/pattern/mixture/Component.h ../src/pattern/../util/Warning.h
+ ../src/pattern/mixture/Component.h ../src/pattern/../util/Warning.h \
+ ../src/pattern/../expressions/Vars.h \
+ ../src/pattern/../expressions/AlgExpression.h
 
 ../src/pattern/Environment.h:
 
@@ -136,3 +138,7 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
 ../src/pattern/mixture/Component.h:
 
 ../src/pattern/../util/Warning.h:
+
+../src/pattern/../expressions/Vars.h:
+
+../src/pattern/../expressions/AlgExpression.h:

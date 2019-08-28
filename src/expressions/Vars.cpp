@@ -112,8 +112,8 @@ template class Auxiliar<FL_TYPE> ;
 /************** class VarLabel **************/
 /********************************************/
 template<typename R>
-VarLabel<R>::VarLabel(int id) :
-		varId(id) {}
+VarLabel<R>::VarLabel(int id,const string &_name) :
+		varId(id),name(_name) {}
 template<typename R>
 R VarLabel<R>::evaluate(const VarVector &consts,
 		const unordered_map<string, int> *aux_values) const {

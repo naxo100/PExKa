@@ -39,8 +39,12 @@ State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 		rates[i].baseRate = new_rate->reduce(vars);
 		if(new_rate != rates[i].baseRate)//reduce can return the same pointer on expression but no with vars.
 			delete new_rate;
-		if(rates[i].baseRate->getVarDeps() & BaseExpression::AUX)
+		if(rates[i].baseRate->getVarDeps() & BaseExpression::AUX){
 			rates[i].base = rates[i].baseRate->factorize();
+			auto& lhs = rule.getLHS();
+			if(lhs.compsCount() == 2 && lhs.getComponent(0) == lhs.getComponent(1))
+				rates[i].base.factors.push_back(new expressions::Constant<FL_TYPE>(0.5));
+		}
 	}
 	for(auto pert : env.getPerts()){
 		perts.emplace(pert->getId(),*pert);

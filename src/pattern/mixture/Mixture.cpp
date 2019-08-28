@@ -93,9 +93,12 @@ void Mixture::addLink(const ag_st_id &p1,const ag_st_id &p2,const Environment& e
 
 void Mixture::declareAgents(Environment &env, bool is_lhs){
 	if(comps)
-		throw std::invalid_argument("Cannot call declareAgents() on a initialized Mixture");
+		throw std::invalid_argument("Cannot call declareAgents() on an initialized Mixture");
 	for(size_t i = 0; i < agentCount ; i++){
-		agents[i] = &env.declareAgentPattern(agents[i],is_lhs);
+		map<string,small_id> new_aux;
+		agents[i] = &env.declareAgentPattern(agents[i],new_aux,is_lhs);
+		//for(auto& aux : new_aux)
+		//	this->setAux(aux.first, i, aux.second);
 	}
 }
 

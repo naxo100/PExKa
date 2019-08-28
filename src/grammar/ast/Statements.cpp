@@ -117,7 +117,7 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		else if(type == AUX_EXPR){
 			BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
 			if(mix.compsCount() != 1)
-				throw SemanticError("Distribution expressions can't have more than one Conected Component.",loc);
+				throw SemanticError("Distribution expressions can't have more than one Connected Component.",loc);
 			//if(op == BaseExpression::SUMATORY && ) //TODO maybe make DistrVar<int> if expr is int?
 			var = new state::DistributionVar<FL_TYPE>(id,name.getString(),observable,mix,make_pair(op,b_expr));
 		}

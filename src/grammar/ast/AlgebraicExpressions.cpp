@@ -232,7 +232,7 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 	}
 	case AUX:
 		if(flags & AUX_ALLOW){
-			if( (flags & LHS) || (flags & RHS) ){
+			if( (flags & LHS) || (flags & RHS) || (flags & PATTERN) ){
 				expr = new Auxiliar<FL_TYPE>(name.getString());//TODO maybe change to Aux<type> depending on valued_site type?
 				if(deps)//TODO set deps
 					deps->emplace(name.getString());

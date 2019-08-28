@@ -77,8 +77,10 @@ public:
 	Channel& declareChannel(const ast::Id &channel);
 	Mixture& declareMixture(const Mixture& m);
 	Mixture::Component& declareComponent(const Mixture::Component& c);
-	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,bool is_lhs = true);
-	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix,const yy::location& loc);
+	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,
+			map<string,small_id>& new_aux,bool is_lhs = true);
+	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix,
+			const yy::location& loc);
 	void declarePert(simulation::Perturbation* pert);
 
 	void declareObservable(state::Variable* obs);

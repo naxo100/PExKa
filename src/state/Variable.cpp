@@ -124,7 +124,7 @@ BaseExpression* AlgebraicVar<T>::clone() const {
 
 template <typename T>
 BaseExpression* AlgebraicVar<T>::makeVarLabel() const{
-	return new VarLabel<T>(id);
+	return new VarLabel<T>(id,name);
 }
 
 template <typename T>
@@ -164,7 +164,7 @@ BaseExpression* ConstantVar<T>::clone() const {
 
 template <typename T>
 BaseExpression* ConstantVar<T>::makeVarLabel() const{
-	return new VarLabel<T>(id);
+	return new VarLabel<T>(id,name);
 }
 
 template <typename T>
@@ -225,7 +225,7 @@ BaseExpression* KappaVar::reduce(VarVector &vars) {
 }
 
 BaseExpression* KappaVar::makeVarLabel() const{
-	return new VarLabel<int>(id);
+	return new VarLabel<int>(id,name);
 }
 
 BaseExpression* KappaVar::clone() const {
@@ -313,7 +313,7 @@ T DistributionVar<T>::evaluate(const state::State& state,const AuxMap& aux_value
 
 template <typename T>
 BaseExpression* DistributionVar<T>::makeVarLabel() const{
-	return new VarLabel<T>(id);
+	return new VarLabel<T>(id,name);
 }
 
 template <typename T>

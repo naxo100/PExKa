@@ -163,13 +163,17 @@ void CcValueInj::addContainer(distribution_tree::DistributionTree<CcValueInj>& c
 	containers[&cont] = address;
 }
 
-void CcValueInj::removeContainer(distribution_tree::DistributionTree<CcValueInj>& cont){
+bool CcValueInj::removeContainer(distribution_tree::DistributionTree<CcValueInj>& cont){
 	containers.erase(&cont);
+	return containers.empty();
 }
 
 void CcValueInj::selfRemove(){
-	for(auto cont_addr : containers)
-		cont_addr.first->erase(cont_addr.second);
+	for(auto cont_addr : containers){
+		auto inj = cont_addr.first->erase(cont_addr.second);
+		if(this != inj)
+			throw invalid_argument("erasing another inj (CcValueInj::selfRemove())");
+	}
 	containers.clear();//TODO is mandatory?
 }
 

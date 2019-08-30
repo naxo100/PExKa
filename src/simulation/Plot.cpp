@@ -29,12 +29,8 @@ Plot::Plot(const pattern::Environment& env,int run_id) : nextPoint(0.),dT(0.) {
 			cout << file_name << endl;
 			file.open(file_name,ios::out);
 		}
-		else{
-			if(params.outputFile.find(".") && params.outputFileType == "csv")//not nice
-				file.open((params.outputDirectory+"/"+params.outputFile).c_str(),ios::out);
-			else
-				file.open((params.outputDirectory+"/"+params.outputFile+"."+params.outputFileType).c_str(),ios::out);
-		}
+		else
+			file.open((params.outputDirectory+"/"+params.outputFile+"."+params.outputFileType).c_str(),ios::out);
 	}
 	catch(exception &e){
 		throw invalid_argument("Error on creating output file:\n\t"+string(e.what()));

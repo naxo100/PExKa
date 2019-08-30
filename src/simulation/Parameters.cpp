@@ -28,7 +28,7 @@ void Parameters::makeOptions(const string &msg){
 		("events,e",value<int>(),"Stop simulation at 'arg' events (negative for unbounded)")
 		("time,t",value<float>(),"Stop simulation at time 'arg' (arbitrary time unit)")
 		("points,p",value<int>(),"Number of points in plot files")
-		("out,o",value<string>(),"Prefix for file name of data outputs (set to 'arg'+'comp_name[index].out')")
+		("out,o",value<string>(),"File names of data outputs. It can include a dot '.' to separate prefix and file type.")
 		("dir,d",value<string>(),"Specifies directory where output files should be stored")
 		("load-sim,l",value<string>(),"Load kappa model from 'arg' instead of kappa files")
 		("make-sim,m",value<string>(),"Save the kappa model 'arg' from kappa files")
@@ -92,8 +92,14 @@ void Parameters::evalOptions(int argc, char* argv[]){
 		points = vm["points"].as<int>();
 	else
 		cout << "No points to plot." << endl;
-	if(vm.count("out"))
+	if(vm.count("out")){
 		outputFile = vm["out"].as<string>();
+		auto last_dot = outputFile.find_last_of(".");
+		if(last_dot != string::npos){
+			outputFileType = outputFile.substr(last_dot+1);
+			outputFile.resize(last_dot);
+		}
+	}
 	if(vm.count("dir"))
 		outputDirectory = vm["dir"].as<string>();
 

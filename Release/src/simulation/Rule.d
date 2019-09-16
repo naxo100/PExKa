@@ -8,6 +8,7 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../pattern/mixture/../../util/params.h \
  ../src/simulation/../pattern/mixture/../../expressions/AlgExpression.h \
  ../src/simulation/../pattern/mixture/../../expressions/BaseExpression.h \
+ ../src/simulation/../pattern/mixture/../../expressions/../util/Warning.h \
  ../src/simulation/../pattern/mixture/../../expressions/SomeValue.h \
  ../src/simulation/../pattern/mixture/../../expressions/../util/params.h \
  ../src/simulation/../grammar/location.hh \
@@ -18,12 +19,7 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../state/../pattern/../expressions/AlgExpression.h \
  ../src/simulation/../state/../pattern/../util/params.h \
  ../src/simulation/../state/../data_structs/SimpleSet.h \
- ../src/simulation/../state/../matching/InjRandSet.h \
- ../src/simulation/../state/../matching/Injection.h \
- ../src/simulation/../state/../matching/../util/params.h \
- ../src/simulation/../state/../matching/../pattern/mixture/Mixture.h \
- ../src/simulation/../state/../matching/../data_structs/DistributionTree.h \
- ../src/simulation/../state/../matching/../data_structs/../util/params.h \
+ ../src/simulation/../state/../pattern/mixture/Mixture.h \
  ../src/simulation/../state/../expressions/AlgExpression.h \
  ../src/simulation/../pattern/Environment.h \
  ../src/simulation/../pattern/Signature.h \
@@ -60,7 +56,14 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../state/../simulation/Perturbation.h \
  ../src/simulation/../state/../data_structs/RandomTree.h \
  ../src/simulation/../state/../data_structs/../util/params.h \
- ../src/simulation/../state/../pattern/Dependencies.h
+ ../src/simulation/../state/../pattern/Dependencies.h \
+ ../src/simulation/../state/../matching/InjRandSet.h \
+ ../src/simulation/../state/../matching/Injection.h \
+ ../src/simulation/../state/../matching/../util/params.h \
+ ../src/simulation/../state/../matching/../pattern/mixture/Mixture.h \
+ ../src/simulation/../state/../matching/../data_structs/DistributionTree.h \
+ ../src/simulation/../state/../matching/../data_structs/../util/params.h \
+ ../src/simulation/../state/../matching/../simulation/Rule.h
 
 ../src/simulation/../util/Exceptions.h:
 
@@ -82,6 +85,8 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 
 ../src/simulation/../pattern/mixture/../../expressions/BaseExpression.h:
 
+../src/simulation/../pattern/mixture/../../expressions/../util/Warning.h:
+
 ../src/simulation/../pattern/mixture/../../expressions/SomeValue.h:
 
 ../src/simulation/../pattern/mixture/../../expressions/../util/params.h:
@@ -102,17 +107,7 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 
 ../src/simulation/../state/../data_structs/SimpleSet.h:
 
-../src/simulation/../state/../matching/InjRandSet.h:
-
-../src/simulation/../state/../matching/Injection.h:
-
-../src/simulation/../state/../matching/../util/params.h:
-
-../src/simulation/../state/../matching/../pattern/mixture/Mixture.h:
-
-../src/simulation/../state/../matching/../data_structs/DistributionTree.h:
-
-../src/simulation/../state/../matching/../data_structs/../util/params.h:
+../src/simulation/../state/../pattern/mixture/Mixture.h:
 
 ../src/simulation/../state/../expressions/AlgExpression.h:
 
@@ -189,3 +184,17 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 ../src/simulation/../state/../data_structs/../util/params.h:
 
 ../src/simulation/../state/../pattern/Dependencies.h:
+
+../src/simulation/../state/../matching/InjRandSet.h:
+
+../src/simulation/../state/../matching/Injection.h:
+
+../src/simulation/../state/../matching/../util/params.h:
+
+../src/simulation/../state/../matching/../pattern/mixture/Mixture.h:
+
+../src/simulation/../state/../matching/../data_structs/DistributionTree.h:
+
+../src/simulation/../state/../matching/../data_structs/../util/params.h:
+
+../src/simulation/../state/../matching/../simulation/Rule.h:

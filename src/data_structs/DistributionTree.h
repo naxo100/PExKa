@@ -34,7 +34,7 @@ protected:
 public:
 	static const int MAX_LVL0 = 2;
 	//DistributionTree();
-	DistributionTree(Node<T>* leaf = nullptr,FL_TYPE val = 0.0);
+	DistributionTree(Node<T>* leaf = nullptr,FL_TYPE val = 1.0);
 	virtual ~DistributionTree();
 	virtual void deleteContent() = 0;
 	//return the sum of activity in node and children
@@ -50,6 +50,7 @@ public:
 	virtual T* erase(int address) = 0;
 
 	virtual FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const = 0;
+	virtual FL_TYPE squares() = 0;
 
 	virtual void treeBalance(DistributionTree<T>*& parent_pointer);
 	virtual float treeHeight() const = 0;
@@ -88,6 +89,7 @@ public:
 	virtual float treeHeight() const override;
 
 	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
+	virtual FL_TYPE squares();
 };
 
 template <typename T>
@@ -121,6 +123,7 @@ public:
 	virtual void decrease(FL_TYPE val, unsigned n = 1) override;
 
 	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
+	virtual FL_TYPE squares();
 
 
 	virtual float treeHeight() const override;

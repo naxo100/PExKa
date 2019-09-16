@@ -68,7 +68,7 @@ public:
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
-	BaseExpression::Reduction factorize() const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
 	BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 
@@ -76,6 +76,7 @@ public:
 	virtual T evaluate(const state::State& state,const AuxMap& aux_values) const override;
 
 	BaseExpression* makeVarLabel() const override;
+	virtual void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) override;
 
 	virtual bool operator==(const BaseExpression& exp) const override;
 };
@@ -109,7 +110,7 @@ public:
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
-	BaseExpression::Reduction factorize() const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
 	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 	
@@ -139,7 +140,7 @@ public:
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
-	BaseExpression::Reduction factorize() const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
 	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 
@@ -148,6 +149,7 @@ public:
 
 	BaseExpression* makeVarLabel() const override;
 
+	//virtual void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) override;
 
 	virtual bool operator==(const BaseExpression& exp) const override;
 	const pattern::Mixture& getMix() const;
@@ -183,7 +185,7 @@ public:
 
 	bool operator==(const BaseExpression& exp) const override;
 
-	BaseExpression::Reduction factorize() const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
 	BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 

@@ -42,13 +42,14 @@ public:
 	void setSiteValue(small_id mix_site,small_id label);
 	void setSiteValue(small_id mix_site,int val);
 	void setSiteValue(small_id mix_site,FL_TYPE val);
-	void setSiteExprValue(small_id mix_site,const expressions::BaseExpression* expr);
+	void setSiteExprValue(small_id mix_site,expressions::BaseExpression* expr);
 	void setSiteAuxPattern(small_id mix_site,expressions::BaseExpression** vals);
 	//void setSiteMinExpr(small_id mix_site,const expressions::BaseExpression* expr);
 	//void setSiteMaxExpr(small_id mix_site,const expressions::BaseExpression* expr);
 
 	/*not optimized*/
 	map<small_id,string> getAuxNames() const;
+	void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords);
 
 
 	//void setSiteLink(short mix_site,LinkType l);
@@ -102,7 +103,7 @@ struct Pattern::Site {
 	ag_st_id lnk_ptrn;//agent_id,site (-1,-1)
 
 	//string aux_id;//if "" then no aux
-	const expressions::BaseExpression* values[3];//[smaller=,value,greater=]
+	expressions::BaseExpression* values[3];//[smaller=,value,greater=]
 
 	/** \brief Constructs an empty site.
 	 * Default state value is (small_id)-1 and

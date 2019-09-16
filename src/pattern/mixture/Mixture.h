@@ -93,6 +93,7 @@ public:
 	short_id getId() const override;
 
 	void setAux(string id,small_id ag,small_id site);
+	void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords);
 
 	/** \brief Add a new agent to the mixture.
 	 * Add a new agent to the mixture from a pointer to

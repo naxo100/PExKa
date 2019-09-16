@@ -11,16 +11,21 @@
 #include <utility>
 #include <map>
 #include <queue>
+#include <unordered_set>
 #include "../pattern/Signature.h"
 #include "../data_structs/SimpleSet.h"
-#include <unordered_set>
-#include "../matching/InjRandSet.h"
+#include "../pattern/mixture/Mixture.h"
+//#include "../matching/InjRandSet.h"
 //#include <boost/fusion/container/set.hpp>
 //#include <boost/fusion/include/set.hpp>
 //#include <boost/fusion/container/set/set_fwd.hpp>
 //#include <boost/fusion/include/set_fwd.hpp>
 
 
+namespace matching {
+class Injection;
+class InjRandContainer;
+}
 
 //typedef data_structs::SimpleSet<matching::Injection*> InjSet;
 typedef set<matching::Injection*> InjSet;
@@ -31,6 +36,7 @@ namespace state {
 
 class SiteGraph;
 struct EventInfo;
+struct Internal;
 
 using namespace std;
 using namespace expressions;

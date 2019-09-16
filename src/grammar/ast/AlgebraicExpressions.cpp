@@ -64,8 +64,8 @@ void Const::show( string tabs ) const {
 }
 
 BaseExpression* Const::eval(const pattern::Environment& env,
-		const VAR &vars,pattern::DepSet* deps,
-		const char flags) const{
+		const VAR &vars,pattern::DepSet* deps,const char flags,
+		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
 	BaseExpression* cons;
 	switch(type){
 	case FLOAT:
@@ -102,10 +102,10 @@ BoolBinaryOperation::BoolBinaryOperation(const location &l,const Expression *e1,
 		Expression(l),exp1(e1),exp2(e2),op(o){}
 
 BaseExpression* BoolBinaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,pattern::DepSet* deps,
-		const char flags) const{
-	BaseExpression* ex1 = exp1->eval(env,vars,deps,flags);
-	BaseExpression* ex2 = exp2->eval(env,vars,deps,flags);
+		const VAR &vars,pattern::DepSet* deps,const char flags,
+		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
+	BaseExpression* ex1 = exp1->eval(env,vars,deps,flags,aux_map);
+	BaseExpression* ex2 = exp2->eval(env,vars,deps,flags,aux_map);
 
 	return BaseExpression::makeBinaryExpression<true>(ex1,ex2,op);
 }
@@ -130,10 +130,10 @@ AlgBinaryOperation::AlgBinaryOperation(const location &l,const Expression *e1,
 		Expression(l),exp1(e1),exp2(e2),op(o){};
 
 BaseExpression* AlgBinaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,pattern::DepSet* deps,
-		const char flags) const{
-	BaseExpression* ex1 = exp1->eval(env,vars,deps,flags);
-	BaseExpression* ex2 = exp2->eval(env,vars,deps,flags);
+		const VAR &vars,pattern::DepSet* deps,const char flags,
+		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
+	BaseExpression* ex1 = exp1->eval(env,vars,deps,flags,aux_map);
+	BaseExpression* ex2 = exp2->eval(env,vars,deps,flags,aux_map);
 
 	return BaseExpression::makeBinaryExpression<false>(ex1,ex2,op);
 }
@@ -157,9 +157,9 @@ UnaryOperation::UnaryOperation(const location &l,const Expression *e,
 		const BaseExpression::Unary f):
 		Expression(l),exp(e),func(f){};
 BaseExpression* UnaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,pattern::DepSet* deps,
-		const char flags) const{
-	BaseExpression* ex = exp->eval(env,vars,deps,flags);
+		const VAR &vars,pattern::DepSet* deps,const char flags,
+		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
+	BaseExpression* ex = exp->eval(env,vars,deps,flags,aux_map);
 	return BaseExpression::makeUnaryExpression(ex, func);
 }
 UnaryOperation* UnaryOperation::clone() const{
@@ -178,8 +178,8 @@ void UnaryOperation::show( string tabs ) const {
 
 /****** Class NullaryOperation ******/
 BaseExpression* NullaryOperation::eval(const pattern::Environment& env,
-		const VAR &vars,pattern::DepSet* deps,
-		const char flags) const{
+		const VAR &vars,pattern::DepSet* deps,const char flags,
+		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
 	switch(func){
 	case BaseExpression::Nullary::SIM_TIME:
 		if(deps)
@@ -213,8 +213,8 @@ Var::Var(const location &l,const VarType &t,const Id &label):
 	Expression(l),name(label),type(t){};
 
 BaseExpression* Var::eval(const pattern::Environment& env,
-		const Expression::VAR &vars,pattern::DepSet* deps,
-		const char flags) const {
+		const Expression::VAR &vars,pattern::DepSet* deps,const char flags,
+		const map<string,tuple<int,small_id,small_id>>* aux_map) const {
 	BaseExpression* expr =nullptr;
 	switch(type){
 	case VAR:{
@@ -233,12 +233,16 @@ BaseExpression* Var::eval(const pattern::Environment& env,
 	case AUX:
 		if(flags & AUX_ALLOW){
 			if( (flags & LHS) || (flags & RHS) || (flags & PATTERN) ){
-				expr = new Auxiliar<FL_TYPE>(name.getString());//TODO maybe change to Aux<type> depending on valued_site type?
+				//TODO maybe change to Aux<type> depending on valued_site type?
+				tuple<int,small_id,small_id> ccagst(-1,0,0);
+				if(aux_map && aux_map->count(name.getString()))
+					ccagst = aux_map->at(name.getString());
+				expr = new Auxiliar<FL_TYPE>(name.getString(),ccagst);
 				if(deps)//TODO set deps
 					deps->emplace(name.getString());
 			}
 			else//is compartment
-				expr = new Auxiliar<int>(name.getString());
+				expr = new Auxiliar<int>(name.getString());//comp aux || aux_map->at(name.getString()));
 		}
 		else
 			throw SemanticError("The auxiliar '"+name.getString()+"' can not be used here.", loc);

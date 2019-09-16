@@ -57,6 +57,14 @@ map<small_id,string> Mixture::Agent::getAuxNames() const {
 	return ret;
 }
 
+void Mixture::Agent::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords){
+	for(auto& id_site : interface){
+		for(int i = 0; i < 3; i++)
+			if(id_site.second.values[i])
+				id_site.second.values[i]->setAuxCoords(aux_coords);
+	}
+}
+
 
 const map<small_id,Mixture::Site>::const_iterator Mixture::Agent::begin() const{
 	return interface.begin();
@@ -122,7 +130,7 @@ void Mixture::Agent::setSiteValue(small_id site_id,int val){
 	//interface[site_id].label = Site::AUX;
 }
 
-void Mixture::Agent::setSiteExprValue(small_id mix_site,const BaseExpression* expr){
+void Mixture::Agent::setSiteExprValue(small_id mix_site,BaseExpression* expr){
 	interface[mix_site].values[1] = expr;
 	interface[mix_site].label = Site::EXPR;//Expression site TODO
 }

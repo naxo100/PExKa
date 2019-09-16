@@ -7,7 +7,7 @@
 
 #include "InjRandSet.h"
 #include "../state/Node.h"
-#include "../simulation/Rule.h"
+//#include "../simulation/Rule.h"
 #include "../state/State.h"
 #include "../pattern/Environment.h"
 #include "../pattern/mixture/Component.h"
@@ -177,18 +177,32 @@ vector<CcInjection*>::iterator InjRandSet::end(){
 
 /************ InjRandTree *******************/
 
+const float InjRandTree::MAX_INVALIDATIONS = 0.03;//3%
 
-InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
-		InjRandContainer(_cc),average(0),counter(0),selected_root(0,0){
+InjRandTree::Root::Root() : tree(new distribution_tree::Node<CcValueInj>(1.0)),
+		second_moment(-1.,0.),is_valid(false) {}
+
+InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc,const vector<simulation::Rule::Rate>& rates) :
+		InjRandContainer(_cc),counter(0),invalidations(0),selected_root(0,0){
 	auto& deps = cc.getRateDeps();
 	//distribution_tree::Node<CcValueInj>* pointer = nullptr;
 	for(auto r_cc : deps){//
+		auto r_id = r_cc.first.getId();
+		auto rid_cc = make_pair(r_id,r_cc.second);
 		if(r_cc.first.getRate().getVarDeps() & expressions::BaseExpression::AUX){
-			//TODO only ifthe reduction rate is diferent from every one else
-			roots[r_cc.first.getId()][r_cc.second] = new distribution_tree::Node<CcValueInj>(1.0);
+			auto faux_ridcc = rates[r_id].base.aux_functions.at(r_cc.second);
+			for(auto& root : roots)//dont create another root if there is one assoc. with the same aux.func.
+				if(*faux_ridcc == *(rates[root.first.first].base.aux_functions.at(root.first.second)) ){
+					roots[rid_cc] = root.second;
+					break;
+				}
+			if(!roots.count(rid_cc)){
+				roots[rid_cc] = new Root();
+				roots_to_push[rid_cc] = roots[rid_cc];
+			}
 		}
-		else
-			roots[r_cc.first.getId()][r_cc.second] = nullptr;//no need to make another tree for this root
+		//else
+		//	roots[r_cc.first.getId(),r_cc.second] = nullptr;//no need to make another tree for this root
 	}
 
 }
@@ -196,50 +210,50 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc) :
 InjRandTree::~InjRandTree(){
 	for(auto inj : infList)
 		delete inj;
-	roots.begin()->second.begin()->second->deleteContent();
+	roots.begin()->second->tree->deleteContent();//delete only injs inside tree
+	set<Root*> deleted;
 	for(auto root : roots)
-		for(auto tree : root.second)
-			delete tree.second;
+		if(root.second && !deleted.count(root.second)){
+			delete root.second;
+			deleted.emplace(root.second);
+		}
 }
 
 void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 	auto ccval_inj = static_cast<CcValueInj*>(inj);
-	for(auto& rid_ccnode : roots){// for each rule that is using this pattern
-		for(auto& cc_node : rid_ccnode.second){// for each CC in the LHS that use this pattern
-			auto& r = state.getEnv().getRules()[rid_ccnode.first];
-			state::AuxMap aux_values;
-			for(auto& aux : r.getLHS().getAux()){
-				if(get<0>(aux.second) == cc_node.first)// to select proper CC
-					aux_values[aux.first] =
-							inj->getEmbedding()[get<1>(aux.second)]->
-							getInternalState(get<2>(aux.second)).valueAs<FL_TYPE>();
-				/*else
-					aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux*/
-			}
-			auto val = 1.0;
-			for(auto& aux_func : state.getRuleRate(r.getId()).base.aux_functions){
-				if(aux_values.count(aux_func.first))//TODO remove when fix reductions (one per CC and not per aux)
-					val *= aux_func.second->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
-			}
-			cc_node.second->push(ccval_inj,val);//TODO static cast?
+	for(auto& ridcc_tree : roots_to_push){// for each (rid,cc_index) that is using this cc-pattern
+		auto& r = state.getEnv().getRules()[ridcc_tree.first.first];
+		state::AuxMap aux_values;
+		for(auto& aux : r.getLHS().getAux()){
+			if(get<0>(aux.second) == ridcc_tree.first.second)// to select proper CC
+				aux_values[aux.first] =
+						inj->getEmbedding()[get<1>(aux.second)]->
+						getInternalState(get<2>(aux.second)).valueAs<FL_TYPE>();
+			/*else
+				aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux*/
 		}
+		FL_TYPE val = 1.0;
+		auto ccaux_func = state.getRuleRate(r.getId()).base.aux_functions.at(ridcc_tree.first.second);
+		val *= ccaux_func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+		if(val < 0.)
+			throw invalid_argument("Partial reactivities cannot be negative.");
+		ridcc_tree.second->tree->push(ccval_inj,val);//TODO static cast?
 	}
 	counter += inj->count();
+	invalidations++;
 }
 
 
 const Injection& InjRandTree::chooseRandom(default_random_engine& randGen) const {
-	distribution_tree::DistributionTree<CcValueInj> *root = nullptr;
-	if(roots.count(selected_root.first)){
-		auto& root_map = roots.at(selected_root.first);
-		if(root_map.count(selected_root.second))
-			root = root_map.at(selected_root.second);
+	distribution_tree::DistributionTree<CcValueInj> *tree = nullptr;
+	if(roots.count(selected_root)){
+		tree = roots.at(selected_root)->tree;
 	}
 
-	if(root){
+	if(tree){
 		auto uni = uniform_real_distribution<FL_TYPE>(0,partialReactivity());
 		auto selection = uni(randGen);
-		return root->choose(selection);
+		return tree->choose(selection);
 		/*for(auto& cc_node : roots.at(selected_root.first)){
 		if(selection > cc_node.second->total())
 			selection -= cc_node.second->total();
@@ -249,13 +263,13 @@ const Injection& InjRandTree::chooseRandom(default_random_engine& randGen) const
 	else{
 		auto uni = uniform_int_distribution<unsigned int>(0,count());
 		auto selection = uni(randGen);
-		return *root->choose(selection).first;
+		return *roots.begin()->second->tree->choose(selection).first;
 	}
 	//throw std::out_of_range("Selected injection out of range. [InjRandTree::chooseRandom()]");
 }
 
 const Injection& InjRandTree::choose(unsigned id) const {
-	return *(roots.begin()->second.begin()->second->choose(id).first);
+	return *(roots.begin()->second->tree->choose(id).first);
 }
 
 void InjRandTree::erase(Injection* inj){
@@ -263,6 +277,7 @@ void InjRandTree::erase(Injection* inj){
 	val_inj->selfRemove();
 	freeInjs.push_back(val_inj);
 	counter -= inj->count();
+	invalidations++;
 }
 
 CcInjection* InjRandTree::newInj() const{
@@ -270,21 +285,34 @@ CcInjection* InjRandTree::newInj() const{
 }
 
 size_t InjRandTree::count() const {
-	return roots.begin()->second.begin()->second->total();
+	return roots.begin()->second->tree->total();
 }
 
 
 FL_TYPE InjRandTree::partialReactivity() const {
-	distribution_tree::DistributionTree<CcValueInj> *root = nullptr;
-	if(roots.count(selected_root.first)){
-		auto& root_map = roots.at(selected_root.first);
-		if(root_map.count(selected_root.second))
-			root = root_map.at(selected_root.second);
+	distribution_tree::DistributionTree<CcValueInj> *tree = nullptr;
+	if(roots.count(selected_root)){
+		tree = roots.at(selected_root)->tree;
 	}
-	if(root)
-		return root->total();
+	if(tree)
+		return tree->total();
 	else
 		return count();
+}
+
+FL_TYPE InjRandTree::getM2() const {
+	auto root = roots.at(selected_root);
+	if(invalidations > MAX_INVALIDATIONS*count()){
+		for(auto r : roots)
+			r.second->is_valid = false;
+		invalidations = 0;
+	}
+	if(!root->is_valid){
+		root->second_moment = make_pair(root->tree->squares(),root->tree->total());
+		root->is_valid = true;
+	}
+	auto val = sqrt(root->second_moment.first)*root->tree->total()/root->second_moment.second;
+	return val*val;
 }
 
 
@@ -303,7 +331,7 @@ FL_TYPE InjRandTree::sumInternal(const expressions::BaseExpression* aux_func,
 				getInternalState(aux_coords.second.second).valueAs<FL_TYPE>();
 		return aux_func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 	};
-	return roots.begin()->second.begin()->second->sumInternal(func);
+	return roots.begin()->second->tree->sumInternal(func);
 }
 
 

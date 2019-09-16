@@ -38,9 +38,9 @@ FL_TYPE Constant<T>::auxFactors(
 }
 
 template<typename T>
-BaseExpression::Reduction Constant<T>::factorize() const {
+BaseExpression::Reduction Constant<T>::factorize(const std::map<std::string,small_id> aux_cc) const {
 	BaseExpression::Reduction r;
-	r.factors.push_back(this->clone());
+	r.factor = this->clone();
 	return r;
 }
 
@@ -87,6 +87,10 @@ Constant<FL_TYPE> MAX_INT(std::numeric_limits<int>::max());
 const BaseExpression* MAX_INT_EXPR = &MAX_INT;
 Constant<FL_TYPE> MIN_INT(std::numeric_limits<int>::min());
 const BaseExpression* MIN_INT_EXPR = &MIN_INT;
+Constant<FL_TYPE> ONE_EXPR = Constant<FL_TYPE>(1.0);
+const BaseExpression* ONE_FL_EXPR = &ONE_EXPR;
+Constant<FL_TYPE> ZERO_EXPR = Constant<FL_TYPE>(0.0);
+const BaseExpression* ZERO_FL_EXPR = &ZERO_EXPR;
 
 
 } /* namespace expressio */

@@ -19,6 +19,7 @@ namespace pattern {
  *
  */
 class Mixture::Component : public Pattern {
+	friend class Mixture;
 	short_id id;
 	vector<Agent*> agents;
 	union {
@@ -50,6 +51,8 @@ public:
 	string toString(const Environment& env) const;
 
 	const Agent& getAgent(small_id ag_id ) const override;
+
+	//void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords);
 
 	/** \brief Returns agent and site ids of site-link
 	 * exception-safe

@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <unordered_map>
-//#include "../util/params.h"
+#include "../util/Warning.h"
 #include "SomeValue.h"
 #include <vector>
 #include <map>
@@ -36,8 +36,8 @@ class BaseExpression {
 public:
 	struct Reduction {
 		// factorized expression = multiplications of all elements in factors * multiplications of all elements in aux_functions
-		std::vector<BaseExpression*> factors; // constants and variables of the expression
-		std::map<std::string, BaseExpression*> aux_functions; // functions of each auxiliar
+		BaseExpression* factor; // constants and variables of the expression
+		std::map<small_id, BaseExpression*> aux_functions; // funcs on aux for each cc-index
 	};
 
 	enum AlgebraicOp {
@@ -81,12 +81,16 @@ public:
 	virtual FL_TYPE auxFactors(
 			std::unordered_map<std::string, FL_TYPE> &factor) const = 0;
 
+
 	/** \brief Returns a factorized expression
 	 *
 	 */
-	virtual Reduction factorize() const = 0;
+	virtual Reduction factorize(const std::map<std::string,small_id> aux_cc) const = 0;
 	virtual BaseExpression* clone() const = 0;
 	virtual BaseExpression* reduce(VarVector& vars) = 0;
+	virtual Reduction reduceAndFactorize(const std::map<std::string,small_id> aux_cc) const;
+
+	virtual void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords);
 
 	//virtual std::set<std::string> getAuxiliars() const = 0;
 	virtual bool operator==(const BaseExpression& exp) const = 0;
@@ -94,7 +98,8 @@ public:
 
 	template<bool isBool>
 	static BaseExpression* makeBinaryExpression(BaseExpression *ex1,
-			BaseExpression *ex2, const int op);
+			BaseExpression *ex2, typename std::conditional<isBool,
+			BaseExpression::BoolOp,BaseExpression::AlgebraicOp>::type op);
 
 	static BaseExpression* makeUnaryExpression(BaseExpression *ex, const int func);
 
@@ -111,6 +116,12 @@ public:
 protected:
 	//BaseExpression();
 	Type t;
+
+
+	class Unfactorizable : public std::invalid_argument {
+	public:
+		Unfactorizable(const std::string &msg);
+	};
 
 };
 

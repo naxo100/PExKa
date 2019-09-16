@@ -17,6 +17,7 @@ namespace expressions {
 /************ UnaryOperations ******************/
 /***********************************************/
 
+std::string ops[] = {"sqrt", "exp", "log", "sin", "cos", "tan", "atan", "abs", "coin", "rand_n"};
 
 template<typename R, typename T>
 R (*UnaryOperations<R, T>::funcs[10])(T)= {
@@ -65,14 +66,56 @@ FL_TYPE UnaryOperation<R, T>::auxFactors(
 		std::unordered_map<std::string, FL_TYPE> &var_factors) const {return 0.0;}
 
 template<typename R, typename T>
-BaseExpression::Reduction UnaryOperation<R, T>::factorize() const {
-	//throw std::invalid_argument("cannot factorize unary operations");
+BaseExpression::Reduction UnaryOperation<R, T>::factorize(const std::map<std::string,small_id> aux_cc) const {
+	using Unfactorizable = BaseExpression::Unfactorizable;
+	auto VARDEP = BaseExpression::VarDep::VARDEP;
+	auto MULT = BaseExpression::AlgebraicOp::MULT;
+	auto make_binary = BaseExpression::makeBinaryExpression<false>;
+	auto make_unary = BaseExpression::makeUnaryExpression;
 	BaseExpression::Reduction res;
-	BaseExpression::Reduction r = exp->factorize();
-	map<string, BaseExpression*> m = r.aux_functions;
-	std::map<string, BaseExpression*>::iterator it;
-	for(it = m.begin(); it != m.end(); it++)
-		res.aux_functions[it->first] = new UnaryOperation(it->second, BaseExpression::SQRT);
+	BaseExpression::Reduction r(exp->factorize(aux_cc));
+	switch(op){
+	case BaseExpression::SQRT:
+		res.factor = *r.factor == *ONE_FL_EXPR ?
+				make_unary(r.factor,op) :
+				r.factor;
+		for(auto& aux_f : r.aux_functions)
+			res.aux_functions[aux_f.first] = make_unary(aux_f.second,op);
+		break;
+	case BaseExpression::ABS:
+		ADD_WARN_NOLOC("Factorizing the function 'absolute value' has unexpected behavior.");
+		//no break;
+	case BaseExpression::EXPONENT:
+	case BaseExpression::LOG:
+	case BaseExpression::SINE:
+	case BaseExpression::COSINE:
+	case BaseExpression::TAN:
+	case BaseExpression::ATAN:
+		if(r.aux_functions.size() > 1)
+			throw Unfactorizable("Cannot factorize: Applying "+ops[op]+" to more than one cc-aux function.");
+		if(r.aux_functions.size() == 1){
+			auto& aux_f = *r.aux_functions.begin();
+			if(*r.factor == *ONE_FL_EXPR){
+				res.factor = r.factor;
+				res.aux_functions[aux_f.first] = make_unary(aux_f.second,op);
+			}
+			else{
+				res.factor = ONE_FL_EXPR->clone();
+				res.aux_functions[aux_f.first] = make_unary(
+						make_binary(r.factor,aux_f.second,MULT),op);
+			}
+			if(r.factor->getVarDeps() & VARDEP)
+				ADD_WARN_NOLOC("Rate factorization will depend on "+ops[op]+"(aux,var) and this will lead to inexact results.");
+		}
+		else
+			res.factor = make_unary(r.factor,op);
+		break;
+	case BaseExpression::COIN:
+	case BaseExpression::RAND_N:
+	case BaseExpression::NOT:
+		throw Unfactorizable("Cannot factorize: Applying "+ops[op]+" is not possible.");
+	}
+
 	return res;
 }
 
@@ -105,7 +148,11 @@ bool UnaryOperation<R, T>::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
-std::string ops[] = {"sqrt", "exp", "log", "sin", "cos", "tan", "atan", "abs", "coin", "rand_n"};
+template <typename R,typename T>
+void UnaryOperation<R,T>::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords){
+	exp->setAuxCoords(aux_coords);
+}
+
 
 template<typename R, typename T>
 std::string UnaryOperation<R,T>::toString() const {

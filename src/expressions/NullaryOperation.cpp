@@ -17,6 +17,8 @@ namespace expressions {
 /***********************************************/
 
 
+std::string n_ops[] = {"Rand(1)","TIME","EVENT","NULL_EVENT","PROD_EVENT","CPUTIME","ACTIVITY"};
+
 template<>
 FL_TYPE (*NullaryOperations<FL_TYPE>::funcs[4])(const state::State& state)= {
 	[](const state::State& state) {return uniform_real_distribution<FL_TYPE>(0.0,1.0)(state.getRandomGenerator());},
@@ -58,9 +60,9 @@ FL_TYPE NullaryOperation<R>::auxFactors(
 		std::unordered_map<std::string, FL_TYPE> &var_factors) const {return 0.0;}
 
 template<typename R>
-BaseExpression::Reduction NullaryOperation<R>::factorize() const {
-	BaseExpression::Reduction r;
-	return r;
+BaseExpression::Reduction NullaryOperation<R>::factorize(const std::map<std::string,small_id> aux_cc) const {
+	throw BaseExpression::Unfactorizable("Cannot factorize: operation "+n_ops[op]+" is not factorizable.");
+	return BaseExpression::Reduction();
 }
 
 template <typename T>
@@ -78,7 +80,6 @@ bool NullaryOperation<R>::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
-std::string n_ops[] = {"Rand(1)","TIME","EVENT","NULL_EVENT","PROD_EVENT","CPUTIME","ACTIVITY"};
 
 
 template <typename R>

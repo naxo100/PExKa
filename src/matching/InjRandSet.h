@@ -10,6 +10,7 @@
 
 #include "Injection.h"
 #include "../data_structs/DistributionTree.h"
+#include "../simulation/Rule.h"
 
 
 namespace matching {
@@ -75,14 +76,23 @@ public:
 
 
 class InjRandTree : public InjRandContainer {
+	static const float MAX_INVALIDATIONS;//3%
 	//list<FL_TYPE> hints;
 
 	//list<CcInjection*> freeInjs;
 	list<CcInjection*> infList;
 
-	FL_TYPE average;
+	struct Root {
+		distribution_tree::DistributionTree<CcValueInj>* tree;
+		two<FL_TYPE> second_moment;//(sum x*x,sum x) at validation
+		bool is_valid;
+
+		Root();
+	};
 	unsigned counter;
-	map<int,map<small_id,distribution_tree::DistributionTree<CcValueInj>*> > roots;
+	// (r_id,cc_index) -> contribution to rule-rate per cc
+	map<pair<int,small_id>,Root*> roots,roots_to_push;
+	mutable int invalidations;
 
 	mutable pair<int,small_id> selected_root;
 
@@ -90,12 +100,14 @@ class InjRandTree : public InjRandContainer {
 	virtual CcInjection* newInj() const override;
 
 public:
-	InjRandTree(const pattern::Mixture::Component& cc);
+	InjRandTree(const pattern::Mixture::Component& cc,const vector<simulation::Rule::Rate>& rates);
 	~InjRandTree();
 	const Injection& chooseRandom(default_random_engine& randGen) const override;
 	const Injection& choose(unsigned id) const override;
 	size_t count() const override;
 	virtual FL_TYPE partialReactivity() const;
+
+	FL_TYPE getM2() const;
 
 	void erase(Injection* inj) override;
 

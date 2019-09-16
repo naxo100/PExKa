@@ -31,19 +31,22 @@ State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 	plot(_plot),activeDeps(env.getDependencies()){
 	for(unsigned i = 0; i < _vars.size(); i++){
 		vars[i] = dynamic_cast<Variable*>(_vars[i]->clone());
-		vars[i]->reduce(vars);
+		vars[i]->reduce(vars);//vars are simplified for every state
 	}
 	for(auto& rule : env.getRules()){
 		int i = rule.getId();
 		auto new_rate = rule.getRate().clone();
-		rates[i].baseRate = new_rate->reduce(vars);
+		rates[i].baseRate = new_rate->reduce(vars);//rates also have to be reduced for every state
 		if(new_rate != rates[i].baseRate)//reduce can return the same pointer on expression but no with vars.
 			delete new_rate;
 		if(rates[i].baseRate->getVarDeps() & BaseExpression::AUX){
-			rates[i].base = rates[i].baseRate->factorize();
+			map<string,small_id> aux_ccindex;
+			for(auto& aux_cc__ : rule.getLHS().getAux())
+				aux_ccindex[aux_cc__.first] = get<0>(aux_cc__.second);
+			rates[i].base = rates[i].baseRate->reduceAndFactorize(aux_ccindex);
 			auto& lhs = rule.getLHS();
-			if(lhs.compsCount() == 2 && lhs.getComponent(0) == lhs.getComponent(1))
-				rates[i].base.factors.push_back(new expressions::Constant<FL_TYPE>(0.5));
+			/*if(lhs.compsCount() == 2 && lhs.getComponent(0) == lhs.getComponent(1))
+				rates[i].base.factors.push_back(new expressions::Constant<FL_TYPE>(0.5));*/
 		}
 	}
 	for(auto pert : env.getPerts()){
@@ -140,8 +143,9 @@ two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
 	if(rate.base.aux_functions.empty())
 		a *= rate.baseRate->getValue(vars).valueAs<FL_TYPE>();
 	else
-		for(auto factor : rate.base.factors)
-			a *= factor->getValue(vars).valueAs<FL_TYPE>();
+		a *= rate.base.factor->getValue(vars).valueAs<FL_TYPE>();
+	//Adjust rate cause reactants cc-injs intersection
+	//a = rate.correct(a)
 	return make_pair(a,0.0);
 }
 /*
@@ -613,7 +617,7 @@ void State::initInjections() {
 	injections = (matching::InjRandContainer**)(new matching::InjRandContainer*[env.size<pattern::Mixture::Component>()]);
 	for(auto& cc : env.getComponents())
 		if(cc.getRateDeps().size())
-			injections[cc.getId()] = new matching::InjRandTree(cc);
+			injections[cc.getId()] = new matching::InjRandTree(cc,rates);
 		else
 			injections[cc.getId()] = new matching::InjRandSet(cc);
 	for(auto node_p : graph){

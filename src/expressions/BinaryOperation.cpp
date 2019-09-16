@@ -6,6 +6,7 @@
  */
 
 #include "BinaryOperation.h"
+#include "Constant.h"
 #include "../state/Variable.h"
 #include <iostream>
 #include "Vars.h"
@@ -20,6 +21,11 @@ namespace expressions {
 /***********************************************/
 /*********** BinaryOperations ******************/
 /***********************************************/
+
+
+char AlgOpChar[] = "+-*/^%Mm";
+string AlgOpStr[] = {"add","subs","mult","div","pow","mod","max","min"};
+char BoolOpChar[] = "&|><=~";
 
 template<typename T1, typename T2>
 bool (*BinaryOperations<bool, T1, T2>::funcs[10])(T1, T2)= {
@@ -108,7 +114,7 @@ R BinaryOperation<R, T1, T2>::evaluate(const state::State& state,
 
 template<typename R, typename T1, typename T2>
 BinaryOperation<R, T1, T2>::BinaryOperation(BaseExpression *ex1,
-		BaseExpression *ex2, const short op) :
+		BaseExpression *ex2, Op_Type op) :
 		op(op) {
 	exp1 = dynamic_cast<AlgExpression<T1>*>(ex1);
 	exp2 = dynamic_cast<AlgExpression<T2>*>(ex2);
@@ -162,208 +168,156 @@ FL_TYPE BinaryOperation<R, T1, T2>::auxFactors(
  return l1;
  }*/
 
+
+
 template<typename R, typename T1, typename T2>
-BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize() const {
+BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<std::string,small_id> aux_cc) const {
+	using Unfactorizable = BaseExpression::Unfactorizable;
+	auto VARDEP = BaseExpression::VarDep::VARDEP;
+	auto MULT = BaseExpression::AlgebraicOp::MULT;
+	auto DIV = BaseExpression::AlgebraicOp::DIV;
+	auto make_binary = BaseExpression::makeBinaryExpression<false>;
+
+	if(std::is_same<R,bool>::value)
+		throw BaseExpression::Unfactorizable("Cannot factorize: boolean binary operations cannot be factorized.");
+
+	auto op = BaseExpression::AlgebraicOp(this->op);//to avoid problems with op been a BoolOp
+
 	BaseExpression::Reduction r;
-	BaseExpression::Reduction r1 = exp1->factorize();
-	BaseExpression::Reduction r2 = exp2->factorize();
+	BaseExpression::Reduction r1(exp1->factorize(aux_cc));
+	BaseExpression::Reduction r2(exp2->factorize(aux_cc));
 
 	// create the auxiliar functions from the current operation with
 	// the functions of the expressions (exp1 and exp2)
-	auto& m1 = r1.aux_functions;
-	auto& m2 = r2.aux_functions;
+	auto& auxf_1 = r1.aux_functions;
+	auto& auxf_2 = r2.aux_functions;
 	std::map<string, BaseExpression*>::iterator it;
 	switch(op){
-		case (BaseExpression::SUM):
-			if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) + constant|variable)
-				if(m1.size() == 1){
-					BaseExpression* ex = m1.begin()->second;
-					for(auto fac : r1.factors)
-						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
-					r.aux_functions[m1.begin()->first] = new BinaryOperation(ex, exp2, BaseExpression::SUM);
-				}
-				else
-					throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) + constant|variable)");
-			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable + f(aux1)*.....*g(auxn)
-				if(m2.size() == 1){
-					BaseExpression* ex = m2.begin()->second;
-					for(auto fac : r2.factors)
-						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
-					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, ex, BaseExpression::SUM);
-				}
-				else
-					throw std::invalid_argument("cant factorize expression (constant|variable + f(aux1)*.....*g(auxn))");
-			}else if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) + f'(aux1')*.....*g'(auxn')
-				if(m1.size()==1 && m2.size()==1){ // f(aux1) + f'(aux1')
-					BaseExpression* ex1 = m1.begin()->second;
-					BaseExpression* ex2 = m2[m1.begin()->first];
-					if(m2[m1.begin()->first]){ // aux1 = aux1' => f(aux1) + f'(aux1') = g(aux1)
-						for(auto fac : r1.factors)
-							ex1 = BaseExpression::makeBinaryExpression<false>(fac, ex1, BaseExpression::MULT);
-						for(auto fac : r2.factors)
-							ex2 = BaseExpression::makeBinaryExpression<false>(fac, ex2, BaseExpression::MULT);
-						r.aux_functions[m1.begin()->first] = new BinaryOperation(ex1, ex2, BaseExpression::SUM);
+	case BaseExpression::SUM:
+	case BaseExpression::MINUS:
+		if(auxf_1.size()){
+			auto& cc_f_1 = *auxf_1.begin();
+			if(auxf_2.size()){//sum of cc-aux funcs
+				if(auxf_1.size() == 1 && auxf_2.size() == 1){//only one cc-index
+					auto& cc_f_2 = *auxf_2.begin();
+					if(cc_f_1.first == cc_f_2.first){//sum of same cc-aux funcs index
+						if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
+							ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results.");
+						if(*r1.factor == *ONE_FL_EXPR){
+							delete r1.factor;r1.factor = nullptr;
+						}
+						if(*r2.factor == *ONE_FL_EXPR){
+							delete r2.factor;r2.factor = nullptr;
+						}
+						r.factor = ONE_FL_EXPR->clone();
+						r.aux_functions[cc_f_1.first] = make_binary(
+								r1.factor ? cc_f_1.second : make_binary(r1.factor,cc_f_1.second,MULT),
+								r2.factor ? cc_f_2.second : make_binary(r2.factor,cc_f_2.second,MULT),
+								op);
 					}
-					else
-						throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) + f'(aux1')*.....*g'(auxn'))");
+					else throw Unfactorizable("Cannot factorize: add/sub of different cc-aux-functions.");
 				}
-			}else{
-				break;
+				else throw Unfactorizable("Cannot factorize: add/sub of more than one cc-aux-functions.");
 			}
-			break;
-		case (BaseExpression::MINUS):
-			if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) - constant|variable)
-				if(m1.size() == 1){
-					BaseExpression* ex = m1.begin()->second;
-					for(auto fac : r1.factors)
-						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
-					r.aux_functions[m1.begin()->first] = new BinaryOperation(ex, exp2, BaseExpression::MINUS);
+			else{//cc-aux func plus const
+				if(auxf_1.size() == 1){//only one cc-index
+					if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
+						ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results(2).");
+					r.factor = r1.factor->clone();
+					r.aux_functions[cc_f_1.first] = make_binary(cc_f_1.second,
+							make_binary(r2.factor,r1.factor,DIV),op);
 				}
-				else
-					throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) - constant|variable)");
-			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable - f(aux1)*.....*g(auxn)
-				if(m2.size() == 1){
-					BaseExpression* ex = m2.begin()->second;
-					for(auto fac : r2.factors)
-						ex = BaseExpression::makeBinaryExpression<false>(fac, ex, BaseExpression::MULT);
-					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, ex, BaseExpression::MINUS);
-				}
-				else
-					throw std::invalid_argument("cant factorize expression (constant|variable - f(aux1)*.....*g(auxn))");
-			}else if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) - f'(aux1')*.....*g'(auxn')
-				if(m1.size()==1 && m2.size()==1){ // f(aux1) - f'(aux1')
-					BaseExpression* ex1 = m1.begin()->second;
-					BaseExpression* ex2 = m2[m1.begin()->first];
-					if(m2[m1.begin()->first]){ // aux1 = aux1' => f(aux1) + f'(aux1') = g(aux1)
-						for(auto fac : r1.factors)
-							ex1 = BaseExpression::makeBinaryExpression<false>(fac, ex1, BaseExpression::MULT);
-						for(auto fac : r2.factors)
-							ex2 = BaseExpression::makeBinaryExpression<false>(fac, ex2, BaseExpression::MULT);
-						r.aux_functions[m1.begin()->first] = new BinaryOperation(ex1, ex2, BaseExpression::MINUS);
-					}
-					else
-						throw std::invalid_argument("cant factorize expression (f(aux1)*.....*g(auxn) + f'(aux1')*.....*g'(auxn'))");
-				}
-			}else{
-				break;
+				else throw Unfactorizable("Cannot factorize: add/sub a const to more than one cc-aux-functions.");
 			}
-			break;
-		case (BaseExpression::MULT):
-			// add the constants and variables to the response factors
-			r.factors.insert(r.factors.end(), r1.factors.begin(), r1.factors.end());
-			r.factors.insert(r.factors.end(), r2.factors.begin(), r2.factors.end());
-			if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) * f'(aux1')*.....*g'(auxn')
-				for(it = m1.begin(); it != m1.end(); it++){
-					if(m2[it->first]) // add the auxiliars that are in m1 and m2
-						r.aux_functions[it->first] = new BinaryOperation(m1[it->first], m2[it->first], BaseExpression::MULT);
-					else // add the auxiliars that are in m1 but not in m2
-						r.aux_functions[it->first] = it->second;
-				}
-				for(it = m2.begin(); it != m2.end(); it++){
-					if(!m1[it->first]) // add the auxiliars that are in m2 but not in m1
-						r.aux_functions[it->first] = it->second;
-				}
-			}else if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) * constant|variable)
-				r.aux_functions = m1;
-			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable) * f(aux1)*.....*g(auxn)
-				r.aux_functions = m2;
-			}else{
-				break;
+		}
+		else if(auxf_2.size()){//cc-aux func plus const
+			if(auxf_2.size() == 1){//only one cc-index
+				if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
+					ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results.");
+				auto& cc_f_2 = *auxf_2.begin();
+				r.factor = r2.factor->clone();
+				r.aux_functions[cc_f_2.first] = make_binary(make_binary(r1.factor,r2.factor,DIV),
+						cc_f_2.second,op);
 			}
-			break;
-		case (BaseExpression::DIV):
-			// add the constants and variables to the response factors
-			r.factors.insert(r.factors.end(), r1.factors.begin(), r1.factors.end());
-			if(op == BaseExpression::DIV){
-				for(unsigned int i = 0; i < r2.factors.size(); i++)
-					r.factors.push_back(BaseExpression::makeBinaryExpression<false>(new Constant<FL_TYPE>(1), r2.factors[i], op));
-			}else
-				r.factors.insert(r.factors.end(), r2.factors.begin(), r2.factors.end());
+			else throw Unfactorizable("Cannot factorize: add/sub a const to more than one cc-aux-functions.");
+		}
+		else//sum of constants (no aux)
+			r.factor = make_binary(r1.factor,r2.factor,op);
+		break;
 
-			if(m1.size() > 0 && m2.size() > 0){ // f(aux1)*.....*g(auxn) / f'(aux1')*.....*g'(auxn')
-				for(it = m1.begin(); it != m1.end(); it++){
-					if(m2[it->first]) // add the auxiliars that are in m1 and m2, convert division to * 1/m2
-						r.aux_functions[it->first] = new BinaryOperation(m1[it->first], new BinaryOperation(new Constant<FL_TYPE>(1), m2[it->first], BaseExpression::DIV), BaseExpression::MULT);
-					else // add the auxiliars that are in m1 but not in m2
-						r.aux_functions[it->first] = it->second;
-				}
-				for(it = m2.begin(); it != m2.end(); it++){
-					if(!m1[it->first]) // add the auxiliars that are in m2 but not in m1 (1/m2)
-						r.aux_functions[it->first] = new BinaryOperation(new Constant<FL_TYPE>(1), m2[it->first], BaseExpression::DIV);
-				}
-			}else if(m1.size() > 0 && m2.size() == 0){ // f(aux1)*.....*g(auxn) / constant|variable)
-				r.aux_functions[m1.begin()->first] = m1.begin()->second;
-			}else if(m1.size() == 0 && m2.size() > 0){ // constant|variable) / f(aux1)*.....*g(auxn)
-				r.aux_functions[m2.begin()->first] = new BinaryOperation(new Constant<FL_TYPE>(1), m2.begin()->second, BaseExpression::DIV);
-			}else{
-				break;
+	case (BaseExpression::DIV):
+	case (BaseExpression::MULT):
+		//setting factor, excluding factor 1x
+		if(*r1.factor != *ONE_FL_EXPR)
+			if(*r2.factor != *ONE_FL_EXPR)
+				r.factor = make_binary(r1.factor,r2.factor,op);
+			else{
+				r.factor = r1.factor;
+				delete r2.factor;
 			}
-			break;
-		case (BaseExpression::POW):
-			if(m1.size()>0 && m2.size()>0) // f(aux1)*.....*g(auxn) ^ f'(aux1')*.....*g'(auxn')
-				throw std::invalid_argument("cannot factorize, one or more auxiliars ^ one or more auxiliars");
-			else if(m1.size()>0 && m2.size() == 0) // f(aux1)*.....*g(auxn) ^ constant|variable
-				for(it = m1.begin(); it != m1.end(); it++)
-					r.aux_functions[it->first] = new BinaryOperation(it->second, exp2, BaseExpression::POW);
-			else if(m1.size()==0 && m2.size() > 0){ // constant|variable ^ f(aux1)*.....*g(auxn)
-				if(m2.size() == 1)
-					r.aux_functions[m2.begin()->first] = new BinaryOperation(exp1, m2.begin()->second, BaseExpression::POW);
-				else
-					throw std::invalid_argument("cannot factorize expression constant|variable ^ multiple auxiliars");
-			}else
-				break;
-			break;
-		default:
-			break;
+		else{
+			r.factor = r2.factor;
+			delete r1.factor;
+		}
+		r.aux_functions = auxf_1;//aux_funcs = r1
+		for(auto aux_f : auxf_2)
+			if(auxf_1.count(aux_f.first))//aux_func = r1*/r2
+				r.aux_functions[aux_f.first] = make_binary(
+						auxf_1[aux_f.first],aux_f.second,op);
+			else
+				r.aux_functions[aux_f.first] = op == DIV ?//aux_func = 1*/r2
+						make_binary(ONE_FL_EXPR->clone(),aux_f.second,op) :
+						aux_f.second;
+		break;
+	case (BaseExpression::POW):
+		if(auxf_2.size()){
+			if(auxf_2.size() > 1)
+				throw Unfactorizable("Cannot factorize: pow exponent of more than one cc_aux function.");
+			auto& cc_f_2 = *auxf_2.begin();
+			if(auxf_1.size() ){
+				if(auxf_1.size() == 1){//only one cc-index
+					auto& cc_f_1 = *auxf_1.begin();
+					if(cc_f_1.first == cc_f_2.first){//pow of same cc-aux funcs index
+						if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
+							ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results.");
+						r.factor = ONE_FL_EXPR->clone();
+						r.aux_functions[cc_f_1.first] = make_binary(
+								make_binary(r1.factor,cc_f_1.second,MULT),
+								make_binary(r2.factor,cc_f_2.second,MULT),
+								op);
+					}
+					else throw Unfactorizable("Cannot factorize: val powered to a different cc-aux-function.");
+				}
+				else throw Unfactorizable("Cannot factorize: more than one cc-aux functions powered to one aux-function.");
+			}
+			else{//no aux_f powered to 1 aux_f
+				if(*r1.factor == *ONE_FL_EXPR)
+					throw Unfactorizable("Cannot factorize: 1 powered to some aux function has no sense.");
+				if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
+					ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results.");
+				r.factor = ONE_FL_EXPR->clone();
+				r.aux_functions[cc_f_2.first] = make_binary(r1.factor,
+						make_binary(r2.factor,cc_f_2.second,MULT),op);
+			}
+		}
+		else{//some aux_f powered to factor
+			if((r2.factor->getVarDeps() & VARDEP) && auxf_1.size())
+				ADD_WARN_NOLOC("Rate factorization will depend on (aux^var) and this will lead to inexact results.");
+			if(*r1.factor == *ONE_FL_EXPR)
+				r.factor = r1.factor;
+			else
+				r.factor = make_binary(r1.factor,r2.factor,op);
+			for(auto aux_f : auxf_1)
+				r.aux_functions[aux_f.first] = make_binary(aux_f.second,r2.factor->clone(),op);
+		}
+		break;
+	default:
+		break;
 	}
 
 	return r;
-
-//	vector<BaseExpression*> fac_list = this->getFactorizableElements(r1.aux, r2.aux);
-//
-//	// put exp1 and exp2 values in vectors
-//	r.constant.insert(r.constant.end(), r1.constant.begin(), r1.constant.end());
-//	r.constant.insert(r.constant.end(), r2.constant.begin(), r2.constant.end());
-//
-//	// cannot factorize exp2 elements of a division
-//	if(op == BaseExpression::DIV)
-//		r.aux.insert(r.aux.end(), r1.aux.begin(), r1.aux.end());
-//	else{
-//		r.aux.insert(r.aux.end(), r1.aux.begin(), r1.aux.end());
-//		r.aux.insert(r.aux.end(), r2.aux.begin(), r2.aux.end());
-//	}
-//
-//
-//	r.factor_vars.insert(r.factor_vars.end(), r1.factor_vars.begin(), r1.factor_vars.end());
-//	r.factor_vars.insert(r.factor_vars.end(), r2.factor_vars.begin(), r2.factor_vars.end());
-//
-//
-//	BaseExpression* ex;
-//	if(fac_list.size() > 0){
-//		if((op == BaseExpression::SUM) || (op == BaseExpression::MINUS)){
-//			BaseExpression* ex1 = r1.factorized_expression;
-//			BaseExpression* ex2 = r2.factorized_expression;
-//			unsigned int i = 0;
-//			// delete the auxiliars from both expressions
-//			while(i < fac_list.size()){
-//				ex1 = ex1->deleteElement(fac_list[i]);
-//				ex2 = ex2->deleteElement(fac_list[i]);
-//				i++;
-//			}
-//			// create the factorized expression
-//			ex = new BinaryOperation<R, T1, T2>(ex1, ex2, op);
-//			// multiply the expression with the auxiliars
-//			for(unsigned int i=0; i< fac_list.size(); i++)
-//				ex = new BinaryOperation<R, T1, T2>(fac_list[i], ex, BaseExpression::MULT);
-//		}else{
-//			ex = new BinaryOperation<R, T1, T2>(r1.factorized_expression, r2.factorized_expression, op);
-//		}
-//	}else
-//		ex = new BinaryOperation<R, T1, T2>(r1.factorized_expression, r2.factorized_expression, op);
-//
-//	r.factorized_expression = ex;
-
 }
+
 
 template <typename R, typename T1, typename T2>
 BaseExpression* BinaryOperation<R,T1,T2>::reduce(VarVector& vars){
@@ -381,6 +335,7 @@ BaseExpression* BinaryOperation<R,T1,T2>::reduce(VarVector& vars){
 				delete r2;
 			return new Constant<R>(func(val1,val2));
 		}
+		//TODO delete sum of 0 and mult of 1
 	}
 	if(r1 != exp1)
 		delete exp1;
@@ -411,13 +366,19 @@ bool BinaryOperation<R, T1, T2>::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
+template <typename R,typename T1, typename T2>
+void BinaryOperation<R,T1,T2>::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords){
+	exp1->setAuxCoords(aux_coords);
+	exp2->setAuxCoords(aux_coords);
+}
+
+
+
 template<typename R,typename T1,typename T2>
 char BinaryOperation<R,T1,T2>::getVarDeps() const{
 	return exp1->getVarDeps() | exp2->getVarDeps();
 }
 
-char AlgOpChar[] = "+-*/^%Mm";
-char BoolOpChar[] = "&|><=~";
 
 template<typename R, typename T1, typename T2>
 std::string BinaryOperation<R,T1,T2>::toString() const {

@@ -342,6 +342,14 @@ void Mixture::setAux(string id,small_id ag,small_id site){
 	auxiliars[id] = make_tuple(small_id(-1),ag,site);
 }
 
+void Mixture::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords){
+	if(!declaredComps)
+		throw std::invalid_argument("Cannot call setAuxCoords() on an no initialized mixture.");
+	for(int cc = 0; cc < comps->size(); cc++)
+		for(int ag = 0; ag < comps->at(cc)->size(); ag++)
+			comps->at(cc)->agents[ag]->setAuxCoords(aux_coords);
+}
+
 string Mixture::toString(const Environment& env) const {
 	string out = "Agents: " + to_string(agentCount) + "\tComponents: " + to_string(compCount) + "\n";
 	short i = 0;

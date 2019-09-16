@@ -2,6 +2,9 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
  ../src/pattern/Environment.h ../src/pattern/Signature.h \
  ../src/pattern/../expressions/AlgExpression.h \
  ../src/pattern/../expressions/BaseExpression.h \
+ ../src/pattern/../expressions/../util/Warning.h \
+ ../src/pattern/../expressions/../util/../grammar/location.hh \
+ ../src/pattern/../expressions/../util/../grammar/position.hh \
  ../src/pattern/../expressions/SomeValue.h \
  ../src/pattern/../expressions/../util/params.h \
  ../src/pattern/../util/params.h ../src/pattern/Compartment.h \
@@ -16,18 +19,12 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
  ../src/pattern/../simulation/../util/params.h \
  ../src/pattern/../simulation/../pattern/mixture/Mixture.h \
  ../src/pattern/../simulation/../grammar/location.hh \
- ../src/pattern/../simulation/../grammar/position.hh \
  ../src/pattern/../simulation/../state/SiteGraph.h \
  ../src/pattern/../simulation/../state/../util/params.h \
  ../src/pattern/../simulation/../state/Node.h \
  ../src/pattern/../simulation/../state/../pattern/Signature.h \
  ../src/pattern/../simulation/../state/../data_structs/SimpleSet.h \
- ../src/pattern/../simulation/../state/../matching/InjRandSet.h \
- ../src/pattern/../simulation/../state/../matching/Injection.h \
- ../src/pattern/../simulation/../state/../matching/../util/params.h \
- ../src/pattern/../simulation/../state/../matching/../pattern/mixture/Mixture.h \
- ../src/pattern/../simulation/../state/../matching/../data_structs/DistributionTree.h \
- ../src/pattern/../simulation/../state/../matching/../data_structs/../util/params.h \
+ ../src/pattern/../simulation/../state/../pattern/mixture/Mixture.h \
  ../src/pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/../simulation/Perturbation.h \
  ../src/pattern/../simulation/Rule.h ../src/pattern/../util/Exceptions.h \
@@ -50,6 +47,12 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
 ../src/pattern/../expressions/AlgExpression.h:
 
 ../src/pattern/../expressions/BaseExpression.h:
+
+../src/pattern/../expressions/../util/Warning.h:
+
+../src/pattern/../expressions/../util/../grammar/location.hh:
+
+../src/pattern/../expressions/../util/../grammar/position.hh:
 
 ../src/pattern/../expressions/SomeValue.h:
 
@@ -85,8 +88,6 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
 
 ../src/pattern/../simulation/../grammar/location.hh:
 
-../src/pattern/../simulation/../grammar/position.hh:
-
 ../src/pattern/../simulation/../state/SiteGraph.h:
 
 ../src/pattern/../simulation/../state/../util/params.h:
@@ -97,17 +98,7 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
 
 ../src/pattern/../simulation/../state/../data_structs/SimpleSet.h:
 
-../src/pattern/../simulation/../state/../matching/InjRandSet.h:
-
-../src/pattern/../simulation/../state/../matching/Injection.h:
-
-../src/pattern/../simulation/../state/../matching/../util/params.h:
-
-../src/pattern/../simulation/../state/../matching/../pattern/mixture/Mixture.h:
-
-../src/pattern/../simulation/../state/../matching/../data_structs/DistributionTree.h:
-
-../src/pattern/../simulation/../state/../matching/../data_structs/../util/params.h:
+../src/pattern/../simulation/../state/../pattern/mixture/Mixture.h:
 
 ../src/pattern/../simulation/../state/../expressions/AlgExpression.h:
 

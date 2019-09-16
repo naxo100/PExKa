@@ -8,6 +8,7 @@
 #include "Statements.h"
 #include "../../util/Exceptions.h"
 #include "../../util/Warning.h"
+#include "../../pattern/mixture/Component.h"
 
 namespace ast {
 
@@ -112,10 +113,16 @@ Variable* Declaration::evalVar(pattern::Environment &env,
 		p_mix->setAndDeclareComponents(env);
 		auto& mix = env.declareMixture(*p_mix);
 		delete p_mix;
+		map<string,tuple<int,small_id,small_id>> aux_map;
+		for(auto& aux_ccagst : mix.getAux()){
+			auto cc_id = mix.getComponent(get<0>(aux_ccagst.second)).getId();
+			aux_map.emplace(aux_ccagst.first,tuple<int,small_id,small_id>(cc_id,get<1>(aux_ccagst.second),get<2>(aux_ccagst.second)));
+		}
+		mix.setAuxCoords(aux_map);
 		if(type == KAPPA)
 			var = new state::KappaVar(id,name.getString(),observable,mix);
 		else if(type == AUX_EXPR){
-			BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag);
+			BaseExpression* b_expr = expr->eval(env,vars,nullptr,flag,&aux_map);
 			if(mix.compsCount() != 1)
 				throw SemanticError("Distribution expressions can't have more than one Connected Component.",loc);
 			//if(op == BaseExpression::SUMATORY && ) //TODO maybe make DistrVar<int> if expr is int?

@@ -21,7 +21,7 @@ public:
 	T evaluate(const VarVector &consts,const std::unordered_map<std::string, int> *aux_values = nullptr) const override;
 	T evaluate(const state::State& state, const AuxMap& aux_values) const override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const override;
-	BaseExpression::Reduction factorize() const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
 	virtual BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 	bool operator==(const BaseExpression& exp) const override;
@@ -36,6 +36,8 @@ extern const BaseExpression* MAX_FL_EXPR;
 extern const BaseExpression* MIN_FL_EXPR;
 extern const BaseExpression* MAX_INT_EXPR;
 extern const BaseExpression* MIN_INT_EXPR;
+extern const BaseExpression* ONE_FL_EXPR;
+extern const BaseExpression* ZERO_FL_EXPR;
 
 } /* namespace expressio */
 

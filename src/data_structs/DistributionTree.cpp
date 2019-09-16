@@ -38,7 +38,7 @@ void DistributionTree<T>::treeBalance(DistributionTree<T>*& parent_pointer) {
 
 template <typename T>
 Node<T>::Node(FL_TYPE val) : DistributionTree<T>(nullptr,val),counter(0) {
-	smaller = val != 0.0 ? new Leaf<T>(this) : nullptr;
+	smaller = /*val != 0.0 ? */new Leaf<T>(this); //: nullptr;
 	greater = new Leaf<T>(this);
 }
 
@@ -75,6 +75,7 @@ void Node<T>::deleteContent(){
 			delete inj;
 }
 
+
 template <typename T>
 void Node<T>::push(T* inj,FL_TYPE val){
 	if(val > this->value){
@@ -99,12 +100,12 @@ void Node<T>::push(T* inj,FL_TYPE val){
 	}
 	else{
 		if(inj->count() > 1){
-			inj->alloc(multi_injs.size());//not useful
+			//inj->alloc(multi_injs.size());//not useful
 			inj->addContainer(*this,-multi_injs.size()-1);//negative address for multi injs
 			multi_injs.emplace_back(inj);
 		}
 		else{
-			inj->alloc(injs.size());//not useful
+			//inj->alloc(injs.size());//not useful
 			inj->addContainer(*this,injs.size());
 			injs.emplace_back(inj);
 		}
@@ -146,7 +147,7 @@ T* Node<T>::erase(int address){
 		injs[address] = injs.back();
 		injs.pop_back();
 	}
-	elem->alloc(size_t(-1));
+	//elem->alloc(size_t(-1));
 	this->decrease(this->value*elem->count(),elem->count());
 	return elem;
 }
@@ -244,6 +245,13 @@ FL_TYPE Node<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
 	}
 	return sum + smaller->sumInternal(func)+greater->sumInternal(func);
 }
+
+
+template <typename T>
+FL_TYPE Node<T>::squares() {
+	return this->value*this->value*counter + smaller->squares() + greater->squares();
+}
+
 
 
 template <typename T>
@@ -356,7 +364,7 @@ void Leaf<T>::sort(bool revalidate){
 	static auto is_less = [](const pair<T*,FL_TYPE> &a,const pair<T*,FL_TYPE> &b) {return a.second < b.second;};
 	std::sort(injs.begin(),injs.end(),is_less);
 	if(revalidate)
-		for(unsigned i = 0; i < injs.size(); i++)//not useful ???
+		for(unsigned i = 0; i < injs.size(); i++)
 			injs[i].first->addContainer(*this,i);
 }
 
@@ -375,7 +383,7 @@ void Leaf<T>::push(T* inj,FL_TYPE val){
 	if(injs.size() == (this->MAX_LVL0 << this->level) )
 		throw bad_alloc();
 	else{
-		inj->alloc(injs.size());//not useful
+		//inj->alloc(injs.size());//not useful
 		inj->addContainer(*this,injs.size());
 		injs.emplace_back(inj,val);//TODO maybe ordered??
 		this->sum += val;
@@ -439,6 +447,14 @@ FL_TYPE Leaf<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
 		sum += func(inj.first);
 	}
 	return sum;
+}
+
+
+template <typename T>
+FL_TYPE Leaf<T>::squares() {
+	this->sort(true);
+	auto a = injs.front().second,b = injs.back().second;
+	return (a*a + a*b + b*b) / 3.0;//second-moment of uniform distr
 }
 
 

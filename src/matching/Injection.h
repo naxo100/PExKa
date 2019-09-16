@@ -41,6 +41,7 @@ class InjRandSet;
 
 
 class Injection {
+protected:
 	friend class InjRandSet;
 	const pattern::Pattern& ptrn;
 	int address;
@@ -50,7 +51,7 @@ public:
 	virtual ~Injection();
 	virtual const vector<Node*>& getEmbedding() const = 0;
 
-	virtual bool isTrashed() const;
+	virtual bool isTrashed() const = 0;
 
 	virtual void codomain(vector<Node*>& injs,set<Node*>& cod) const = 0;
 
@@ -84,6 +85,8 @@ public:
 
 	const vector<Node*>& getEmbedding() const override;
 
+	virtual bool isTrashed() const override;
+
 	void codomain(vector<Node*>& injs,set<Node*>& cod) const override;
 
 	size_t count() const override;
@@ -104,7 +107,7 @@ public:
 	CcValueInj(const pattern::Mixture::Component& _cc);
 	CcValueInj(const CcInjection& inj);
 
-	//void alloc(int address) override;
+	virtual bool isTrashed() const override;
 
 	void addContainer(distribution_tree::DistributionTree<CcValueInj>& cont,int addr);
 	void selfRemove();

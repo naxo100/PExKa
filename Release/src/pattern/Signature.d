@@ -1,11 +1,13 @@
 src/pattern/Signature.o: ../src/pattern/Signature.cpp \
  ../src/pattern/Signature.h ../src/pattern/../expressions/AlgExpression.h \
  ../src/pattern/../expressions/BaseExpression.h \
+ ../src/pattern/../expressions/../util/Warning.h \
+ ../src/pattern/../expressions/../util/../grammar/location.hh \
+ ../src/pattern/../expressions/../util/../grammar/position.hh \
  ../src/pattern/../expressions/SomeValue.h \
  ../src/pattern/../expressions/../util/params.h \
  ../src/pattern/../util/params.h ../src/pattern/../util/Exceptions.h \
  ../src/pattern/../util/../grammar/location.hh \
- ../src/pattern/../util/../grammar/position.hh \
  ../src/pattern/../grammar/ast/Basics.h \
  ../src/pattern/../grammar/ast/../location.hh \
  ../src/pattern/../grammar/ast/../../state/Variable.h \
@@ -31,12 +33,7 @@ src/pattern/Signature.o: ../src/pattern/Signature.cpp \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/Node.h \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../pattern/Signature.h \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../data_structs/SimpleSet.h \
- ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/InjRandSet.h \
- ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/Injection.h \
- ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../util/params.h \
- ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../pattern/mixture/Mixture.h \
- ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/DistributionTree.h \
- ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/../util/params.h \
+ ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../pattern/mixture/Mixture.h \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/Perturbation.h \
  ../src/pattern/../grammar/ast/../../pattern/../simulation/Rule.h \
@@ -49,6 +46,12 @@ src/pattern/Signature.o: ../src/pattern/Signature.cpp \
 
 ../src/pattern/../expressions/BaseExpression.h:
 
+../src/pattern/../expressions/../util/Warning.h:
+
+../src/pattern/../expressions/../util/../grammar/location.hh:
+
+../src/pattern/../expressions/../util/../grammar/position.hh:
+
 ../src/pattern/../expressions/SomeValue.h:
 
 ../src/pattern/../expressions/../util/params.h:
@@ -58,8 +61,6 @@ src/pattern/Signature.o: ../src/pattern/Signature.cpp \
 ../src/pattern/../util/Exceptions.h:
 
 ../src/pattern/../util/../grammar/location.hh:
-
-../src/pattern/../util/../grammar/position.hh:
 
 ../src/pattern/../grammar/ast/Basics.h:
 
@@ -111,17 +112,7 @@ src/pattern/Signature.o: ../src/pattern/Signature.cpp \
 
 ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../data_structs/SimpleSet.h:
 
-../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/InjRandSet.h:
-
-../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/Injection.h:
-
-../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../util/params.h:
-
-../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../pattern/mixture/Mixture.h:
-
-../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/DistributionTree.h:
-
-../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../matching/../data_structs/../util/params.h:
+../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../pattern/mixture/Mixture.h:
 
 ../src/pattern/../grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h:
 

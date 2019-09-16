@@ -35,7 +35,9 @@ class BinaryOperation: public AlgExpression<R> {
 	AlgExpression<T2>* exp2;
 	//static R (*operations[]) (T1,T2);
 	R (*func)(T1, T2);
-	const char op;
+	typedef typename std::conditional<std::is_same<bool,R>::value,
+		BaseExpression::BoolOp,BaseExpression::AlgebraicOp>::type Op_Type;
+	Op_Type op;
 
 	friend class simulation::Perturbation;
 public:
@@ -46,7 +48,7 @@ public:
 			override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const
 			override;
-	BaseExpression::Reduction factorize() const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
 	BaseExpression* clone() const override;
 
 	BaseExpression* reduce(VarVector& vars);
@@ -55,10 +57,12 @@ public:
 	bool operator==(const BaseExpression& exp) const override;
 	~BinaryOperation();
 	BinaryOperation(BaseExpression *ex1, BaseExpression *ex2,
-			const short op);
+			Op_Type op);
 
 	void getNeutralAuxMap(
 			std::unordered_map<std::string, FL_TYPE>& aux_map) const;
+
+	virtual void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) override;
 
 	//return a flag of VarDep
 	char getVarDeps() const override;

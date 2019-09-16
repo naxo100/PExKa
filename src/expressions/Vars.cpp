@@ -17,9 +17,9 @@ namespace expressions {
 
 /*********** Class Auxiliar ***********/
 template<typename R>
-Auxiliar<R>::Auxiliar(const std::string &nme) :
-		name(nme) {
-}
+Auxiliar<R>::Auxiliar(const std::string &nme,
+		const tuple<int,small_id,small_id>& ccagst) :
+		name(nme),cc_ag_st(ccagst) {}
 
 template<typename R>
 Auxiliar<R>::~Auxiliar() {
@@ -62,10 +62,11 @@ FL_TYPE Auxiliar<R>::auxFactors(
 }
 
 template<typename R>
-BaseExpression::Reduction Auxiliar<R>::factorize() const {
+BaseExpression::Reduction Auxiliar<R>::factorize(const std::map<std::string,small_id> aux_cc) const {
 	BaseExpression::Reduction r;
 	Auxiliar<R>* aux = new Auxiliar<R>(*this);
-	r.aux_functions[aux->toString()] = aux;
+	r.aux_functions[aux_cc.at(aux->toString())] = aux;
+	r.factor = ONE_FL_EXPR->clone();
 	return r;
 }
 
@@ -83,10 +84,17 @@ template<typename T>
 bool Auxiliar<T>::operator==(const BaseExpression& exp) const {
 	try {
 		auto& aux_exp = dynamic_cast<const Auxiliar<T>&>(exp);
-		if (aux_exp.name == name)
-			return true;
+		if (get<0>(aux_exp.cc_ag_st) == -1 || get<0>(cc_ag_st) == -1)
+			return aux_exp.name == name;
+		else
+			return (aux_exp.cc_ag_st == cc_ag_st);
 	} catch (std::bad_cast &ex) { }
 	return false;
+}
+
+template <typename T>
+void Auxiliar<T>::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords){
+	cc_ag_st = aux_coords.at(name);
 }
 
 template <typename T>
@@ -141,7 +149,7 @@ BaseExpression* VarLabel<R>::reduce(VarVector &vars ) {
 }
 
 template <typename R>
-BaseExpression::Reduction VarLabel<R>::factorize() const {
+BaseExpression::Reduction VarLabel<R>::factorize(const std::map<std::string,small_id> aux_cc) const {
 	throw invalid_argument("You should have reduced this expression before factorize! (var-name/id: "+name+"/"+to_string(varId));
 }
 template <typename R>

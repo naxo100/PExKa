@@ -27,9 +27,9 @@ public:
 	Const (const location &loc,const float f);
 	Const (const location &loc,const int i);
 	Const (const location &loc,const bool b);
-	BaseExpression* eval(const pattern::Environment& env,
-			const VAR &vars,pattern::DepSet* deps = nullptr,
-			const char flags = 0) const override;
+	BaseExpression* eval(const pattern::Environment& env,const VAR &vars,
+			pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const override;
 	bool isConstant();
 	Const (const location &loc,const ConstType t);
 	Const* clone() const override;
@@ -46,9 +46,9 @@ class BoolBinaryOperation: public Expression {
 public:
 	BoolBinaryOperation(const location &loc,const Expression *e1,const Expression *e2,
 			BaseExpression::BoolOp o);
-	BaseExpression* eval(const pattern::Environment& env,
-			const VAR &vars,pattern::DepSet* deps = nullptr,
-			const char flags = 0) const override;
+	BaseExpression* eval(const pattern::Environment& env,const VAR &vars,
+			pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const override;
 	BoolBinaryOperation* clone() const override;
 	void show( string tabs = "" ) const;
 protected:
@@ -63,9 +63,9 @@ class AlgBinaryOperation: public Expression {
 public:
 	AlgBinaryOperation(const location &loc,const Expression *e1,
 			const Expression *e2,BaseExpression::AlgebraicOp o);
-	BaseExpression* eval(const pattern::Environment& env,
-			const VAR &vars,pattern::DepSet* deps = nullptr,
-			const char flags = 0) const override;
+	BaseExpression* eval(const pattern::Environment& env,const VAR &vars,
+			pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const override;
 	AlgBinaryOperation* clone() const override;
 	void show( string tabs = "" ) const;
 
@@ -82,9 +82,9 @@ class UnaryOperation: public Expression{
 public:
 	UnaryOperation(const location &loc,const Expression *e,
 			const BaseExpression::Unary f);
-	BaseExpression* eval(const pattern::Environment& env,
-			const VAR &vars,pattern::DepSet* deps = nullptr,
-			const char flags = 0) const override;
+	BaseExpression* eval(const pattern::Environment& env,const VAR &vars,
+			pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const override;
 	UnaryOperation* clone() const override;
 	void show( string tabs = "" ) const;
 protected:
@@ -98,9 +98,9 @@ protected:
 class NullaryOperation: public Expression {
 public:
 	BaseExpression::Nullary func;
-	BaseExpression* eval(const pattern::Environment& env,
-			const VAR &vars,pattern::DepSet* deps = nullptr,
-			const char flags = 0) const override;
+	BaseExpression* eval(const pattern::Environment& env,const VAR &vars,
+			pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const override;
 	NullaryOperation* clone() const override;
 	NullaryOperation(const location &loc,const BaseExpression::Nullary f);
 	void show( string tabs = "" ) const;
@@ -113,9 +113,9 @@ class Var : public Expression {
 public:
 	enum VarType {VAR,TOKEN,AUX};
 	Var(const location &loc,const VarType &t,const Id &label=Id());
-	BaseExpression* eval(const pattern::Environment& env,
-			const Expression::VAR &vars,pattern::DepSet* deps = nullptr,
-			const char flags = 0) const override;
+	BaseExpression* eval(const pattern::Environment& env,const Expression::VAR &vars,
+			pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const override;
 	Var* clone() const override;
 	void show( string tabs = "" ) const;
 protected:

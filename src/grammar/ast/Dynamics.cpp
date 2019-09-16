@@ -755,11 +755,20 @@ const state::BaseExpression* Rate::eval(const pattern::Environment& env,simulati
 		const vector<state::Variable*> &vars,two<pattern::DepSet> &deps,bool is_bi) const {
 	if(!base)
 		throw std::invalid_argument("Base rate cannot be null.");
-	auto base_rate = base->eval(env,vars,&deps.first,Expression::AUX_ALLOW+Expression::RHS);//TODO enum rate?
+	auto& lhs = r.getLHS();
+	map<string,tuple<int,small_id,small_id>> aux_map;
+	for(auto& aux_ccagst : lhs.getAux()){
+		auto cc_id = lhs.getComponent(get<0>(aux_ccagst.second)).getId();
+		aux_map.emplace(aux_ccagst.first,tuple<int,small_id,small_id>(cc_id,get<1>(aux_ccagst.second),get<2>(aux_ccagst.second)));
+	}
+	auto base_rate = base->eval(env,vars,&deps.first,
+			Expression::AUX_ALLOW+Expression::RHS,&aux_map);//TODO enum rate?
 	r.setRate(base_rate);
 	if(is_bi){
 		if(unary)
 			throw SemanticError("Cannot define a bidirectional rule with a rate for unary cases.",loc);
+		if(deps.first.count(Deps::AUX))
+			throw SemanticError("Cannot define a bidirectional rule with a rate depending on auxiliars.",loc);
 		if(!reverse){
 			ADD_WARN("Assuming same rate for both directions of bidirectional rule.",loc);
 		}
@@ -852,6 +861,14 @@ void Rule::eval(pattern::Environment& env,
 	auto& lhs_mix = env.declareMixture(*lhs_mix_p);
 	delete lhs_mix_p;
 	auto& rule = env.declareRule(label,lhs_mix,loc);
+
+
+	map<string,tuple<int,small_id,small_id>> aux_map;
+	for(auto& aux_ccagst : lhs_mix.getAux()){
+		auto cc_id = lhs_mix.getComponent(get<0>(aux_ccagst.second)).getId();
+		aux_map.emplace(aux_ccagst.first,tuple<int,small_id,small_id>(cc_id,get<1>(aux_ccagst.second),get<2>(aux_ccagst.second)));
+	}
+	lhs_mix.setAuxCoords(aux_map);
 
 	lhs_mix.addInclude(rule.getId());
 	two<pattern::DepSet> deps;//first-> | second<-

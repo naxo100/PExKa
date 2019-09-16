@@ -9,8 +9,10 @@
 #include "Node.h"
 #include "SiteGraph.h"
 #include "../matching/Injection.h"
+#include "../matching/InjRandSet.h"
 #include "../pattern/Environment.h"
 #include "../pattern/mixture/Agent.h"
+
 
 namespace state {
 
@@ -230,7 +232,7 @@ void Node::assign(EventInfo& ev,matching::InjRandContainer** injs,small_id id,co
 		//ev.null_actions.emplace(this,id);
 	//else{
 #ifdef DEBUG
-		cout << "site-value changed from " << interface[id].val.valueAs<FL_TYPE>();
+		cout << "[action] site-value changed from " << interface[id].val.valueAs<FL_TYPE>();
 #endif
 	interface[id].val = val;//TODO opertor= ??
 	interface[id].negativeUpdate(ev,injs,interface[id].deps.first);

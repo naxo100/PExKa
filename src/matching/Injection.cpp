@@ -36,11 +36,6 @@ const pattern::Pattern& Injection::pattern() const{
 	return ptrn;
 }
 
-bool Injection::isTrashed() const {
-	static auto trshd = size_t(-1);
-	return address == trshd;
-}
-
 
 /********** CcInjection **********/
 
@@ -110,6 +105,11 @@ const vector<Node*>& CcInjection::getEmbedding() const {
 	return ccAgToNode;
 }
 
+bool CcInjection::isTrashed() const {
+	static auto trshd = size_t(-1);
+	return address == trshd;
+}
+
 void CcInjection::codomain(vector<Node*>& injs,set<Node*>& cod) const {
 	int i = 0;
 	for(auto node_p : ccAgToNode){
@@ -154,10 +154,9 @@ CcValueInj::CcValueInj(const pattern::Mixture::Component& _cc) : CcInjection(_cc
 
 CcValueInj::CcValueInj(const CcInjection& inj) : CcInjection(inj) {};
 
-/*void CcValueInj::alloc(int address){
-	containers.at(address) =
-}*/
-
+bool CcValueInj::isTrashed() const {
+	return containers.empty();
+}
 
 void CcValueInj::addContainer(distribution_tree::DistributionTree<CcValueInj>& cont,int address){
 	containers[&cont] = address;
@@ -170,11 +169,13 @@ bool CcValueInj::removeContainer(distribution_tree::DistributionTree<CcValueInj>
 
 void CcValueInj::selfRemove(){
 	for(auto cont_addr : containers){
-		auto inj = cont_addr.first->erase(cont_addr.second);
+		auto inj = cont_addr.first->erase(cont_addr.second);//TODO this will delete cont, check iterator invalidation
+#ifdef DEBUG
 		if(this != inj)
 			throw invalid_argument("erasing another inj (CcValueInj::selfRemove())");
+#endif
 	}
-	containers.clear();//TODO is mandatory?
+	containers.clear();//is mandatory!
 }
 
 

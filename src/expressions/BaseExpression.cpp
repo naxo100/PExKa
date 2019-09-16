@@ -37,6 +37,30 @@ BaseExpression::~BaseExpression() {
 }
 ;
 
+
+
+BaseExpression::Reduction BaseExpression::reduceAndFactorize(
+		const std::map<std::string,small_id> aux_cc) const{
+	Reduction red(this->factorize(aux_cc));
+	VarVector vars;
+	auto factor = red.factor->reduce(vars);
+	if(factor != red.factor){
+		delete red.factor;
+		red.factor = factor;
+	}
+	for(auto& aux_f : red.aux_functions){
+		auto reduced = aux_f.second->reduce(vars);
+		if(reduced  != aux_f.second){
+			delete aux_f.second;
+			aux_f.second = reduced;
+		}
+	}
+	return red;
+}
+
+void BaseExpression::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) {}
+
+
 /*SomeValue BaseExpression::getValue(const std::unordered_map<std::string,int> *aux_values = nullptr) const{
  throw std::invalid_argument("Cannot call this expression without state.");
  }
@@ -46,7 +70,8 @@ BaseExpression::~BaseExpression() {
 
 template<bool isBool>
 BaseExpression* BaseExpression::makeBinaryExpression(BaseExpression *ex1,
-		BaseExpression *ex2, const int op) {
+		BaseExpression *ex2, typename std::conditional<isBool,
+		BaseExpression::BoolOp,BaseExpression::AlgebraicOp>::type op) {
 	Type type1 = ex1->getType();
 	Type type2 = ex2->getType();
 	typedef typename std::conditional<isBool, bool, FL_TYPE>::type BoolOrFloat;
@@ -100,7 +125,10 @@ BaseExpression* BaseExpression::makeBinaryExpression(BaseExpression *ex1,
 			bin_op = new BinaryOperation<BoolOrInt, bool, int>(ex1, ex2, op);
 			break;
 		case BOOL:
-			bin_op = new BinaryOperation<bool, bool, bool>(ex1, ex2, op);
+			if(isBool)
+				bin_op = new BinaryOperation<bool, bool, bool>(ex1, ex2, BaseExpression::BoolOp(op));//op is always BoolOp
+			else
+				throw std::invalid_argument("Cannot make an algebraic operation with booleans.");
 			break;
 		default:
 			SemanticError("Not a valid value for a binary operation",
@@ -115,9 +143,11 @@ BaseExpression* BaseExpression::makeBinaryExpression(BaseExpression *ex1,
 	return bin_op;
 }
 template BaseExpression* BaseExpression::makeBinaryExpression<true>(
-		BaseExpression *ex1, BaseExpression *ex2, const int op);
+		BaseExpression *ex1, BaseExpression *ex2, typename std::conditional<true,
+		BaseExpression::BoolOp,BaseExpression::AlgebraicOp>::type op);
 template BaseExpression* BaseExpression::makeBinaryExpression<false>(
-		BaseExpression *ex1, BaseExpression *ex2, const int op);
+		BaseExpression *ex1, BaseExpression *ex2, typename std::conditional<false,
+		BaseExpression::BoolOp,BaseExpression::AlgebraicOp>::type op);
 
 
 BaseExpression* BaseExpression::makeUnaryExpression(BaseExpression *ex,
@@ -166,6 +196,8 @@ std::string BaseExpression::toString() const {
 	return std::string("BaseExpression");
 }
 
+
+BaseExpression::Unfactorizable::Unfactorizable(const std::string& msg) : std::invalid_argument(msg) {}
 
 } //namespace
 

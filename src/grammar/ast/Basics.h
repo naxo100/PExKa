@@ -63,8 +63,8 @@ public:
 	virtual ~Expression()=0;
 
 	virtual expressions::BaseExpression* eval(const pattern::Environment& env,
-			const VAR &vars,pattern::DepSet* deps = nullptr,
-			const char flags = 0) const;
+			const VAR &vars,pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const = 0;
 	virtual bool isConstant();
 	virtual Expression* clone() const = 0;
 	virtual void show( string tabs = "" ) const;

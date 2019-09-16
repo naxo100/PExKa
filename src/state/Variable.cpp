@@ -102,9 +102,9 @@ FL_TYPE AlgebraicVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &aux
 	return expression->auxFactors(aux_values);
 }
 template <typename T>
-BaseExpression::Reduction AlgebraicVar<T>::factorize() const {
+BaseExpression::Reduction AlgebraicVar<T>::factorize(const std::map<std::string,small_id> aux_cc) const {
 	BaseExpression::Reduction r;
-	r.factors.push_back(this->clone());
+	r.factor = this->clone();
 	return r;
 }
 
@@ -125,6 +125,11 @@ BaseExpression* AlgebraicVar<T>::clone() const {
 template <typename T>
 BaseExpression* AlgebraicVar<T>::makeVarLabel() const{
 	return new VarLabel<T>(id,name);
+}
+
+template <typename T>
+void AlgebraicVar<T>::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) {
+	expression->setAuxCoords(aux_coords);
 }
 
 template <typename T>
@@ -214,9 +219,9 @@ FL_TYPE KappaVar::auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) co
 	return 0;
 }
 
-BaseExpression::Reduction KappaVar::factorize() const {
+BaseExpression::Reduction KappaVar::factorize(const std::map<std::string,small_id> aux_cc) const {
 	BaseExpression::Reduction r;
-	r.factors.push_back(this->clone());
+	r.factor = this->clone();
 	return r;
 }
 
@@ -285,9 +290,9 @@ FL_TYPE DistributionVar<T>::auxFactors(std::unordered_map<std::string,FL_TYPE> &
 }
 
 template <typename T>
-BaseExpression::Reduction DistributionVar<T>::factorize() const {
+BaseExpression::Reduction DistributionVar<T>::factorize(const std::map<std::string,small_id> aux_cc) const {
 	BaseExpression::Reduction r;
-	r.factors.push_back(this->clone());
+	r.factor = this->clone();
 	return r;
 }
 
@@ -398,9 +403,9 @@ bool TokenVar::operator==(const BaseExpression& exp) const {
 	return false;
 }
 
-BaseExpression::Reduction TokenVar::factorize() const {
+BaseExpression::Reduction TokenVar::factorize(const std::map<std::string,small_id> aux_cc) const {
 	BaseExpression::Reduction r;
-	r.factors.push_back(this->clone());
+	r.factor = this->clone();
 	return r;
 }
 

@@ -15,6 +15,7 @@ src/state/State.o: ../src/state/State.cpp ../src/state/State.h \
  ../src/state/../pattern/../expressions/AlgExpression.h \
  ../src/state/../pattern/../util/params.h \
  ../src/state/../data_structs/SimpleSet.h \
+ ../src/state/../expressions/Vars.h \
  ../src/state/../expressions/AlgExpression.h \
  ../src/state/../simulation/Counter.h \
  ../src/state/../simulation/../util/params.h \
@@ -96,6 +97,8 @@ src/state/State.o: ../src/state/State.cpp ../src/state/State.h \
 ../src/state/../pattern/../util/params.h:
 
 ../src/state/../data_structs/SimpleSet.h:
+
+../src/state/../expressions/Vars.h:
 
 ../src/state/../expressions/AlgExpression.h:
 

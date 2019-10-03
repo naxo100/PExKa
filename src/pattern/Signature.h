@@ -79,6 +79,7 @@ public:
 	 */
 	virtual bool isPossibleValue(const expressions::SomeValue &val) const = 0;
 	virtual expressions::SomeValue getDefaultValue() const = 0;
+	virtual two<expressions::SomeValue> getLimits() const;
 	virtual ~Site();
 
 	const string& getName() const;
@@ -113,6 +114,8 @@ public:
 	RangeSite(const string &nme);
 	void setBoundaries(T mn,T mx, T def);
 	expressions::SomeValue getDefaultValue() const override;
+
+	virtual two<expressions::SomeValue> getLimits() const override;
 };
 
 //class Token {};

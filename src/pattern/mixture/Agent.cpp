@@ -137,8 +137,13 @@ void Mixture::Agent::setSiteExprValue(small_id mix_site,BaseExpression* expr){
 void Mixture::Agent::setSiteAuxPattern(small_id mix_site, BaseExpression** vals){
 	//interface[mix_site].aux_id = id;
 	interface[mix_site].label = Site::AUX;//expression site
-	for(int i = 0; i < 3; i++)
-		interface[mix_site].values[i] = vals[i];
+	interface[mix_site].values[0] = vals[0];
+	interface[mix_site].values[2] = vals[2];
+	if(vals[1] ){//&& (vals[0] || vals[2])){
+		if(!dynamic_cast<expressions::Auxiliar<FL_TYPE>*>(vals[1]))
+			throw invalid_argument("Pattern mixtures can't contain expressions as auxiliar matching.");
+		delete vals[1];
+	}
 }
 /*
 void Mixture::Agent::setSiteMinExpr(small_id mix_site,const BaseExpression* expr){

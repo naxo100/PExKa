@@ -38,6 +38,7 @@ public:
 	virtual Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask,
 			const state::State& state);
 	virtual void erase(Injection* inj) = 0;
+	virtual void clear() = 0;
 
 	virtual void selectRule(int rid,small_id cc) const;
 
@@ -45,6 +46,9 @@ public:
 			const map<string,two<small_id>>& aux_map, const state::State &state) const = 0;
 	//vector<CcInjection*>::iterator begin();
 	//vector<CcInjection*>::iterator end();
+
+
+	virtual void fold(const function<void (const Injection*)> func) const = 0;
 };
 
 
@@ -66,10 +70,11 @@ public:
 			const state::State& state,small_id root = 0) override;*/
 	//Injection* emplace(Injection* base_inj,map<Node*,Node*>& mask) override;
 	void erase(Injection* inj) override;
+	virtual void clear() override;
 
 	FL_TYPE sumInternal(const expressions::BaseExpression* aux_func,
 			const map<string,two<small_id>>& aux_map, const state::State &state) const override;
-
+	virtual void fold(const function<void (const Injection*)> func) const;
 	//vector<CcInjection*>::iterator begin();
 	//vector<CcInjection*>::iterator end();
 };
@@ -110,12 +115,14 @@ public:
 	FL_TYPE getM2() const;
 
 	void erase(Injection* inj) override;
+	virtual void clear() override;
 
 
 	void selectRule(int rid,small_id cc) const override;
 
 	FL_TYPE sumInternal(const expressions::BaseExpression* aux_func,
 				const map<string,two<small_id>>& aux_map, const state::State &state) const override;
+	virtual void fold(const function<void (const Injection*)> func) const;
 	//void addHint(FL_TYPE value);
 };
 

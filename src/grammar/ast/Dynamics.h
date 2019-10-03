@@ -159,10 +159,14 @@ public:
 	//STOP,SNAPSHOT,FLUX,FLUXOFF,PRINT
 	Effect(const location &l,const Action &a,const list<StringExpression> &str);
 	//PRINTF
-	Effect(const location &l,const Action &a,const list<StringExpression> &str1,const list<StringExpression> &str2);
+	Effect(const location &l,const Action &a,const list<StringExpression> &str1,
+			const list<StringExpression> &str2);
+	//HISTOGRAM
+	Effect(const location &l,const list<StringExpression> &str,
+			const VarValue &bins,list<Agent>& mix,const Expression* aux_expr = nullptr);
 
-	Effect(const Effect &eff);
-	Effect& operator=(const Effect& eff);
+	//Effect(const Effect &eff);
+	//Effect& operator=(const Effect& eff);
 
 	simulation::Perturbation::Effect* eval(pattern::Environment& env,
 			const vector<state::Variable*> &vars) const;

@@ -116,6 +116,8 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 		return KappaParser::make_INTRO(loc);
 	else if(!strcmp(yytext,"$SNAPSHOT"))
 		return KappaParser::make_SNAPSHOT(loc);
+	else if(!strcmp(yytext,"$HISTOGRAM"))
+		return KappaParser::make_SNAPSHOT(loc);
 	else if(!strcmp(yytext,"$STOP"))
 		return KappaParser::make_STOP(loc);
 	else if(!strcmp(yytext,"$FLUX"))
@@ -168,8 +170,9 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 
 ":"			return KappaParser::make_TYPE(loc);
 ";"			return KappaParser::make_SEMICOLON(loc);
-"\""[^\"]*"\""	{ 
-	return KappaParser::make_STRING(yytext,loc); }
+"\""[^\"]*"\""	{
+	yytext[strlen(yytext)-1] = 0;
+	return KappaParser::make_STRING(&(yytext[1]),loc); }
 
 [\n]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);
 [\r]+		loc.lines (yyleng); loc.step ();return KappaParser::make_NEWLINE(loc);

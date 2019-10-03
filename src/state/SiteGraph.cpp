@@ -30,6 +30,7 @@ SiteGraph::~SiteGraph() {
 void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 		const State& state,vector<Node*>&& buff_nodes) {
 	unsigned i = 0;
+	AuxNames aux_map;//TODO should replace with non empty map?
 	if(n < MULTINODE_LIM) {//=> n = 1
 		for(unsigned j = 0; j < n; j++){
 			i = 0;
@@ -39,7 +40,7 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 				for(auto id_site : *p_ag){
 					if(!id_site.second.isEmptySite()){
 						if(id_site.second.values[1])
-							node->setState(id_site.first,id_site.second.values[1]->getValue(state));
+							node->setState(id_site.first,id_site.second.values[1]->getValue(state,aux_map));
 						else
 							node->setState(id_site.first, id_site.second.label);
 					}
@@ -59,7 +60,7 @@ void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 			for(auto id_site : *p_ag){
 				if(!id_site.second.isEmptySite()){
 					if(id_site.second.values[1])
-						node->setState(id_site.first,id_site.second.values[1]->getValue(state));
+						node->setState(id_site.first,id_site.second.values[1]->getValue(state,aux_map));
 					else
 						node->setState(id_site.first, id_site.second.label);
 				}

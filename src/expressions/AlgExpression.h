@@ -34,7 +34,7 @@ public:
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const
 					override;
 	virtual SomeValue getValue(const state::State& state,
-			const AuxMap&& aux_values = AuxMap()) const override;
+			const AuxMap& aux_values) const override;
 	virtual bool operator==(const BaseExpression& exp) const override = 0;
 
 	//virtual void getNeutralAuxMap(

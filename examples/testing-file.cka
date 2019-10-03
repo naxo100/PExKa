@@ -1,7 +1,7 @@
 
 
 %agent: Person(RightHand,Trust~High~Mod~LowInst~Low,money~[0,[inf]], \
-				inter~[0,[inf]],coop~[0,[inf]])
+				inter~['inter-min','inter-max'],coop~[0,[inf]])
 
 
 #payoff-matrix
@@ -55,13 +55,13 @@
                 @ 5*c1*c2
 
 'end-deal_CD' Person(RightHand!1,money~{m1},coop~{c1},inter~{i1}),\
-					Person(RightHand!1,money~{m2},coop~{c2}) -> \
+					Person(RightHand!1,money~{m2},coop~{c2},inter~{i2}) -> \
 				Person(RightHand,money~{m1+'cd_payoff'},inter~{i1-(i1-'inter-min')*'inter-step'}),\
 					Person(RightHand,money~{m2+'dc_payoff'}) \
 				@ 2*5*c1*(1-c2)
 
-'end-deal_DD' Person(RightHand!1,money~{m1},coop~{c1}),\
-					Person(RightHand!1,money~{m2},coop~{c2}) -> \
+'end-deal_DD' Person(RightHand!1,money~{m1},coop~{c1},inter~{i1}),\
+					Person(RightHand!1,money~{m2},coop~{c2},inter~{i2}) -> \
 				Person(RightHand,money~{m1+'dd_payoff'}),\
 					Person(RightHand,money~{m1+'dd_payoff'}) \
 				@ 5*(1-c1)*(1-c2)
@@ -99,9 +99,13 @@
 %obs: 'count' |count|
 
 
+%mod: repeat [T] [mod] 1 = 0 do \
+	$HISTOGRAM (10) "histrogram-money" Person(money~{m}) \
+	until [false]
 
-
-
+%mod: repeat [T] [mod] 1 = 0 do \
+	$HISTOGRAM (10) "histrogram-interaction" Person(inter~{i}) \
+	until [false]
 
 
 

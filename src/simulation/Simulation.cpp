@@ -33,8 +33,8 @@ void Simulation::setCells(list<unsigned int>& _cells,const VarVector& vars){
 	auto distr = uniform_int_distribution<int>();
 	for(auto cell_id : _cells){
 		cells.emplace(piecewise_construct,forward_as_tuple(cell_id),
-				forward_as_tuple(env.size<state::TokenVar>(),vars,
-						env.getCompartmentByCellId(cell_id).getVolume(),plot,env,distr(randGen)));
+				forward_as_tuple(*this,vars,env.getCompartmentByCellId(cell_id).getVolume(),
+						plot,env,distr(randGen)));
 	}
 }
 
@@ -61,6 +61,10 @@ void Simulation::run(const Parameters& params){
 		}
 		counter.advanceTime(tau);
 	//}
+}
+
+int Simulation::getId() const {
+	return id;
 }
 
 //TODO

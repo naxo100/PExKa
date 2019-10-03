@@ -32,6 +32,8 @@ src/main.o: ../src/main.cpp ../src/grammar/KappaLexer.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../pattern/Signature.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../data_structs/SimpleSet.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../pattern/mixture/Mixture.h \
+ ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/Vars.h \
+ ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/grammar/ast/../../pattern/../simulation/Perturbation.h \
  ../src/grammar/ast/../../pattern/../simulation/Rule.h \
@@ -143,6 +145,10 @@ src/main.o: ../src/main.cpp ../src/grammar/KappaLexer.h \
 ../src/grammar/ast/../../pattern/../simulation/../state/../data_structs/SimpleSet.h:
 
 ../src/grammar/ast/../../pattern/../simulation/../state/../pattern/mixture/Mixture.h:
+
+../src/grammar/ast/../../pattern/../simulation/../state/../expressions/Vars.h:
+
+../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h:
 
 ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h:
 

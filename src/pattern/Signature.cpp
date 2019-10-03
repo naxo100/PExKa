@@ -78,6 +78,11 @@ const std::string& Signature::Site::getName() const {
 	return this->name;
 }
 
+two<expressions::SomeValue> Signature::Site::getLimits() const {
+	throw invalid_argument("This site doesn't have limits.");
+}
+
+
 ///EmptySite
 Signature::EmptySite::EmptySite(const string& nme) : Site(nme){}
 bool Signature::EmptySite::isPossibleValue(const state::SomeValue &val) const {
@@ -139,6 +144,10 @@ state::SomeValue Signature::RangeSite<T>::getDefaultValue() const {
 	return state::SomeValue(byDefault);
 }
 
+template <typename T>
+two<SomeValue> Signature::RangeSite<T>::getLimits() const {
+	return make_pair(SomeValue(min),SomeValue(max));
+}
 
 template <>
 bool Signature::RangeSite<FL_TYPE>::isPossibleValue(const state::SomeValue &val) const {

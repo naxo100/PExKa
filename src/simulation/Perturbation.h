@@ -11,6 +11,8 @@
 #include "../pattern/mixture/Mixture.h"
 #include "Rule.h"
 
+#include <fstream>
+
 
 namespace state {
 	class State;
@@ -110,6 +112,29 @@ public:
 	~UpdateToken();
 
 	void apply(state::State &state) const override;
+};
+
+class Histogram : public Perturbation::Effect {
+	mutable vector<unsigned> bins;
+	mutable vector<FL_TYPE> points;
+	mutable float min, max;
+	string filename,filetype;
+	BaseExpression* func;
+	pattern::Mixture& mix;
+	mutable bool newLim;
+	bool fixedLim;
+
+public:
+	Histogram(const Environment& env,int _bins,string file_name,Mixture& _mix,BaseExpression* f = nullptr);
+	~Histogram();
+
+	void apply(state::State& state) const override;
+
+	void setPoints() const;
+	void tag(FL_TYPE val) const;
+
+	void printHeader(ofstream &file) const;
+
 };
 
 

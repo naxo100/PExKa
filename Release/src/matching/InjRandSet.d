@@ -24,6 +24,8 @@ src/matching/InjRandSet.o: ../src/matching/InjRandSet.cpp \
  ../src/matching/../simulation/../state/../pattern/../util/params.h \
  ../src/matching/../simulation/../state/../data_structs/SimpleSet.h \
  ../src/matching/../simulation/../state/../pattern/mixture/Mixture.h \
+ ../src/matching/../simulation/../state/../expressions/Vars.h \
+ ../src/matching/../simulation/../state/../expressions/AlgExpression.h \
  ../src/matching/../simulation/../state/../expressions/AlgExpression.h \
  ../src/matching/../state/Node.h ../src/matching/../state/State.h \
  ../src/matching/../state/Variable.h \
@@ -109,6 +111,10 @@ src/matching/InjRandSet.o: ../src/matching/InjRandSet.cpp \
 ../src/matching/../simulation/../state/../data_structs/SimpleSet.h:
 
 ../src/matching/../simulation/../state/../pattern/mixture/Mixture.h:
+
+../src/matching/../simulation/../state/../expressions/Vars.h:
+
+../src/matching/../simulation/../state/../expressions/AlgExpression.h:
 
 ../src/matching/../simulation/../state/../expressions/AlgExpression.h:
 

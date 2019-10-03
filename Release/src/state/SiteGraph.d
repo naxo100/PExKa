@@ -13,6 +13,8 @@ src/state/SiteGraph.o: ../src/state/SiteGraph.cpp \
  ../src/state/../pattern/mixture/Mixture.h \
  ../src/state/../pattern/mixture/../../util/params.h \
  ../src/state/../pattern/mixture/../../expressions/AlgExpression.h \
+ ../src/state/../expressions/Vars.h \
+ ../src/state/../expressions/AlgExpression.h \
  ../src/state/../expressions/AlgExpression.h \
  ../src/state/../pattern/Environment.h \
  ../src/state/../pattern/Signature.h \
@@ -84,6 +86,10 @@ src/state/SiteGraph.o: ../src/state/SiteGraph.cpp \
 ../src/state/../pattern/mixture/../../util/params.h:
 
 ../src/state/../pattern/mixture/../../expressions/AlgExpression.h:
+
+../src/state/../expressions/Vars.h:
+
+../src/state/../expressions/AlgExpression.h:
 
 ../src/state/../expressions/AlgExpression.h:
 

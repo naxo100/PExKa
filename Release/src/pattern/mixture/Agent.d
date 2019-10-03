@@ -31,13 +31,14 @@ src/pattern/mixture/Agent.o: ../src/pattern/mixture/Agent.cpp \
  ../src/pattern/mixture/../../simulation/../state/../pattern/Signature.h \
  ../src/pattern/mixture/../../simulation/../state/../data_structs/SimpleSet.h \
  ../src/pattern/mixture/../../simulation/../state/../pattern/mixture/Mixture.h \
+ ../src/pattern/mixture/../../simulation/../state/../expressions/Vars.h \
+ ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/mixture/../../simulation/Perturbation.h \
  ../src/pattern/mixture/../../simulation/Rule.h \
  ../src/pattern/mixture/../../util/Exceptions.h \
  ../src/pattern/mixture/../../util/../grammar/location.hh \
- ../src/pattern/mixture/../../expressions/Vars.h \
- ../src/pattern/mixture/../../expressions/AlgExpression.h
+ ../src/pattern/mixture/../../expressions/Vars.h
 
 ../src/pattern/mixture/Agent.h:
 
@@ -105,6 +106,10 @@ src/pattern/mixture/Agent.o: ../src/pattern/mixture/Agent.cpp \
 
 ../src/pattern/mixture/../../simulation/../state/../pattern/mixture/Mixture.h:
 
+../src/pattern/mixture/../../simulation/../state/../expressions/Vars.h:
+
+../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h:
+
 ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h:
 
 ../src/pattern/mixture/../../simulation/Perturbation.h:
@@ -116,5 +121,3 @@ src/pattern/mixture/Agent.o: ../src/pattern/mixture/Agent.cpp \
 ../src/pattern/mixture/../../util/../grammar/location.hh:
 
 ../src/pattern/mixture/../../expressions/Vars.h:
-
-../src/pattern/mixture/../../expressions/AlgExpression.h:

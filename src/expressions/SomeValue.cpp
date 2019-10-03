@@ -91,6 +91,23 @@ bool SomeValue::operator ==(const SomeValue& val) const {
 	return val.fVal == fVal && val.t == t;
 }
 
+std::string SomeValue::toString() const {
+	switch(t){
+		case FLOAT:
+			return std::to_string(fVal);
+		case INT:
+			return std::to_string(iVal);
+		case BOOL:
+			return std::to_string(bVal);
+		case SMALL_ID:
+			return std::to_string(int(smallVal));
+		case SHORT_ID:
+			return std::to_string(int(shortVal));
+		default:
+			return "NaN";
+		}
+}
+
 std::ostream& operator <<(std::ostream& out,const SomeValue& val) {
 	switch(val.t){
 	case FLOAT:

@@ -19,10 +19,11 @@ InjRandContainer::InjRandContainer(const pattern::Mixture::Component& _cc) : cc(
 
 InjRandContainer::~InjRandContainer(){
 	for(auto inj_it = freeInjs.begin(); inj_it != freeInjs.end(); inj_it++){
-		//test if there is repeats injs in the list
-		/*for(auto inj2_it = next(inj_it); inj2_it != freeInjs.end(); inj2_it++)
+#ifdef DEBUG
+		for(auto inj2_it = next(inj_it); inj2_it != freeInjs.end(); inj2_it++)
 			if(*inj_it == *inj2_it)
-				throw invalid_argument("inj is repeated in freeinjs!");*/
+				throw invalid_argument("inj is repeated in freeinjs!");
+#endif
 		delete *inj_it;
 	}
 }
@@ -125,8 +126,10 @@ void InjRandSet::insert(CcInjection* inj,const state::State& state){
 }
 
 void InjRandSet::erase(Injection* inj){
-	//if(container.empty())
-	//	throw invalid_argument("InjRandSet is empty, what injection are you trying to delete?");
+#ifdef DEBUG
+	if(container.empty())
+		throw out_of_range("InjRandSet is empty, what injection are you trying to delete?");
+#endif
 	if(inj->getAddress() < multiCount)
 		multiCount--;
 	freeInjs.push_back(static_cast<CcInjection*>(inj));
@@ -137,6 +140,16 @@ void InjRandSet::erase(Injection* inj){
 	inj->alloc(size_t(-1));//dealloc
 	container.pop_back();
 	counter -= inj->count();
+}
+
+void InjRandSet::clear() {
+	multiCount = 0;
+	counter = 0;
+	for(auto inj : container){
+		inj->alloc(size_t(-1));
+		freeInjs.push_back(inj);
+	}
+	container.clear();
 }
 
 
@@ -151,7 +164,7 @@ FL_TYPE InjRandSet::partialReactivity() const {
 
 FL_TYPE InjRandSet::sumInternal(const expressions::BaseExpression* aux_func,
 			const map<string,two<small_id>>& aux_map, const state::State &state) const {
-	expressions::AuxMap aux_values;
+	expressions::AuxNames aux_values;
 	auto func = [&](const CcInjection* inj) -> FL_TYPE {
 		for(auto aux_coords : aux_map)
 			aux_values[aux_coords.first] = inj->getEmbedding()[0][aux_coords.second.first].
@@ -162,6 +175,11 @@ FL_TYPE InjRandSet::sumInternal(const expressions::BaseExpression* aux_func,
 	for(auto inj : container)
 		sum += func(inj);
 	return sum;
+}
+
+void InjRandSet::fold(const function<void (const Injection*)> func) const{
+	for(auto inj : container)
+		func(inj);
 }
 
 
@@ -210,20 +228,19 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc,const vector<sim
 InjRandTree::~InjRandTree(){
 	for(auto inj : infList)
 		delete inj;
-	roots.begin()->second->tree->deleteContent();//delete only injs inside tree
+	//roots.begin()->second->tree->deleteContent();//delete only injs inside tree
 	set<Root*> deleted;
-	for(auto root : roots)
-		if(root.second && !deleted.count(root.second)){
-			delete root.second;
-			deleted.emplace(root.second);
-		}
+	for(auto root : roots_to_push){
+		root.second->tree->deleteContent();//delete only injs inside treeif(root.second && !deleted.count(root.second)){
+		delete root.second;
+	}
 }
 
 void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 	auto ccval_inj = static_cast<CcValueInj*>(inj);
 	for(auto& ridcc_tree : roots_to_push){// for each (rid,cc_index) that is using this cc-pattern
 		auto& r = state.getEnv().getRules()[ridcc_tree.first.first];
-		state::AuxMap aux_values;
+		state::AuxNames aux_values;
 		for(auto& aux : r.getLHS().getAux()){
 			if(get<0>(aux.second) == ridcc_tree.first.second)// to select proper CC
 				aux_values[aux.first] =
@@ -280,6 +297,16 @@ void InjRandTree::erase(Injection* inj){
 	invalidations++;
 }
 
+
+void InjRandTree::clear() {
+	counter = 0;
+	invalidations = 0;
+	list<CcValueInj*> frees;
+	for(auto root : roots_to_push)
+		root.second->tree->clear(&frees);
+	freeInjs.insert(freeInjs.end(),frees.begin(),frees.end());
+}
+
 CcInjection* InjRandTree::newInj() const{
 	return new CcValueInj(cc);
 }
@@ -324,14 +351,18 @@ void InjRandTree::selectRule(int rid,small_id cc) const {
 
 FL_TYPE InjRandTree::sumInternal(const expressions::BaseExpression* aux_func,
 			const map<string,two<small_id>>& aux_map, const state::State &state) const {
-	expressions::AuxMap aux_values;
+	expressions::AuxNames aux_values;
 	function<FL_TYPE (const CcValueInj*)> func = [&](const CcValueInj* inj) -> FL_TYPE {
-		for(auto aux_coords : aux_map)
-			aux_values[aux_coords.first] = inj->getEmbedding()[0][aux_coords.second.first].
+		for(auto& aux_coords : aux_map)
+			aux_values[aux_coords.first] = inj->getEmbedding()[aux_coords.second.first]->
 				getInternalState(aux_coords.second.second).valueAs<FL_TYPE>();
 		return aux_func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 	};
 	return roots.begin()->second->tree->sumInternal(func);
+}
+
+void InjRandTree::fold(const function<void (const Injection*)> func) const{
+	roots.begin()->second->tree->fold(func);
 }
 
 

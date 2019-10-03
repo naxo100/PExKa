@@ -32,6 +32,8 @@ src/grammar/ast/AlgebraicExpressions.o: \
  ../src/grammar/ast/../../pattern/../simulation/../state/../pattern/Signature.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../data_structs/SimpleSet.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../pattern/mixture/Mixture.h \
+ ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/Vars.h \
+ ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/grammar/ast/../../pattern/../simulation/Perturbation.h \
  ../src/grammar/ast/../../pattern/../simulation/Rule.h \
@@ -41,7 +43,6 @@ src/grammar/ast/AlgebraicExpressions.o: \
  ../src/grammar/ast/../../pattern/Dependencies.h \
  ../src/grammar/ast/../../expressions/Constant.h \
  ../src/grammar/ast/../../expressions/Vars.h \
- ../src/grammar/ast/../../expressions/AlgExpression.h \
  ../src/grammar/ast/../../pattern/mixture/Component.h \
  ../src/grammar/ast/../../pattern/mixture/Mixture.h
 
@@ -111,6 +112,10 @@ src/grammar/ast/AlgebraicExpressions.o: \
 
 ../src/grammar/ast/../../pattern/../simulation/../state/../pattern/mixture/Mixture.h:
 
+../src/grammar/ast/../../pattern/../simulation/../state/../expressions/Vars.h:
+
+../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h:
+
 ../src/grammar/ast/../../pattern/../simulation/../state/../expressions/AlgExpression.h:
 
 ../src/grammar/ast/../../pattern/../simulation/Perturbation.h:
@@ -128,8 +133,6 @@ src/grammar/ast/AlgebraicExpressions.o: \
 ../src/grammar/ast/../../expressions/Constant.h:
 
 ../src/grammar/ast/../../expressions/Vars.h:
-
-../src/grammar/ast/../../expressions/AlgExpression.h:
 
 ../src/grammar/ast/../../pattern/mixture/Component.h:
 

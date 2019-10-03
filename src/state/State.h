@@ -22,6 +22,7 @@
 
 namespace simulation {
 	class Plot;
+	class Simulation;
 }
 
 namespace state {
@@ -38,6 +39,7 @@ struct EventInfo;
 class State {
 	friend class RateVar;
 
+	const simulation::Simulation& sim;
 	const pattern::Environment& env;
 	SiteGraph graph;
 	const state::BaseExpression& volume;
@@ -91,7 +93,8 @@ public:
 	 * @param _vars the variable vector.
 	 * @param vol the volume of this state.
 	 */
-	State(size_t tok_count,const std::vector<Variable*>& _vars,
+	State(const simulation::Simulation& sim,
+			const std::vector<Variable*>& _vars,
 			const BaseExpression& vol,simulation::Plot& plot,
 			const pattern::Environment& env,int seed);
 	~State();
@@ -117,6 +120,7 @@ public:
 
 	FL_TYPE getTotalActivity() const;
 	default_random_engine& getRandomGenerator() const;
+	matching::InjRandContainer& getInjContainer(int cc_id);
 	const matching::InjRandContainer& getInjContainer(int cc_id) const;
 
 	/** \brief Add nodes to the SiteGraph using a fully described mixture.
@@ -154,6 +158,7 @@ public:
 	void initActTree();
 
 	const pattern::Environment& getEnv() const;
+	const simulation::Simulation& getSim() const;
 
 	/** \brief Print the state for debugging purposes.
 	 **/

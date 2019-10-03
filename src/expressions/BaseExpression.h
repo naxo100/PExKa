@@ -25,7 +25,24 @@ typedef std::vector<state::Variable*> VarVector;
 
 namespace expressions {
 
-typedef std::unordered_map<std::string, FL_TYPE> AuxMap;
+//typedef std::unordered_map<std::string, FL_TYPE> AuxMap;
+//typedef std::unordered_map<two<small_id>,FL_TYPE> AuxCoords;
+
+template <typename T> class Auxiliar;
+
+template <typename T>
+class AuxValueMap {
+public:
+	virtual ~AuxValueMap();
+	virtual FL_TYPE& operator[](const Auxiliar<T>& a) = 0;
+	virtual FL_TYPE at(const Auxiliar<T>& a) const = 0;
+	virtual void clear() = 0;
+	virtual size_t size() const = 0;
+};
+
+typedef AuxValueMap<FL_TYPE> AuxMap;
+
+
 
 /** \brief Base class for algebraic and every number-evaluated expression.
  *
@@ -72,7 +89,8 @@ public:
 	virtual SomeValue getValue(const VarVector &consts,
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const = 0;
 	virtual SomeValue getValue(const state::State& state,
-			const AuxMap&& aux_values = AuxMap()) const = 0;
+			const AuxMap& aux_values) const = 0;
+	virtual SomeValue getValue(const state::State& state) const;
 
 	/** \brief Return an int vector that represents this expression
 	 * as an equation on auxiliars.

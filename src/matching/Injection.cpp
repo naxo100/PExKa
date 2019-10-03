@@ -62,7 +62,7 @@ bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 	//for(auto elem : _cc.getGraph())
 	//	printf("(%d,%d)->(%d,%d); ",elem.first.first,elem.first.second,elem.second.first,elem.second.second);
 	//cout << endl;
-	expressions::AuxMap aux_map;
+	expressions::AuxCoords aux_map;
 	while(!q.empty()){
 		ag = &_cc.getAgent(q.front().first);
 		curr_node = q.front().second;
@@ -83,10 +83,10 @@ bool CcInjection::reuse(const pattern::Mixture::Component& _cc,Node& node,
 					}
 					next_node.second = nullptr;
 				}
-				if(id_site.second.label == pattern::Mixture::Site::AUX && id_site.second.values[1]){
-					auto aux_expr = dynamic_cast<const expressions::Auxiliar<FL_TYPE>*>(id_site.second.values[1]);
-					if(aux_expr)
-						aux_map[aux_expr->toString()] = curr_node->getInternalState(id_site.first).valueAs<FL_TYPE>();
+				if(id_site.second.label == pattern::Mixture::Site::AUX){
+					//auto aux_expr = dynamic_cast<const expressions::Auxiliar<FL_TYPE>*>(id_site.second.values[1]);
+					//if(aux_expr)
+						aux_map[make_pair(q.front().first,id_site.first)] = curr_node->getInternalState(id_site.first).valueAs<FL_TYPE>();
 				}
 			}
 			else

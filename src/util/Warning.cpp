@@ -31,27 +31,35 @@ const std::string Warning::what() const{
 WarningStack WarningStack::stack = WarningStack();
 
 
-WarningStack::WarningStack(){}
+WarningStack::WarningStack() : counts(1){}
 WarningStack& WarningStack::getStack() {
 	return stack;
 }
 
-int WarningStack::global_id = 1;
+//int WarningStack::global_id = 1;
 int WarningStack::add(int id,const std::string &msg,const yy::location &loc){
-
-	if(id == 0)
-		id = ++global_id;
-	if(this->count(id) < MAX_WARNS-1)
-		emplace(id,Warning(msg,loc));
-	else if(this->count(id) == MAX_WARNS-1)
-		emplace(id,Warning(msg+" (Shutting down this warning).",loc));
+	if(id == 0){
+		id = counts.size();
+		counts.push_back(1);
+	}
+	else
+		counts[id]++;
+	if(counts[id] < MAX_WARNS-1)
+		push_back(Warning(msg,loc));
+	else if(counts[id] == MAX_WARNS-1)
+		push_back(Warning(msg+" (Shutting down this warning).",loc));
 	return id;
 }
 
-void WarningStack::show() const {
-	for(auto& id_warn : *this){
-		std::cout << id_warn.second.what() << std::endl;
+void WarningStack::show(bool show_nowarns) {
+	#pragma omp critical
+	{
+		for(auto& id_warn : *this){
+			std::cout << id_warn.what() << std::endl;
+		}
+		clear();
 	}
-	if(size() == 0)
+	if(size() == 0 && show_nowarns)
 		std::cout << "No warnings." << std::endl;
+
 }

@@ -12,6 +12,7 @@
 #include <functional>
 
 #include "../util/params.h"
+#include <list>
 
 
 namespace distribution_tree {
@@ -48,8 +49,10 @@ public:
 	virtual void push(T* inj,FL_TYPE val) = 0;
 	virtual void erase(T* inj) = 0;
 	virtual T* erase(int address) = 0;
+	virtual void clear(list<T*> *free = nullptr) = 0;
 
 	virtual FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const = 0;
+	virtual void fold(const function<void (const T*)> func) const = 0;
 	virtual FL_TYPE squares() = 0;
 
 	virtual void treeBalance(DistributionTree<T>*& parent_pointer);
@@ -61,6 +64,9 @@ class Leaf;
 
 template <typename T>
 class Node : public DistributionTree<T> {
+	/* sum stores the value of all injs inside and down
+	 * smaller stores injs < value
+	 */
 	friend class DistributionTree<T>;
 	friend class Leaf<T>;
 	vector<T*> injs; //equals
@@ -82,6 +88,7 @@ public:
 	virtual void push(T* inj,FL_TYPE val) override;
 	virtual void erase(T* inj) override;
 	virtual T* erase(int address) override;
+	virtual void clear(list<T*> *free = nullptr) override;
 	virtual void decrease(FL_TYPE val,unsigned n = 1) override;
 
 	virtual void leafBalance(Leaf<T>* full,DistributionTree<T>* n);
@@ -89,6 +96,7 @@ public:
 	virtual float treeHeight() const override;
 
 	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
+	virtual void fold(const function<void (const T*)> func) const;
 	virtual FL_TYPE squares();
 };
 
@@ -118,11 +126,13 @@ public:
 	virtual void push(T* elem,FL_TYPE val) override;
 	virtual void erase(T* elem) override;
 	virtual T* erase(int address) override;
+	virtual void clear(list<T*> *free) override;
 
 
 	virtual void decrease(FL_TYPE val, unsigned n = 1) override;
 
 	FL_TYPE sumInternal(const function<FL_TYPE (const T*)> &func) const override;
+	virtual void fold(const function<void (const T*)> func) const;
 	virtual FL_TYPE squares();
 
 

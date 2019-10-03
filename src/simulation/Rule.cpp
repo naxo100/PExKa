@@ -461,7 +461,7 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		const Mixture::Component& test_cc,multimap<ag_st_id,ag_st_id>& already_done,
 		const VarVector& vars,const Environment& env) const {
 	map<small_id,small_id> visited;
-	expressions::AuxMap empty_aux;
+	//expressions::AuxMap empty_aux;
 	auto& rhs_cc = rhs->getComponent(rhs_cc_id);
 	while(to_test.size()){//test connected agents of emb
 		if(to_test.front().first.second != to_test.front().second.second)
@@ -599,7 +599,7 @@ void Rule::checkInfluence(const Environment &env,const VarVector& vars) {
 		}
 	}
 	//small_id i = 0;
-	expressions::AuxMap aux_map;
+	//expressions::AuxMap aux_map;
 	for(auto n : news){
 		auto& new_ag = rhs->getAgent(n.first);
 		for(auto& ag : env.getAgentPatterns(new_ag.getId())){

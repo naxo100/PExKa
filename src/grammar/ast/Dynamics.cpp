@@ -198,7 +198,6 @@ void Site::eval(pattern::Environment &env,const vector<state::Variable*> &consts
 		break;
 	case SiteState::RANGE:
 		try{
-			VarVector consts;//TODO use a real VarVector
 			BaseExpression* range[3];
 			if(!stateInfo.evalRange(env,consts,range)){
 				site = &sign.addSite<pattern::Signature::RangeSite<FL_TYPE> >(name);
@@ -341,9 +340,15 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 		}}//double try
 
 		if((stateInfo.range[0] || stateInfo.range[2]) && !(ptrn_flag & Mixture::Info::PATTERN))
-			throw SemanticError("Can't use an inequation pattern at RHS.",stateInfo.loc);
+			throw SemanticError("Can't use an inequation pattern here (maybe RHS?).",stateInfo.loc);
 		//else {
-		if(stateInfo.range[1]){
+		if(ptrn_flag & Mixture::Info::PATTERN){
+			if(stateInfo.range[1])
+				values[1] = stateInfo.range[1]->eval
+						(env,consts,nullptr,ptrn_flag|Expression::FORCE);
+			agent.setSiteAuxPattern(site_id,values);
+		}
+		else if(stateInfo.range[1]){
 			values[1] = stateInfo.range[1]->eval
 					(env,consts,nullptr,ptrn_flag|Expression::FORCE);
 			agent.setSiteExprValue(site_id,values[1]);
@@ -351,7 +356,7 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 		else{
 			values[1] = Var(stateInfo.aux.loc,Var::AUX,stateInfo.aux).eval
 					(env, consts, nullptr, ptrn_flag);//TODO is this mandatory???
-			agent.setSiteAuxPattern(site_id,values);
+			agent.setSiteExprValue(site_id,values[1]);
 		}
 		break;
 	case SiteState::EXPR:
@@ -496,7 +501,11 @@ Effect::Effect(const location& l,const Action& a,const list<StringExpression>& s
 Effect::Effect(const location& l,const Action& a,const list<StringExpression>& str1,const list<StringExpression>& str2):
 	Node(l),action(a),filename(str1),string_expr(str2),n(nullptr),mix(nullptr) {};
 
-Effect::Effect(const Effect &eff):
+Effect::Effect(const location &l,const list<StringExpression> &str,
+		const VarValue &bins,list<Agent>& _mix,const Expression* aux_expr) :
+	Node(l),action(SNAPSHOT),n(aux_expr),mix(new Mixture(l,_mix)),set(bins),filename(str){}
+
+/*Effect::Effect(const Effect &eff):
 	Node(eff.loc),action(eff.action),n(nullptr),mix(nullptr) {
 
 	n = eff.n;
@@ -520,9 +529,9 @@ Effect::Effect(const Effect &eff):
 		filename = eff.filename;
 		break;
 	}
-}
+}*/
 
-Effect& Effect::operator=(const Effect& eff){
+/*Effect& Effect::operator=(const Effect& eff){
 	loc = eff.loc;
 	action = eff.action;
 
@@ -548,10 +557,11 @@ Effect& Effect::operator=(const Effect& eff){
 		break;
 	}
 	return *this;
-}
+}*/
 
 simulation::Perturbation::Effect* Effect::eval(pattern::Environment& env,
 		const vector<state::Variable*> &vars) const {
+	try{
 	switch(action){
 	case INTRO:{
 		auto mixture = mix->eval(env,vars,0);
@@ -559,7 +569,7 @@ simulation::Perturbation::Effect* Effect::eval(pattern::Environment& env,
 		return new simulation::Intro(n->eval(env, vars, nullptr, 0),mixture);
 	}
 	case DELETE:{
-		auto mixture = mix->eval(env,vars,Expression::PATTERN);
+		auto mixture = mix->eval(env,vars,Expression::PATTERN | Expression::AUX_ALLOW);
 		mixture->declareAgents(env, true);
 		mixture->setAndDeclareComponents(env);
 		auto& decl_mixture = env.declareMixture(*mixture);
@@ -583,6 +593,23 @@ simulation::Perturbation::Effect* Effect::eval(pattern::Environment& env,
 	case UPDATE_TOK:
 	case STOP:
 	case SNAPSHOT:
+		if(set.value){//histogram
+			string file;
+			auto mix_p = mix->eval(env, vars, Expression::PATTERN | Expression::AUX_ALLOW);
+			mix_p->declareAgents(env);
+			auto mask = mix_p->setAndDeclareComponents(env);
+			auto& _mix = env.declareMixture(*mix_p);
+			delete mix_p;
+			auto bins = set.value->eval(env, vars, nullptr, Expression::PATTERN | Expression::AUX_ALLOW)
+					->getValue(vars).valueAs<int>();
+			auto aux_func = n ? n->eval(env, vars, nullptr, Expression::PATTERN | Expression::AUX_ALLOW)
+					: nullptr;
+			for(auto& se : filename)
+				file += se.evalConst(env, vars);
+			auto eff = new simulation::Histogram(env,bins,file,_mix,aux_func);
+			return eff;
+		}
+		break;
 	case PRINT:
 	case PRINTF:
 	case CFLOW:
@@ -590,6 +617,10 @@ simulation::Perturbation::Effect* Effect::eval(pattern::Environment& env,
 	case FLUX:
 	case FLUX_OFF:
 		break;
+	}
+	}
+	catch(invalid_argument &e){
+		throw SemanticError(e.what(),loc);
 	}
 	return nullptr;
 }

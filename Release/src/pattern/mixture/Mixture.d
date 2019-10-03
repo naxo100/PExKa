@@ -30,6 +30,8 @@ src/pattern/mixture/Mixture.o: ../src/pattern/mixture/Mixture.cpp \
  ../src/pattern/mixture/../../simulation/../state/../pattern/Signature.h \
  ../src/pattern/mixture/../../simulation/../state/../data_structs/SimpleSet.h \
  ../src/pattern/mixture/../../simulation/../state/../pattern/mixture/Mixture.h \
+ ../src/pattern/mixture/../../simulation/../state/../expressions/Vars.h \
+ ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/mixture/../../simulation/Perturbation.h \
  ../src/pattern/mixture/../../simulation/Rule.h \
@@ -100,6 +102,10 @@ src/pattern/mixture/Mixture.o: ../src/pattern/mixture/Mixture.cpp \
 ../src/pattern/mixture/../../simulation/../state/../data_structs/SimpleSet.h:
 
 ../src/pattern/mixture/../../simulation/../state/../pattern/mixture/Mixture.h:
+
+../src/pattern/mixture/../../simulation/../state/../expressions/Vars.h:
+
+../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h:
 
 ../src/pattern/mixture/../../simulation/../state/../expressions/AlgExpression.h:
 

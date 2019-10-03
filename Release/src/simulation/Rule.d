@@ -20,6 +20,8 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../state/../pattern/../util/params.h \
  ../src/simulation/../state/../data_structs/SimpleSet.h \
  ../src/simulation/../state/../pattern/mixture/Mixture.h \
+ ../src/simulation/../state/../expressions/Vars.h \
+ ../src/simulation/../state/../expressions/AlgExpression.h \
  ../src/simulation/../state/../expressions/AlgExpression.h \
  ../src/simulation/../pattern/Environment.h \
  ../src/simulation/../pattern/Signature.h \
@@ -43,7 +45,6 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../grammar/ast/../../pattern/Environment.h \
  ../src/simulation/../grammar/ast/../../pattern/Dependencies.h \
  ../src/simulation/../expressions/Vars.h \
- ../src/simulation/../expressions/AlgExpression.h \
  ../src/simulation/../pattern/mixture/Agent.h \
  ../src/simulation/../pattern/mixture/Mixture.h \
  ../src/simulation/../pattern/mixture/../../grammar/location.hh \
@@ -109,6 +110,10 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 
 ../src/simulation/../state/../pattern/mixture/Mixture.h:
 
+../src/simulation/../state/../expressions/Vars.h:
+
+../src/simulation/../state/../expressions/AlgExpression.h:
+
 ../src/simulation/../state/../expressions/AlgExpression.h:
 
 ../src/simulation/../pattern/Environment.h:
@@ -154,8 +159,6 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 ../src/simulation/../grammar/ast/../../pattern/Dependencies.h:
 
 ../src/simulation/../expressions/Vars.h:
-
-../src/simulation/../expressions/AlgExpression.h:
 
 ../src/simulation/../pattern/mixture/Agent.h:
 

@@ -95,6 +95,8 @@ public:
 
 	void show(string tabs = "") const;
 
+	string evalConst(const pattern::Environment& env,const VarVector& vars) const;
+
 	~StringExpression();
 
 protected:

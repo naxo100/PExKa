@@ -23,11 +23,13 @@ using Deps = pattern::Dependency::Dep;
 void (State::*State::action[6])(const simulation::Rule::Action&) =
 		{&State::modify,&State::bind,&State::free,&State::del,nullptr,&State::assign};
 
-State::State(size_t tok_count,const std::vector<Variable*>& _vars,
+State::State(const simulation::Simulation& _sim,
+		const std::vector<Variable*>& _vars,
 		const BaseExpression& vol,simulation::Plot& _plot,
 		const pattern::Environment& _env,int seed) :
-	env(_env),volume(vol),vars(_vars.size()),rates(env.size<simulation::Rule>()),
-	tokens (new float[tok_count]()),activityTree(nullptr),injections(nullptr),randGen(seed),
+	sim(_sim),env(_env),volume(vol),vars(_vars.size()),rates(env.size<simulation::Rule>()),
+	tokens (new float[env.size<state::TokenVar>()]()),activityTree(nullptr),
+	injections(nullptr),randGen(seed),
 	plot(_plot),activeDeps(env.getDependencies()){
 	for(unsigned i = 0; i < _vars.size(); i++){
 		vars[i] = dynamic_cast<Variable*>(_vars[i]->clone());
@@ -59,6 +61,10 @@ State::State(size_t tok_count,const std::vector<Variable*>& _vars,
 
 const pattern::Environment& State::getEnv() const{
 	return env;
+}
+
+const simulation::Simulation& State::getSim() const {
+	return sim;
 }
 
 
@@ -95,7 +101,7 @@ const simulation::Rule::Rate& State::getRuleRate(int _id) const {
 }
 
 SomeValue State::getVarValue(short_id var_id, const AuxMap& aux_values) const {
-	return vars[var_id]->getValue(*this, move(aux_values));
+	return vars[var_id]->getValue(*this, aux_values);
 }
 
 FL_TYPE State::getTotalActivity() const {
@@ -109,6 +115,10 @@ default_random_engine& State::getRandomGenerator() const{
 const matching::InjRandContainer& State::getInjContainer(int cc_id) const{
 	return *(injections[cc_id]);
 }
+matching::InjRandContainer& State::getInjContainer(int cc_id) {
+	return *(injections[cc_id]);
+}
+
 
 void State::initNodes(unsigned n,const pattern::Mixture& mix){
 	for(auto comp_p : mix){
@@ -141,9 +151,9 @@ two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
 	}
 	auto& rate = rates[r.getId()];
 	if(rate.base.aux_functions.empty())
-		a *= rate.baseRate->getValue(vars).valueAs<FL_TYPE>();
+		a *= rate.baseRate->getValue(*this).valueAs<FL_TYPE>();
 	else
-		a *= rate.base.factor->getValue(vars).valueAs<FL_TYPE>();
+		a *= rate.base.factor->getValue(*this).valueAs<FL_TYPE>();
 	//Adjust rate cause reactants cc-injs intersection
 	//a = rate.correct(a)
 	return make_pair(a,0.0);
@@ -379,6 +389,7 @@ void State::advanceUntil(FL_TYPE sync_t) {
 			#endif
 			counter.incNullEvents(ex.error);
 		}
+		WarningStack::getStack().show(false);
 	}
 	plot.fill(*this,env);
 }
@@ -562,8 +573,9 @@ void State::tryPerturbate() {
 
 void State::updateVar(const Variable& var,bool by_value){
 	//delete vars[var.getId()];
+	AuxNames aux_map;//TODO delete all this method
 	if(by_value)
-		vars[var.getId()]->update(var.getValue(*this));
+		vars[var.getId()]->update(var.getValue(*this,aux_map));
 	else
 		vars[var.getId()]->update(var);
 	updateDeps(pattern::Dependency(Deps::VAR,var.getId()));
@@ -654,7 +666,6 @@ void State::initActTree() {
 	rules.sort([](const simulation::Rule * a, const simulation::Rule* b) { return a->getName() < b->getName(); });
 	for(auto rule_p : rules){
 		auto& rule = *rule_p;
-		//auto act_pr = evalActivity(rule);
 		auto act_pr = evalActivity(rule);
 		activityTree->add(rule.getId(),act_pr.first+act_pr.second);
 #ifdef DEBUG

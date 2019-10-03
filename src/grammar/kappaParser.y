@@ -326,6 +326,14 @@ effect:
 	{ $$ = Effect(@$,Effect::UPDATE_TOK,VarValue(@2,Id(@1,$1),$3)); }
 | SNAPSHOT print_expr_list
 	{ $$ = Effect(@$,Effect::SNAPSHOT,$2); }
+/*| SNAPSHOT print_expr_list non_empty_mixture
+	{}
+| SNAPSHOT print_expr_list non_empty_mixture alg_expr
+	{}*/
+| SNAPSHOT OP_PAR alg_expr CL_PAR print_expr_list non_empty_mixture
+	{ $$ = Effect(@$,$5,VarValue(@3,Id(@2,"bins"),$3),$6);}
+| SNAPSHOT OP_PAR alg_expr CL_PAR print_expr_list non_empty_mixture OP_CUR alg_expr CL_CUR
+	{ $$ = Effect(@$,$5,VarValue(@3,Id(@2,"bins"),$3),$6,$8);}
 | PRINT print_expr_list 
 	{ $$ = Effect(@$,Effect::PRINT,$2); }
 | PRINTF print_expr_list print_expr_list 

@@ -17,8 +17,9 @@ src/matching/Injection.o: ../src/matching/Injection.cpp \
  ../src/matching/../state/../pattern/../util/params.h \
  ../src/matching/../state/../data_structs/SimpleSet.h \
  ../src/matching/../state/../pattern/mixture/Mixture.h \
+ ../src/matching/../state/../expressions/Vars.h \
+ ../src/matching/../state/../expressions/AlgExpression.h \
  ../src/matching/../expressions/Vars.h \
- ../src/matching/../expressions/AlgExpression.h \
  ../src/matching/../pattern/mixture/Component.h \
  ../src/matching/../pattern/mixture/Mixture.h \
  ../src/matching/../pattern/mixture/Agent.h \
@@ -62,9 +63,11 @@ src/matching/Injection.o: ../src/matching/Injection.cpp \
 
 ../src/matching/../state/../pattern/mixture/Mixture.h:
 
-../src/matching/../expressions/Vars.h:
+../src/matching/../state/../expressions/Vars.h:
 
-../src/matching/../expressions/AlgExpression.h:
+../src/matching/../state/../expressions/AlgExpression.h:
+
+../src/matching/../expressions/Vars.h:
 
 ../src/matching/../pattern/mixture/Component.h:
 

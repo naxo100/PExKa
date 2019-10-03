@@ -1,6 +1,6 @@
 
 
-%agent: P(s~S~E~I~R,info~[0,[inf]]([inf]), fake~[0,[inf]]([inf]))
+%agent: P(s~S~E~I~R,info~[0,'max-forget']('max-forget'), fake~[0,'max-forget']('max-forget'))
 %agent: D(buried~false~true)
 
 %agent: Info()
@@ -10,15 +10,16 @@
 #constants
 
 %const: 'Infected_t0' 1
-%const: 'Pop_t0' 10000 + 'Infected_t0'
+%const: 'Pop_t0' 10000
 
-%const: 'debate_rate' 0.01/'Pop_t0'	#once every 10 days per 2 person
-%const: 'forgetSE_rate' 0.3			#every ~3 days
-%const: 'forgetI_rate' 0.0			#never
-%const: 'inform_rate' 0.3			#if (show-info) appears 1 entire day -> 30% pop informed
-%const: 'informI_rate' 0.5			#an infected person is informed in 2 days avg
-#%const: 'show_info_rate' 0.14		#it appears once a week
-%const: 'hide_info_rate' 2			#it disappears in 12 hours
+%const: 'max-forget' 20					#max value of forgetting
+%const: 'debate_rate' 0.01#/'Pop_t0'	#once every 10 days per 2 person
+%const: 'forgetSE_rate' 0.3				#every ~3 days
+%const: 'forgetI_rate' 0.0				#never
+%const: 'inform_rate' 0.3				#if (show-info) appears 24hrs -> 30% pop informed
+%const: 'informI_rate' 0.5				#an infected person is informed in 2 days avg
+#%const: 'show_info_rate' 0.14			#it appears once a week
+%const: 'hide_info_rate' 2				#it disappears in 12 hours
 
 %const: 'alfa_i' 0.8
 %const: 'alfa_f' 0.5
@@ -59,22 +60,23 @@
 ####'forget-info S'	P(s~S,info~{i}) -> P(s~S,info~{i+1}) @ 1.0
 ####'forget-info E'	P(s~E,info~{i}) -> P(s~E,info~{i+1}) @ 1.0
 
-#'forget S'	P(s~S,info~{i < [inf]},fake~{f < [inf]}) -> P(s~S,info~{i+1},fake~{f+1}) @ 0.3
-#'forget E'	P(s~E,info~{i < [inf]},fake~{f < [inf]}) -> P(s~E,info~{i+1},fake~{f+1}) @ 0.3
-'forget S'	P(s~S,info~{i < [inf]}) -> P(s~S,info~{i+1}) @ 'forgetSE_rate'
-'forget E'	P(s~S,info~{i < [inf]}) -> P(s~S,info~{i+1}) @ 'forgetSE_rate'
+#'forget S'	P(s~S,info~{i < 20},fake~{f < 'max-forget'}) -> P(s~S,info~{i+1},fake~{f+1}) @ 0.3
+#'forget E'	P(s~E,info~{i < 'max-forget'},fake~{f < 'max-forget'}) -> P(s~E,info~{i+1},fake~{f+1}) @ 0.3
+'forget S'	P(s~S,info~{i < 'max-forget'}) -> P(s~S,info~{i+1}) @ 'forgetSE_rate'
+'forget E'	P(s~S,info~{i < 'max-forget'}) -> P(s~S,info~{i+1}) @ 'forgetSE_rate'
 
 
 #'show info' -> Info() @ 'show_info_rate'
-'hide info'	Info() -> @ 'hide_info_rate'
+#'hide info'	Info() -> @ 'hide_info_rate'
 
 
-'debate'	P(info~{i1}),P(info~{i2}) -> P(info~{[min] i1 i2}),P(info~{[min] i1 i2}) @ 'debate_rate'
+'debate'	P(info~{i1}),P(info~{i2}) -> P(info~{[min] i1 i2}),P(info~{[min] i1 i2}) @ 'debate_rate'/('Pop_t0'-'Dead')
 #'gossip'	P(fake~{i1}),P(fake~{i2}) -> P(fake~{[min] i1 i2}),P(fake~{[min] i1 i2}) @ 0.0011
 
 
 %mod: repeat ([T] [mod] 7) = -0.0 do $ADD 1 Info() until [false]
-
+%mod: repeat ([T] [mod] 7) = 0.5 do $DEL 1 Info() until [false]
+%mod: repeat ([T] [mod] 2) = -0.0 do $HISTOGRAM(10) "H-info" P(info~{i}) until [false]
 
 
 #init
@@ -95,7 +97,7 @@
 %obs: 'Inmune'		P(s~R)
 %obs: 'Corps'		D(buried~false)
 %obs: 'Dead'		D()
-%obs: 'Smarts%*10'	'smarts'*1000.0 / 'Pop_t0'
+#%obs: 'Smarts%*10'	'smarts'*1000.0 / 'Pop_t0'
 #%obs: 'Idiots'		P(info~{5 <= i})
 %obs: 'Info-On-Tv'	-50*'info'
 

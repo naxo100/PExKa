@@ -40,6 +40,7 @@ public:
 
 template<typename R>
 class Auxiliar: public AlgExpression<R> {
+	//friend class AuxMap;
 	std::string name;
 	tuple<int,small_id,small_id> cc_ag_st;
 public:
@@ -65,7 +66,30 @@ public:
 	char getVarDeps() const;
 	bool isAux() const override;
 
+	const tuple<int,small_id,small_id>& getCoordinates() const;
+
 	std::string toString() const override;
+};
+
+
+class AuxCoords : public AuxMap {
+	unordered_map<int,FL_TYPE> m;
+public:
+	FL_TYPE& operator[](const Auxiliar<FL_TYPE>& a) override;
+	FL_TYPE& operator[](const two<small_id>& ag_st);
+	FL_TYPE at(const Auxiliar<FL_TYPE>& a) const override;
+	void clear();
+	size_t size() const;
+};
+
+class AuxNames : public AuxMap {
+	unordered_map<string,FL_TYPE> m;
+public:
+	FL_TYPE& operator[](const Auxiliar<FL_TYPE>& a) override;
+	FL_TYPE& operator[](const string &s);
+	FL_TYPE at(const Auxiliar<FL_TYPE>& a) const override;
+	void clear();
+	size_t size() const;
 };
 
 } /* namespace expressio */

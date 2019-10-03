@@ -45,7 +45,7 @@ SomeValue AlgExpression<T>::getValue(const VarVector &consts,
 }
 template<typename T>
 SomeValue AlgExpression<T>::getValue(const state::State& state,
-		const std::unordered_map<std::string, FL_TYPE>&& aux) const {
+		const AuxMap& aux) const {
 	return SomeValue(this->evaluate(state, aux));
 }
 

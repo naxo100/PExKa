@@ -6,13 +6,20 @@
  */
 
 #include "Perturbation.h"
+#include "Parameters.h"
+#include "Simulation.h"
 #include "../state/State.h"
 #include "../state/Node.h"
 #include "../pattern/mixture/Agent.h"
+#include "../pattern/mixture/Component.h"
 #include "../pattern/Environment.h"
 #include "../expressions/BinaryOperation.h"
 #include "../expressions/NullaryOperation.h"
+#include "../expressions/Vars.h"
 #include "../util/Warning.h"
+
+#include <limits>
+#include <float.h>
 
 
 namespace simulation {
@@ -104,7 +111,9 @@ FL_TYPE Perturbation::timeTest(const state::State& state) const {
 }
 
 void Perturbation::apply(state::State& state) const {
+#ifdef DEBUG
 	cout << "Applying effects of perturbation " << id << " at time " << state.getCounter().getTime() << endl;
+#endif
 	for(auto eff : effects)
 		eff->apply(state);
 	state.positiveUpdate(influence);
@@ -168,7 +177,7 @@ void Intro::apply(state::State& state) const {
 
 
 int Intro::addInfluences(int current,Rule::CandidateMap& map,const Environment &env) const {
-	expressions::AuxMap aux_map;
+	//expressions::AuxMap aux_map;
 	for(unsigned i = 0; i < mix->size(); i++){
 		auto& new_ag = mix->getAgent(i);
 		for(auto& ag : env.getAgentPatterns(new_ag.getId())){
@@ -224,8 +233,34 @@ Delete::~Delete(){
 
 void Delete::apply(state::State& state) const {
 	auto& inj_cont = state.getInjContainer(mix.getId());
-	auto distr = uniform_int_distribution<unsigned>(inj_cont.count());
-	for(int i = 0; i < n->getValue(state).valueAs<int>(); i++){
+	auto total = inj_cont.count();
+	auto some_del = n->getValue(state);
+	size_t del;
+	if(some_del.t == Type::FLOAT){
+		if(some_del.fVal == numeric_limits<FL_TYPE>::infinity())
+			del = numeric_limits<size_t>::max();
+		else{
+			del = round(some_del.fVal);
+			ADD_WARN_NOLOC("Making approximation of a float value in agent initialization to "+to_string(del));
+		}
+	}
+	else
+		del = some_del.valueAs<int>();
+
+	if(some_del.valueAs<FL_TYPE>() < 0)
+		throw invalid_argument("A perturbation is trying to delete a negative number ("+
+			to_string(del)+") of instances of "+mix.getComponent(0).toString(state.getEnv()));
+	if(total <= del){
+		inj_cont.clear();
+		if(total < del && del != numeric_limits<size_t>::max())
+			ADD_WARN_NOLOC("Trying to delete "+to_string(del)+" instances of "+
+				mix.getComponent(0).toString(state.getEnv())+" but there are "+
+				to_string(total)+" available. Deleting all.");
+		return;
+	}
+
+	auto distr = uniform_int_distribution<unsigned>();
+	for(int i = 0; i < del; i++){
 		int j = distr(state.getRandomGenerator());
 		auto& inj = inj_cont.choose(j);
 		for(auto node : inj.getEmbedding()){
@@ -252,6 +287,176 @@ void Update::apply(state::State &state) const {
 void Update::setValueUpdate() {
 	byValue= true;
 }
+
+
+/***** Histogram **************************/
+
+Histogram::Histogram(const Environment& env,int _bins,string file_name,Mixture& _mix,BaseExpression* f) :
+		bins(_bins+2),points(_bins+1),min(-numeric_limits<float>::infinity()),max(-min),filetype("tsv"),func(f),
+		mix(_mix),newLim(true),fixedLim(false){
+	if(mix.compsCount() != 1)
+		throw invalid_argument("Mixture must contain exactly one Connected Component.");
+	auto& cc = mix.getComponent(0);
+	auto& auxs = mix.getAux();
+	if(auxs.size() < 1)
+		throw invalid_argument("Mixture must have at least one Auxiliar variable.");
+	if(!func){
+		if(auxs.size() > 1)
+			throw invalid_argument("Mixture must have exactly one Auxiliar variable if you don't declare a value function for histogram.");
+		auto& aux_ccagst = *(auxs.begin());
+		func = new expressions::Auxiliar<FL_TYPE>(aux_ccagst.first);
+	}
+	if(dynamic_cast<expressions::Auxiliar<FL_TYPE>*>(func)){
+		auto& ccagst = auxs.at(func->toString());
+		auto lims = env.getSignature(cc.getAgent(get<1>(ccagst)).getId()).getSite(get<2>(ccagst)).getLimits();
+		min = lims.first.valueAs<FL_TYPE>();
+		max = lims.second.valueAs<FL_TYPE>();
+	}
+	auto pos = file_name.find('.');
+	if( pos == string::npos )
+		filename = file_name;
+	else{
+		filename = file_name.substr(0,pos);
+		filetype = file_name.substr(pos+1);
+	}
+
+	if(min != max && !isinf(max) && !isinf(min)){
+		fixedLim = true;
+		newLim = true;
+		setPoints();
+	}
+}
+
+Histogram::~Histogram(){
+	//TODO
+	//file.close();
+}
+
+
+void Histogram::apply(state::State& state) const {
+	auto& cc = mix.getComponent(0);
+	auto& aux_map = mix.getAux();
+
+	char file_name[100];
+	if(Parameters::get().runs > 1)
+		sprintf(file_name,("%s-%0"+to_string(int(log10(Parameters::get().runs-1)+1))+"d.%s").c_str(),
+				filename.c_str(),state.getSim().getId(),filetype.c_str());
+	else
+		sprintf(file_name,"%s.%s",filename.c_str(),filetype.c_str());
+	ofstream file(file_name,ios_base::app);
+
+	if(min == max || isinf(min) || isinf(max)){
+		list<FL_TYPE> values;
+		max = -numeric_limits<float>::infinity();
+		min = -max;
+		function<void (const matching::Injection*)> f = [&](const matching::Injection* inj) -> void {
+			AuxNames aux_values;
+			for(auto& aux_coords : aux_map)
+				aux_values[aux_coords.first] = inj->getEmbedding()[get<1>(aux_coords.second)]->
+					getInternalState(get<2>(aux_coords.second)).valueAs<FL_TYPE>();
+			auto val = func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+			if(val < min)
+				min = val;
+			else if(val > max)
+				max = val;
+			values.push_back(val);
+		};
+		state.getInjContainer(cc.getId()).fold(f);
+		bins.assign(bins.size(),0);
+		setPoints();
+		printHeader(file);
+		newLim = false;
+		if(min != max)
+			for(auto v : values)
+				tag(v);
+	}
+	else{
+		if(newLim){
+			printHeader(file);
+			setPoints();
+			newLim = false;
+		}
+		function<void (const matching::Injection*)> f = [&](const matching::Injection* inj) -> void {
+			AuxNames aux_values;
+			for(auto& aux_coords : aux_map)
+				aux_values[aux_coords.first] = inj->getEmbedding()[get<1>(aux_coords.second)]->
+					getInternalState(get<2>(aux_coords.second)).valueAs<FL_TYPE>();
+			auto val = func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
+			if(!fixedLim){
+				if(val < min){
+					min = val;newLim = true;
+				}
+				else if(val > max){
+					max = val;newLim = true;
+				}
+			}
+			tag(val);
+		};
+		bins.assign(bins.size(),0);
+		state.getInjContainer(cc.getId()).fold(f);
+	}
+
+	file << state.getCounter().getTime();
+	if(min == max)
+		file << "\t" << state.getInjContainer(cc.getId()).count();
+	else
+		for(auto bin : bins)
+			file << "\t" << bin ;
+	file << "\n";
+
+	file.close();
+}
+
+void Histogram::setPoints() const {
+	auto dif = (max - min) / (bins.size()-2);
+	for(unsigned i = 0; i < points.size(); i++){
+		points[i] = min + i*dif;
+	}
+}
+
+void Histogram::tag(FL_TYPE val) const {
+	if(val < points[0]){
+		if(fixedLim)
+			ADD_WARN_NOLOC("The value for a site in an agent instance is bellow the minimum allowed");
+		bins[0]++;
+		return;
+	}
+	for(unsigned i = 1; i < points.size()-1; i++)
+		if(val < points[i]){
+			bins[i]++;return;
+		}
+	if(val <= points.back())
+		bins[points.size()-1]++;
+	else{
+		if(fixedLim)
+			ADD_WARN_NOLOC("The value for a site in an agent instance is over the maximum allowed");
+		bins[points.size()]++;
+	}
+}
+
+void Histogram::printHeader(ofstream& file) const {
+	char s1[100];
+
+	if(min == max){
+		sprintf(s1,"time\t%.5g",min);
+		file << "time\t " << min << "\n";
+	}
+	else{
+		auto dif = (max - min) / (bins.size()-2);
+		sprintf(s1,"time\tx < %.5g",min);
+		file << s1;
+		for(unsigned i = 0; i < bins.size()-2; i++){
+			if(i)
+				file << ")";
+			sprintf(s1,"\t[%.5g,%.5g",min+dif*i,min+dif*(i+1));
+			file << s1;
+		}
+		sprintf(s1,"]\t%.5g < x\n",max);
+		file << s1 ;
+	}
+	newLim = false;
+}
+
 
 
 } /* namespace simulation */

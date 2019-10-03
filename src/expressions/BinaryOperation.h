@@ -62,7 +62,7 @@ public:
 	void getNeutralAuxMap(
 			std::unordered_map<std::string, FL_TYPE>& aux_map) const;
 
-	virtual void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) override;
+	void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) override;
 
 	//return a flag of VarDep
 	char getVarDeps() const override;

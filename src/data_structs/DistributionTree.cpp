@@ -153,6 +153,22 @@ T* Node<T>::erase(int address){
 }
 
 template <typename T>
+void Node<T>::clear(list<T*>* free){
+	smaller->clear(free);
+	greater->clear(free);
+	for(auto inj : multi_injs)
+		if(inj->removeContainer(*this) && free)
+			free->push_back(inj);
+	multi_injs.clear();
+	for(auto inj : injs)
+		if(inj->removeContainer(*this) && free)
+			free->push_back(inj);
+	injs.clear();
+	counter = 0;
+	this->sum = 0;
+}
+
+template <typename T>
 void Node<T>::decrease(FL_TYPE val,unsigned n){
 	this->sum -= val;
 	counter -= n;
@@ -244,6 +260,17 @@ FL_TYPE Node<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
 		sum += func(inj)*inj->count();
 	}
 	return sum + smaller->sumInternal(func)+greater->sumInternal(func);
+}
+
+template <typename T>
+void Node<T>:: fold(const function<void (const T*)> func) const {
+	smaller->fold(func);
+	for(auto& inj : injs)
+		func(inj);
+	for(auto& inj : multi_injs)
+		for(unsigned i = 0; i < inj->count(); i++)
+			func(inj);
+	greater->fold(func);
 }
 
 
@@ -420,6 +447,15 @@ T* Leaf<T>::erase(int address){
 }
 
 template <typename T>
+void Leaf<T>::clear(list<T*>* free){
+	for(auto inj : injs)
+		if(inj.first->removeContainer(*this) && free)
+			free->push_back(inj.first);
+	injs.clear();
+	this->sum = 0;
+}
+
+template <typename T>
 const T& Leaf<T>::choose(FL_TYPE sel) const {
 	/*auto p = injs[int(count() * sel / this->sum)].first;
 	if(p == nullptr){
@@ -447,6 +483,12 @@ FL_TYPE Leaf<T>::sumInternal(const function<FL_TYPE (const T*)> &func) const {
 		sum += func(inj.first);
 	}
 	return sum;
+}
+
+template <typename T>
+void Leaf<T>:: fold(const function<void (const T*)> func) const {
+	for(auto& inj : injs)
+		func(inj.first);
 }
 
 

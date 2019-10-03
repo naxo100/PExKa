@@ -12,7 +12,9 @@ src/state/Node.o: ../src/state/Node.cpp ../src/state/Node.h \
  ../src/state/../pattern/mixture/Mixture.h \
  ../src/state/../pattern/mixture/../../util/params.h \
  ../src/state/../pattern/mixture/../../expressions/AlgExpression.h \
- ../src/state/SiteGraph.h ../src/state/../util/params.h \
+ ../src/state/../expressions/Vars.h \
+ ../src/state/../expressions/AlgExpression.h ../src/state/SiteGraph.h \
+ ../src/state/../util/params.h \
  ../src/state/../expressions/AlgExpression.h \
  ../src/state/../matching/Injection.h \
  ../src/state/../matching/../util/params.h \
@@ -73,6 +75,10 @@ src/state/Node.o: ../src/state/Node.cpp ../src/state/Node.h \
 ../src/state/../pattern/mixture/../../util/params.h:
 
 ../src/state/../pattern/mixture/../../expressions/AlgExpression.h:
+
+../src/state/../expressions/Vars.h:
+
+../src/state/../expressions/AlgExpression.h:
 
 ../src/state/SiteGraph.h:
 

@@ -50,7 +50,7 @@ public:
 	bool operator!=(const SomeValue&) const;
 	bool operator==(const SomeValue&) const;
 
-
+	std::string toString() const;
 	friend std::ostream& operator<<(std::ostream& out, const SomeValue& val);
 };
 

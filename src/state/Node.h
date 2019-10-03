@@ -15,6 +15,7 @@
 #include "../pattern/Signature.h"
 #include "../data_structs/SimpleSet.h"
 #include "../pattern/mixture/Mixture.h"
+#include "../expressions/Vars.h"
 //#include "../matching/InjRandSet.h"
 //#include <boost/fusion/container/set.hpp>
 //#include <boost/fusion/include/set.hpp>
@@ -194,7 +195,7 @@ struct EventInfo {
 	//mask for new injections, nullptr are erased injs
 	map<matching::Injection*,matching::Injection*> inj_mask;
 	//aux_values
-	unordered_map<string,FL_TYPE> aux_map;
+	AuxNames aux_map;
 
 	set<const pattern::Pattern*> to_update;
 	set<small_id> rule_ids;

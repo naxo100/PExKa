@@ -25,6 +25,8 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
  ../src/pattern/../simulation/../state/../pattern/Signature.h \
  ../src/pattern/../simulation/../state/../data_structs/SimpleSet.h \
  ../src/pattern/../simulation/../state/../pattern/mixture/Mixture.h \
+ ../src/pattern/../simulation/../state/../expressions/Vars.h \
+ ../src/pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/../simulation/../state/../expressions/AlgExpression.h \
  ../src/pattern/../simulation/Perturbation.h \
  ../src/pattern/../simulation/Rule.h ../src/pattern/../util/Exceptions.h \
@@ -37,8 +39,7 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
  ../src/pattern/mixture/Agent.h ../src/pattern/mixture/Mixture.h \
  ../src/pattern/mixture/../../grammar/location.hh \
  ../src/pattern/mixture/Component.h ../src/pattern/../util/Warning.h \
- ../src/pattern/../expressions/Vars.h \
- ../src/pattern/../expressions/AlgExpression.h
+ ../src/pattern/../expressions/Vars.h
 
 ../src/pattern/Environment.h:
 
@@ -100,6 +101,10 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
 
 ../src/pattern/../simulation/../state/../pattern/mixture/Mixture.h:
 
+../src/pattern/../simulation/../state/../expressions/Vars.h:
+
+../src/pattern/../simulation/../state/../expressions/AlgExpression.h:
+
 ../src/pattern/../simulation/../state/../expressions/AlgExpression.h:
 
 ../src/pattern/../simulation/Perturbation.h:
@@ -131,5 +136,3 @@ src/pattern/Environment.o: ../src/pattern/Environment.cpp \
 ../src/pattern/../util/Warning.h:
 
 ../src/pattern/../expressions/Vars.h:
-
-../src/pattern/../expressions/AlgExpression.h:

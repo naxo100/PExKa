@@ -20,6 +20,7 @@ src/expressions/AlgExpression.o: ../src/expressions/AlgExpression.cpp \
  ../src/expressions/../state/../pattern/../expressions/AlgExpression.h \
  ../src/expressions/../state/../pattern/../util/params.h \
  ../src/expressions/../state/../data_structs/SimpleSet.h \
+ ../src/expressions/../state/../expressions/Vars.h \
  ../src/expressions/../state/../expressions/AlgExpression.h \
  ../src/expressions/../state/../simulation/Counter.h \
  ../src/expressions/../state/../simulation/../util/params.h \
@@ -82,6 +83,8 @@ src/expressions/AlgExpression.o: ../src/expressions/AlgExpression.cpp \
 ../src/expressions/../state/../pattern/../util/params.h:
 
 ../src/expressions/../state/../data_structs/SimpleSet.h:
+
+../src/expressions/../state/../expressions/Vars.h:
 
 ../src/expressions/../state/../expressions/AlgExpression.h:
 

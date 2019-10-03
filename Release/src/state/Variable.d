@@ -16,6 +16,7 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
  ../src/state/../pattern/../expressions/AlgExpression.h \
  ../src/state/../pattern/../util/params.h \
  ../src/state/../data_structs/SimpleSet.h \
+ ../src/state/../expressions/Vars.h \
  ../src/state/../expressions/AlgExpression.h \
  ../src/state/../simulation/Counter.h \
  ../src/state/../simulation/../util/params.h \
@@ -36,8 +37,7 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
  ../src/state/../matching/../data_structs/../util/params.h \
  ../src/state/../matching/../simulation/Rule.h \
  ../src/state/../pattern/mixture/Component.h \
- ../src/state/../pattern/mixture/Mixture.h \
- ../src/state/../expressions/Vars.h
+ ../src/state/../pattern/mixture/Mixture.h
 
 ../src/state/Variable.h:
 
@@ -78,6 +78,8 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
 ../src/state/../pattern/../util/params.h:
 
 ../src/state/../data_structs/SimpleSet.h:
+
+../src/state/../expressions/Vars.h:
 
 ../src/state/../expressions/AlgExpression.h:
 
@@ -120,5 +122,3 @@ src/state/Variable.o: ../src/state/Variable.cpp ../src/state/Variable.h \
 ../src/state/../pattern/mixture/Component.h:
 
 ../src/state/../pattern/mixture/Mixture.h:
-
-../src/state/../expressions/Vars.h:

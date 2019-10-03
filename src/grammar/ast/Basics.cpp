@@ -77,6 +77,14 @@ StringExpression::StringExpression(const location &l,const string s):
 StringExpression::StringExpression(const location &l,const Expression *e):
 	Node(l),t(ALG),alg(e),str() {};
 
+string StringExpression::evalConst(const pattern::Environment &env,const VarVector& vars) const {
+	if(t)
+		return alg->eval(env, vars, nullptr, Expression::CONST)->getValue(vars).toString();
+	else
+		return str;
+}
+
+
 void StringExpression::show(string tabs) const {
 	tabs += "   ";
 	if( t ) {

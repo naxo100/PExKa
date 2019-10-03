@@ -11,7 +11,7 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-//#include <omp>
+#include <omp.h>
 #include <vector>
 #include "grammar/KappaDriver.h"
 #include "grammar/ast/KappaAst.h"
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
 	const string v_msg("PExKa "+version);
 	const string usage_msg("Simple usage is \n$ [mpirun* -np procs] PExKa ([-i] kappa_file)+ [-e events] -t time [-p points] -sync-t tau");
 
-	cout << "PISKa ";
+	//cout << "PISKa ";
 	for(int i = 0; i < argc; i++) cout << argv[i] << " "; cout << endl;
 
 	auto& params = simulation::Parameters::singleton;
@@ -113,6 +113,12 @@ int main(int argc, char* argv[]){
 
 	auto sims = new simulation::Simulation*[params.runs];
 	//sims[0] = &sim;
+
+	#pragma omp parallel
+	{
+		omp_set_num_threads(min(params.runs,omp_get_num_threads()));
+	}
+
 	#pragma omp parallel for
 	for(int i = 0; i < params.runs; i++){
 		sims[i] = new simulation::Simulation(env,i);

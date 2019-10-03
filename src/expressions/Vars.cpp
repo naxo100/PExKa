@@ -47,11 +47,17 @@ template<typename R>
 R Auxiliar<R>::evaluate(const state::State& state,
 		const AuxMap& aux_values) const {
 	try {
-		return aux_values.at(name);
+		return aux_values.at(*this);
 	} catch (std::out_of_range& ex) {
 		throw std::out_of_range(
 			"Cannot find value for auxiliar "+name+". Try to reorder agent-signature sites if there is dependency.");
 	}
+}
+
+template <>
+int Auxiliar<int>::evaluate(const state::State& state,
+		const AuxMap& aux_values) const {
+	throw invalid_argument("Cannot call this evaluate() on Auxiliar<int>.");
 }
 
 template<typename R>
@@ -94,7 +100,11 @@ bool Auxiliar<T>::operator==(const BaseExpression& exp) const {
 
 template <typename T>
 void Auxiliar<T>::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords){
-	cc_ag_st = aux_coords.at(name);
+	if(get<0>(cc_ag_st) == -1)
+		cc_ag_st = aux_coords.at(name);
+	else{
+		//TODO check if the name of the aux match with all others
+	}
 }
 
 template <typename T>
@@ -107,6 +117,10 @@ bool Auxiliar<T>::isAux() const {
 	return true;
 }
 
+template <typename T>
+const tuple<int,small_id,small_id>& Auxiliar<T>::getCoordinates() const {
+	return cc_ag_st;
+}
 
 template <typename T>
 std::string Auxiliar<T>::toString() const {
@@ -180,5 +194,50 @@ std::string VarLabel<T>::toString() const{
 template class VarLabel<int> ;
 template class VarLabel<FL_TYPE> ;
 template class VarLabel<bool> ;
+
+
+template <typename T>
+AuxValueMap<T>::~AuxValueMap() {}
+
+
+FL_TYPE& AuxNames::operator[](const Auxiliar<FL_TYPE>& a){
+	return m.unordered_map<string,FL_TYPE>::operator [](a.toString());
+}
+FL_TYPE& AuxNames::operator[](const string &s){
+	return m.unordered_map<string,FL_TYPE>::operator [](s);
+}
+FL_TYPE AuxNames::at(const Auxiliar<FL_TYPE>& a) const {
+	return m.unordered_map<string,FL_TYPE>::at(a.toString());
+}
+void AuxNames::clear() {
+	m.unordered_map<string,FL_TYPE>::clear();
+}
+size_t AuxNames::size() const {
+	return m.unordered_map<string,FL_TYPE>::size();
+}
+
+
+
+FL_TYPE& AuxCoords::operator[](const Auxiliar<FL_TYPE>& a){
+	auto& coords = a.getCoordinates();
+	return m.unordered_map<int,FL_TYPE>::operator [](get<1>(coords)+get<2>(coords)*sizeof(small_id));
+}
+FL_TYPE& AuxCoords::operator[](const two<small_id>& ag_st){
+	return m.unordered_map<int,FL_TYPE>::operator [](ag_st.first+ag_st.second*sizeof(small_id));
+}
+FL_TYPE AuxCoords::at(const Auxiliar<FL_TYPE>& a) const {
+	auto& coords = a.getCoordinates();
+	return m.unordered_map<int,FL_TYPE>::at(get<1>(coords)+get<2>(coords)*sizeof(small_id));
+}
+void AuxCoords::clear() {
+	m.unordered_map<int,FL_TYPE>::clear();
+}
+size_t AuxCoords::size() const {
+	return m.unordered_map<int,FL_TYPE>::size();
+}
+
+template class AuxValueMap<FL_TYPE>;
+
+
 
 } /* namespace expressio */

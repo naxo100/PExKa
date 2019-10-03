@@ -9,7 +9,7 @@
 #define SRC_UTIL_WARNING_H_
 
 #include <list>
-#include <map>
+#include <vector>
 #include "../grammar/location.hh"
 
 
@@ -25,16 +25,17 @@ public:
 };
 
 
-class WarningStack : private std::multimap<int,Warning> {
+class WarningStack : private std::list<Warning> {
 	static WarningStack stack;
 	static const int MAX_WARNS = 3;
-	static int global_id;
+	//static int global_id;
+	std::vector<int> counts;
 	WarningStack();
 	WarningStack(const WarningStack&);
 public:
 	static WarningStack& getStack();
 	int add(int id,const std::string& msg,const yy::location &loc = yy::location());
-	void show() const;
+	void show(bool show_nowarns = true);
 };
 
 

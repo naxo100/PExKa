@@ -58,6 +58,8 @@ public:
 	void initialize();
 	void run(const Parameters& params);
 
+	int getId() const;
+
 	template <template <typename,typename...> class Range,typename... Args>
 	void addTokens(const Range<int,Args...> &cell_ids,float count,short token_id);
 

@@ -9,6 +9,7 @@
 #include "BinaryOperation.h"
 #include "UnaryOperation.h"
 #include "NullaryOperation.h"
+#include "Vars.h"
 #include "../util/Exceptions.h" //semanticError
 
 namespace expressions {
@@ -33,11 +34,12 @@ bool BaseExpression::operator!=(const BaseExpression& exp) const {
  return std::set<std::string>();
  }*/
 
-BaseExpression::~BaseExpression() {
+BaseExpression::~BaseExpression() { }
+
+SomeValue BaseExpression::getValue(const state::State& state) const {
+	static AuxNames aux_map;
+	return getValue(state,aux_map);
 }
-;
-
-
 
 BaseExpression::Reduction BaseExpression::reduceAndFactorize(
 		const std::map<std::string,small_id> aux_cc) const{

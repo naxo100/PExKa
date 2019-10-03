@@ -103,8 +103,13 @@ void Parameters::evalOptions(int argc, char* argv[]){
 	if(vm.count("dir"))
 		outputDirectory = vm["dir"].as<string>();
 
-	if(vm.count("runs"))
+	if(vm.count("runs")){
 		runs = vm["runs"].as<int>();
+		if(runs < 1){
+			cout << "Not a valid value for -runs parameter." << endl;
+			exit(1);
+		}
+	}
 
 }
 

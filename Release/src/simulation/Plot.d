@@ -19,6 +19,7 @@ src/simulation/Plot.o: ../src/simulation/Plot.cpp \
  ../src/simulation/../state/../pattern/../expressions/AlgExpression.h \
  ../src/simulation/../state/../pattern/../util/params.h \
  ../src/simulation/../state/../data_structs/SimpleSet.h \
+ ../src/simulation/../state/../expressions/Vars.h \
  ../src/simulation/../state/../expressions/AlgExpression.h \
  ../src/simulation/../state/../simulation/Counter.h \
  ../src/simulation/../state/../simulation/../util/params.h \
@@ -92,6 +93,8 @@ src/simulation/Plot.o: ../src/simulation/Plot.cpp \
 ../src/simulation/../state/../pattern/../util/params.h:
 
 ../src/simulation/../state/../data_structs/SimpleSet.h:
+
+../src/simulation/../state/../expressions/Vars.h:
 
 ../src/simulation/../state/../expressions/AlgExpression.h:
 

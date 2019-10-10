@@ -17,6 +17,11 @@
 
 //class pattern::Environment;
 
+namespace matching {
+	class InjRandTree;
+}
+
+
 namespace simulation {
 
 using namespace std;
@@ -62,10 +67,18 @@ public:
 		void setRoot(small_id root,ag_st_id node,int change);
 	};
 	typedef map<const pattern::Mixture::Component*,CandidateInfo> CandidateMap;
-	struct Rate {
+	class Rate {
+	protected:
 		BaseExpression* baseRate;
 		pair<BaseExpression*,int> unaryRate;
-		BaseExpression::Reduction base,unary;
+
+		const Rule& rule;
+	public:
+		Rate(const Rule& r,state::State& state);
+		virtual ~Rate();
+
+		virtual two<FL_TYPE> evalActivity(const state::State& state) const = 0;
+		virtual const BaseExpression* getExpression(small_id cc_index = 0) const;
 		//CandidateMap influence;
 	};
 protected:
@@ -156,6 +169,46 @@ public:
 
 	string toString(const pattern::Environment& env) const;
 };
+
+
+
+class NormalRate : public virtual Rule::Rate {
+public:
+	NormalRate(const Rule& r,state::State& state);
+	virtual ~NormalRate();
+
+	two<FL_TYPE> evalActivity(const state::State& state) const override;
+};
+
+class SamePtrnRate : public virtual Rule::Rate {
+protected:
+	float norm;
+public:
+	SamePtrnRate(const Rule& r,state::State& state,bool normalize = false);
+	virtual ~SamePtrnRate();
+
+	two<FL_TYPE> evalActivity(const state::State& state) const override;
+};
+
+class AuxDepRate : public virtual Rule::Rate {
+protected:
+	BaseExpression::Reduction base,unary;
+public:
+	AuxDepRate(const Rule& r,state::State& state);
+	virtual ~AuxDepRate();
+
+	virtual const BaseExpression* getExpression(small_id cc_index = 0) const override;
+	virtual two<FL_TYPE> evalActivity(const state::State& state) const override;
+};
+
+class SameAuxDepRate : public SamePtrnRate,public AuxDepRate {
+public:
+	SameAuxDepRate(const Rule& r,state::State& state,bool normalize);
+	virtual ~SameAuxDepRate();
+
+	virtual two<FL_TYPE> evalActivity(const state::State& state) const override;
+};
+
 
 
 

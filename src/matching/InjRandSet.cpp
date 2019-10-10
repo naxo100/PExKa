@@ -62,6 +62,9 @@ Injection* InjRandContainer::emplace(Injection* base_inj,map<Node*,Node*>& mask,
 }
 
 void InjRandContainer::selectRule(int rid,small_id cc) const {/*do nothing*/};
+FL_TYPE InjRandContainer::getM2() const {
+	throw invalid_argument("calling InjRandContainer::getM2() is forbidden.");
+}
 
 /********* MultiInjSet ********************/
 
@@ -200,7 +203,7 @@ const float InjRandTree::MAX_INVALIDATIONS = 0.03;//3%
 InjRandTree::Root::Root() : tree(new distribution_tree::Node<CcValueInj>(1.0)),
 		second_moment(-1.,0.),is_valid(false) {}
 
-InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc,const vector<simulation::Rule::Rate>& rates) :
+InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc,const vector<simulation::Rule::Rate*>& rates) :
 		InjRandContainer(_cc),counter(0),invalidations(0),selected_root(0,0){
 	auto& deps = cc.getRateDeps();
 	//distribution_tree::Node<CcValueInj>* pointer = nullptr;
@@ -208,9 +211,9 @@ InjRandTree::InjRandTree(const pattern::Mixture::Component& _cc,const vector<sim
 		auto r_id = r_cc.first.getId();
 		auto rid_cc = make_pair(r_id,r_cc.second);
 		if(r_cc.first.getRate().getVarDeps() & expressions::BaseExpression::AUX){
-			auto faux_ridcc = rates[r_id].base.aux_functions.at(r_cc.second);
+			auto faux_ridcc = rates[r_id]->getExpression(r_cc.second);
 			for(auto& root : roots)//dont create another root if there is one assoc. with the same aux.func.
-				if(*faux_ridcc == *(rates[root.first.first].base.aux_functions.at(root.first.second)) ){
+				if(*faux_ridcc == *(rates[root.first.first]->getExpression(root.first.second)) ){
 					roots[rid_cc] = root.second;
 					break;
 				}
@@ -250,7 +253,7 @@ void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 				aux_values[aux.first] = 1.0;//default factor-aux values TODO non factor-aux*/
 		}
 		FL_TYPE val = 1.0;
-		auto ccaux_func = state.getRuleRate(r.getId()).base.aux_functions.at(ridcc_tree.first.second);
+		auto ccaux_func = state.getRuleRate(r.getId()).getExpression(ridcc_tree.first.second);
 		val *= ccaux_func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 		if(val < 0.)
 			throw invalid_argument("Partial reactivities cannot be negative.");

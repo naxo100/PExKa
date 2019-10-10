@@ -37,19 +37,28 @@ State::State(const simulation::Simulation& _sim,
 	}
 	for(auto& rule : env.getRules()){
 		int i = rule.getId();
-		auto new_rate = rule.getRate().clone();
-		rates[i].baseRate = new_rate->reduce(vars);//rates also have to be reduced for every state
-		if(new_rate != rates[i].baseRate)//reduce can return the same pointer on expression but no with vars.
-			delete new_rate;
-		if(rates[i].baseRate->getVarDeps() & BaseExpression::AUX){
-			map<string,small_id> aux_ccindex;
-			for(auto& aux_cc__ : rule.getLHS().getAux())
-				aux_ccindex[aux_cc__.first] = get<0>(aux_cc__.second);
-			rates[i].base = rates[i].baseRate->reduceAndFactorize(aux_ccindex);
-			auto& lhs = rule.getLHS();
-			/*if(lhs.compsCount() == 2 && lhs.getComponent(0) == lhs.getComponent(1))
-				rates[i].base.factors.push_back(new expressions::Constant<FL_TYPE>(0.5));*/
+		auto& lhs = rule.getLHS();
+		bool same_ptrn = true;
+		for(size_t cc_id = 0; cc_id < lhs.size()-1; cc_id++)
+			if(&(lhs.getComponent(cc_id)) != &(lhs.getComponent(cc_id+1)) )
+				{same_ptrn = false; break;}
+
+
+		if(rule.getRate().getVarDeps() & BaseExpression::AUX){
+			if(same_ptrn){
+				try{
+					rates[i] = new simulation::SameAuxDepRate(rule,*this,false);
+					break;
+				}
+				catch(invalid_argument& e){}
+			}
+			rates[i] = new simulation::AuxDepRate(rule,*this);
 		}
+		else
+			if(same_ptrn && lhs.size() > 1)
+				rates[i] = new simulation::SamePtrnRate(rule,*this,false);
+			else
+				rates[i] = new simulation::NormalRate(rule,*this);
 	}
 	for(auto pert : env.getPerts()){
 		perts.emplace(pert->getId(),*pert);
@@ -97,7 +106,7 @@ float State::getTokenValue(unsigned tok_id) const{
 }
 
 const simulation::Rule::Rate& State::getRuleRate(int _id) const {
-	return rates[_id];
+	return *(rates[_id]);
 }
 
 SomeValue State::getVarValue(short_id var_id, const AuxMap& aux_values) const {
@@ -140,7 +149,7 @@ UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
 	return count;
 }
 
-two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
+/*two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
 	//two<FL_TYPE> act;
 	FL_TYPE a = 1.0;
 	auto& lhs = r.getLHS();
@@ -157,7 +166,7 @@ two<FL_TYPE> State::evalActivity(const simulation::Rule& r) const{
 	//Adjust rate cause reactants cc-injs intersection
 	//a = rate.correct(a)
 	return make_pair(a,0.0);
-}
+}*/
 /*
 template <int n> //for both
 void State::negativeUpdate(SiteGraph::Internal& intf){
@@ -359,7 +368,7 @@ void State::positiveUpdate(const simulation::Rule::CandidateMap& wake_up){
 	//cout << "rules to update: ";
 	for(auto r_id : ev.rule_ids){
 		//cout << env.getRules()[r_id].getName() << ", ";
-		auto act = evalActivity(env.getRules()[r_id]);
+		auto act = rates[r_id]->evalActivity(*this);
 		activityTree->add(r_id,act.first+act.second);
 	}
 	//cout << endl;
@@ -454,7 +463,7 @@ const simulation::Rule& State::drawRule(){
 	auto rid_alpha = activityTree->chooseRandom();
 	auto& rule = env.getRules()[rid_alpha.first];
 
-	auto a1a2 = evalActivity(rule);
+	auto a1a2 = rates[rid_alpha.first]->evalActivity(*this);
 	auto alpha = a1a2.first + a1a2.second;
 
 	//*?
@@ -666,7 +675,7 @@ void State::initActTree() {
 	rules.sort([](const simulation::Rule * a, const simulation::Rule* b) { return a->getName() < b->getName(); });
 	for(auto rule_p : rules){
 		auto& rule = *rule_p;
-		auto act_pr = evalActivity(rule);
+		auto act_pr = rates[rule.getId()]->evalActivity(*this);
 		activityTree->add(rule.getId(),act_pr.first+act_pr.second);
 #ifdef DEBUG
 		printf("\t%s\t%.6f\n", rule.getName().c_str(),(act_pr.first+act_pr.second));
@@ -688,7 +697,7 @@ void State::print() const {
 	}
 	cout << "\t}\n\tRules {\n";
 	for(auto& r : env.getRules()){
-		auto act = evalActivity(r);
+		auto act = rates[r.getId()]->evalActivity(*this);
 		cout << "\t(" << r.getId() << ")\t" << r.getName() << "\t("
 			<< act.first << " , " << act.second << ")" << endl;
 	}

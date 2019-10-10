@@ -64,7 +64,8 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
  ../src/simulation/../state/../matching/../pattern/mixture/Mixture.h \
  ../src/simulation/../state/../matching/../data_structs/DistributionTree.h \
  ../src/simulation/../state/../matching/../data_structs/../util/params.h \
- ../src/simulation/../state/../matching/../simulation/Rule.h
+ ../src/simulation/../state/../matching/../simulation/Rule.h \
+ ../src/simulation/../matching/InjRandSet.h
 
 ../src/simulation/../util/Exceptions.h:
 
@@ -201,3 +202,5 @@ src/simulation/Rule.o: ../src/simulation/Rule.cpp \
 ../src/simulation/../state/../matching/../data_structs/../util/params.h:
 
 ../src/simulation/../state/../matching/../simulation/Rule.h:
+
+../src/simulation/../matching/InjRandSet.h:

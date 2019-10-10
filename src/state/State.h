@@ -38,13 +38,14 @@ struct EventInfo;
  */
 class State {
 	friend class RateVar;
+	friend class simulation::Rule::Rate;
 
 	const simulation::Simulation& sim;
 	const pattern::Environment& env;
 	SiteGraph graph;
 	const state::BaseExpression& volume;
 	std::vector<Variable*> vars;
-	vector<simulation::Rule::Rate> rates;
+	vector<simulation::Rule::Rate*> rates;
 	float* tokens;
 
 	data_structs::RandomTree* activityTree;
@@ -133,7 +134,7 @@ public:
 
 	UINT_TYPE mixInstances(const pattern::Mixture& mix) const;
 
-	two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
+	//two<FL_TYPE> evalActivity(const simulation::Rule& r) const;
 
 	/** \brief Apply actions described by r to the state.
 	 * @param r rule to apply.

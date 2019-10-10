@@ -15,6 +15,7 @@
 #include "../pattern/mixture/Agent.h"
 #include "../pattern/mixture/Component.h"
 #include "../state/State.h"
+#include "../matching/InjRandSet.h"
 
 namespace simulation {
 
@@ -780,6 +781,138 @@ void Rule::CandidateInfo::setRoot(small_id root,ag_st_id node,int change){
 	node_id[node] = root;
 	infl_by.emplace(change);
 }
+
+
+
+
+/********** Rule::Rate ****************/
+
+
+Rule::Rate::Rate(const Rule& r,state::State& state) : rule(r),unaryRate(nullptr,-1) {
+	auto new_rate = rule.getRate().clone();
+	baseRate = new_rate->reduce(state.vars);//rates also have to be reduced for every state
+	if(new_rate != baseRate)//reduce can return the same pointer on expression but no with vars.
+		delete new_rate;
+}
+
+const BaseExpression* Rule::Rate::getExpression(small_id cc_index) const {
+	return baseRate;
+}
+
+
+NormalRate::NormalRate(const Rule& r,state::State& state) : Rule::Rate(r,state) {}
+
+SamePtrnRate::SamePtrnRate(const Rule& r,state::State& state,bool normalize) :
+		Rule::Rate(r,state),norm(1.0){
+	if(normalize)
+		for(auto i = r.getLHS().size(); i > 1; i--)
+			norm *= i;
+}
+
+AuxDepRate::AuxDepRate(const Rule& r,state::State& state) :
+		Rule::Rate(r,state) {
+	map<string,small_id> aux_ccindex;
+	for(auto& aux_cc__ : rule.getLHS().getAux())
+		aux_ccindex[aux_cc__.first] = get<0>(aux_cc__.second);
+	base = baseRate->reduceAndFactorize(aux_ccindex);
+}
+
+const BaseExpression* AuxDepRate::getExpression(small_id cc_index) const {
+	return base.aux_functions.at(cc_index);
+}
+
+SameAuxDepRate::SameAuxDepRate(const Rule& r,state::State& state,bool normalize) :
+		Rule::Rate(r,state),SamePtrnRate(r,state,normalize),AuxDepRate(r,state) {
+	for(auto i = 1; i < base.aux_functions.size();i++)
+		if(base.aux_functions[i-1] != base.aux_functions[i]){
+			delete base.factor;
+			for(auto& elem : base.aux_functions)
+				delete elem.second;
+			throw invalid_argument("Not the same aux function.");
+		}
+}
+
+
+Rule::Rate::~Rate() {
+	delete baseRate;
+	if(unaryRate.first)
+		delete unaryRate.first;
+}
+
+NormalRate::~NormalRate(){}
+
+SamePtrnRate::~SamePtrnRate() {}
+
+AuxDepRate::~AuxDepRate() {
+	delete base.factor;
+	for(auto& elem : base.aux_functions)
+		delete elem.second;
+}
+
+SameAuxDepRate::~SameAuxDepRate() {}
+
+
+two<FL_TYPE> NormalRate::evalActivity(const state::State& state) const {
+	FL_TYPE a = baseRate->getValue(state).valueAs<FL_TYPE>();
+	auto& lhs = rule.getLHS();
+	for(unsigned i = 0 ; i < lhs.compsCount() ; i++){
+		auto& cc = lhs.getComponent(i);
+		auto& injs = state.getInjContainer(cc.getId());
+		a *= injs.count();
+	}
+	return make_pair(a,0.0);
+}
+
+two<FL_TYPE> SamePtrnRate::evalActivity(const state::State& state) const {
+	FL_TYPE a = baseRate->getValue(state).valueAs<FL_TYPE>()/norm;
+	auto& lhs = rule.getLHS();
+	auto count = state.getInjContainer(lhs.getComponent(0).getId()).count();
+	for(unsigned i = 0 ; i < lhs.compsCount() ; i++){
+		//injs.selectRule(rule.getId(), i);
+		a *= (count-i);
+	}
+	return make_pair(a,0.0);
+}
+
+two<FL_TYPE> AuxDepRate::evalActivity(const state::State& state) const {
+	FL_TYPE a = base.factor->getValue(state).valueAs<FL_TYPE>();
+	auto& lhs = rule.getLHS();
+	for(unsigned i = 0 ; i < lhs.compsCount() ; i++){
+		auto& cc = lhs.getComponent(i);
+		auto& injs = state.getInjContainer(cc.getId());
+		injs.selectRule(rule.getId(), i);
+		a *= injs.partialReactivity();
+	}
+	return make_pair(a,0.0);
+}
+
+two<FL_TYPE> SameAuxDepRate::evalActivity(const state::State& state) const {
+	FL_TYPE a = base.factor->getValue(state).valueAs<FL_TYPE>()/norm;
+	auto& lhs = rule.getLHS();
+	auto& injs = state.getInjContainer(lhs.getComponent(0).getId());
+	injs.selectRule(rule.getId(), 0);
+	auto ract = injs.partialReactivity();
+	for(unsigned i = 0 ; i < lhs.compsCount() ; i++){
+		a *= ract;
+	}
+	a -= injs.getM2();
+	return make_pair(a,0.0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

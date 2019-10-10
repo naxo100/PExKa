@@ -19,7 +19,7 @@
 %const: 'inform_rate' 0.3				#if (show-info) appears 24hrs -> 30% pop informed
 %const: 'informI_rate' 0.5				#an infected person is informed in 2 days avg
 #%const: 'show_info_rate' 0.14			#it appears once a week
-%const: 'hide_info_rate' 2				#it disappears in 12 hours
+#%const: 'hide_info_rate' 2				#it disappears in 12 hours
 
 %const: 'alfa_i' 0.8
 %const: 'alfa_f' 0.5

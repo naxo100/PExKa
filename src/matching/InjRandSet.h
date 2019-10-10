@@ -41,6 +41,7 @@ public:
 	virtual void clear() = 0;
 
 	virtual void selectRule(int rid,small_id cc) const;
+	virtual FL_TYPE getM2() const;
 
 	virtual FL_TYPE sumInternal(const expressions::BaseExpression* aux_func,
 			const map<string,two<small_id>>& aux_map, const state::State &state) const = 0;
@@ -105,14 +106,14 @@ class InjRandTree : public InjRandContainer {
 	virtual CcInjection* newInj() const override;
 
 public:
-	InjRandTree(const pattern::Mixture::Component& cc,const vector<simulation::Rule::Rate>& rates);
+	InjRandTree(const pattern::Mixture::Component& cc,const vector<simulation::Rule::Rate*>& rates);
 	~InjRandTree();
 	const Injection& chooseRandom(default_random_engine& randGen) const override;
 	const Injection& choose(unsigned id) const override;
 	size_t count() const override;
 	virtual FL_TYPE partialReactivity() const;
 
-	FL_TYPE getM2() const;
+	FL_TYPE getM2() const override;
 
 	void erase(Injection* inj) override;
 	virtual void clear() override;

@@ -66,7 +66,7 @@ FL_TYPE UnaryOperation<R, T>::auxFactors(
 		std::unordered_map<std::string, FL_TYPE> &var_factors) const {return 0.0;}
 
 template<typename R, typename T>
-BaseExpression::Reduction UnaryOperation<R, T>::factorize(const std::map<std::string,small_id> aux_cc) const {
+BaseExpression::Reduction UnaryOperation<R, T>::factorize(const std::map<std::string,small_id> &aux_cc) const {
 	using Unfactorizable = BaseExpression::Unfactorizable;
 	auto VARDEP = BaseExpression::VarDep::VARDEP;
 	auto MULT = BaseExpression::AlgebraicOp::MULT;

@@ -38,7 +38,25 @@ src/expressions/NullaryOperation.o: \
  ../src/expressions/../state/../matching/../pattern/mixture/Mixture.h \
  ../src/expressions/../state/../matching/../data_structs/DistributionTree.h \
  ../src/expressions/../state/../matching/../data_structs/../util/params.h \
- ../src/expressions/../state/../matching/../simulation/Rule.h
+ ../src/expressions/../state/../matching/../simulation/Rule.h \
+ ../src/expressions/../simulation/Simulation.h \
+ ../src/expressions/../simulation/Parameters.h \
+ ../src/expressions/../simulation/Counter.h \
+ ../src/expressions/../simulation/Plot.h \
+ ../src/expressions/../simulation/../state/State.h \
+ ../src/expressions/../simulation/../pattern/Environment.h \
+ ../src/expressions/../simulation/../pattern/Signature.h \
+ ../src/expressions/../simulation/../pattern/Compartment.h \
+ ../src/expressions/../simulation/../pattern/../state/Variable.h \
+ ../src/expressions/../simulation/../pattern/Channel.h \
+ ../src/expressions/../simulation/../pattern/mixture/Mixture.h \
+ ../src/expressions/../simulation/../pattern/Dependencies.h \
+ ../src/expressions/../simulation/../pattern/../simulation/Rule.h \
+ ../src/expressions/../simulation/../pattern/../simulation/Perturbation.h \
+ ../src/expressions/../simulation/../pattern/../util/Exceptions.h \
+ ../src/expressions/../simulation/../pattern/../util/../grammar/location.hh \
+ ../src/expressions/../simulation/../pattern/RuleSet.h \
+ ../src/expressions/../simulation/../matching/Injection.h
 
 ../src/expressions/NullaryOperation.h:
 
@@ -123,3 +141,39 @@ src/expressions/NullaryOperation.o: \
 ../src/expressions/../state/../matching/../data_structs/../util/params.h:
 
 ../src/expressions/../state/../matching/../simulation/Rule.h:
+
+../src/expressions/../simulation/Simulation.h:
+
+../src/expressions/../simulation/Parameters.h:
+
+../src/expressions/../simulation/Counter.h:
+
+../src/expressions/../simulation/Plot.h:
+
+../src/expressions/../simulation/../state/State.h:
+
+../src/expressions/../simulation/../pattern/Environment.h:
+
+../src/expressions/../simulation/../pattern/Signature.h:
+
+../src/expressions/../simulation/../pattern/Compartment.h:
+
+../src/expressions/../simulation/../pattern/../state/Variable.h:
+
+../src/expressions/../simulation/../pattern/Channel.h:
+
+../src/expressions/../simulation/../pattern/mixture/Mixture.h:
+
+../src/expressions/../simulation/../pattern/Dependencies.h:
+
+../src/expressions/../simulation/../pattern/../simulation/Rule.h:
+
+../src/expressions/../simulation/../pattern/../simulation/Perturbation.h:
+
+../src/expressions/../simulation/../pattern/../util/Exceptions.h:
+
+../src/expressions/../simulation/../pattern/../util/../grammar/location.hh:
+
+../src/expressions/../simulation/../pattern/RuleSet.h:
+
+../src/expressions/../simulation/../matching/Injection.h:

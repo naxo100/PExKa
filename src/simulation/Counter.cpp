@@ -10,7 +10,10 @@
 namespace simulation {
 
 Counter::Counter() : time(0.),events(0),null_events(0),cons_null_events(0),
-		perturbation_events(0),null_actions(0),stat_null({}){}
+		perturbation_events(0),null_actions(0),stat_null({}),zero_reactivity(false),
+		initialized(false),dT(.0),dE(.0),next_sync_at(-1.),max_time(-1.),max_events(0),
+		sync_count(0),sync_time(0),ticks(0),init_event(0),diffusion_ev(0),reaction_ev(0),
+		init_time(0),progress_step(0),stop(false),sync_event_dt(.0){}
 
 Counter::~Counter() {}
 
@@ -58,10 +61,10 @@ string Counter::toString() const {
 
 
 
-LocalCounter::LocalCounter(){}
+LocalCounter::LocalCounter() : Counter() {}
 
 
-GlobalCounter::GlobalCounter(){}
+GlobalCounter::GlobalCounter() : Counter() {}
 
 
 

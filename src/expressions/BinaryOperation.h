@@ -48,7 +48,7 @@ public:
 			override;
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const
 			override;
-	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> &aux_cc) const override;
 	BaseExpression* clone() const override;
 
 	BaseExpression* reduce(VarVector& vars);

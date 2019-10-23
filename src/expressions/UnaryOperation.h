@@ -34,7 +34,7 @@ public:
 	FL_TYPE auxFactors(std::unordered_map<std::string, FL_TYPE> &factor) const
 				override;
 	//std::set<std::string> getAuxiliars() const override;
-	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> &aux_cc) const override;
 	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 	bool operator==(const BaseExpression& exp) const override;

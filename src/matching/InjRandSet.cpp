@@ -315,19 +315,16 @@ CcInjection* InjRandTree::newInj() const{
 }
 
 size_t InjRandTree::count() const {
-	return roots.begin()->second->tree->total();
+	return roots.begin()->second->tree->count();
 }
 
 
 FL_TYPE InjRandTree::partialReactivity() const {
-	distribution_tree::DistributionTree<CcValueInj> *tree = nullptr;
 	if(roots.count(selected_root)){
-		tree = roots.at(selected_root)->tree;
+		return roots.at(selected_root)->tree->total();
 	}
-	if(tree)
-		return tree->total();
 	else
-		return count();
+		return roots.begin()->second->tree->total();
 }
 
 FL_TYPE InjRandTree::getM2() const {

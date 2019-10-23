@@ -68,7 +68,7 @@ public:
 
 	virtual FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
-	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> &aux_cc) const override;
 	BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 
@@ -110,7 +110,7 @@ public:
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
-	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> &aux_cc) const override;
 	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 	
@@ -140,7 +140,7 @@ public:
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;
 
-	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> &aux_cc) const override;
 	BaseExpression* reduce(VarVector &vars) override;
 	BaseExpression* clone() const override;
 
@@ -185,7 +185,7 @@ public:
 
 	bool operator==(const BaseExpression& exp) const override;
 
-	BaseExpression::Reduction factorize(const std::map<std::string,small_id> aux_cc) const override;
+	BaseExpression::Reduction factorize(const std::map<std::string,small_id> &aux_cc) const override;
 	BaseExpression* reduce(VarVector& vars) override;
 	BaseExpression* clone() const override;
 

@@ -138,6 +138,9 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 		return KappaParser::make_NEWLINE(loc);
 	}
 }
+"[ID]"		return KappaParser::make_RUN_ID(loc);
+"[run-id]"	return KappaParser::make_RUN_ID(loc);
+"[RUNS]"	return KappaParser::make_RUNS(loc);
 "[A]"		return KappaParser::make_ACTIVITY(loc);
 "[E]"		return KappaParser::make_EVENT(loc);
 "[E+]"		return KappaParser::make_PROD_EVENT(loc);

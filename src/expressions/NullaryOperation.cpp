@@ -7,6 +7,7 @@
 
 #include "NullaryOperation.h"
 #include "../state/State.h"
+#include "../simulation/Simulation.h"
 #include <math.h>
 
 
@@ -28,7 +29,8 @@ FL_TYPE (*NullaryOperations<FL_TYPE>::funcs[4])(const state::State& state)= {
 };
 
 template<>
-int (*NullaryOperations<int>::funcs[3])(const state::State& state)= {
+int (*NullaryOperations<int>::funcs[4])(const state::State& state)= {
+	[](const state::State& state) {return int(state.getSim().getId());},
 	[](const state::State& state) {return int(state.getCounter().getEvent());},
 	[](const state::State& state) {return int(state.getCounter().getNullEvent());},
 	[](const state::State& state) {return int(state.getCounter().getProdEvent());}
@@ -60,9 +62,13 @@ FL_TYPE NullaryOperation<R>::auxFactors(
 		std::unordered_map<std::string, FL_TYPE> &var_factors) const {return 0.0;}
 
 template<typename R>
-BaseExpression::Reduction NullaryOperation<R>::factorize(const std::map<std::string,small_id> aux_cc) const {
-	throw BaseExpression::Unfactorizable("Cannot factorize: operation "+n_ops[op]+" is not factorizable.");
-	return BaseExpression::Reduction();
+BaseExpression::Reduction NullaryOperation<R>::factorize(const std::map<std::string,small_id> &aux_cc) const {
+	BaseExpression::Reduction red;
+	if(op == BaseExpression::RUN_ID)
+		red.factor = this->clone();
+	else
+		throw BaseExpression::Unfactorizable("Cannot factorize: operation "+n_ops[op]+" is not factorizable.");
+	return red;
 }
 
 template <typename T>
@@ -95,6 +101,8 @@ char NullaryOperation<R>::getVarDeps() const{
 		return BaseExpression::EVENT;
 	case BaseExpression::RAND_1:
 		return BaseExpression::RAND;
+	case BaseExpression::RUN_ID:
+		return BaseExpression::RUN;
 	}
 	return '\0';
 }

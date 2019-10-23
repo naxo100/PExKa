@@ -7,6 +7,7 @@
 
 #include "Plot.h"
 #include "../pattern/Environment.h"
+#include "Simulation.h"
 #include <boost/filesystem.hpp>
 
 namespace simulation {
@@ -51,12 +52,32 @@ Plot::~Plot() {
 
 void Plot::fill(const state::State& state,const pattern::Environment& env) {
 	auto t = min(state.getCounter().getTime(),state.getCounter().next_sync_at);
+	AuxNames aux_map;
 	while(t >= nextPoint){
 		file << nextPoint;
+		//cout << state.getSim().getId() <<"]\t" << nextPoint;
 		for(auto var : env.getObservables()){
-			file << "\t" << var->getValue(state);
+			file << "\t" << state.getVarValue(var->getId(), aux_map);
+			//cout << "\t" << state.getVarValue(var->getId(), aux_map);
 		}
 		file << endl;
+		//cout << endl;
+		nextPoint += dT;
+	}
+}
+
+void Plot::fillBefore(const state::State& state,const pattern::Environment& env) {
+	auto t = min(std::nextafter(state.getCounter().getTime(),0.),state.getCounter().next_sync_at);
+	AuxNames aux_map;
+	while(t >= nextPoint){
+		file << nextPoint;
+		//cout << state.getSim().getId() <<"]\t" << nextPoint;
+		for(auto var : env.getObservables()){
+			file << "\t" << state.getVarValue(var->getId(), aux_map);
+			//cout << "\t" << state.getVarValue(var->getId(), aux_map);
+		}
+		file << endl;
+		//cout << endl;
 		nextPoint += dT;
 	}
 }

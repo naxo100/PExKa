@@ -68,7 +68,7 @@ FL_TYPE Auxiliar<R>::auxFactors(
 }
 
 template<typename R>
-BaseExpression::Reduction Auxiliar<R>::factorize(const std::map<std::string,small_id> aux_cc) const {
+BaseExpression::Reduction Auxiliar<R>::factorize(const std::map<std::string,small_id> &aux_cc) const {
 	BaseExpression::Reduction r;
 	Auxiliar<R>* aux = new Auxiliar<R>(*this);
 	r.aux_functions[aux_cc.at(aux->toString())] = aux;
@@ -163,7 +163,7 @@ BaseExpression* VarLabel<R>::reduce(VarVector &vars ) {
 }
 
 template <typename R>
-BaseExpression::Reduction VarLabel<R>::factorize(const std::map<std::string,small_id> aux_cc) const {
+BaseExpression::Reduction VarLabel<R>::factorize(const std::map<std::string,small_id> &aux_cc) const {
 	throw invalid_argument("You should have reduced this expression before factorize! (var-name/id: "+name+"/"+to_string(varId));
 }
 template <typename R>

@@ -42,7 +42,7 @@ SomeValue BaseExpression::getValue(const state::State& state) const {
 }
 
 BaseExpression::Reduction BaseExpression::reduceAndFactorize(
-		const std::map<std::string,small_id> aux_cc) const{
+		const std::map<std::string,small_id> &aux_cc) const{
 	Reduction red(this->factorize(aux_cc));
 	VarVector vars;
 	auto factor = red.factor->reduce(vars);
@@ -176,10 +176,10 @@ BaseExpression* BaseExpression::makeUnaryExpression(BaseExpression *ex,
 BaseExpression* BaseExpression::makeNullaryExpression(const int func) {
 	BaseExpression* null_op = nullptr;
 
-	if(func <= Nullary::ACTIVITY)
+	if(func < Nullary::RUN_ID)
 		null_op = new NullaryOperation<FL_TYPE>(func);
 	else
-		null_op = new NullaryOperation<int>(func - Nullary::ACTIVITY);
+		null_op = new NullaryOperation<int>(func - Nullary::RUN_ID);
 	//SemanticError("Not a valid value for a nullary operation",
 	//		yy::location());
 	return null_op;

@@ -171,7 +171,7 @@ FL_TYPE BinaryOperation<R, T1, T2>::auxFactors(
 
 
 template<typename R, typename T1, typename T2>
-BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<std::string,small_id> aux_cc) const {
+BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<std::string,small_id> &aux_cc) const {
 	using Unfactorizable = BaseExpression::Unfactorizable;
 	auto VARDEP = BaseExpression::VarDep::VARDEP;
 	auto MULT = BaseExpression::AlgebraicOp::MULT;
@@ -223,21 +223,21 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<s
 				if(auxf_1.size() == 1){//only one cc-index
 					if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
 						ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results(2).");
-					r.factor = r1.factor->clone();
-					r.aux_functions[cc_f_1.first] = make_binary(cc_f_1.second,
-							make_binary(r2.factor,r1.factor,DIV),op);
+					r.factor = ONE_FL_EXPR->clone();
+					r.aux_functions[cc_f_1.first] = make_binary(make_binary(r1.factor,cc_f_1.second,MULT),
+							r2.factor,op);
 				}
 				else throw Unfactorizable("Cannot factorize: add/sub a const to more than one cc-aux-functions.");
 			}
 		}
-		else if(auxf_2.size()){//cc-aux func plus const
+		else if(auxf_2.size()){//const plus cc-aux func
 			if(auxf_2.size() == 1){//only one cc-index
 				if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
 					ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results.");
 				auto& cc_f_2 = *auxf_2.begin();
-				r.factor = r2.factor->clone();
-				r.aux_functions[cc_f_2.first] = make_binary(make_binary(r1.factor,r2.factor,DIV),
-						cc_f_2.second,op);
+				r.factor = ONE_FL_EXPR->clone();
+				r.aux_functions[cc_f_2.first] = make_binary(r1.factor,
+						make_binary(r2.factor,cc_f_2.second,MULT),op);
 			}
 			else throw Unfactorizable("Cannot factorize: add/sub a const to more than one cc-aux-functions.");
 		}

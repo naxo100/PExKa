@@ -43,7 +43,6 @@ State::State(const simulation::Simulation& _sim,
 			if(&(lhs.getComponent(cc_id)) != &(lhs.getComponent(cc_id+1)) )
 				{same_ptrn = false; break;}
 
-
 		if(rule.getRate().getVarDeps() & BaseExpression::AUX){
 			if(same_ptrn){
 				try{
@@ -143,7 +142,7 @@ void State::addNodes(unsigned n,const pattern::Mixture& mix){
 UINT_TYPE State::mixInstances(const pattern::Mixture& mix) const{
 	//auto& mix = env.getMixtures().front();
 	UINT_TYPE  count = 1;
-	for(auto cc : mix){
+	for(const auto cc : mix){
 		count *= injections[cc->getId()]->count();
 	}
 	return count;
@@ -399,8 +398,8 @@ void State::advanceUntil(FL_TYPE sync_t) {
 			counter.incNullEvents(ex.error);
 		}
 		WarningStack::getStack().show(false);
+		plot.fill(*this,env);
 	}
-	plot.fill(*this,env);
 }
 
 void State::selectBinaryInj(const simulation::Rule& r,bool clsh_if_un) const {
@@ -499,12 +498,11 @@ int State::event() {
 	dt = exp_distr(randGen);
 	if(act == 0 || std::isinf(dt)){
 		counter.advanceTime(dt);
-		plot.fill(*this,env);
+		//plot.fill(*this,env);
 		return 0;//TODO
 	}
 
 	counter.advanceTime(dt);
-
 	updateDeps(pattern::Dependency(pattern::Dependency::TIME));
 	//timePerts = pertIds;
 	//pertIds.clear();
@@ -518,7 +516,9 @@ int State::event() {
 		stop_t = pert.timeTest(*this);
 		//if(stop_t){
 			counter.time = (stop_t > 0) ? stop_t : counter.time;
+			plot.fillBefore(*this,env);
 			pert.apply(*this);
+			counter.time = std::nextafter(counter.time,counter.time + 1.0);//TODO inf?
 			abort = pert.testAbort(*this,true);
 		//}
 		//if(!abort)
@@ -536,12 +536,10 @@ int State::event() {
 				counter.getEvent(),counter.getTime(),act);
 	#endif
 	//EventInfo* ev = nullptr;
-
 	if(stop_t)
 		return 6;//NullEvent caused by perturbation
 	auto& rule = drawRule();
-
-	plot.fill(*this,env);
+	plot.fillBefore(*this,env);
 
 	#ifdef DEBUG
 		printf( "  | Rule: %-11.11s",rule.getName().c_str());

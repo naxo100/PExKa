@@ -38,7 +38,7 @@ FL_TYPE Constant<T>::auxFactors(
 }
 
 template<typename T>
-BaseExpression::Reduction Constant<T>::factorize(const std::map<std::string,small_id> aux_cc) const {
+BaseExpression::Reduction Constant<T>::factorize(const std::map<std::string,small_id> &aux_cc) const {
 	BaseExpression::Reduction r;
 	r.factor = this->clone();
 	return r;

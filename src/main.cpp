@@ -114,10 +114,13 @@ int main(int argc, char* argv[]){
 	auto sims = new simulation::Simulation*[params.runs];
 	//sims[0] = &sim;
 
+	int k = 1;
 	#pragma omp parallel
 	{
-		omp_set_num_threads(min(params.runs,omp_get_num_threads()));
+		k = omp_get_num_threads();
 	}
+
+	omp_set_num_threads(min(params.runs,k));
 
 	#pragma omp parallel for
 	for(int i = 0; i < params.runs; i++){

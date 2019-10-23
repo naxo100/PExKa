@@ -50,7 +50,9 @@ src/simulation/Plot.o: ../src/simulation/Plot.cpp \
  ../src/simulation/../pattern/../simulation/Rule.h \
  ../src/simulation/../pattern/../simulation/Perturbation.h \
  ../src/simulation/../pattern/../util/Exceptions.h \
- ../src/simulation/../pattern/../util/../grammar/location.hh
+ ../src/simulation/../pattern/../util/../grammar/location.hh \
+ ../src/simulation/Simulation.h ../src/simulation/../pattern/RuleSet.h \
+ ../src/simulation/../matching/Injection.h
 
 ../src/simulation/Plot.h:
 
@@ -159,3 +161,9 @@ src/simulation/Plot.o: ../src/simulation/Plot.cpp \
 ../src/simulation/../pattern/../util/Exceptions.h:
 
 ../src/simulation/../pattern/../util/../grammar/location.hh:
+
+../src/simulation/Simulation.h:
+
+../src/simulation/../pattern/RuleSet.h:
+
+../src/simulation/../matching/Injection.h:

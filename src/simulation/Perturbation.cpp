@@ -78,8 +78,17 @@ Perturbation::Perturbation(BaseExpression* cond,BaseExpression* unt,const yy::lo
 }
 
 Perturbation::Perturbation(const Perturbation& p) : id(p.id),condition(p.condition),
-		until(p.until),effects(p.effects),influence(p.influence),introCount(0),
-		nextStop(p.nextStop),incStep(p.incStep),applies(0),isCopy(true) {}
+		until(p.until),influence(p.influence),introCount(0),
+		nextStop(p.nextStop),incStep(p.incStep),applies(0),isCopy(true) {
+	//cloning state-dependent effects
+	for(auto eff : p.effects){
+		auto hist = dynamic_cast<Histogram*>(eff);
+		if(hist)
+			effects.push_back(new Histogram(*hist));
+		else
+			effects.push_back(eff);
+	}
+}
 
 Perturbation::~Perturbation() {
 	if(!isCopy){
@@ -88,6 +97,10 @@ Perturbation::~Perturbation() {
 		for(auto eff : effects)
 			delete eff;
 	}
+	else
+		for(auto eff : effects)
+			if(dynamic_cast<Histogram*>(eff))
+				delete eff;
 }
 
 void Perturbation::setId(int _id){
@@ -103,7 +116,7 @@ bool Perturbation::test(const state::State& state) const {
 }
 
 FL_TYPE Perturbation::timeTest(const state::State& state) const {
-	static FL_TYPE min_inc = numeric_limits<FL_TYPE>::epsilon();
+	static const FL_TYPE min_inc = numeric_limits<FL_TYPE>::epsilon();
 	if(nextStop >= 0)
 		return nextStop > state.getCounter().getTime() ? 0.0 : nextStop+min_inc;
 	else
@@ -260,8 +273,8 @@ void Delete::apply(state::State& state) const {
 	}
 
 	auto distr = uniform_int_distribution<unsigned>();
-	for(int i = 0; i < del; i++){
-		int j = distr(state.getRandomGenerator());
+	for(size_t i = 0; i < del; i++){
+		auto j = distr(state.getRandomGenerator());
 		auto& inj = inj_cont.choose(j);
 		for(auto node : inj.getEmbedding()){
 			state.del(node);

@@ -70,12 +70,12 @@ public:
 		SUMATORY,AVERAGE
 	};
 
-	//ACTIVITY always last of float op!!
+	//RUN_ID always first of INT op!!
 	enum Nullary {
-		RAND_1,SIM_TIME,CPUTIME,ACTIVITY,SIM_EVENT,NULL_EVENT,PROD_EVENT
+		RAND_1,SIM_TIME,CPUTIME,ACTIVITY,RUN_ID,SIM_EVENT,NULL_EVENT,PROD_EVENT
 	};
 	enum VarDep {
-		CONSTS = 1,AUX = 2,SPATIAL = 4,TIME = 8,EVENT = 16, RAND = 32, VARDEP=64
+		CONSTS = 1,RUN = 2,AUX = 4,SPATIAL = 8,TIME = 16,EVENT = 32,RAND = 64,VARDEP = 128
 	};
 
 	virtual ~BaseExpression() = 0;
@@ -103,10 +103,10 @@ public:
 	/** \brief Returns a factorized expression
 	 *
 	 */
-	virtual Reduction factorize(const std::map<std::string,small_id> aux_cc) const = 0;
+	virtual Reduction factorize(const std::map<std::string,small_id> &aux_cc) const = 0;
 	virtual BaseExpression* clone() const = 0;
 	virtual BaseExpression* reduce(VarVector& vars) = 0;
-	virtual Reduction reduceAndFactorize(const std::map<std::string,small_id> aux_cc) const;
+	virtual Reduction reduceAndFactorize(const std::map<std::string,small_id> &aux_cc) const;
 
 	virtual void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords);
 

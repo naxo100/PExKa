@@ -28,11 +28,10 @@ public:
 	virtual T evaluate(const state::State& state,
 			const AuxMap& aux_values) const = 0;
 	virtual FL_TYPE auxFactors(
-			std::unordered_map<std::string, FL_TYPE> &factor) const
-					override = 0;
+			std::unordered_map<std::string, FL_TYPE> &factor) const override = 0;
 	virtual SomeValue getValue(const VarVector &consts,
-			const std::unordered_map<std::string, int> *aux_values = nullptr) const
-					override;
+			const std::unordered_map<std::string,
+			int> *aux_values = nullptr) const override;
 	virtual SomeValue getValue(const state::State& state,
 			const AuxMap& aux_values) const override;
 	virtual bool operator==(const BaseExpression& exp) const override = 0;

@@ -26,6 +26,7 @@ public:
 	~Plot();
 
 	void fill(const state::State& state,const pattern::Environment& env);
+	void fillBefore(const state::State& state,const pattern::Environment& env);
 };
 
 } /* namespace simulation */

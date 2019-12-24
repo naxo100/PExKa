@@ -67,9 +67,16 @@ src/grammar/KappaDriver.o: ../src/grammar/KappaDriver.cpp \
  ../src/grammar/ast/../../simulation/../pattern/Environment.h \
  ../src/grammar/ast/../../simulation/../pattern/RuleSet.h \
  ../src/grammar/ast/../../simulation/../matching/Injection.h \
- ../src/grammar/location.hh ../src/grammar/KappaLexer.h \
- ../src/grammar/KappaParser.hpp ../src/grammar/ast/Statements.h \
- ../src/grammar/../util/Exceptions.h ../src/grammar/stack.hh
+ ../src/grammar/location.hh ../src/grammar/kappa3/Lexer.h \
+ ../src/grammar/kappa3/Parser.hpp ../src/grammar/kappa3/../location.hh \
+ ../src/grammar/kappa3/../ast/Statements.h \
+ ../src/grammar/kappa3/../../util/Exceptions.h \
+ ../src/grammar/kappa3/stack.hh ../src/grammar/kappa3/Parser.hpp \
+ ../src/grammar/kappa4/Lexer.h ../src/grammar/kappa4/Parser.hpp \
+ ../src/grammar/kappa4/../location.hh \
+ ../src/grammar/kappa4/../ast/Statements.h \
+ ../src/grammar/kappa4/../../util/Exceptions.h \
+ ../src/grammar/kappa4/stack.hh ../src/grammar/kappa4/Parser.hpp
 
 ../src/grammar/KappaDriver.h:
 
@@ -215,12 +222,30 @@ src/grammar/KappaDriver.o: ../src/grammar/KappaDriver.cpp \
 
 ../src/grammar/location.hh:
 
-../src/grammar/KappaLexer.h:
+../src/grammar/kappa3/Lexer.h:
 
-../src/grammar/KappaParser.hpp:
+../src/grammar/kappa3/Parser.hpp:
 
-../src/grammar/ast/Statements.h:
+../src/grammar/kappa3/../location.hh:
 
-../src/grammar/../util/Exceptions.h:
+../src/grammar/kappa3/../ast/Statements.h:
 
-../src/grammar/stack.hh:
+../src/grammar/kappa3/../../util/Exceptions.h:
+
+../src/grammar/kappa3/stack.hh:
+
+../src/grammar/kappa3/Parser.hpp:
+
+../src/grammar/kappa4/Lexer.h:
+
+../src/grammar/kappa4/Parser.hpp:
+
+../src/grammar/kappa4/../location.hh:
+
+../src/grammar/kappa4/../ast/Statements.h:
+
+../src/grammar/kappa4/../../util/Exceptions.h:
+
+../src/grammar/kappa4/stack.hh:
+
+../src/grammar/kappa4/Parser.hpp:

@@ -1,0 +1,39 @@
+
+
+%agent: Person(i,t~HT~MT~LiT~LT,money~[.0,[inf]],inter,coop)
+
+%agent: AFP(i,money~[.0,[inf]])
+
+
+%const: 'interaction-rate' 0.01
+%const: 'return-rate' 10.0
+
+%const: '$inv' 1.0
+%const: '%return' 0.2
+%const: '%profit P' 0.5
+%const: '%profit A' 1.0 - '%profit P'
+
+
+
+
+
+'inversion' Person(i,money~{m1}),AFP(i,money~{m2}) -> \
+			Person(i!1,money~{m1-'$inv'}),AFP(i!1,money~{m2+'$inv'}) \
+			@ 'interaction-rate'
+
+
+
+'renta'		Person(i!1,money~{m1}),AFP(i!1,money~{m2}) -> \
+			Person(i,money~{m1+'$inv'+'$inv'*'%return'*'%profit P'}),AFP(i,money~{m2-'$inv'+'$inv'*'%return'*'%profit A'}) \
+			@ 'return-rate'
+
+
+%init: 100 Person()
+%init: 10 AFP()
+
+
+
+
+%obs: 'AFP $' {[sum] m} AFP(money~{m})
+%obs: 'Person $' {[sum] m} Person(money~{m})
+

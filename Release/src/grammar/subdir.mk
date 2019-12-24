@@ -4,19 +4,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/grammar/KappaDriver.cpp \
-../src/grammar/KappaLexer.cpp \
-../src/grammar/KappaParser.cpp 
+../src/grammar/KappaDriver.cpp 
 
 OBJS += \
-./src/grammar/KappaDriver.o \
-./src/grammar/KappaLexer.o \
-./src/grammar/KappaParser.o 
+./src/grammar/KappaDriver.o 
 
 CPP_DEPS += \
-./src/grammar/KappaDriver.d \
-./src/grammar/KappaLexer.d \
-./src/grammar/KappaParser.d 
+./src/grammar/KappaDriver.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

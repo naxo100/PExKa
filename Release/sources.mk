@@ -27,6 +27,8 @@ src/data_structs \
 src/expressions \
 src/grammar \
 src/grammar/ast \
+src/grammar/kappa3 \
+src/grammar/kappa4 \
 src \
 src/matching \
 src/pattern \

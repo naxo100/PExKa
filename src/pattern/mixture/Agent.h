@@ -62,7 +62,7 @@ public:
 	/** \brief Test if this agent is "contained" in 'a'.
 	 * to_test stores site-ids of every bind that will need to be tested
 	 */
-	bool testEmbed(const Agent& a,list<small_id>& to_test) const;
+	bool testEmbed(const Agent& a,list<small_id>& to_test,const VarVector& consts) const;
 
 	/*void addParent(small_id id,Agent *a);
 	void addParents(small_id id,const list<Agent*>& la);
@@ -116,7 +116,7 @@ struct Pattern::Site {
 
 	//Site& operator=(const Site& s);
 	bool operator==(const Site &s) const;
-	bool testEmbed(const Site &s,list<small_id>& to_test) const;
+	bool testEmbed(const Site &s,list<small_id>& to_test,const VarVector& vars) const;
 	int compareLinkPtrn(ag_st_id ptrn) const;
 	bool isEmptySite() const;
 	bool isExpression() const;

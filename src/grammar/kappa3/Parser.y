@@ -2,12 +2,16 @@
 %require "3.0"
 %defines
 %define parse.assert
-%define parser_class_name { KappaParser }
+%define api.namespace { kappa3 }
+%define parser_class_name { Parser }
 %define api.value.type variant
 %define api.token.constructor
 %define parse.error verbose
 %param { grammar::KappaDriver &driver }
-%locations
+
+%define api.location.type {yy::location}
+%code requires { #include "../location.hh" }
+
 %initial-action
 {
 	// Initialize the initial location.
@@ -18,9 +22,9 @@
 %code requires{
 	#include <iostream>
 	#include <string>
-	#include "ast/Statements.h"
-	#include "location.hh"
-	#include "../util/Exceptions.h"
+	#include "../ast/Statements.h"
+	#include "../location.hh"
+	#include "../../util/Exceptions.h"
 	#include <typeinfo>
 	
 	using namespace std;
@@ -36,16 +40,16 @@
 }
 
 %code top {
-    #include "KappaLexer.h"
-    #include "KappaParser.hpp"
+    #include "Lexer.h"
+    #include "Parser.hpp"
     
-	#define yylex(x) x.getNextToken()
+	#define yylex(x) x.getNextToken<kappa3::Parser::symbol_type>()
 
 	using namespace yy;
 }
 
 %code {
-    #include "KappaDriver.h"
+    #include "../KappaDriver.h"
 }
 
 
@@ -120,7 +124,7 @@ statements:
 | statements statement newline
 	{}
 | statements error
-	{yy::KappaParser::error(@$ , "Statement not recognized");}
+	{error(@$ , "Statement not recognized");}
 ;
 
 
@@ -146,7 +150,7 @@ instruction:
 | CHANNEL LABEL comp_expr arrow comp_expr where_expr ATD alg_expr
  	{this->driver.getAst().add(Channel(@$,Id(@2,$2),$3,$5,$4,$6,$8));}
 | CHANNEL error
-	{yy::KappaParser::error(@2, "Bad channel declaration");}
+	{error(@2, "Bad channel declaration");}
 | TRANSPORT join LABEL mixture AT alg_expr
  	{}
 | USE MULT
@@ -166,7 +170,7 @@ instruction:
 | LET variable_declaration 
 	{this->driver.getAst().add($2);}
 | LET error
-	{yy::KappaParser::error(@2, "Bad variable declaration");}
+	{error(@2, "Bad variable declaration");}
 | CONST variable_declaration
 	{$2.setConstant(true); this->driver.getAst().add($2);}
 | CONST error
@@ -386,7 +390,7 @@ variable_declaration:
 | LABEL OP_CUR distr_expr CL_CUR non_empty_mixture
 	{$$ = Declaration(@$,Id(@1,$1),$3,Mixture(@5,$5));}
 | LABEL error 
-	{yy::KappaParser::error(@2 , "error in LABEL error");}
+	{error(@2 , "error in LABEL error");}
 ;
 
 
@@ -644,7 +648,7 @@ agent_expression:
   ID OP_PAR interface_expression CL_PAR 
 	{ $$ = Agent(@$,Id(@1,$1),$3); }
 | ID error 
-	{yy::KappaParser::error(@1,std::string("Malformed agent ")+$1);}
+	{error(@1,std::string("Malformed agent ")+$1);}
 ;
 
 
@@ -703,9 +707,11 @@ internal_state:
 	{$$ = SiteState(@$,$2,$4);}
 | KAPPA_INTER alg_expr COMMA alg_expr CL_BRA OP_PAR alg_expr CL_PAR //default is third alg_expr
 	{$$ = SiteState(@$,$2,$4,$7);}
+| KAPPA_INTER CL_BRA OP_PAR alg_expr CL_PAR
+	{$$ = SiteState(@$,nullptr,nullptr,$4);}
 
 | error
-	{yy::KappaParser::error(@1,"Invalid internal state");}
+	{error(@1,"Invalid internal state");}
 ;
 
 
@@ -718,7 +724,7 @@ state_enum:
 		$$=$2;
 	 }
 | error 
-	{yy::KappaParser::error(@1,"Invalid internal state");}
+	{error(@1,"Invalid internal state");}
 ;
 
 
@@ -734,7 +740,7 @@ link_state:
 | KAPPA_WLD 
 	{$$ = ast::Link(@$,ast::Link::ANY);}
 | KAPPA_LNK error 
-	{yy::KappaParser::error(@1,"Invalid link state");}
+	{error(@1,"Invalid link state");}
 ;
 
 %%
@@ -742,7 +748,7 @@ link_state:
  * CODE
  */
 
-void yy::KappaParser::error(const location &loc , const std::string &message) {
+void kappa3::Parser::error(const location &loc , const std::string &message) {
 	// Location should be initialized inside scanner action, but is not in this example.
 	// Let's grab location directly from driver class.
 	// cout << "Error: " << message << endl << "Location: " << loc << endl;

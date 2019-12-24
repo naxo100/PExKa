@@ -92,7 +92,7 @@ bool Mixture::Agent::operator ==(const Agent &a) const {
 	return true;
 }
 
-bool Mixture::Agent::testEmbed(const Agent &a,list<small_id>& to_test) const {
+bool Mixture::Agent::testEmbed(const Agent &a,list<small_id>& to_test,const VarVector& vars) const {
 	if(this == &a)
 		return true;
 	if(signId != a.signId)
@@ -101,7 +101,7 @@ bool Mixture::Agent::testEmbed(const Agent &a,list<small_id>& to_test) const {
 	set<small_id> already_done;
 	for(auto &id_site : interface){
 		to_test.push_front(id_site.first);
-		if(!id_site.second.testEmbed(a.getSiteSafe(id_site.first),to_test))
+		if(!id_site.second.testEmbed(a.getSiteSafe(id_site.first),to_test,vars))
 			return false;
 		to_test.pop_front();
 		already_done.insert(id_site.first);
@@ -110,7 +110,7 @@ bool Mixture::Agent::testEmbed(const Agent &a,list<small_id>& to_test) const {
 		to_test.push_front(id_site.first);
 		if(already_done.count(id_site.first))
 			continue;
-		if(!getSiteSafe(id_site.first).testEmbed(id_site.second,to_test))
+		if(!getSiteSafe(id_site.first).testEmbed(id_site.second,to_test,vars))
 			return false;
 		to_test.pop_front();
 	}
@@ -454,14 +454,15 @@ bool Mixture::Site::operator ==(const Site &s) const{
 }
 
 /*test if this rhs-site is contained in s*/
-bool Mixture::Site::testEmbed(const Site &s,list<small_id>& to_test) const{
+bool Mixture::Site::testEmbed(const Site &s,list<small_id>& to_test,const VarVector& vars) const{
+	try{
 	switch(label){
 	case EMPTY:break;
 	case EXPR:
 		if(values[1] && values[1]->getVarDeps() <= BaseExpression::CONSTS){
-			auto rhs_val = values[1]->getValue(VarVector());
+			auto rhs_val = values[1]->getValue(vars);
 			if(s.values[1] && s.values[1]->getVarDeps() < BaseExpression::CONSTS &&
-					s.values[1]->getValue(VarVector()).valueAs<FL_TYPE>() != rhs_val.valueAs<FL_TYPE>() )
+					s.values[1]->getValue(vars).valueAs<FL_TYPE>() != rhs_val.valueAs<FL_TYPE>() )
 				return false;
 		}
 		break;
@@ -469,15 +470,15 @@ bool Mixture::Site::testEmbed(const Site &s,list<small_id>& to_test) const{
 		if(s.label == EMPTY)//else is AUX never VAL
 			break;
 		if(values[1] && values[1]->getVarDeps() <= BaseExpression::CONSTS){
-			auto rhs_val = values[1]->getValue(VarVector());
+			auto rhs_val = values[1]->getValue(vars);
 			if(s.values[0] && s.values[0]->getVarDeps() < BaseExpression::CONSTS &&
-					s.values[0]->getValue(VarVector()).valueAs<FL_TYPE>() > rhs_val.valueAs<FL_TYPE>() )
+					s.values[0]->getValue(vars).valueAs<FL_TYPE>() > rhs_val.valueAs<FL_TYPE>() )
 				return false;
 			if(s.values[2] && s.values[2]->getVarDeps() < BaseExpression::CONSTS &&
-					s.values[2]->getValue(VarVector()).valueAs<FL_TYPE>() < rhs_val.valueAs<FL_TYPE>() )
+					s.values[2]->getValue(vars).valueAs<FL_TYPE>() < rhs_val.valueAs<FL_TYPE>() )
 				return false;
 			if(s.values[1] && s.values[1]->getVarDeps() < BaseExpression::CONSTS &&
-					s.values[1]->getValue(VarVector()).valueAs<FL_TYPE>() != rhs_val.valueAs<FL_TYPE>() )
+					s.values[1]->getValue(vars).valueAs<FL_TYPE>() != rhs_val.valueAs<FL_TYPE>() )
 				return false;
 		}
 		break;
@@ -485,6 +486,7 @@ bool Mixture::Site::testEmbed(const Site &s,list<small_id>& to_test) const{
 		if(s.label != EMPTY && label != s.label)
 			return false;
 	}
+	}catch(out_of_range &e){/*cannot calculate exact values, so maybe yes*/}
 
 	if(link_type == WILD || s.link_type == WILD)
 		return true;

@@ -14,6 +14,8 @@ RM := rm -rf
 -include src/pattern/mixture/subdir.mk
 -include src/pattern/subdir.mk
 -include src/matching/subdir.mk
+-include src/grammar/kappa4/subdir.mk
+-include src/grammar/kappa3/subdir.mk
 -include src/grammar/ast/subdir.mk
 -include src/grammar/subdir.mk
 -include src/expressions/subdir.mk

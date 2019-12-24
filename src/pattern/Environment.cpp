@@ -239,7 +239,7 @@ void Environment::buildInfluenceMap(const VarVector& vars){
 }
 void Environment::buildFreeSiteCC() {
 	for(auto& ag_class : agentPatterns){
-		for(auto ag : ag_class){
+		for(auto& ag : ag_class){
 			for(auto& site_id : ag){
 				if(site_id.second.link_type == Pattern::FREE){
 					auto& l = freeSiteCC[(ag.getId() << sizeof(small_id)) + site_id.first];

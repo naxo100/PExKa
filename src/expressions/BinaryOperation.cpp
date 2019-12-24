@@ -203,12 +203,12 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<s
 					if(cc_f_1.first == cc_f_2.first){//sum of same cc-aux funcs index
 						if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
 							ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results.");
-						if(*r1.factor == *ONE_FL_EXPR){
+						/*if(*r1.factor == *ONE_FL_EXPR){
 							delete r1.factor;r1.factor = nullptr;
 						}
 						if(*r2.factor == *ONE_FL_EXPR){
 							delete r2.factor;r2.factor = nullptr;
-						}
+						}*/
 						r.factor = ONE_FL_EXPR->clone();
 						r.aux_functions[cc_f_1.first] = make_binary(
 								r1.factor ? cc_f_1.second : make_binary(r1.factor,cc_f_1.second,MULT),
@@ -256,7 +256,7 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<s
 				delete r2.factor;
 			}
 		else{
-			r.factor = r2.factor;
+			r.factor = op == DIV? make_binary(ONE_FL_EXPR->clone(),r2.factor,op) : r2.factor;
 			delete r1.factor;
 		}
 		r.aux_functions = auxf_1;//aux_funcs = r1

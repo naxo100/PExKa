@@ -30,7 +30,7 @@ R (*UnaryOperations<R, T>::funcs[10])(T)= {
 	[](T v) {return (R)std::atan(v);}, // ATAN
 	[](T v) {return (R)std::abs(v);}, // ABS
 	[](T v) {return ((rand()%10)/10.0) > v ? (R)1 : (R)0;}, // COIN
-	[](T v) {return (R)std::fmod(std::rand(), v);} // RAND_N
+	[](T v) {return (R)std::fmod(std::rand(), v);} // RAND_N //TODO use better rand function
 };
 
 template<typename R, typename T>
@@ -58,7 +58,7 @@ UnaryOperation<R, T>::UnaryOperation(BaseExpression *ex,
 template<typename R, typename T>
 UnaryOperation<R, T>::~UnaryOperation() {
 	if (!dynamic_cast<const state::Variable*>(exp))
-		delete exp;
+		1;//delete exp;
 }
 
 template<typename R, typename T>
@@ -138,11 +138,11 @@ BaseExpression* UnaryOperation<R, T>::clone() const {
 }
 
 template<typename R, typename T>
-bool UnaryOperation<R, T>::operator==(const BaseExpression& exp) const {
+bool UnaryOperation<R, T>::operator==(const BaseExpression& expr) const {
 	try {
-		auto& unary_exp = dynamic_cast<const UnaryOperation<R, T>&>(exp);
+		auto& unary_exp = dynamic_cast<const UnaryOperation<R, T>&>(expr);
 		if (unary_exp.op == op)
-			return (*unary_exp.exp) == exp;
+			return (*unary_exp.exp) == *exp;
 	} catch (std::bad_cast &ex) {
 	}
 	return false;
@@ -151,6 +151,11 @@ bool UnaryOperation<R, T>::operator==(const BaseExpression& exp) const {
 template <typename R,typename T>
 void UnaryOperation<R,T>::setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords){
 	exp->setAuxCoords(aux_coords);
+}
+
+template <typename R,typename T>
+char UnaryOperation<R,T>::getVarDeps() const {
+	return exp->getVarDeps();
 }
 
 

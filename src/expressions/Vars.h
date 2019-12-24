@@ -63,7 +63,7 @@ public:
 
 	virtual void setAuxCoords(const std::map<std::string,std::tuple<int,small_id,small_id>>& aux_coords) override;
 
-	char getVarDeps() const;
+	char getVarDeps() const override;
 	bool isAux() const override;
 
 	const tuple<int,small_id,small_id>& getCoordinates() const;

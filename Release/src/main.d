@@ -1,5 +1,5 @@
-src/main.o: ../src/main.cpp ../src/grammar/KappaLexer.h \
- ../src/grammar/KappaParser.hpp ../src/grammar/ast/Statements.h \
+src/main.o: ../src/main.cpp ../src/grammar/KappaDriver.h \
+ ../src/grammar/ast/KappaAst.h ../src/grammar/ast/Statements.h \
  ../src/grammar/ast/AlgebraicExpressions.h \
  ../src/grammar/ast/../location.hh ../src/grammar/ast/../position.hh \
  ../src/grammar/ast/../../state/Variable.h \
@@ -66,17 +66,23 @@ src/main.o: ../src/main.cpp ../src/grammar/KappaLexer.h \
  ../src/grammar/ast/../../simulation/../pattern/Environment.h \
  ../src/grammar/ast/../../simulation/../pattern/RuleSet.h \
  ../src/grammar/ast/../../simulation/../matching/Injection.h \
- ../src/grammar/location.hh ../src/grammar/../util/Exceptions.h \
- ../src/grammar/stack.hh ../src/grammar/KappaParser.hpp \
- ../src/grammar/KappaDriver.h ../src/grammar/ast/KappaAst.h \
- ../src/grammar/ast/Statements.h ../src/grammar/KappaLexer.h \
+ ../src/grammar/location.hh ../src/grammar/kappa3/Lexer.h \
+ ../src/grammar/kappa3/Parser.hpp ../src/grammar/kappa3/../location.hh \
+ ../src/grammar/kappa3/../ast/Statements.h \
+ ../src/grammar/kappa3/../../util/Exceptions.h \
+ ../src/grammar/kappa3/stack.hh ../src/grammar/kappa3/Parser.hpp \
+ ../src/grammar/kappa4/Lexer.h ../src/grammar/kappa4/Parser.hpp \
+ ../src/grammar/kappa4/../location.hh \
+ ../src/grammar/kappa4/../ast/Statements.h \
+ ../src/grammar/kappa4/../../util/Exceptions.h \
+ ../src/grammar/kappa4/stack.hh ../src/grammar/kappa4/Parser.hpp \
  ../src/grammar/ast/KappaAst.h ../src/pattern/Environment.h \
  ../src/simulation/Simulation.h ../src/simulation/Parameters.h \
  ../src/util/Warning.h
 
-../src/grammar/KappaLexer.h:
+../src/grammar/KappaDriver.h:
 
-../src/grammar/KappaParser.hpp:
+../src/grammar/ast/KappaAst.h:
 
 ../src/grammar/ast/Statements.h:
 
@@ -218,19 +224,33 @@ src/main.o: ../src/main.cpp ../src/grammar/KappaLexer.h \
 
 ../src/grammar/location.hh:
 
-../src/grammar/../util/Exceptions.h:
+../src/grammar/kappa3/Lexer.h:
 
-../src/grammar/stack.hh:
+../src/grammar/kappa3/Parser.hpp:
 
-../src/grammar/KappaParser.hpp:
+../src/grammar/kappa3/../location.hh:
 
-../src/grammar/KappaDriver.h:
+../src/grammar/kappa3/../ast/Statements.h:
 
-../src/grammar/ast/KappaAst.h:
+../src/grammar/kappa3/../../util/Exceptions.h:
 
-../src/grammar/ast/Statements.h:
+../src/grammar/kappa3/stack.hh:
 
-../src/grammar/KappaLexer.h:
+../src/grammar/kappa3/Parser.hpp:
+
+../src/grammar/kappa4/Lexer.h:
+
+../src/grammar/kappa4/Parser.hpp:
+
+../src/grammar/kappa4/../location.hh:
+
+../src/grammar/kappa4/../ast/Statements.h:
+
+../src/grammar/kappa4/../../util/Exceptions.h:
+
+../src/grammar/kappa4/stack.hh:
+
+../src/grammar/kappa4/Parser.hpp:
 
 ../src/grammar/ast/KappaAst.h:
 

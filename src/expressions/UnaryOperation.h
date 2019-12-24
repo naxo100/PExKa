@@ -43,6 +43,8 @@ public:
 	UnaryOperation(BaseExpression *ex,
 			const short op);
 
+	virtual char getVarDeps() const override;
+
 	virtual std::string toString() const override;
 };
 

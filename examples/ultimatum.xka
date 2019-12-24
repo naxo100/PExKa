@@ -1,0 +1,64 @@
+
+%agent: Person(i,money~[0,[inf]],offer~[0,[inf]], \
+				success~[0,[inf]],fail~[0,[inf]],start~[0,[inf]],\
+				inter~[0,[inf]],coop~[0,[inf]])
+
+
+
+
+%const: 'population' 2000  #2e+3
+%const: 't0_person_high_trust' 'population' * .073
+%const: 't0_person_moderate_trust' 'population' * .298
+%const: 't0_person_lowinstitutional_trust' 'population' * .502
+%const: 't0_person_low_trust' 'population' * .127
+
+
+%const: 'interaction_rate_ht' 3.7536
+%const: 'interaction_rate_mt' 3.2787
+%const: 'interaction_rate_lit' 3.1400
+%const: 'interaction_rate_lt' 2.8844
+
+%const: 'coop_h' 0.5750
+%const: 'coop_m' 0.5537
+%const: 'coop_li' 0.5537
+%const: 'coop_l' 0.4750
+
+
+%const: 'max-coop' 0.8 #'coop_h'
+%const: 'min_coop' 0.2 #'coop_l'
+
+%const: 'K'	3	#const for curve slope
+
+
+
+
+%const: '$' 10.0
+%const: 'max-offer' '$'/2.0
+
+%const: 'interaction-scale' 1.0/'population' #1e-5
+%const: 'disjoint-scale' 5.0
+
+'bid' 	Person(i,inter~{i1}),Person(i,offer~{o},inter~{i2}) \
+		-> Person(i!1),Person(i!1,offer~{1+[randN] ('max-offer'-1)}) \
+		@ i1*i2*'interaction-scale'
+
+
+'accept' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp}) \
+		-> Person(i,money~{m1-o}),Person(i,offer~{0},money~{m2+o}) \
+		@ 'disjoint-scale' * ([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi]
+
+'reject' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp})  \
+		-> Person(i,money~{m1-'$'}),Person(i,offer~{0},money~{m2}) \
+		@ 'disjoint-scale' * (1-([pi]/2.0 + [atan] ('K'(o- 0.5*cp)/(cp*(1-cp))))/[pi])
+
+
+
+%obs: 'Person $' {[sum] m} Person(money~{m})
+
+
+#init
+%init: 't0_person_high_trust' Person(i,money~{0},inter~{'interaction_rate_ht'},coop~{'coop_h'})
+%init: 't0_person_moderate_trust' Person(i,money~{0},inter~{'interaction_rate_mt'},coop~{'coop_m'})
+%init: 't0_person_lowinstitutional_trust' Person(i,money~{0},inter~{'interaction_rate_lit'},coop~{'coop_li'})
+%init: 't0_person_low_trust' Person(i,money~{0},inter~{'interaction_rate_lt'},coop~{'coop_l'})
+

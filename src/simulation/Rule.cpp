@@ -522,7 +522,7 @@ bool Rule::test_linked_agents(list<two<ag_st_id>>& to_test,small_id rhs_cc_id,
 		}
 		else{//testing for conserved node
 			list<small_id> link_sites;
-			if(rhs_ag.testEmbed(test_ag,link_sites))
+			if(rhs_ag.testEmbed(test_ag,link_sites,vars))
 				for(auto site_id : link_sites){
 					to_test.emplace_back(rhs_cc.follow(rhs_ag_id, site_id),
 							test_cc.follow(test_ag_id, site_id));

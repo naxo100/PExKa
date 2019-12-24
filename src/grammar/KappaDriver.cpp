@@ -11,10 +11,10 @@ namespace grammar {
 
 using namespace std;
 KappaDriver::KappaDriver():
-		parser(*this), lexer (*this){}
+		lexer3 (*this),parser3(*this), lexer4(*this), parser4(*this) {}
 
 KappaDriver::KappaDriver(const vector<string> &fls):
-		files(fls),parser(*this), lexer(*this) {}
+		files(fls),lexer3 (*this), parser3(*this),lexer4(*this),parser4(*this) {}
 
 KappaDriver::~KappaDriver() {}
 
@@ -22,20 +22,29 @@ int KappaDriver::parse(){
 	int r;
 	if(files.empty()){
 		// = stdin;
-		r = parser.parse();
+		r = parser3.parse();
 	} else {
-		for(fit = files.begin();fit != files.end() ; fit++) {
-			ifstream f(fit->c_str());
+		for(auto& file : files) {
+			curr_file = file;
+			ifstream f(file.c_str());
 
 			if (f.fail()) {
-		      cerr << "Cannot open input file " << fit->c_str() << endl;
-		      exit (EXIT_FAILURE);
+				cerr << "Cannot open input file " << file << endl;
+				exit (EXIT_FAILURE);
 		    }
 
-			lexer.switch_streams( &f, NULL);
-			loc.initialize(&*fit,1,1);
 
-		    r = parser.parse();
+			string file_type = file.substr(file.find_last_of("."));
+			if(file_type == "ka4"){
+				lexer4.switch_streams( &f, NULL);
+				loc.initialize(&file,1,1);
+				r = parser4.parse();
+			}
+			else{
+				lexer3.switch_streams( &f, NULL);
+				loc.initialize(&file,1,1);
+				r = parser3.parse();
+			}
 
 		    f.close();
 		}
@@ -43,12 +52,17 @@ int KappaDriver::parse(){
 	return r;
 }
 
-yy::KappaParser::symbol_type KappaDriver::getNextToken(){
-	return lexer.get_next_token();
+template<>
+kappa3::Parser::symbol_type KappaDriver::getNextToken(){
+	return lexer3.get_next_token();
+}
+template<>
+kappa4::Parser::symbol_type KappaDriver::getNextToken(){
+	return lexer4.get_next_token();
 }
 
-std::string* KappaDriver::getCurrentFileName() const{
-	return &(*fit);
+const std::string* KappaDriver::getCurrentFileName() const{
+	return &curr_file;
 }
 
 yy::location* KappaDriver::getLocation(){

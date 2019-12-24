@@ -256,7 +256,8 @@ void InjRandTree::insert(CcInjection* inj,const state::State& state) {
 		auto ccaux_func = state.getRuleRate(r.getId()).getExpression(ridcc_tree.first.second);
 		val *= ccaux_func->getValue(state, move(aux_values)).valueAs<FL_TYPE>();
 		if(val < 0.)
-			throw invalid_argument("Partial reactivities cannot be negative.");
+			throw invalid_argument("When applying rule '"+r.getName()+
+					"':\nPartial reactivities cannot be negative.");
 		ridcc_tree.second->tree->push(ccval_inj,val);//TODO static cast?
 	}
 	counter += inj->count();

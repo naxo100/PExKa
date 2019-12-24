@@ -15,8 +15,10 @@
 #include <fstream>
 #include "ast/KappaAst.h"
 #include "location.hh"
-#include "KappaLexer.h"
-#include "KappaParser.hpp"
+#include "kappa3/Lexer.h"
+#include "kappa3/Parser.hpp"
+#include "kappa4/Lexer.h"
+#include "kappa4/Parser.hpp"
 
 using namespace std;
 
@@ -24,9 +26,11 @@ namespace grammar {
 
 class KappaDriver {
 	vector<string> files;
-	vector<string>::iterator fit;
-	yy::KappaParser parser;
-	yy::KappaLexer lexer;
+	string curr_file;
+	kappa3::Lexer lexer3;
+	kappa3::Parser parser3;
+	kappa4::Lexer lexer4;
+	kappa4::Parser parser4;
 	yy::location loc;
 	ast::KappaAst syntax_tree;
 
@@ -56,9 +60,10 @@ public:
 	 */
 	int parse();
 
-	yy::KappaParser::symbol_type getNextToken();
+	template <typename T>
+	T getNextToken();
 
-	string* getCurrentFileName() const;
+	const string* getCurrentFileName() const;
 
 	yy::location* getLocation();
 

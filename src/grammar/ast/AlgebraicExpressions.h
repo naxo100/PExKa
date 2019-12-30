@@ -123,6 +123,13 @@ protected:
 	VarType type;
 };
 
+class Func : public Expression {
+	BaseExpression::Funcs type;
+	list<Expression*> args;
+public:
+	Func(const location &loc,const list<Expression*>& args,BaseExpression::Funcs f);
+};
+
 
 } /* namespace ast */
 

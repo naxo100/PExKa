@@ -68,7 +68,7 @@
 %token <float> FLOAT 
 %token <std::string> STRING
 %token TRUE FALSE INF TIME EVENT RUN_ID RUNS ACTIVITY NULL_EVENT PROD_EVENT EMAX TMAX RAND_1
-%token LOG SINE COSINE TAN ATAN COIN RAND_N SQRT EXPONENT POW ABS MODULO SUM AVG MAX MIN
+%token LOG SINE COSINE TAN ATAN COIN RAND_N BETA SQRT EXPONENT POW ABS MODULO SUM AVG MAX MIN
 %token AND OR GREATER SMALLER EQUAL 
 %token MULT DIV PLUS MINUS
 
@@ -597,6 +597,11 @@ alg_expr:
 	{$$ = new Const(@$,simulation::Parameters::get().runs);}
 | MINUS alg_expr
 	{$$ = new AlgBinaryOperation(@$,new Const(location(),0),$2,BaseExpression::AlgebraicOp::MINUS);}
+| BETA alg_expr alg_expr {
+	list<Expression*> l;
+	l.push($2);l.push($3);
+	$$ = new Func(@$,BaseExpression::Funcs::BETA,l);
+}
 | error
 	{}
 ;

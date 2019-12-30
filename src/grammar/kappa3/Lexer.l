@@ -167,6 +167,7 @@ real		([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(([eE][+-][0-9]+)|([eE][0-9]+))?
 "[sum]"		return Parser::make_SUM(loc); 
 "[average]"	return Parser::make_AVG(loc);
 "[avg]"		return Parser::make_AVG(loc);
+"[Beta]"	return Parser::make_BETA(loc);
 
 ":"			return Parser::make_TYPE(loc);
 ";"			return Parser::make_SEMICOLON(loc);

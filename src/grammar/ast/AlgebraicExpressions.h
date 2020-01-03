@@ -127,7 +127,12 @@ class Func : public Expression {
 	BaseExpression::Funcs type;
 	list<Expression*> args;
 public:
-	Func(const location &loc,const list<Expression*>& args,BaseExpression::Funcs f);
+	Func(const location &loc,BaseExpression::Funcs f,const list<Expression*>& args);
+	BaseExpression* eval(const pattern::Environment& env,const Expression::VAR &vars,
+			pattern::DepSet* deps = nullptr,const char flags = 0,
+			const map<string,tuple<int,small_id,small_id>>* aux_map = nullptr) const override;
+	Func* clone() const override;
+	void show( string tabs = "" ) const;
 };
 
 

@@ -9,6 +9,7 @@
 #include "../../state/Variable.h"
 #include "../../expressions/Constant.h"
 #include "../../expressions/Vars.h"
+#include "../../expressions/Function.h"
 #include "../../pattern/mixture/Component.h"
 
 #include <limits>
@@ -272,5 +273,48 @@ void Var::show( string tabs ) const {
 
 	cout << endl << tabs << "Variable: " << name.getString() << ", type: " << ar_type[type];
 }
+
+
+
+
+
+
+
+Func::Func(const location &loc,BaseExpression::Funcs f,const list<Expression*>& _args)
+		: Expression(loc),type(f),args(_args){}
+
+
+BaseExpression* Func::eval(const pattern::Environment& env,
+		const Expression::VAR &vars,pattern::DepSet* deps,const char flags,
+		const map<string,tuple<int,small_id,small_id>>* aux_map) const {
+	BaseExpression* expr =nullptr;
+	list<BaseExpression*> expr_list;
+	for(auto arg : args)
+		expr_list.push_back(arg->eval(env,vars,deps,flags,aux_map));
+	expr = new expressions::Function<FL_TYPE>(type,expr_list);
+	return expr;
+}
+Func* Func::clone() const{
+	list<Expression*> new_args;
+	for(auto arg : args)
+		new_args.push_back(arg->clone());
+	return new Func(loc,type,new_args);
+}
+
+void Func::show( string tabs ) const {
+	string ar_type[]= {"VAR","TOKEN","AUX","TIME","EVENT","NULL_EVENT","PROD_EVENT","CPUTIME","ACTIVITY"};
+	tabs += "   ";
+
+	cout << endl << tabs << "Beta (?)";
+}
+
+
+
+
+
+
+
+
+
 
 } /* namespace ast */

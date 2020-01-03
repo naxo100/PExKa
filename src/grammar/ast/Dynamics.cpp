@@ -372,7 +372,7 @@ pair<small_id,Id> Site::eval(const pattern::Environment &env,const vector<Variab
 		else //LHS
 			values[1] = stateInfo.val->eval(env,consts,nullptr,Expression::CONST | ptrn_flag);
 		try{
-			if(! sign->getSite(site_id).isPossibleValue(values[1]->getValue(consts)))//TODO use a real VarVector
+			if(! sign->getSite(site_id).isPossibleValue(values[1]->getValue(consts)))
 				throw SemanticError("This value is not included in range declaration of site",loc);
 		}
 		catch(exception &e){}//TODO check which exceptions

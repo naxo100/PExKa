@@ -3,7 +3,8 @@
 				success~[0,[inf]],fail~[0,[inf]],start~[0,[inf]],\
 				inter~[0,[inf]],coop~[0,[inf]])
 
-
+%token: accepted
+%token: rejected
 
 
 %const: 'population' 2000  #2e+3
@@ -28,6 +29,8 @@
 %const: 'min_coop' 0.2 #'coop_l'
 
 %const: 'K'	3	#const for curve slope
+%const: 'K-alfa' 625
+%const: 'K-beta' 90
 
 
 
@@ -38,22 +41,38 @@
 %const: 'interaction-scale' 1.0/'population' #1e-5
 %const: 'disjoint-scale' 5.0
 
-'bid' 	Person(i,inter~{i1}),Person(i,offer~{o},inter~{i2}) \
-		-> Person(i!1),Person(i!1,offer~{1+[randN] ('max-offer'-1)}) \
+
+
+
+'bid' 	Person(i,inter~{i1},coop~{cp}),Person(i,offer~{o},inter~{i2}) \
+		-> Person(i!1),Person(i!1,offer~{[Beta] 'K-alfa'^(cp*(1-cp))/(1-cp)  'K-beta'^(1-cp)/(1-cp)}) \
 		@ i1*i2*'interaction-scale'
 
 
 'accept' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp}) \
-		-> Person(i,money~{m1-o}),Person(i,offer~{0},money~{m2+o}) \
+		-> Person(i!1,money~{m1-o}),Person(i!1,offer~{-o},money~{m2+o}) \
+		| 1: accepted \
 		@ 'disjoint-scale' * ([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi]
 
 'reject' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp})  \
-		-> Person(i,money~{m1-'$'}),Person(i,offer~{0},money~{m2}) \
-		@ 'disjoint-scale' * (1-([pi]/2.0 + [atan] ('K'(o- 0.5*cp)/(cp*(1-cp))))/[pi])
+		-> Person(i!1,money~{m1-'$'}),Person(i!1,offer~{-o},money~{m2}) \
+		| 1: rejected \
+		@ 'disjoint-scale' * (1-([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi])
 
 
 
-%obs: 'Person $' {[sum] m} Person(money~{m})
+
+
+%obs: 'Total $' {[sum] m} Person(money~{m})
+%obs: 'Accepted' |accepted|
+%obs: 'Rejected' |rejected|
+
+
+%obs: 'Free People' Person(i)
+%mod: repeat [T] [mod] 999 = 0 do $HISTOGRAM (10) "output/histogram-offers" Person(offer~{o}) \
+		until [false]
+
+
 
 
 #init

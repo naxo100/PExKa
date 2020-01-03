@@ -28,7 +28,7 @@ const yy::location& Mixture::Agent::getLoc() const {
 
 
 Mixture::Site& Mixture::Agent::addSite(small_id env_site){
-	return interface[env_site] = Site();
+	return interface[env_site];
 }
 
 const Mixture::Site& Mixture::Agent::getSite(small_id id) const {

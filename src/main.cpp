@@ -149,12 +149,12 @@ int main(int argc, char* argv[]){
 			sims[i]->print();
 
 #endif
-		try{
+		//try{
 			sims[i]->run(params);
-		}catch(exception &e){
-			cerr << "An exception found when running simulation (" << i <<"):\n" << e.what() << endl;
+		//}catch(exception &e){
+			//cerr << "An exception found when running simulation (" << i <<"):\n" << e.what() << endl;
 			//exit(1);
-		}
+		//}
 		if(i != 0)
 			delete sims[i];
 	}

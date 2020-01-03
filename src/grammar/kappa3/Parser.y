@@ -599,7 +599,7 @@ alg_expr:
 	{$$ = new AlgBinaryOperation(@$,new Const(location(),0),$2,BaseExpression::AlgebraicOp::MINUS);}
 | BETA alg_expr alg_expr {
 	list<Expression*> l;
-	l.push($2);l.push($3);
+	l.push_back($2);l.push_back($3);
 	$$ = new Func(@$,BaseExpression::Funcs::BETA,l);
 }
 | error

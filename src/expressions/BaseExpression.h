@@ -69,6 +69,9 @@ public:
 	enum N_ary {
 		SUMATORY,AVERAGE
 	};
+	enum Funcs {
+		BETA
+	};
 
 	//RUN_ID always first of INT op!!
 	enum Nullary {

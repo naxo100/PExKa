@@ -43,6 +43,8 @@ src/grammar/ast/AlgebraicExpressions.o: \
  ../src/grammar/ast/../../pattern/Dependencies.h \
  ../src/grammar/ast/../../expressions/Constant.h \
  ../src/grammar/ast/../../expressions/Vars.h \
+ ../src/grammar/ast/../../expressions/Function.h \
+ ../src/grammar/ast/../../expressions/AlgExpression.h \
  ../src/grammar/ast/../../pattern/mixture/Component.h \
  ../src/grammar/ast/../../pattern/mixture/Mixture.h
 
@@ -133,6 +135,10 @@ src/grammar/ast/AlgebraicExpressions.o: \
 ../src/grammar/ast/../../expressions/Constant.h:
 
 ../src/grammar/ast/../../expressions/Vars.h:
+
+../src/grammar/ast/../../expressions/Function.h:
+
+../src/grammar/ast/../../expressions/AlgExpression.h:
 
 ../src/grammar/ast/../../pattern/mixture/Component.h:
 

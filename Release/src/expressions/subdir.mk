@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/expressions/BaseExpression.cpp \
 ../src/expressions/BinaryOperation.cpp \
 ../src/expressions/Constant.cpp \
+../src/expressions/Function.cpp \
 ../src/expressions/NullaryOperation.cpp \
 ../src/expressions/SomeValue.cpp \
 ../src/expressions/UnaryOperation.cpp \
@@ -18,6 +19,7 @@ OBJS += \
 ./src/expressions/BaseExpression.o \
 ./src/expressions/BinaryOperation.o \
 ./src/expressions/Constant.o \
+./src/expressions/Function.o \
 ./src/expressions/NullaryOperation.o \
 ./src/expressions/SomeValue.o \
 ./src/expressions/UnaryOperation.o \
@@ -28,6 +30,7 @@ CPP_DEPS += \
 ./src/expressions/BaseExpression.d \
 ./src/expressions/BinaryOperation.d \
 ./src/expressions/Constant.d \
+./src/expressions/Function.d \
 ./src/expressions/NullaryOperation.d \
 ./src/expressions/SomeValue.d \
 ./src/expressions/UnaryOperation.d \

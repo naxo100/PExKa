@@ -1,4 +1,5 @@
 
+
 %agent: Person(i,money~[0,[inf]],offer~[0,[inf]], \
 				success~[0,[inf]],fail~[0,[inf]],start~[0,[inf]],\
 				inter~[0,[inf]],coop~[0,[inf]])
@@ -7,11 +8,18 @@
 %token: rejected
 
 
-%const: 'population' 2000  #2e+3
-%const: 't0_person_high_trust' 'population' * .073
-%const: 't0_person_moderate_trust' 'population' * .298
-%const: 't0_person_lowinstitutional_trust' 'population' * .502
-%const: 't0_person_low_trust' 'population' * .127
+
+%const: 'K'	5	#const for curve slope
+%const: 'K-alfa' 34.0	#for param alfa = 100 and cp = 0.5
+%const: 'K-beta' 25.0	#for param beta = 125 when cp = 0.5
+
+
+
+%const: '$' 10.0				#money to play ultimatum game
+%const: 'max-offer' '$'/2.0		#max-money to offer by dumb agent
+
+
+
 
 
 %const: 'interaction_rate_ht' 3.7536
@@ -24,42 +32,10 @@
 %const: 'coop_li' 0.5537
 %const: 'coop_l' 0.4750
 
-
-%const: 'max-coop' 0.8 #'coop_h'
-%const: 'min_coop' 0.2 #'coop_l'
-
-%const: 'K'	3	#const for curve slope
-%const: 'K-alfa' 625
-%const: 'K-beta' 90
-
-
-
-
-%const: '$' 10.0
-%const: 'max-offer' '$'/2.0
+%const: 'population' 10  #2e+3
 
 %const: 'interaction-scale' 1.0/'population' #1e-5
 %const: 'disjoint-scale' 5.0
-
-
-
-
-'bid' 	Person(i,inter~{i1},coop~{cp}),Person(i,offer~{o},inter~{i2}) \
-		-> Person(i!1),Person(i!1,offer~{[Beta] 'K-alfa'^(cp*(1-cp))/(1-cp)  'K-beta'^(1-cp)/(1-cp)}) \
-		@ i1*i2*'interaction-scale'
-
-
-'accept' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp}) \
-		-> Person(i!1,money~{m1-o}),Person(i!1,offer~{-o},money~{m2+o}) \
-		| 1: accepted \
-		@ 'disjoint-scale' * ([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi]
-
-'reject' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp})  \
-		-> Person(i!1,money~{m1-'$'}),Person(i!1,offer~{-o},money~{m2}) \
-		| 1: rejected \
-		@ 'disjoint-scale' * (1-([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi])
-
-
 
 
 
@@ -68,16 +44,58 @@
 %obs: 'Rejected' |rejected|
 
 
-%obs: 'Free People' Person(i)
-%mod: repeat [T] [mod] 999 = 0 do $HISTOGRAM (10) "output/histogram-offers" Person(offer~{o}) \
-		until [false]
-
-
-
 
 #init
 %init: 't0_person_high_trust' Person(i,money~{0},inter~{'interaction_rate_ht'},coop~{'coop_h'})
 %init: 't0_person_moderate_trust' Person(i,money~{0},inter~{'interaction_rate_mt'},coop~{'coop_m'})
 %init: 't0_person_lowinstitutional_trust' Person(i,money~{0},inter~{'interaction_rate_lit'},coop~{'coop_li'})
 %init: 't0_person_low_trust' Person(i,money~{0},inter~{'interaction_rate_lt'},coop~{'coop_l'})
+
+
+
+
+
+
+
+
+%const: 't0_person_high_trust' 'population' * .283
+%const: 't0_person_moderate_trust' 'population' * .464
+%const: 't0_person_lowinstitutional_trust' 'population' * .190
+%const: 't0_person_low_trust' 'population' * .062
+
+
+
+
+
+
+
+
+
+
+'bid' 	Person(i,inter~{i1},coop~{cp}),Person(i,offer~{o},inter~{i2}) \
+		-> Person(i!1),Person(i!1,offer~{'$'*[Beta] ('K-alfa'*cp+1)/(1-cp)  ('K-beta'*cp+10)/(1-cp)}) \
+		@ i1*i2*'interaction-scale'
+
+
+'accept' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp}) \
+		-> Person(i!1,money~{m1-o}),Person(i!1,offer~{-o},money~{m2+o}) \
+		| 1: accepted \
+		@ 'disjoint-scale' * (1-([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi])
+
+'reject' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp})  \
+		-> Person(i!1,money~{m1-'$'}),Person(i!1,offer~{-o},money~{m2}) \
+		| 1: rejected \
+		@ 'disjoint-scale' * (0+([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi])
+
+
+
+
+
+
+
+%obs: 'Free People' Person(i)
+#%mod: repeat [T] [mod] 999 = 0 do $HISTOGRAM (10) "output/histogram-offers" Person(offer~{o}) \
+#		until [false]
+
+
 

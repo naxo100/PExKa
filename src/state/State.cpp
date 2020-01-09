@@ -553,6 +553,18 @@ int State::event() {
 	apply(rule);
 	positiveUpdate(rule.getInfluences());
 
+	list<const simulation::Rule*> rules;
+	for(auto& rule : env.getRules())
+			rules.emplace_back(&rule);
+	rules.sort([](const simulation::Rule * a, const simulation::Rule* b) { return a->getName() < b->getName(); });
+	for(auto rule_p : rules){
+			auto& rule = *rule_p;
+			auto act_pr = rates[rule.getId()]->evalActivity(*this);
+			//activityTree->add(rule.getId(),act_pr.first+act_pr.second);
+	#ifdef DEBUG
+			printf("\t%s\t%.6f\n", rule.getName().c_str(),(act_pr.first+act_pr.second));
+	#endif
+	}
 	return 0;
 
 }

@@ -15,12 +15,12 @@
 
 #include "../../simulation/Simulation.h"
 
+namespace grammar {
 namespace ast {
 
 /** \brief Base class for statements that have %use context.
  *
- * Statements that depends on %use are rules, %var, %obs & %mod.
- */
+ * Statements that depends on %use are rules, %var, %obs & %mod.	*/
 class Statement {
 	short useId;
 public:
@@ -28,9 +28,12 @@ public:
 	short getUseId() const;
 };
 
+/** \brief Variable declarations and Observable.
+ *
+ * AST of a %var and %obs. It's evaluated as a state::Variable. */
 class Declaration: public Node, public Statement {
 public:
-	//static int count;
+	/** \brief The var types: Algebraic, Kappa, or Auxiliar Expression for internal values distributions.*/
 	enum VarType{ALG,KAPPA,AUX_EXPR};
 	Declaration();
 	Declaration(const location &l,const Id &lab,const Expression *e);
@@ -44,8 +47,19 @@ public:
 */
 	~Declaration();
 
+	/** Evaluate a %const declaration.
+	 *
+	 * %const are evaluated before %vars because dependencies.
+	 * Consts have a fixed value before the simulation begins.
+	 * @returns a pointer to a state::ConstantVar object. 			*/
 	Variable* evalConst(pattern::Environment &env,
 			Expression::VAR &vars) const;
+
+	/** Evaluate a %var declaration.
+	 *
+	 * Vars should be evaluated in the order they appear in the kappa files because dependencies.
+	 * And they should be deleted in reverse order.
+	 * @returns a pointer to a state::Variable object.		*/
 	Variable* evalVar(pattern::Environment &env,
 				Expression::VAR &vars) const;
 	bool isKappa() const;
@@ -70,9 +84,9 @@ protected:
 	BaseExpression::N_ary op;
 };
 
-//The Number of Agents and the Agents at the start
+/** \brief Initialization of agent/token instances (%init). */
 class Init : public Node, public Statement {
-	enum InitType {MIXTURE,TOKEN} type;
+	enum InitType {MIXTURE,TOKEN} type;	///< The type of initialization (Agents or Tokens).
 	const Expression *alg;
 	//union {
 		Mixture mixture;
@@ -87,8 +101,9 @@ public:
 	Init& operator=(const Init &init);
 	~Init();
 
+	/** \brief Evaluate the %init ASTs to add agents and tokens into the Simulation object.  */
 	void eval(const pattern::Environment &env,
-			const Expression::VAR &vars,simulation::Simulation &state);
+			const Expression::VAR &vars,simulation::Simulation &sim);
 
 };
 
@@ -97,5 +112,6 @@ public:
 
 
 } /* namespace ast */
+}
 
 #endif /* GRAMMAR_AST_STATEMENTS_H_ */

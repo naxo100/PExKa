@@ -14,7 +14,7 @@
 #include "../expressions/AlgExpression.h"
 #include "../util/params.h"
 
-namespace ast {
+namespace grammar::ast {
 class Id;
 }
 
@@ -37,10 +37,10 @@ public:
 	const string& getName() const;
 	//void setId(short id);
 	template <typename T>
-	Site& addSite(const ast::Id &name);
-	small_id addSite(const ast::Id &name,const vector<string> &labels);
-	small_id addSite(const ast::Id &name,int min,int max);
-	small_id addSite(const ast::Id &name,FL_TYPE min,FL_TYPE max);
+	Site& addSite(const grammar::ast::Id &name);
+	small_id addSite(const grammar::ast::Id &name,const vector<string> &labels);
+	small_id addSite(const grammar::ast::Id &name,int min,int max);
+	small_id addSite(const grammar::ast::Id &name,FL_TYPE min,FL_TYPE max);
 
 	const Site& getSite(const small_id id) const;
 	const Site& getSite(const string &name) const;
@@ -100,7 +100,7 @@ class Signature::LabelSite : public Site {
 	virtual bool isPossibleValue(const expressions::SomeValue &val) const override;
 public:
 	LabelSite(const string &name);
-	void addLabel(const ast::Id& name_loc);
+	void addLabel(const grammar::ast::Id& name_loc);
 	const string& getLabel( small_id id ) const;
 	small_id getLabelId(const string& s) const;
 	expressions::SomeValue getDefaultValue() const override;

@@ -11,6 +11,7 @@
 #include "../../pattern/mixture/Agent.h"
 #include "../../pattern/mixture/Component.h"
 
+namespace grammar {
 namespace ast {
 
 using Deps = pattern::Dependency;
@@ -96,7 +97,7 @@ void Link::eval(const pattern::Environment &env,
 			mix_site.lnk_ptrn.first = bind_to_ag;
 			mix_site.lnk_ptrn.second = bind_to_site;
 		}catch(std::out_of_range &e){
-			throw SemanticError("Link pattern '"+ag_site.second.getString()+
+			throw SemanticError("Link pattern (site,agent) '"+ag_site.second.getString()+
 					"."+ag_site.first.getString()+"' is not defined.",
 					ag_site.second.loc+ag_site.first.loc);
 		}

@@ -13,7 +13,7 @@
 
 #include "AlgebraicExpressions.h"
 
-
+namespace grammar {
 namespace ast {
 using namespace std;
 
@@ -80,6 +80,7 @@ protected:
 	list<const Expression*> indexList;
 };
 
+/** \brief The AST of a compartment declaration. */
 class Compartment : public Node {
 	CompExpression comp;
 	Expression* volume;
@@ -89,6 +90,7 @@ public:
 	void eval(pattern::Environment &env,const vector<Variable*> &vars);
 };
 
+/** \brief The AST of a channel declaration */
 class Channel : public Node {
 	Id name;
 	CompExpression source,target;
@@ -104,6 +106,7 @@ public:
 
 };
 
+/** \brief The AST of the \%use statement. */
 class Use : public Node {
 	static unsigned short count;
 	const unsigned short id;
@@ -125,5 +128,6 @@ public:
 
 
 } /* namespace ast */
+}
 
 #endif /* GRAMMAR_AST_SPATIAL_H_ */

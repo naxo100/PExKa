@@ -12,13 +12,16 @@
 namespace pattern {
 
 using namespace expressions;
+using namespace grammar::ast;
 
 /************** class Signature *******************/
 
 Signature::Signature(const string &nme) : id((short_id)-1),name(nme) {}
 
 Signature::~Signature() {
-	// TODO Auto-generated destructor stub
+	for(auto site : sites){
+		delete site;
+	}
 }
 
 const std::string& Signature::getName() const{
@@ -39,7 +42,7 @@ short Signature::getSiteId(const string &name) const{
 }
 
 template <typename T>
-Signature::Site& Signature::addSite(const ast::Id &name_loc){
+Signature::Site& Signature::addSite(const Id &name_loc){
 	const string& nme(name_loc.getString());
 	if(siteMap.count(nme))
 		throw SemanticError("Site "+nme+" declared twice!",name_loc.loc);
@@ -48,16 +51,16 @@ Signature::Site& Signature::addSite(const ast::Id &name_loc){
 	sites.push_back(new T(nme));
 	return *sites[id];
 }
-template Signature::Site& Signature::addSite<Signature::EmptySite>(const ast::Id &name_loc);
-template Signature::Site& Signature::addSite<Signature::LabelSite>(const ast::Id &name_loc);
-template Signature::Site& Signature::addSite<Signature::RangeSite<int> >(const ast::Id &name_loc);
-template Signature::Site& Signature::addSite<Signature::RangeSite<FL_TYPE> >(const ast::Id &name_loc);
+template Signature::Site& Signature::addSite<Signature::EmptySite>(const Id &name_loc);
+template Signature::Site& Signature::addSite<Signature::LabelSite>(const Id &name_loc);
+template Signature::Site& Signature::addSite<Signature::RangeSite<int> >(const Id &name_loc);
+template Signature::Site& Signature::addSite<Signature::RangeSite<FL_TYPE> >(const Id &name_loc);
 
-small_id Signature::addSite(const ast::Id &name_loc,int min,int max){
+small_id Signature::addSite(const Id &name_loc,int min,int max){
 	//const string& nme(name_loc.getString());
 	return 0;
 }
-small_id Signature::addSite(const ast::Id &name_loc,FL_TYPE min,FL_TYPE max){
+small_id Signature::addSite(const Id &name_loc,FL_TYPE min,FL_TYPE max){
 	//const string& nme(name_loc.getString());
 	return 0;
 }
@@ -98,7 +101,7 @@ state::SomeValue Signature::EmptySite::getDefaultValue() const {
 ///LabelSite
 Signature::LabelSite::LabelSite(const string& nme) : Site(nme),labels(){ }
 
-void Signature::LabelSite::addLabel(const ast::Id& name_loc){
+void Signature::LabelSite::addLabel(const Id& name_loc){
 	const string& lbl = name_loc.getString();
 	if(label_ids.count(lbl))
 		throw SemanticError("Label "+lbl+" of site "+name+" declared twice!",name_loc.loc);

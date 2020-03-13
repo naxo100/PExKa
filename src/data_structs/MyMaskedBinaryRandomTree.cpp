@@ -57,6 +57,10 @@ void MyMaskedBinaryRandomTree<Container>::initLayer(int k,int current_layer,int 
 template<template <typename,typename...> class Container>
 void MyMaskedBinaryRandomTree<Container>::add(int i,FL_TYPE val)
 {
+#if(DEBUG)
+	if(val < .0)
+		throw std::invalid_argument("RandomTree::add(): The rate value can't be negative.");
+#endif
 	//obtenemos la id interna para modificar su data asociada
 	i=maskId(i);
 

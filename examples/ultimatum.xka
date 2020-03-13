@@ -1,17 +1,18 @@
 
 
-%agent: Person(i,money~[0,[inf]],offer~[0,[inf]], \
+%agent: Person(i,money~[0,[inf]],offer~[0,10.0](10), \
 				success~[0,[inf]],fail~[0,[inf]],start~[0,[inf]],\
 				inter~[0,[inf]],coop~[0,[inf]])
 
 %token: accepted
 %token: rejected
+%token: offered
 
 
 
 %const: 'K'	5	#const for curve slope
-%const: 'K-alfa' 34.0	#for param alfa = 100 and cp = 0.5
-%const: 'K-beta' 25.0	#for param beta = 125 when cp = 0.5
+%const: 'K-alfa' 16 #34.0	#for param alfa = 100 and cp = 0.5
+%const: 'K-beta' 7 #25.0	#for param beta = 125 when cp = 0.5
 
 
 
@@ -32,7 +33,7 @@
 %const: 'coop_li' 0.5537
 %const: 'coop_l' 0.4750
 
-%const: 'population' 10  #2e+3
+%const: 'population' 100  #2e+3
 
 %const: 'interaction-scale' 1.0/'population' #1e-5
 %const: 'disjoint-scale' 5.0
@@ -42,6 +43,7 @@
 %obs: 'Total $' {[sum] m} Person(money~{m})
 %obs: 'Accepted' |accepted|
 %obs: 'Rejected' |rejected|
+%obs: 'Avg-offer' |offered|/(|accepted|+|rejected|+0.1)
 
 
 
@@ -71,22 +73,20 @@
 
 
 
-
 'bid' 	Person(i,inter~{i1},coop~{cp}),Person(i,offer~{o},inter~{i2}) \
 		-> Person(i!1),Person(i!1,offer~{'$'*[Beta] ('K-alfa'*cp+1)/(1-cp)  ('K-beta'*cp+10)/(1-cp)}) \
 		@ i1*i2*'interaction-scale'
 
 
 'accept' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp}) \
-		-> Person(i!1,money~{m1-o}),Person(i!1,offer~{-o},money~{m2+o}) \
-		| 1: accepted \
-		@ 'disjoint-scale' * (1-([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi])
+		-> Person(i,money~{m1-o}),Person(i,offer~{0},money~{m2+o}) \
+		| 1: accepted + o: offered \
+		@ 'disjoint-scale' * (([pi]/2.0 + [atan] ('K'*(o- 0.5*(1-cp))/(cp*(1-cp))))/[pi])
 
 'reject' Person(i!1,money~{m1}),Person(i!1,offer~{0 < o},money~{m2},coop~{cp})  \
-		-> Person(i!1,money~{m1-'$'}),Person(i!1,offer~{-o},money~{m2}) \
-		| 1: rejected \
-		@ 'disjoint-scale' * (0+([pi]/2.0 + [atan] ('K'*(o- 0.5*cp)/(cp*(1-cp))))/[pi])
-
+		-> Person(i,money~{m1-'$'}),Person(i,offer~{0},money~{m2}) \
+		| 1: rejected + o: offered \
+		@ 'disjoint-scale' * (1-([pi]/2.0 + [atan] ('K'*(o- 0.5*(1-cp))/(cp*(1-cp))))/[pi])
 
 
 
@@ -94,8 +94,8 @@
 
 
 %obs: 'Free People' Person(i)
-#%mod: repeat [T] [mod] 999 = 0 do $HISTOGRAM (10) "output/histogram-offers" Person(offer~{o}) \
-#		until [false]
+%mod: repeat [T] [mod] 1 = 0 do $HISTOGRAM (10) "output/histogram-offers" Person(offer~{o}) \
+		until [false]
 
 
 

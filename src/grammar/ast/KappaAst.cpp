@@ -9,6 +9,7 @@
 #include "../../pattern/Environment.h"
 #include "../../util/Warning.h"
 
+namespace grammar {
 namespace ast {
 
 KappaAst::KappaAst()  {
@@ -157,3 +158,4 @@ void KappaAst::show(){
 }
 
 } /* namespace ast */
+}

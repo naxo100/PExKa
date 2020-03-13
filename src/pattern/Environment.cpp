@@ -12,9 +12,11 @@
 #include "../util/Warning.h"
 #include "../expressions/Vars.h"
 
-using namespace std;
 
 namespace pattern {
+
+using namespace std;
+using namespace grammar::ast;
 
 Environment::Environment() {
 //TODO
@@ -33,7 +35,7 @@ bool Environment::exists(const string &name,const Environment::IdMap &map){
 }
 
 
-unsigned Environment::declareToken(const ast::Id &name_loc){
+unsigned Environment::declareToken(const Id &name_loc){
 	const string& name = name_loc.getString();
 	if(tokenMap.count(name) || signatureMap.count(name) )
 		throw SemanticError("Name "+name+" already defined for agent or token.",name_loc.loc);
@@ -42,7 +44,7 @@ unsigned Environment::declareToken(const ast::Id &name_loc){
 	tokenNames.push_back(name);
 	return id;
 }
-short Environment::declareVariable(const ast::Id &name_loc,bool is_kappa){
+short Environment::declareVariable(const Id &name_loc,bool is_kappa){
 	//if(this->exists(name,algMap) || this->exists(name,kappaMap))
 	const string& name = name_loc.getString();
 	if(this->exists(name,varMap))
@@ -53,7 +55,7 @@ short Environment::declareVariable(const ast::Id &name_loc,bool is_kappa){
 	varNames.push_back(name);
 	return id;
 }
-Compartment& Environment::declareCompartment(const ast::Id &name_loc){
+Compartment& Environment::declareCompartment(const Id &name_loc){
 	const string& name = name_loc.getString();
 	if(compartmentMap.count(name))
 		throw SemanticError("Compartment "+name+" already defined.",name_loc.loc);
@@ -68,7 +70,7 @@ UseExpression& Environment::declareUseExpression(unsigned short id,size_t n){
 	useExpressions.emplace_back(n);
 	return useExpressions[id];
 }
-Channel& Environment::declareChannel(const ast::Id &name_loc) {
+Channel& Environment::declareChannel(const Id &name_loc) {
 	const string& name = name_loc.getString();
 	short id;
 	if(channelMap.count(name))
@@ -81,7 +83,7 @@ Channel& Environment::declareChannel(const ast::Id &name_loc) {
 	channels[id].emplace_back(name);
 	return channels[id].back();
 }
-Signature& Environment::declareSignature(const ast::Id &name_loc) {
+Signature& Environment::declareSignature(const Id &name_loc) {
 	const string& name = name_loc.getString();
 	if(tokenMap.count(name) || signatureMap.count(name) )
 		throw SemanticError("Name "+name+" already defined for agent or token.",name_loc.loc);
@@ -211,7 +213,7 @@ Mixture::Agent& Environment::declareAgentPattern(const Mixture::Agent* new_ag,
 	return new_agent;
 }
 
-simulation::Rule& Environment::declareRule(const ast::Id &name_loc,const Mixture& mix,const yy::location& loc){
+simulation::Rule& Environment::declareRule(const Id &name_loc,const Mixture& mix,const yy::location& loc){
 	//if(this->exists(name,algMap) || this->exists(name,kappaMap))
 	const string& name = name_loc.getString();
 	if(this->exists(name,varMap))
@@ -262,7 +264,7 @@ const list<pair<const Mixture::Component*,small_id> >& Environment::getFreeSiteC
 short Environment::getVarId(const string &s) const {
 	return varMap.at(s);
 }
-short Environment::getVarId(const ast::Id &s) const {
+short Environment::getVarId(const Id &s) const {
 	try {
 		return varMap.at(s.getString());
 	}catch(out_of_range &ex){

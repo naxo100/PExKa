@@ -35,31 +35,29 @@ int main(int argc, char* argv[]){
 	const string v_msg("PExKa "+version);
 	const string usage_msg("Simple usage is \n$ [mpirun* -np procs] PExKa ([-i] kappa_file)+ [-e events] -t time [-p points] -sync-t tau");
 
-	//cout << "PISKa ";
+	//printing program name and all arguments
 	for(int i = 0; i < argc; i++) cout << argv[i] << " "; cout << endl;
 
+	//eval given arguments to the program
 	auto& params = simulation::Parameters::singleton;
 	params.makeOptions(v_msg + "\n" + usage_msg + "\n\nAllowed options");
 	params.evalOptions(argc, argv);
 
-	// parser kappa file
+	//Reading kappa-model files (if any)
 	grammar::KappaDriver *driver;
 	driver = new grammar::KappaDriver(params.inputFiles);
 
-
-	//parser Kappa file
+	//Parsing and building AST
 	try{
 		driver->parse();
 	} catch(const exception &e) {
 		cerr << "A parser error found: " << e.what() << endl;
 		exit(1);
 	}
-	// make AST
-	ast::KappaAst &ast = driver->getAst();
-	//ast.show();
-	//cout << "\n\n" ;
+	grammar::ast::KappaAst &ast = driver->getAst();
+	//ast.show();cout << "\n\n" ;
 
-	// initialize states
+	//building the environment and (global) vars
 	pattern::Environment& env = *(new pattern::Environment());//just to delete vars after env
 	vector<Variable*> vars;
 	try{
@@ -73,14 +71,13 @@ int main(int argc, char* argv[]){
 		ast.evaluatePerts(env,vars);
 	}
 	catch(const exception &e){
-		cerr << "An exception found: " << e.what() << endl;
+		cerr << "An exception found while building the environment:\n" << e.what() << endl;
 		exit(1);
 	}
-
 	env.buildFreeSiteCC();
 	env.buildInfluenceMap(vars);
 
-
+	//TODO building the connection map for compartments
 	map<pair<int,int>,double> edges;
 	for(size_t i = 0; i < env.size<pattern::Channel>(); i++ ){
 		for(auto& channel : env.getChannels(i)){
@@ -107,25 +104,24 @@ int main(int argc, char* argv[]){
 
 #ifdef DEBUG
 	env.show();
+	//sim.print();
 #endif
 
-	//sim.print();
 
 	auto sims = new simulation::Simulation*[params.runs];
-	//sims[0] = &sim;
 
+	//initialize number of thread (TODO a better way?)
 	int k = 1;
 	#pragma omp parallel
 	{
 		k = omp_get_num_threads();
 	}
-
 	omp_set_num_threads(min(params.runs,k));
 
 	#pragma omp parallel for
 	for(int i = 0; i < params.runs; i++){
 		sims[i] = new simulation::Simulation(env,i);
-		sims[i]->setCells(cells[0],vars);
+		sims[i]->setCells(cells.at(0),vars);
 		try{
 			ast.evaluateInits(env,vars,*sims[i]);
 		}
@@ -161,6 +157,7 @@ int main(int argc, char* argv[]){
 
 	//sims[0]->print();
 	delete sims[0];
+	delete[] sims;
 	cout << "finished!" << endl;
 
 	delete &env;

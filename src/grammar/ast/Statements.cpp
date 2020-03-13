@@ -10,7 +10,7 @@
 #include "../../util/Warning.h"
 #include "../../pattern/mixture/Component.h"
 
-namespace ast {
+namespace grammar::ast {
 
 /****** Class Statement *********/
 Statement::Statement() : useId(Use::getCount()) {}
@@ -53,12 +53,17 @@ Declaration& Declaration::operator=(const Declaration &d){
 	op = d.op;
 	if(expr)
 		delete expr;
+	if(mixture)
+		delete mixture;
 
 	if(type)
 		mixture = new Mixture(*(d.mixture));
+	else
+		mixture = nullptr;
 
-	if(d.expr) expr = d.expr->clone();
-	else expr= nullptr;
+	if(d.expr)
+		expr = d.expr->clone();
+	else expr = nullptr;
 
 	return *this;
 }
@@ -255,7 +260,7 @@ Init& Init::operator=(const Init &init) {
 void Init::eval(const pattern::Environment &env,const VarVector &vars,
 		simulation::Simulation &sim){
 	auto& use_expr = env.getUseExpression(this->getUseId());
-	auto &cells = use_expr.getCells();
+	auto &cells = use_expr.getCells();//cells to distribute tokens/agents
 	if(type){ //TOKEN
 		float n;
 		short tok_id;

@@ -328,7 +328,10 @@ FL_TYPE InjRandTree::partialReactivity() const {
 		return roots.begin()->second->tree->total();
 }
 
+//return an approximation of the sum(elem_i*elem_i)
 FL_TYPE InjRandTree::getM2() const {
+	if(count() == 0)
+		return 0;
 	auto root = roots.at(selected_root);
 	if(invalidations > MAX_INVALIDATIONS*count()){
 		for(auto r : roots)

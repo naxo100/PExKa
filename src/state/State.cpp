@@ -38,20 +38,26 @@ State::State(const simulation::Simulation& _sim,
 	for(auto& rule : env.getRules()){
 		int i = rule.getId();
 		auto& lhs = rule.getLHS();
-		bool same_ptrn = true;
-		for(size_t cc_id = 0; cc_id < lhs.size()-1; cc_id++)
+		auto lhs_comps = lhs.compsCount();
+		bool same_ptrn = false;
+		for(int cc_id = 0; cc_id < int(lhs_comps)-1; cc_id++)
 			if(&(lhs.getComponent(cc_id)) != &(lhs.getComponent(cc_id+1)) )
 				{same_ptrn = false; break;}
+			else
+				same_ptrn = true;
 
 		if(rule.getRate().getVarDeps() & BaseExpression::AUX){
 			if(same_ptrn){
 				try{
 					rates[i] = new simulation::SameAuxDepRate(rule,*this,false);
-					break;
 				}
-				catch(invalid_argument& e){}
+				catch(invalid_argument& e){
+					ADD_WARN_NOLOC("Same Pattern but not same pattern for rates?");
+					rates[i] = new simulation::AuxDepRate(rule,*this);
+				}
 			}
-			rates[i] = new simulation::AuxDepRate(rule,*this);
+			else
+				rates[i] = new simulation::AuxDepRate(rule,*this);
 		}
 		else
 			if(same_ptrn && lhs.size() > 1)
@@ -90,6 +96,8 @@ State::~State() {
 	injections = nullptr;
 	for(auto it = vars.rbegin(); it != vars.rend(); it++)
 		delete *it;//vars are deleted in main!
+	for(auto rate : rates)
+		delete rate;
 }
 
 
@@ -553,7 +561,7 @@ int State::event() {
 	apply(rule);
 	positiveUpdate(rule.getInfluences());
 
-	list<const simulation::Rule*> rules;
+	/*list<const simulation::Rule*> rules;
 	for(auto& rule : env.getRules())
 			rules.emplace_back(&rule);
 	rules.sort([](const simulation::Rule * a, const simulation::Rule* b) { return a->getName() < b->getName(); });
@@ -564,7 +572,7 @@ int State::event() {
 	#ifdef DEBUG
 			printf("\t%s\t%.6f\n", rule.getName().c_str(),(act_pr.first+act_pr.second));
 	#endif
-	}
+	}*/
 	return 0;
 
 }

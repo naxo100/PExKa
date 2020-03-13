@@ -21,6 +21,8 @@ template<> struct BaseExpression::EnumType<bool> {
 	static const Type t = BOOL;
 };
 
+BaseExpression::Reduction::Reduction() : factor(nullptr) {}
+
 /****** BaseExpression *******/
 const Type BaseExpression::getType() const {
 	return t;

@@ -25,8 +25,10 @@
 
 using namespace std;
 
+namespace grammar {
 namespace ast {
 class Id;
+}
 }
 
 namespace pattern {
@@ -69,17 +71,17 @@ public:
 	Environment();
 	~Environment();
 
-	unsigned declareToken(const ast::Id &name);
-	short declareVariable(const ast::Id &name,bool isKappa);
-	Signature& declareSignature(const ast::Id& sign);
-	Compartment& declareCompartment(const ast::Id& comp);
+	unsigned declareToken(const grammar::ast::Id &name);
+	short declareVariable(const grammar::ast::Id &name,bool isKappa);
+	Signature& declareSignature(const grammar::ast::Id& sign);
+	Compartment& declareCompartment(const grammar::ast::Id& comp);
 	UseExpression& declareUseExpression(unsigned short id,size_t n);
-	Channel& declareChannel(const ast::Id &channel);
+	Channel& declareChannel(const grammar::ast::Id &channel);
 	Mixture& declareMixture(const Mixture& m);
 	Mixture::Component& declareComponent(const Mixture::Component& c);
 	Mixture::Agent& declareAgentPattern(const Mixture::Agent* a,
 			map<string,small_id>& new_aux,bool is_lhs = true);
-	simulation::Rule& declareRule(const ast::Id &name,const Mixture& mix,
+	simulation::Rule& declareRule(const grammar::ast::Id &name,const Mixture& mix,
 			const yy::location& loc);
 	void declarePert(simulation::Perturbation* pert);
 
@@ -107,7 +109,7 @@ public:
 
 	short idOfAlg(const string& name) const;
 	short getVarId(const string &name) const;
-	short getVarId(const ast::Id &name) const;
+	short getVarId(const grammar::ast::Id &name) const;
 	short getChannelId(const string &name) const;
 	short getCompartmentId(const string &name) const;
 	short getSignatureId(const string &name) const;

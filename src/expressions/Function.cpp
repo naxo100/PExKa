@@ -164,7 +164,7 @@ T (*FunctionPointers<T>::funcs[1])(const std::vector<SomeValue>&,const state::St
 		//double p = unif(state.getRandomGenerator());
 		//return boost::math::ibeta_inv(args[0].valueAs<FL_TYPE>(), args[1].valueAs<FL_TYPE>(), p);
 		sftrabbit::beta_distribution<> beta(args[0].valueAs<FL_TYPE>(), args[1].valueAs<FL_TYPE>());
-		std::cout << beta << endl;
+		//std::cout << beta << endl;
 		return beta(state.getRandomGenerator());
 	}, // Beta
 };

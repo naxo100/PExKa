@@ -21,15 +21,16 @@ namespace state {
 	class Variable;
 }
 
+/** Collection of state::Variable. Useful to use in method params. */
 typedef std::vector<state::Variable*> VarVector;
 
 namespace expressions {
 
-//typedef std::unordered_map<std::string, FL_TYPE> AuxMap;
-//typedef std::unordered_map<two<small_id>,FL_TYPE> AuxCoords;
 
 template <typename T> class Auxiliar;
 
+
+/** \brief Class used to ?. */
 template <typename T>
 class AuxValueMap {
 public:
@@ -44,44 +45,50 @@ typedef AuxValueMap<FL_TYPE> AuxMap;
 
 
 
-/** \brief Base class for algebraic and every number-evaluated expression.
- *
- *
- *
- */
+/** \brief Base class for algebraic and boolean expressions. */
 class BaseExpression {
 public:
+	/** \brief Reduced expression in terms of factors that depend or not on auxiliary vars. */
 	struct Reduction {
-		// factorized expression = multiplications of all elements in factors * multiplications of all elements in aux_functions
-		BaseExpression* factor; // constants and variables of the expression
-		std::map<small_id, BaseExpression*> aux_functions; // funcs on aux for each cc-index
+		BaseExpression* factor; 							///< Consts and vars factors of the expression.
+		std::map<small_id, BaseExpression*> aux_functions;	///< Mapping of (cc-index -> aux-dependent function).
+
+		Reduction();
 	};
 
+	/** \brief Common binary algebraic operations. */
 	enum AlgebraicOp {
 		SUM, MINUS, MULT, DIV, POW, MODULO, MAX, MIN
 	};
+	/** \brief Common binary boolean operations. */
 	enum BoolOp {
 		AND, OR, GREATER, SMALLER, EQUAL, NOT_EQUAL
 	};
+	/** \brief Unary algebraic/boolean operations. */
 	enum Unary {
 		SQRT, EXPONENT, LOG, SINE, COSINE, TAN, ATAN, ABS, COIN, RAND_N, NOT
 	};
+	/** \brief Operations applied to data collections. */
 	enum N_ary {
 		SUMATORY,AVERAGE
 	};
+	/** \brief Functions (with 3 or more arguments). */
 	enum Funcs {
 		BETA
 	};
 
-	//RUN_ID always first of INT op!!
+	/** \brief Function with no arguments. */
 	enum Nullary {
 		RAND_1,SIM_TIME,CPUTIME,ACTIVITY,RUN_ID,SIM_EVENT,NULL_EVENT,PROD_EVENT
 	};
+	/** \brief Dependencies that an expression can have. */
 	enum VarDep {
 		CONSTS = 1,RUN = 2,AUX = 4,SPATIAL = 8,TIME = 16,EVENT = 32,RAND = 64,VARDEP = 128
 	};
 
 	virtual ~BaseExpression() = 0;
+
+	/** \brief Returns the expression::Type of this expression. */
 	const virtual Type getType() const;
 	//template <Type n> struct TypeDef { typedef float t;};
 	template<typename T>
@@ -89,16 +96,23 @@ public:
 		static const Type t = FLOAT;
 	};
 
+	/** \brief Returns the value of this expression that can only have
+	 * variable and auxiliary dependencies.
+	 *
+	 * This method is useful when the State is still under construction. */
 	virtual SomeValue getValue(const VarVector &consts,
 			const std::unordered_map<std::string, int> *aux_values = nullptr) const = 0;
+
+	/** \brief Returns the value of this expression. */
 	virtual SomeValue getValue(const state::State& state,
 			const AuxMap& aux_values) const = 0;
+
+	/** \brief Returns the value of this expression using only the State of the
+	 * simulation. It cannot contain auxiliary variables. */
 	virtual SomeValue getValue(const state::State& state) const;
 
 	/** \brief Return an int vector that represents this expression
-	 * as an equation on auxiliars.
-	 *
-	 */
+	 * as an equation on auxiliaries. */
 	virtual FL_TYPE auxFactors(
 			std::unordered_map<std::string, FL_TYPE> &factor) const = 0;
 

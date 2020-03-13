@@ -1,6 +1,6 @@
 
-#ifndef KAPPA4_LEXER_H
-#define KAPPA4_LEXER_H
+#ifndef GRAMMAR_KAPPA4_LEXER_H
+#define GRAMMAR_KAPPA4_LEXER_H
 
 
 /**
@@ -23,7 +23,9 @@ namespace grammar {
 class KappaDriver;
 }
 
-namespace kappa4 {
+namespace grammar::kappa4 {
+
+using namespace grammar::ast;
 
 class Lexer : public yyFlexLexer {
 
@@ -31,7 +33,7 @@ public:
 	Lexer(grammar::KappaDriver &driver_arg):driver(driver_arg) {};
 	//KappaLexer() {};
 	virtual ~Lexer() {}
-	virtual kappa4::Parser::symbol_type get_next_token();
+	virtual Parser::symbol_type get_next_token();
 
 private:
 	grammar::KappaDriver &driver;

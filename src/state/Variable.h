@@ -136,6 +136,7 @@ class DistributionVar : public AlgExpression<T>, public Variable {
 public:
 	DistributionVar(const short var_id, const std::string &nme,const bool is_obs,
 				const pattern::Mixture &kappa,const pair<N_ary,const BaseExpression*>& exp);
+	~DistributionVar();
 	void update(const Variable& var);
 
 	FL_TYPE auxFactors(std::unordered_map<std::string,FL_TYPE> &factor) const override;

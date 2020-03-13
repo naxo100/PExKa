@@ -7,6 +7,7 @@
 
 #include "Spatial.h"
 
+namespace grammar {
 namespace ast {
 
 /****** Class CompExpression *********/
@@ -187,3 +188,4 @@ void Use::eval(pattern::Environment &env, const Expression::VAR &consts) const {
 
 
 } /* namespace ast */
+}

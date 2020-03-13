@@ -203,16 +203,16 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<s
 					if(cc_f_1.first == cc_f_2.first){//sum of same cc-aux funcs index
 						if((r1.factor->getVarDeps() | r2.factor->getVarDeps()) & VARDEP)
 							ADD_WARN_NOLOC("Rate factorization will depend on "+AlgOpStr[op]+"(aux,var) and this will lead to inexact results.");
-						/*if(*r1.factor == *ONE_FL_EXPR){
+						if(*r1.factor == *ONE_FL_EXPR){
 							delete r1.factor;r1.factor = nullptr;
 						}
 						if(*r2.factor == *ONE_FL_EXPR){
 							delete r2.factor;r2.factor = nullptr;
-						}*/
+						}
 						r.factor = ONE_FL_EXPR->clone();
 						r.aux_functions[cc_f_1.first] = make_binary(
-								r1.factor ? cc_f_1.second : make_binary(r1.factor,cc_f_1.second,MULT),
-								r2.factor ? cc_f_2.second : make_binary(r2.factor,cc_f_2.second,MULT),
+								r1.factor ? make_binary(r1.factor,cc_f_1.second,MULT) : cc_f_1.second,
+								r2.factor ? make_binary(r2.factor,cc_f_2.second,MULT) : cc_f_2.second,
 								op);
 					}
 					else throw Unfactorizable("Cannot factorize: add/sub of different cc-aux-functions.");
@@ -306,13 +306,16 @@ BaseExpression::Reduction BinaryOperation<R, T1, T2>::factorize(const std::map<s
 			if(*r1.factor == *ONE_FL_EXPR)
 				r.factor = r1.factor;
 			else
-				r.factor = make_binary(r1.factor,r2.factor,op);
+				r.factor = make_binary(r1.factor,r2.factor->clone(),op);
 			for(auto aux_f : auxf_1)
 				r.aux_functions[aux_f.first] = make_binary(aux_f.second,r2.factor->clone(),op);
+			delete r2.factor;
 		}
 		break;
-	default:
-		break;
+	//default://never called
+	//	delete r1.factor;
+	//	delete r2.factor;
+	//	break;
 	}
 
 	return r;

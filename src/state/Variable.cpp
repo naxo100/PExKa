@@ -272,6 +272,13 @@ DistributionVar<T>::DistributionVar(const short id,const std::string &nme,const 
 }
 
 template <typename T>
+DistributionVar<T>::~DistributionVar(){
+	if(auxFunc && !dynamic_cast<const state::Variable*>(auxFunc))
+		delete auxFunc;
+	//else todo***
+}
+
+template <typename T>
 void DistributionVar<T>::update(const Variable& var){
 	try{
 		auto distr_var = dynamic_cast<const DistributionVar<T>&>(var);
@@ -303,7 +310,7 @@ BaseExpression* DistributionVar<T>::reduce(VarVector &vars) {
 
 template <typename T>
 BaseExpression* DistributionVar<T>::clone() const {
-	return new DistributionVar(*this);
+	return new DistributionVar(id,name,isObservable,*mixture,make_pair(op,auxFunc->clone()));
 }
 
 template <typename T>

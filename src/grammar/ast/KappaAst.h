@@ -17,6 +17,10 @@
 
 using namespace std;
 
+namespace grammar {
+
+/** \namespace grammar::ast
+ * \brief Abstract Syntax Tree classes */
 namespace ast {
 
 /** \brief Store the abstract syntax tree of the model written in Kappa.
@@ -24,8 +28,7 @@ namespace ast {
  * Contains several list of syntax trees that represent the model
  * read by the parser from kappa files. Evaluate methods in this class
  * produce the initial state of the system and the mappings of
- * ids and names.
- */
+ * ids and names.*/
 class KappaAst {
 
 	//AST structures
@@ -66,7 +69,9 @@ public:
 	void add(const Pert *p);
 
 
-	//show declarations
+	/** \brief Print the AST on stdout.
+	 *
+	 * \deprecated This method is just for debugging and will be removed. */
 	void show();
 
 	/** \brief Evaluate global properties from AST.
@@ -95,5 +100,6 @@ public:
 };
 
 } /* namespace ast */
+}
 
 #endif /* GRAMMAR_AST_KAPPAAST_H_ */

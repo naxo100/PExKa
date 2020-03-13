@@ -788,7 +788,8 @@ void Rule::CandidateInfo::setRoot(small_id root,ag_st_id node,int change){
 /********** Rule::Rate ****************/
 
 
-Rule::Rate::Rate(const Rule& r,state::State& state) : rule(r),unaryRate(nullptr,-1) {
+Rule::Rate::Rate(const Rule& r,state::State& state) :
+		rule(r),baseRate(nullptr),unaryRate(nullptr,-1) {
 	auto new_rate = rule.getRate().clone();
 	baseRate = new_rate->reduce(state.vars);//rates also have to be reduced for every state
 	if(new_rate != baseRate)//reduce can return the same pointer on expression but no with vars.
@@ -810,7 +811,7 @@ SamePtrnRate::SamePtrnRate(const Rule& r,state::State& state,bool normalize) :
 }
 
 AuxDepRate::AuxDepRate(const Rule& r,state::State& state) :
-		Rule::Rate(r,state) {
+		Rule::Rate(r,state){
 	map<string,small_id> aux_ccindex;
 	for(auto& aux_cc__ : rule.getLHS().getAux())
 		aux_ccindex[aux_cc__.first] = get<0>(aux_cc__.second);
@@ -847,6 +848,12 @@ AuxDepRate::~AuxDepRate() {
 	delete base.factor;
 	for(auto& elem : base.aux_functions)
 		delete elem.second;
+
+	if(unary.factor){
+		delete unary.factor;
+		for(auto& elem : unary.aux_functions)
+			delete elem.second;
+	}
 }
 
 SameAuxDepRate::~SameAuxDepRate() {}

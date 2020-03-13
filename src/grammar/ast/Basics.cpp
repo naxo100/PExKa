@@ -7,6 +7,7 @@
 
 #include "Basics.h"
 
+namespace grammar {
 namespace ast {
 
 /****** Class Node *******************/
@@ -110,3 +111,4 @@ Arrow::ArrType Arrow::getType(){
 */
 
 } //namespace ast
+}

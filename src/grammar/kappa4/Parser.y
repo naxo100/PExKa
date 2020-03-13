@@ -2,7 +2,7 @@
 %require "3.0"
 %defines
 %define parse.assert
-%define api.namespace { kappa4 }
+%define api.namespace { grammar::kappa4 }
 %define parser_class_name { Parser }
 %define api.value.type variant
 %define api.token.constructor
@@ -29,7 +29,7 @@
 	
 	
 	using namespace std;
-	using namespace ast;
+	using namespace grammar::ast;
 	
 	namespace yy {
 		class KappaLexer;
@@ -199,8 +199,8 @@ init_declaration:
 /*** TODO ???
 | ID OP_CUR init_declaration CL_CUR 
 	{
-		ast::Id id($1);
-		$$=ast::Init_Declaration($3.Init,&id);
+		Id id($1);
+		$$=Init_Declaration($3.Init,&id);
 	}
 */
 ;
@@ -225,7 +225,7 @@ comp_expr:
 
 dimension: 
 /*empty*/
-	{$$=std::list<const ast::Expression*>();}
+	{$$=std::list<const Expression*>();}
 | OP_BRA alg_expr CL_BRA dimension
 	{
 		$4.push_front($2);
@@ -250,17 +250,17 @@ INT
 | OP_PAR index_expr CL_PAR 
 	{$$=$2;}
 | index_expr MULT index_expr
-	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::MULT);}
+	{$$=IndexOperation(@$,$1,$3,IndexOperation::MULT);}
 | index_expr PLUS index_expr
-	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::SUM);}
+	{$$=IndexOperation(@$,$1,$3,IndexOperation::SUM);}
 | index_expr DIV index_expr
-	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::DIV);}
+	{$$=IndexOperation(@$,$1,$3,IndexOperation::DIV);}
 | index_expr MINUS index_expr
-	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::MINUS);}
+	{$$=IndexOperation(@$,$1,$3,IndexOperation::MINUS);}
 | index_expr POW index_expr
-	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::POW);}
+	{$$=IndexOperation(@$,$1,$3,IndexOperation::POW);}
 | index_expr MODULO index_expr
-	{$$=ast::IndexOperation(@$,$1,$3,ast::IndexOperation::MODULO);}
+	{$$=IndexOperation(@$,$1,$3,IndexOperation::MODULO);}
 ;*/
 
 value_list: 
@@ -276,7 +276,7 @@ value_list:
 
 comp_list:
   comp_expr
-	{$$=std::list<ast::CompExpression>(1,$1); }
+	{$$=std::list<CompExpression>(1,$1); }
 | comp_expr comp_list
 	{ 
 		$2.push_front($1);
@@ -304,7 +304,7 @@ effect_list:
  OP_PAR effect_list CL_PAR {$$=$2;}
 | effect
 	{
-		$$=std::list<ast::Effect>(1,$1);
+		$$=std::list<Effect>(1,$1);
 	}
 | effect SEMICOLON effect_list 
 	{
@@ -428,7 +428,7 @@ bool_expr:
 multiple:
   INT   {$$ = new Const(@$,$1);}
 | FLOAT	{$$ = new Const(@$,$1);}
-| LABEL {$$ = new ast::Var(@$,Var::VAR,Id(@1,$1)); }
+| LABEL {$$ = new Var(@$,Var::VAR,Id(@1,$1)); }
 ;
 
 
@@ -485,7 +485,7 @@ sum_token:
 
 mixture:
 //empty 
-	{ $$ = Mixture(location(),std::list<ast::Agent>()); }
+	{ $$ = Mixture(location(),std::list<Agent>()); }
 | non_empty_mixture 
 	{ $$ = Mixture(@1,$1); }
 ;
@@ -496,7 +496,7 @@ rate_sep:
 | FIX {$$=true;}
 
 /*(**  **)*/
-/*{$$=ast::Rule($1,$2.agents,$4.agents,$2.tokens,$4.tokens,$3,$6.);}*/
+/*{$$=Rule($1,$2.agents,$4.agents,$2.tokens,$4.tokens,$3,$6.);}*/
 ;
 
 rule_expression:
@@ -508,16 +508,16 @@ rule_expression:
 	{
 		cout << "Warning: Rule has no kinetics. Default rate of 0.0 is assumed. (" << @$ << ")\n" << endl;
 		Rate rate(yy::location(),new Const(yy::location(),0.0f),false);
-		$$=ast::Rule(@$,$1,$2,$4,$3,$5,rate);;
+		$$=Rule(@$,$1,$2,$4,$3,$5,rate);;
 	}
 ;
 
 
 arrow:
   KAPPA_RAR 
-	{$$=false;/*ast::Arrow(@$,ast::Arrow::RIGHT);*/}
+	{$$=false;/*Arrow(@$,Arrow::RIGHT);*/}
 | KAPPA_LRAR
-	{$$=true;/*ast::Arrow(@$,ast::Arrow::BI);*/}
+	{$$=true;/*Arrow(@$,Arrow::BI);*/}
 ;
 
 
@@ -605,17 +605,17 @@ alg_expr:
 
 rate:
   rate_sep alg_expr OP_PAR alg_with_radius CL_PAR 
-	{$$=ast::Rate(@$,$2,$1,&$4);}
+	{$$=Rate(@$,$2,$1,&$4);}
 | rate_sep alg_expr 
-	{$$=ast::Rate(@$,$2,$1);}
+	{$$=Rate(@$,$2,$1);}
 | rate_sep alg_expr COMMA alg_expr 
-	{$$=ast::Rate(@$,$2,$1,$4);}
+	{$$=Rate(@$,$2,$1,$4);}
 ;
 
 
 alg_with_radius:
-  alg_expr {$$=ast::Radius(@$,$1);}
-| alg_expr TYPE alg_expr {$$=ast::Radius(@$,$1,$3);}
+  alg_expr {$$=Radius(@$,$1);}
+| alg_expr TYPE alg_expr {$$=Radius(@$,$1,$3);}
 ;
 
 /*
@@ -655,7 +655,7 @@ agent_expression:
 
 interface_expression:
 /* empty */
-	{$$=std::list<ast::Site>();}
+	{$$=std::list<Site>();}
 | ne_interface_expression 
 	{$$ = $1;}
 ;
@@ -668,7 +668,7 @@ ne_interface_expression:
 		$$=$3;
 	}
 | port_expression  
-	{$$=std::list<ast::Site>(1,$1);}
+	{$$=std::list<Site>(1,$1);}
 ;
 
 
@@ -731,15 +731,15 @@ state_enum:
 
 link_state:
 /*empty*/ 
-	{$$ = ast::Link(@$,ast::Link::FREE);}
+	{$$ = Link(@$,Link::FREE);}
 | KAPPA_LNK INT 
-	{$$ = ast::Link(@$,ast::Link::VALUE,$2);}
+	{$$ = Link(@$,Link::VALUE,$2);}
 | KAPPA_LNK KAPPA_SEMI 
-	{$$ = ast::Link(@$,ast::Link::SOME);}
+	{$$ = Link(@$,Link::SOME);}
 | KAPPA_LNK ID DOT ID
-	{$$ = ast::Link(@$,ast::Link::AG_SITE,ast::Id(@4,$4),ast::Id(@2,$2));}
+	{$$ = Link(@$,Link::AG_SITE,Id(@4,$4),Id(@2,$2));}
 | KAPPA_WLD 
-	{$$ = ast::Link(@$,ast::Link::ANY);}
+	{$$ = Link(@$,Link::ANY);}
 | KAPPA_LNK error 
 	{error(@1,"Invalid link state");}
 ;
@@ -749,7 +749,7 @@ link_state:
  * CODE
  */
 
-void kappa4::Parser::error(const location &loc , const std::string &message) {
+void grammar::kappa4::Parser::error(const location &loc , const std::string &message) {
 	// Location should be initialized inside scanner action, but is not in this example.
 	// Let's grab location directly from driver class.
 	// cout << "Error: " << message << endl << "Location: " << loc << endl;

@@ -53,7 +53,7 @@ public:
 	Simulation(const Simulation& sim,int _id);
 	~Simulation();
 
-	void setCells(list<unsigned int>& cells,const VarVector& vars);
+	void setCells(const list<unsigned int>& cells,const VarVector& vars);
 
 	void initialize();
 	void run(const Parameters& params);

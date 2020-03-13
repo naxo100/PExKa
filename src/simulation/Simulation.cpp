@@ -29,7 +29,7 @@ Simulation::~Simulation() {
 	//delete[] mixInjections;
 }
 
-void Simulation::setCells(list<unsigned int>& _cells,const VarVector& vars){
+void Simulation::setCells(const list<unsigned int>& _cells,const VarVector& vars){
 	auto distr = uniform_int_distribution<int>();
 	for(auto cell_id : _cells){
 		cells.emplace(piecewise_construct,forward_as_tuple(cell_id),

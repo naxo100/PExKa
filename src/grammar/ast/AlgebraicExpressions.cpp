@@ -15,6 +15,7 @@
 #include <limits>
 #include <type_traits>
 
+namespace grammar {
 namespace ast {
 
 /****** Class Const **********/
@@ -102,6 +103,11 @@ BoolBinaryOperation::BoolBinaryOperation(const location &l,const Expression *e1,
 		const Expression *e2,BaseExpression::BoolOp o):
 		Expression(l),exp1(e1),exp2(e2),op(o){}
 
+BoolBinaryOperation::~BoolBinaryOperation(){
+	delete exp1;
+	delete exp2;
+}
+
 BaseExpression* BoolBinaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,pattern::DepSet* deps,const char flags,
 		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
@@ -130,6 +136,11 @@ AlgBinaryOperation::AlgBinaryOperation(const location &l,const Expression *e1,
 		const Expression *e2,BaseExpression::AlgebraicOp o):
 		Expression(l),exp1(e1),exp2(e2),op(o){};
 
+AlgBinaryOperation::~AlgBinaryOperation(){
+	delete exp1;
+	delete exp2;
+}
+
 BaseExpression* AlgBinaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,pattern::DepSet* deps,const char flags,
 		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
@@ -157,6 +168,11 @@ void AlgBinaryOperation::show( string tabs ) const {
 UnaryOperation::UnaryOperation(const location &l,const Expression *e,
 		const BaseExpression::Unary f):
 		Expression(l),exp(e),func(f){};
+
+UnaryOperation::~UnaryOperation(){
+	delete exp;
+}
+
 BaseExpression* UnaryOperation::eval(const pattern::Environment& env,
 		const VAR &vars,pattern::DepSet* deps,const char flags,
 		const map<string,tuple<int,small_id,small_id>>* aux_map) const{
@@ -283,6 +299,11 @@ void Var::show( string tabs ) const {
 Func::Func(const location &loc,BaseExpression::Funcs f,const list<Expression*>& _args)
 		: Expression(loc),type(f),args(_args){}
 
+Func::~Func(){
+	for(auto arg : args)
+		delete arg;
+}
+
 
 BaseExpression* Func::eval(const pattern::Environment& env,
 		const Expression::VAR &vars,pattern::DepSet* deps,const char flags,
@@ -318,3 +339,4 @@ void Func::show( string tabs ) const {
 
 
 } /* namespace ast */
+}

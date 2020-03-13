@@ -13,7 +13,7 @@
 	// Since Bison 3 uses symbol_type, we must change returned type. We also rename it
 	// to something sane, since you cannot overload return type.
 	#undef YY_DECL
-	#define YY_DECL kappa4::Parser::symbol_type kappa4::Lexer::get_next_token()
+	#define YY_DECL grammar::kappa4::Parser::symbol_type grammar::kappa4::Lexer::get_next_token()
 	
 	using namespace yy;
 	

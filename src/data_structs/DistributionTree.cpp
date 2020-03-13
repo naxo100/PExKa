@@ -494,6 +494,8 @@ void Leaf<T>:: fold(const function<void (const T*)> func) const {
 
 template <typename T>
 FL_TYPE Leaf<T>::squares() {
+	if(injs.size() == 0)
+		return 0;
 	this->sort(true);
 	auto a = injs.front().second,b = injs.back().second;
 	return (a*a + a*b + b*b) / 3.0;//second-moment of uniform distr

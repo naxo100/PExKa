@@ -69,10 +69,9 @@ public:
 	typedef map<const pattern::Mixture::Component*,CandidateInfo> CandidateMap;
 	class Rate {
 	protected:
+		const Rule& rule;
 		BaseExpression* baseRate;
 		pair<BaseExpression*,int> unaryRate;
-
-		const Rule& rule;
 	public:
 		Rate(const Rule& r,state::State& state);
 		virtual ~Rate();

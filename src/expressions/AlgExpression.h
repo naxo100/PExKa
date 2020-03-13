@@ -16,6 +16,7 @@
 #include "BaseExpression.h"
 //#include "../util/params.h"
 
+/** \brief The family of classes to evaluate algebraic and boolean expressions. */
 namespace expressions {
 
 template<typename T>

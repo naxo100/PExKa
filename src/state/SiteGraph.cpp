@@ -10,6 +10,7 @@
 #include "State.h"
 #include "../pattern/mixture/Agent.h"
 #include "../pattern/mixture/Component.h"
+#include "../simulation/Parameters.h"
 //#include <cstring>
 
 namespace state {
@@ -26,12 +27,12 @@ SiteGraph::~SiteGraph() {
 }
 
 #define MAX_CC_SIZE 10	//TODO
-#define MULTINODE_LIM 500000 //TODO
+#define MULTINODE_LIM 500 //TODO
 void SiteGraph::addComponents(unsigned n,const pattern::Mixture::Component& cc,
 		const State& state,vector<Node*>&& buff_nodes) {
 	unsigned i = 0;
 	AuxNames aux_map;//TODO should replace with non empty map?
-	if(n < MULTINODE_LIM) {//=> n = 1
+	if(!simulation::Parameters::get().useMultiNode || n < MULTINODE_LIM) {//=> n = 1
 		for(unsigned j = 0; j < n; j++){
 			i = 0;
 			for(auto p_ag : cc){

@@ -53,7 +53,9 @@ src/state/SiteGraph.o: ../src/state/SiteGraph.cpp \
  ../src/state/../pattern/mixture/Agent.h \
  ../src/state/../pattern/mixture/Mixture.h \
  ../src/state/../pattern/mixture/../../grammar/location.hh \
- ../src/state/../pattern/mixture/Component.h
+ ../src/state/../pattern/mixture/Component.h \
+ ../src/state/../simulation/Parameters.h \
+ ../src/state/../simulation/Counter.h
 
 ../src/state/SiteGraph.h:
 
@@ -170,3 +172,7 @@ src/state/SiteGraph.o: ../src/state/SiteGraph.cpp \
 ../src/state/../pattern/mixture/../../grammar/location.hh:
 
 ../src/state/../pattern/mixture/Component.h:
+
+../src/state/../simulation/Parameters.h:
+
+../src/state/../simulation/Counter.h:

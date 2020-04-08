@@ -356,6 +356,11 @@ void InjRandTree::selectRule(int rid,small_id cc) const {
 FL_TYPE InjRandTree::sumInternal(const expressions::BaseExpression* aux_func,
 			const map<string,two<small_id>>& aux_map, const state::State &state) const {
 	expressions::AuxNames aux_values;
+	for(auto& ridcc_tree : roots){
+		auto ccaux_func = state.getRuleRate(ridcc_tree.first.first).getExpression(ridcc_tree.first.second);
+		if((*aux_func) == (*ccaux_func))
+			return ridcc_tree.second->tree->total();
+	}
 	function<FL_TYPE (const CcValueInj*)> func = [&](const CcValueInj* inj) -> FL_TYPE {
 		for(auto& aux_coords : aux_map)
 			aux_values[aux_coords.first] = inj->getEmbedding()[aux_coords.second.first]->

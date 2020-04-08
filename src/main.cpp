@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
 
 	//building the environment and (global) vars
 	pattern::Environment& env = *(new pattern::Environment());//just to delete vars after env
-	vector<Variable*> vars;
+	vector<state::Variable*> vars;
 	try{
 		ast.evaluateDeclarations(env,vars,true);//constants
 		ast.evaluateCompartments(env,vars);

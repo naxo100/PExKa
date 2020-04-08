@@ -1,0 +1,125 @@
+
+
+
+%agent: P(s~S~E~I~R~D,inter~[0,[inf]]('interaction'),sympt~no~mid~sevr~crit,ctgs~N~Y,hosp~N~Y~UCI,tested~N~Y)
+%agent: D(buried~false~true)
+
+%token: UCI
+%token: hosp
+%token: tested
+%token: cases
+
+
+#constants
+
+%const: 'Exposed_t0' 			1			#initial population of Exposed
+%const: 'Pop_t0' 			1815901			#initial population of Susceptible
+%const: 'Pop No' 			0.3	*'Pop_t0'
+%const: 'Pop Mid' 			0.55*'Pop_t0'
+%const: 'Pop Sevr' 			0.1 *'Pop_t0'
+%const: 'Pop Crit' 			0.05*'Pop_t0'
+
+
+%const: 'interaction' 			30			#average interactivy-rate (interactions per day)
+
+%const: '%_success'				0.0075		# % of successful interactions
+#let avrg-contagious days = 17
+%const:	'k_expose'		'%_success'#/'Pop_t0'	#30i*0.5%*17d = 2.55 -> 30i*1%*17d = 5.1
+
+%const: 'k_infect-mid'			0.2			#5 days after exposed
+%const: 'k_infect-sevr'			0.2			#5 days after exposed
+%const: 'k_infect-crit'			0.2			#5 days after exposed
+
+%const: 'k_hosp-sevr'			0.25		#4 days after infected
+%const: 'k_hosp-crit'			0.33		#3 days after infected
+
+%const: 'k_die-mid' 			0.0			#0%
+%const: 'k_die-sevr'			0.0136		#15% 11 days after hosp. // 0.067*0.15
+%const: 'k_die-crit'			0.0357		#50% 14 days after uci
+
+%const: 'k_recover-no' 			0.2			#100% 5 days after exposed
+%const: 'k_recover-mid' 		0.2			#100% 5 days after infected
+%const: 'k_recover-sevr'		0.077		#85% 11 days after hosp.
+%const: 'k_recover-crit'		0.036		#50% 14 days after uci
+
+%const: 'k_uncontagious-no'		0.1			#10 days after recovered
+%const: 'k_uncontagious-mid'	0.09		#11 days after recovered
+%const: 'k_uncontagious-sevr'	0.167		#6 days after recovered
+%const: 'k_uncontagious-crit'	0.25		#4 days after recovered
+
+%const: 'k_test-no'				0.02		#very low %
+%const: 'k_test-mid'			0.15		#low %
+%const: 'k_test-sevr'			0.33		#100% 3 days
+%const: 'k_test-crit'			0.5			#100% 2 days
+
+
+%const: 'k_bury'				0.12
+
+
+%var: 'ctgs-inter' {[sum] i1} P(ctgs~Y,inter~{i1})
+%var: 'unctgs-inter' {[sum] i2} P(ctgs~N,s~S,inter~{i2})
+#infect-rules
+'expose'	P(ctgs~Y,inter~{i1}), P(ctgs~N,s~S,inter~{i2}) -> P(ctgs~Y,inter~{i1}), P(ctgs~Y,s~E,inter~{i2})  \
+				@  'k_expose' * i1 * i2 / ('ctgs-inter'+'unctgs-inter') #R0 should be from 2.5 -> 5.2
+	
+'infect-mid' 	P(s~E,sympt~mid) -> P(s~I,sympt~mid) | 1: cases @ 'k_infect-mid'
+'infect-sevr' 	P(s~E,sympt~sevr) -> P(s~I,sympt~sevr) | 1: cases @ 'k_infect-sevr'
+'infect-crit' 	P(s~E,sympt~crit) -> P(s~I,sympt~crit) | 1: cases @ 'k_infect-crit'
+
+#'die' 		P(s~I,sympt~mid) -> D(buried~false) @ 'k_die-mid'
+'die-sevr' 		P(s~I,sympt~sevr) -> D(buried~false) @ 'k_die-sevr'
+'die-crit' 		P(s~I,sympt~crit) -> D(buried~false) @ 'k_die-crit'
+
+'recover-no'	P(s~E,sympt~no) -> P(s~R,sympt~no) @ 'k_recover-no'
+'recover-mid'	P(s~I,sympt~mid) -> P(s~R,sympt~mid) @ 'k_recover-mid'
+'recover-sevr'	P(s~I,sympt~sevr,hosp~Y) | 1: hosp -> P(s~R,sympt~sevr,hosp~N) @ 'k_recover-sevr'
+'recover-crit'	P(s~I,sympt~crit,hosp~UCI) | 1: UCI -> P(s~R,sympt~crit,hosp~N) @ 'k_recover-crit'
+
+'uncontagious-no' P(ctgs~Y,s~R,sympt~no) -> P(ctgs~N,s~R,sympt~no) @ 'k_uncontagious-no'
+'uncontagious-mid' P(ctgs~Y,s~R,sympt~mid) -> P(ctgs~N,s~R,sympt~mid) @ 'k_uncontagious-mid'
+'uncontagious-sevr' P(ctgs~Y,s~R,sympt~sevr) -> P(ctgs~N,s~R,sympt~sevr) @ 'k_uncontagious-sevr'
+'uncontagious-crit' P(ctgs~Y,s~R,sympt~crit) -> P(ctgs~N,s~R,sympt~crit) @ 'k_uncontagious-crit'
+
+'test-no' P(tested~N,sympt~no,ctgs~Y,inter~{i}) -> P(tested~Y,sympt~no,ctgs~Y,inter~{i/3.}) | 1: tested @ 'k_test-no' 
+'test-mid' P(tested~N,sympt~mid,s~I,inter~{i}) -> P(tested~Y,sympt~mid,s~I,inter~{i/4.}) | 1: tested @ 'k_test-mid' 
+'test-sevr' P(tested~N,sympt~sevr,s~I,inter~{i}) -> P(tested~Y,sympt~sevr,s~I,inter~{i/5.}) | 1: tested @ 'k_test-sevr' 
+'test-crit' P(tested~N,sympt~crit,s~I,inter~{i}) -> P(tested~Y,sympt~crit,s~I,inter~{i/5.}) | 1: tested @ 'k_test-crit'
+
+'hosp-sevr' P(hosp~N,s~I,sympt~sevr,inter~{i}) -> P(hosp~Y,sympt~sevr,inter~{'interaction'/10.0}) | 1: hosp @ 'k_hosp-sevr'
+'hosp-crit' P(hosp~N,s~I,sympt~crit,inter~{i}) -> P(hosp~UCI,sympt~crit,inter~{'interaction'/15.0}) | 1: UCI @ 'k_hosp-crit'
+
+
+'bury'		D(buried~false) -> D(buried~true) @ 'k_bury'
+
+
+#init
+%init: 'Pop No' P(s~S,sympt~no,inter~{'interaction'})
+%init: 'Pop Mid' P(s~S,sympt~mid,inter~{'interaction'})
+%init: 'Pop Sevr' P(s~S,sympt~sevr,inter~{'interaction'})
+%init: 'Pop Crit' P(s~S,sympt~crit,inter~{'interaction'})
+
+%init: 'Exposed_t0' P(s~E,sympt~no,ctgs~Y)
+
+
+%var: 'susc' P(s~S)
+%var: 'infected' P(s~I)
+%var: 'exposed' P(s~E)
+
+#OBS
+%obs: 'Susceptible'	P(s~S)
+%obs: 'Infected'	'infected'# + 'exposed'
+%obs: 'Immune'		P(s~R)
+#%obs: 'Corps'		D(buried~false)
+%obs: 'Dead'		D()
+%obs: 'Contagious'	P(ctgs~Y)
+
+%obs: 'Ac.Infected' |cases| 
+%obs: 'Tested' 		|tested|
+%obs: 'UCI beds'	P(hosp~UCI)
+%obs: 'Hosp. beds'	P(hosp~Y)
+
+
+
+
+
+

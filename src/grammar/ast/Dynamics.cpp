@@ -956,6 +956,7 @@ size_t Rule::getCount(){
 
 
 } /* namespace ast */
+}
 
 
 

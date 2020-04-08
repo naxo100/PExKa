@@ -60,6 +60,8 @@ public:
 	unsigned points;	//!< Number of points (lines) in the output trajectory file.
 	long seed;			//!< Seed for the RNG of the simulation(s). Default is random (from time).
 
+	bool useMultiNode;	//!< If true, equal agents will be stored in one node. Default is false.
+
 
 	int runs;			//!< Number of simulations to run with the same model.
 

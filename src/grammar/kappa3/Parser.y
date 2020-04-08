@@ -602,6 +602,8 @@ alg_expr:
 	l.push_back($2);l.push_back($3);
 	$$ = new Func(@$,BaseExpression::Funcs::BETA,l);
 }
+/*| SUM alg_expr
+	{$$ = make_pair(BaseExpression::SUMATORY,$2);}*/
 | error
 	{}
 ;

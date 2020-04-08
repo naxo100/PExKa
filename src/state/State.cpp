@@ -94,10 +94,10 @@ State::~State() {
 	//test
 	activityTree = nullptr;
 	injections = nullptr;
-	for(auto it = vars.rbegin(); it != vars.rend(); it++)
-		delete *it;//vars are deleted in main!
 	for(auto rate : rates)
 		delete rate;
+	for(auto it = vars.rbegin(); it != vars.rend(); it++)
+		delete *it;//vars are deleted in main!
 }
 
 
